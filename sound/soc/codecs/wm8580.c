@@ -262,6 +262,7 @@ static inline unsigned int wm8580_read(struct snd_soc_codec *codec,
 
 static const DECLARE_TLV_DB_SCALE(dac_tlv, -12750, 50, 1);
 
+#if 0
 static int wm8580_out_vu(struct snd_kcontrol *kcontrol,
 			 struct snd_ctl_elem_value *ucontrol)
 {
@@ -288,6 +289,7 @@ static int wm8580_out_vu(struct snd_kcontrol *kcontrol,
 
 	return 0;
 }
+#endif
 
 #define SOC_WM8580_OUT_DOUBLE_R_TLV(xname, reg_left, reg_right, shift, max, invert, tlv_array) \
 {	.iface = SNDRV_CTL_ELEM_IFACE_MIXER, .name = (xname), \
@@ -300,6 +302,7 @@ static int wm8580_out_vu(struct snd_kcontrol *kcontrol,
 		((max) << 12) | ((invert) << 20) | ((reg_right) << 24) }
 
 static const struct snd_kcontrol_new wm8580_snd_controls[] = {
+/*
 SOC_WM8580_OUT_DOUBLE_R_TLV("DAC1 Playback Volume",
 			    WM8580_DIGITAL_ATTENUATION_DACL1,
 			    WM8580_DIGITAL_ATTENUATION_DACR1,
@@ -309,6 +312,20 @@ SOC_WM8580_OUT_DOUBLE_R_TLV("DAC2 Playback Volume",
 			    WM8580_DIGITAL_ATTENUATION_DACR2,
 			    0, 0xff, 0, dac_tlv),
 SOC_WM8580_OUT_DOUBLE_R_TLV("DAC3 Playback Volume",
+			    WM8580_DIGITAL_ATTENUATION_DACL3,
+			    WM8580_DIGITAL_ATTENUATION_DACR3,
+			    0, 0xff, 0, dac_tlv),
+*/
+
+SOC_DOUBLE_R_TLV("DAC1 Playback Volume",
+			    WM8580_DIGITAL_ATTENUATION_DACL1,
+			    WM8580_DIGITAL_ATTENUATION_DACR1,
+			    0, 0xff, 0, dac_tlv),
+SOC_DOUBLE_R_TLV("DAC2 Playback Volume",
+			    WM8580_DIGITAL_ATTENUATION_DACL2,
+			    WM8580_DIGITAL_ATTENUATION_DACR2,
+			    0, 0xff, 0, dac_tlv),
+SOC_DOUBLE_R_TLV("DAC3 Playback Volume",
 			    WM8580_DIGITAL_ATTENUATION_DACL3,
 			    WM8580_DIGITAL_ATTENUATION_DACR3,
 			    0, 0xff, 0, dac_tlv),
@@ -796,19 +813,6 @@ struct snd_soc_dai wm8580_dai[] = {
 			.rates = SNDRV_PCM_RATE_8000_192000,
 			.formats = WM8580_FORMATS,
 		},
-		.ops = {
-			 .hw_params = wm8580_paif_hw_params,
-		 },
-		.dai_ops = {
-			 .set_fmt = wm8580_set_paif_dai_fmt,
-			 .set_clkdiv = wm8580_set_dai_clkdiv,
-			 .set_pll = wm8580_set_dai_pll,
-			 .digital_mute = wm8580_digital_mute,
-		 },
-	},
-	{
-		.name = "WM8580 PAIFTX",
-		.id = 1,
 		.capture = {
 			.stream_name = "Capture",
 			.channels_min = 2,
@@ -818,12 +822,13 @@ struct snd_soc_dai wm8580_dai[] = {
 		},
 		.ops = {
 			 .hw_params = wm8580_paif_hw_params,
-		 },
+		},
 		.dai_ops = {
 			 .set_fmt = wm8580_set_paif_dai_fmt,
 			 .set_clkdiv = wm8580_set_dai_clkdiv,
 			 .set_pll = wm8580_set_dai_pll,
-		 },
+			 .digital_mute = wm8580_digital_mute,
+		},
 	},
 };
 EXPORT_SYMBOL_GPL(wm8580_dai);
