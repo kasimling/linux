@@ -283,7 +283,7 @@ static struct clk init_clocks[] = {
 		.enable		= s5pc1xx_clk_d02_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D02_SDM,
 	},
-	
+
 	/* File (D1_0) devices */
 	{
 		.name		= "pdma0",
@@ -304,7 +304,7 @@ static struct clk init_clocks[] = {
 		.enable		= s5pc1xx_clk_d10_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D10_USBHOST,
 	}, {
-		.name		= "usb-otg",
+		.name		= "otg",
 		.id		= -1,
 		.parent		= &clk_h,
 		.enable		= s5pc1xx_clk_d10_ctrl,
@@ -378,7 +378,7 @@ static struct clk init_clocks[] = {
 		.parent		= &clk_h,
 		.enable		= s5pc1xx_clk_d11_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D11_G3D,
-	}, 
+	},
 
 	/* Multimedia2 (D1_2) devices */
 	{
@@ -411,7 +411,7 @@ static struct clk init_clocks[] = {
 		.parent		= &clk_h,
 		.enable		= s5pc1xx_clk_d12_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D12_MFC,
-	}, 
+	},
 
 	/* System (D1_3) devices */
 	{
@@ -462,7 +462,7 @@ static struct clk init_clocks[] = {
 		.parent		= &clk_p,
 		.enable		= s5pc1xx_clk_d13_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D13_RTC,
-	}, 
+	},
 
 	/* Connectivity (D1_4) devices */
 	{
@@ -490,13 +490,13 @@ static struct clk init_clocks[] = {
 		.enable		= s5pc1xx_clk_d14_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D14_UART3,
 	}, {
-		.name		= "iic",
+		.name		= "i2c",
 		.id		= -1,
 		.parent		= &clk_p,
 		.enable		= s5pc1xx_clk_d14_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D14_IIC,
 	}, {
-		.name		= "hdmi-iic",
+		.name		= "hdmi-i2c",
 		.id		= -1,
 		.parent		= &clk_p,
 		.enable		= s5pc1xx_clk_d14_ctrl,
@@ -680,7 +680,7 @@ static struct clk init_clocks[] = {
 		.parent		= NULL,
 		.enable		= s5pc1xx_sclk1_ctrl,
 		.ctrlbit	= S5P_CLKGATE_SCLK1_CAM,
-	}, 
+	},
 };
 
 static struct clk *clks[] __initdata = {
