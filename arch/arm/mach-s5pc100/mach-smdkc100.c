@@ -73,17 +73,26 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_lcd,
 	&s3c_device_ts,
 	&s3c_device_smc911x,
+	&s3c_device_i2c0,
+	&s3c_device_i2c1,
 };
 
 
 static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
-                .delay 			= 10000,
-                .presc 			= 49,
-                .oversampling_shift	= 2,
-		.resol_bit 		= 12,
-		.s3c_adc_con		= ADC_TYPE_2,
+	.delay 			= 10000,
+	.presc 			= 49,
+	.oversampling_shift	= 2,
+	.resol_bit 		= 12,
+	.s3c_adc_con		= ADC_TYPE_2,
 };
 
+static struct i2c_board_info i2c_devs0[] __initdata = {
+	{ I2C_BOARD_INFO("24c08", 0x50), },
+};
+
+static struct i2c_board_info i2c_devs1[] __initdata = {
+	{ I2C_BOARD_INFO("24c128", 0x57), },
+};
 
 static void __init smdkc100_map_io(void)
 {
@@ -100,7 +109,7 @@ static void __init smdkc100_smc911x_set(void)
 	tmp &=~(0x7<<12);
 	tmp |=(S5PC1XX_GPK0_3_SROM_CSn3);
 	__raw_writel(tmp, S5PC1XX_GPK0CON);
-	
+
 	tmp = __raw_readl(S5PC1XX_SROM_BW);
 	tmp &=~(0xF<<12);
 	tmp |= (1<<12);
@@ -113,6 +122,13 @@ static void __init smdkc100_smc911x_set(void)
 static void __init smdkc100_machine_init(void)
 {
 	smdkc100_smc911x_set();
+
+	/* i2c */
+	s3c_i2c0_set_platdata(NULL);
+	s3c_i2c1_set_platdata(NULL);
+	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
+	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
+
 	platform_add_devices(smdkc100_devices, ARRAY_SIZE(smdkc100_devices));
 }
 

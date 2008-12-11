@@ -181,6 +181,12 @@ static struct clk init_clocks_disable[] = {
 		.parent		= NULL,
 		.enable		= s5pc1xx_clk_d20_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D20_I2SD2,
+	}, {
+		.name		= "otg",
+		.id		= -1,
+		.parent		= &clk_h,
+		.enable		= s5pc1xx_clk_d10_ctrl,
+		.ctrlbit	= S5P_CLKGATE_D10_USBOTG,
 	},
 };
 
