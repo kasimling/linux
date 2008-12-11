@@ -255,3 +255,6 @@ dev-1-0-11: Ilho Lee
 
 rel-1-0-1: Kyoungil Kim
 	- Git Release (08.12.09)
+
+v2.6.28-rc7-s3c64xx-r0d0: Kyoungil Kim
+	- s3c64xx rc7 initial git tag
