@@ -922,6 +922,7 @@ static int soc_new_pcm(struct snd_soc_device *socdev,
 	if (codec_dai->capture.channels_min)
 		capture = 1;
 
+printk("playback: %d, capture : %d\n",playback,capture);
 	ret = snd_pcm_new(codec->card, new_name, codec->pcm_devs++, playback,
 		capture, &pcm);
 	if (ret < 0) {

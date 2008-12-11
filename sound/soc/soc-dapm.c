@@ -1021,12 +1021,14 @@ err:
  *
  * Returns 0 for success else error.
  */
+#if 1
 int snd_soc_dapm_connect_input(struct snd_soc_codec *codec, const char *sink,
 	const char *control, const char *source)
 {
 	return snd_soc_dapm_add_route(codec, sink, control, source);
 }
 EXPORT_SYMBOL_GPL(snd_soc_dapm_connect_input);
+#endif
 
 /**
  * snd_soc_dapm_add_routes - Add routes between DAPM widgets
@@ -1538,6 +1540,45 @@ void snd_soc_dapm_free(struct snd_soc_device *socdev)
 	dapm_free_widgets(codec);
 }
 EXPORT_SYMBOL_GPL(snd_soc_dapm_free);
+
+/* snd_soc_dapm_set_endpoint - set audio endpoint status
+  * @codec: audio codec
+  * @endpoint: audio signal endpoint (or start point)
+  * @status: point status
+  *
+  * Set audio endpoint status - connected or disconnected.
+  *
+  * Returns 0 for success else error.
+  */
+int snd_soc_dapm_set_endpoint(struct snd_soc_codec *codec,
+      char *endpoint, int status)
+{
+      struct snd_soc_dapm_widget *w;
+
+      list_for_each_entry(w, &codec->dapm_widgets, list) {
+              if (!strcmp(w->name, endpoint)) {
+                      w->connected = status;
+              }
+      }
+
+      return 0;
+}
+EXPORT_SYMBOL_GPL(snd_soc_dapm_set_endpoint);
+
+/**
+ * snd_soc_dapm_sync_endpoints - scan and power dapm paths
+ * @codec: audio codec
+ *
+ * Walks all dapm audio paths and powers widgets according to their
+ * stream or path usage.
+ *
+ * Returns 0 for success.
+ */
+int snd_soc_dapm_sync_endpoints(struct snd_soc_codec *codec)
+{
+	return dapm_power_widgets(codec, SND_SOC_DAPM_STREAM_NOP);
+}
+EXPORT_SYMBOL_GPL(snd_soc_dapm_sync_endpoints);
 
 /* Module information */
 MODULE_AUTHOR("Liam Girdwood, lrg@slimlogic.co.uk");
