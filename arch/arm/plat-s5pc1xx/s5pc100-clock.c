@@ -1,11 +1,8 @@
 /* linux/arch/arm/plat-s5pc1xx/s5pc100-clock.c
  *
- * Copyright 2008 Samsung Electronics
  * Copyright 2008 Simtec Electronics
  *	Ben Dooks <ben@simtec.co.uk>
  *	http://armlinux.simtec.co.uk/
- *
- * S3C6400 based common clock support
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
