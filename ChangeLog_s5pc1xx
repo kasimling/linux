@@ -265,3 +265,23 @@ v2.6.28-rc7-s5pc1xx-r0d1: Ilho Lee
 	Modified files:
 		M arch/arm/plat-s3c/dma-pl330.c
 		M arch/arm/plat-s3c/dma-pl330-mcode.h
+
+v2.6.28-rc7-s5pc1xx-r0d2: Jongpill Lee
+	- System Timer support on SMDKC100
+
+	Added Files:
+		A arch/arm/plat-s5pc1xx/s5pc1xx-time.c
+
+v2.6.28-rc7-s5pc1xx-r0d3: Jongpill Lee
+	- System Timer bug fixed
+
+	Modified Files:
+		M ChangeLog_s5pc1xx
+		M arch/arm/mach-s5pc100/cpu.c
+		M arch/arm/mach-s5pc100/include/mach/map.h
+		M arch/arm/mach-s5pc100/include/mach/tick.h
+		M arch/arm/mach-s5pc100/mach-smdkc100.c
+		M arch/arm/plat-s3c/Makefile
+		M arch/arm/plat-s3c/include/plat/map-base.h
+		M arch/arm/plat-s5pc1xx/Makefile
+		M arch/arm/plat-s5pc1xx/include/plat/regs-sys-timer.h

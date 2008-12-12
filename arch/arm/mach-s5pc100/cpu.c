@@ -45,6 +45,7 @@
 static struct map_desc s5pc100_iodesc[] __initdata = {
 	IODESC_ENT(LCD),
 	IODESC_ENT(SROMC),
+	IODESC_ENT(SYSTIMER),
 	//IODESC_ENT(HOSTIFB),
 };
 

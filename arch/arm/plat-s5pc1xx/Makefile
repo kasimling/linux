@@ -14,6 +14,7 @@ obj-				:=
 
 obj-y				+= dev-uart.o devs.o
 obj-y				+= cpu.o
+obj-y				+= s5pc1xx-time.o
 obj-y				+= irq.o
 obj-y				+= irq-eint.o
 obj-y				+= clock.o

@@ -45,10 +45,11 @@
 #include <plat/regs-gpio.h>
 #include <plat/gpio-bank-k0.h>
 
-
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
+
+extern struct sys_timer s5pc1xx_timer;
 
 static struct s3c2410_uartcfg smdkc100_uartcfgs[] __initdata = {
 	[0] = {
@@ -141,5 +142,5 @@ MACHINE_START(SMDKC100, "SMDKC100")
 	.init_irq	= s5pc100_init_irq,
 	.map_io		= smdkc100_map_io,
 	.init_machine	= smdkc100_machine_init,
-	.timer		= &s3c24xx_timer,
+	.timer		= &s5pc1xx_timer,
 MACHINE_END

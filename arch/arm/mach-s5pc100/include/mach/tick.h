@@ -18,10 +18,10 @@
 /* note, the timer interrutps turn up in 2 places, the vic and then
  * the timer block. We take the VIC as the base at the moment.
  */
-static inline u32 s3c24xx_ostimer_pending(void)
+static inline u32 s5pc1xx_ostimer_pending(void)
 {
 	u32 pend = __raw_readl(S3C_VA_VIC0 + VIC_RAW_STATUS);
-	return pend & 1 << (IRQ_TIMER4 - S5PC1XX_IRQ_VIC0(0));
+	return pend & 1 << (IRQ_SYSTIMER - S5PC1XX_IRQ_VIC0(0));
 }
 
 #define TICK_MAX	(0xffffffff)
