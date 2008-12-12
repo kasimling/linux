@@ -1,7 +1,7 @@
 
 /*------------------------------------------------------*/
 /*	Version : v1.1					*/
-/*	Date last updated : Dec. 3, 2008		*/
+/*	Date last updated : Dec. 10, 2008		*/
 /*------------------------------------------------------*/
 
 
@@ -55,7 +55,7 @@ typedef struct DMA_control
 
 
 /* Parameter list for a DMA operation */
-typedef struct DMA_parameters 
+typedef struct DMA_parameters
 {
 	unsigned long			mDirection;	/* DMA direction */
 	unsigned long			mPeriNum;	/* DMA Peripheral number */
@@ -70,6 +70,21 @@ typedef struct DMA_parameters
 } pl330_DMA_parameters_t;
 
 
+static void print_dma_param_info(pl330_DMA_parameters_t dma_param)
+{
+	/* Parameter list for a DMA operation */
+	dma_debug("mDirection = %lu\n", dma_param.mDirection);
+	dma_debug("mPeriNum = %lu\n", dma_param.mPeriNum);
+	dma_debug("mSrcAddr = 0x%x\n", dma_param.mSrcAddr);
+	dma_debug("mDstAddr = 0x%x\n", dma_param.mDstAddr);
+	dma_debug("mTrSize = %lu\n", dma_param.mTrSize);
+	dma_debug("mControl = 0x%x\n", dma_param.mControl);
+	dma_debug("mIrqEnable = %lu\n", dma_param.mIrqEnable);
+	dma_debug("mLoop = %lu\n", dma_param.mLoop);
+	dma_debug("mBwJump = %lu\n", dma_param.mBwJump);
+	dma_debug("mLastReq = %lu\n", dma_param.mLastReq);
+}
+
 /*---------------------- Primitive functions -------------*/
 /* When the DMAC is operating in real-time then you can only issue a limited subset of instructions as follows:
  * DMAGO starts a DMA transaction using a DMA channel that you specify.
@@ -79,7 +94,7 @@ typedef struct DMA_parameters
  * Prior to issuing DMAGO, you must ensure that the system memory contains a suitable
  * program for the DMAC to execute, starting at the address that the DMAGO specifies.
  */
- 
+
 /* DMAMOV CCR, ...  */
 static int encodeDmaMoveChCtrl(u8 * mcode_ptr, u32 dmacon)
 {
@@ -97,7 +112,7 @@ static int encodeDmaMoveChCtrl(u8 * mcode_ptr, u32 dmacon)
 	{
 		memOutp8(mcode_ptr+i, uInsBytes[i]);
 	}
-	
+
 	return 6;
 }
 
@@ -107,7 +122,7 @@ static int encodeDmaMove(u8 * mcode_ptr, u8 uDir, u32 uStAddr)
 {
 	u8 uInsBytes[6];
     	u32 i;
-   
+
 	uInsBytes[0] = (u8)(0xbc);
 	uInsBytes[1] = (u8)(0x0|uDir);
 	uInsBytes[2] = (u8)((uStAddr>>0)&0xff);
@@ -119,7 +134,7 @@ static int encodeDmaMove(u8 * mcode_ptr, u8 uDir, u32 uStAddr)
 	{
 		memOutp8(mcode_ptr+i, uInsBytes[i]);
 	}
-		
+
 	return 6;
 }
 
@@ -154,7 +169,7 @@ static int encodeDmaLoadPeri(u8 * mcode_ptr, u8 mPeriNum)
 		print_warning("[%s] The peripheral number is too big ! : %d\n", __FUNCTION__, mPeriNum);
 		return 0;
 	}
-	
+
 	bs = (m_uBurstSz == 1) ? 0 : 1; // single -> 0, burst -> 1
 
 	uInsBytes[0] = (u8)(0x25|(bs<<1));
@@ -198,7 +213,7 @@ static int encodeDmaStorePeri(u8 * mcode_ptr, u8 mPeriNum)
 		print_warning("[%s] The peripheral number is too big ! : %d\n", __FUNCTION__, mPeriNum);
 		return 0;
 	}
-	
+
 	bs = (m_uBurstSz == 1) ? 0 : 1; /* single:0, burst:1 */
 
 	uInsBytes[0] = (u8)(0x29|(bs<<1));
@@ -217,7 +232,7 @@ static int encodeDmaStoreZero(u8 * mcode_ptr)
 {
 	u8 uInsBytes[1];
 	u32 i;
-	
+
 	uInsBytes[0] = (u8)(0x0c);
 
 	for(i=0; i<1; i++)
@@ -233,7 +248,7 @@ static int encodeDmaLoop(u8 * mcode_ptr, u8 uLoopCnt, u8 uIteration)
 {
 	u8 uInsBytes[2];
 	u32 i;
-	
+
 	uInsBytes[0] = (u8)(0x20|(uLoopCnt<<1));
 	uInsBytes[1] = (u8)(uIteration);
 
@@ -243,7 +258,7 @@ static int encodeDmaLoop(u8 * mcode_ptr, u8 uLoopCnt, u8 uIteration)
 	}
 
 	return 2;
-	
+
 }
 
 /* DMALPFE  */
@@ -287,7 +302,7 @@ static int encodeDmaLoopEnd(u8 * mcode_ptr, u8 uLoopCnt, u8 uBwJump)
 
 /*  DMAWFP, DMAWFPS, DMAWFPB (Wait For Peripheral) */
 static int encodeDmaWaitForPeri(u8 * mcode_ptr, u8 mPeriNum)
-{	
+{
 	u8 bs=0;
 	u8 p=0;
 	u8 uInsBytes[2];
@@ -310,7 +325,7 @@ static int encodeDmaWaitForPeri(u8 * mcode_ptr, u8 mPeriNum)
 }
 
 /* DMAWFE (Wait For Event) : 0 ~ 31 */
-static int encodeDmaWaitForEvent(u8 * mcode_ptr, u8 uEventNum) 
+static int encodeDmaWaitForEvent(u8 * mcode_ptr, u8 uEventNum)
 {
 	u8 uInsBytes[2];
 	u32 i;
@@ -367,7 +382,7 @@ static int encodeDmaAddHalfword(u8 * mcode_ptr, bool bSrcDir, u16 uStAddr)
 	u8 uDir = (bSrcDir) ? 0 : 1; /* src addr=0, dst addr=1 */
 	u8 uInsBytes[3];
 	u32 i;
-	
+
 	uInsBytes[0] = (u8)(0x54|(uDir<<1));
 	uInsBytes[1] = (u8)((uStAddr>>0)&0xff);
 	uInsBytes[2] = (u8)((uStAddr>>8)&0xff);
@@ -427,7 +442,7 @@ static int encodeDmaReadMemBarrier(u8 * mcode_ptr)
 }
 
 /* DMASEV (Send Event) : 0 ~ 31 */
-static int encodeDmaSendEvent(u8 * mcode_ptr, u8 uEventNum) 
+static int encodeDmaSendEvent(u8 * mcode_ptr, u8 uEventNum)
 {
 	u8 uInsBytes[2];
 	u32 i;
@@ -464,7 +479,7 @@ static int encodeDmaWriteMemBarrier(u8 * mcode_ptr)
 }
 
 /* DMAGO over DBGINST[0:1] registers */
-static void encodeDmaGoOverDBGINST(u32 * mcode_ptr, u8 chanNum, u32 * mbufAddr, u8 m_secureBit)
+static void encodeDmaGoOverDBGINST(u32 * mcode_ptr, u8 chanNum, u32 mbufAddr, u8 m_secureBit)
 {
 	u32 x;
 	u8 uDmaGo;		/* DMAGO instruction */
@@ -473,18 +488,18 @@ static void encodeDmaGoOverDBGINST(u32 * mcode_ptr, u8 chanNum, u32 * mbufAddr, 
 		print_warning("[%s] Channel number is too big ! : %d\n", __FUNCTION__, chanNum);
 		return;
 	}
-	
+
 	do
 	{
 		x = Inp32(mcode_ptr+DMA_DBGSTATUS);
 	} while ((x&0x1)==0x1);
 
-	uDmaGo = (m_secureBit!=0) ?
+	uDmaGo = (m_secureBit==0) ?
 		(0xa0|(0<<1)) : 	/* secure mode : M2M DMA only   */
 		(0xa0|(1<<1));  	/* non-secure mode : M2P/P2M DMA only */
 
 	Outp32(mcode_ptr+DMA_DBGINST0, (chanNum<<24)|(uDmaGo<<16)|(chanNum<<8)|(0<<0));
-	Outp32(mcode_ptr+DMA_DBGINST1, *mbufAddr);
+	Outp32(mcode_ptr+DMA_DBGINST1, mbufAddr);
 	Outp32(mcode_ptr+DMA_DBGCMD, 0); 	/* 0 : execute the instruction that the DBGINST0,1 registers contain */
 
 }
@@ -498,19 +513,19 @@ static void encodeDmaKillChannelOverDBGINST(u32 * mcode_ptr, u8 chanNum)
 		print_warning("[%s] Channel number is too big ! : %d\n", __FUNCTION__, chanNum);
 		return;
 	}
-	
+
 	do
 	{
 		x = Inp32(mcode_ptr+DMA_DBGSTATUS);
 	} while ((x&0x1)==0x1);
 
 	Outp32(mcode_ptr+DMA_DBGINST0, (0<<24)|(1<<16)|(chanNum<<8)|(1<<0));	/* issue instruction by channel thread */
-	Outp32(mcode_ptr+DMA_DBGINST1, 0);	
+	Outp32(mcode_ptr+DMA_DBGINST1, 0);
 	Outp32(mcode_ptr+DMA_DBGCMD, 0); 	/* 0 : execute the instruction that the DBGINST0,1 registers contain */
-	
+
 	do
 	{
-		x = Inp32(mcode_ptr+DMA_DBGSTATUS);	
+		x = Inp32(mcode_ptr+DMA_DBGSTATUS);
 	} while ((x&0x1)==0x1);
 }
 
@@ -518,19 +533,19 @@ static void encodeDmaKillChannelOverDBGINST(u32 * mcode_ptr, u8 chanNum)
 static void encodeDmaKillDMACOverDBGINST(u32 * mcode_ptr)
 {
 	u32 x;
-	
+
 	do
 	{
 		x = Inp32(mcode_ptr+DMA_DBGSTATUS);
 	} while ((x&0x1)==0x1);
 
 	Outp32(mcode_ptr+DMA_DBGINST0, (0<<24)|(1<<16)|(0<<8)|(0<<0));	/* issue instruction by manager thread */
-	Outp32(mcode_ptr+DMA_DBGINST1, 0);	
+	Outp32(mcode_ptr+DMA_DBGINST1, 0);
 	Outp32(mcode_ptr+DMA_DBGCMD, 0); 	/* 0 : execute the instruction that the DBGINST0,1 registers contain */
-	
+
 	do
 	{
-		x = Inp32(mcode_ptr+DMA_DBGSTATUS);	
+		x = Inp32(mcode_ptr+DMA_DBGSTATUS);
 	} while ((x&0x1)==0x1);
 }
 
@@ -545,9 +560,10 @@ static void encodeDmaKillDMACOverDBGINST(u32 * mcode_ptr)
  *	chanNum		the DMA channel number to be started
  *	mbufAddr	the start address of the buffer containing PL330 DMA micro codes
  */
-static void config_DMA_GO_command(u32 * mcode_ptr, int chanNum, u32 * mbufAddr, int secureMode)
+static void config_DMA_GO_command(u32 * mcode_ptr, int chanNum, u32 mbufAddr, int secureMode)
 {
 	dma_debug("%s entered - channel Num=%d\n", __FUNCTION__, chanNum);
+	dma_debug("mcode_ptr=0x%p, mbufAddr=0x%x, secureMode=%d\n", mcode_ptr, mbufAddr, secureMode);
 	encodeDmaGoOverDBGINST(mcode_ptr, (u8)chanNum, mbufAddr, (u8)secureMode);
 }
 
@@ -556,7 +572,7 @@ static void config_DMA_GO_command(u32 * mcode_ptr, int chanNum, u32 * mbufAddr, 
  *	mcode_ptr	the buffer for PL330 DMAKILL micro code to be stored into
  *	chanNum		the DMA channel number to be stopped
  */
-static void config_DMA_stop_channel(u32 * mcode_ptr, int chanNum) 
+static void config_DMA_stop_channel(u32 * mcode_ptr, int chanNum)
 {
 	dma_debug("%s entered - channel Num=%d\n", __FUNCTION__, chanNum);
 	encodeDmaKillChannelOverDBGINST(mcode_ptr, (u8)chanNum);
@@ -566,9 +582,9 @@ static void config_DMA_stop_channel(u32 * mcode_ptr, int chanNum)
  * - stop the DMA controller
  *	mcode_ptr	the buffer for PL330 DMAKILL micro code to be stored into
  */
-static void config_DMA_stop_controller(u32 * mcode_ptr) 
+static void config_DMA_stop_controller(u32 * mcode_ptr)
 {
-	dma_debug("%s entered - mcode_ptr=0x%x\n", __FUNCTION__, mcode_ptr);
+	dma_debug("%s entered - mcode_ptr=0x%p\n", __FUNCTION__, mcode_ptr);
 	encodeDmaKillDMACOverDBGINST(mcode_ptr);
 }
 
@@ -579,9 +595,9 @@ static void config_DMA_stop_controller(u32 * mcode_ptr)
  *	mcode_ptr	the pointer to the buffer for PL330 DMAMOVE micro code to be stored into
  *	uStAddr		the DMA start address
  */
-static int config_DMA_start_address(u8 * mcode_ptr, int uStAddr) 
+static int config_DMA_start_address(u8 * mcode_ptr, int uStAddr)
 {
-	dma_debug("%s entered - dest addr=0x%x\n", __FUNCTION__, uStAddr);
+	dma_debug("%s entered - start addr=0x%x\n", __FUNCTION__, uStAddr);
 	return encodeDmaMove(mcode_ptr, 0, (u32)uStAddr);
 }
 
@@ -592,9 +608,9 @@ static int config_DMA_start_address(u8 * mcode_ptr, int uStAddr)
  *	mcode_ptr	the pointer to the buffer for PL330 DMAMOVE micro code to be stored into
  *	uStAddr		the DMA destination address
  */
-static int config_DMA_destination_address(u8 * mcode_ptr, int uStAddr) 
+static int config_DMA_destination_address(u8 * mcode_ptr, int uStAddr)
 {
-	dma_debug("%s entered - start addr=0x%x\n", __FUNCTION__, uStAddr);
+	dma_debug("%s entered - destination addr=0x%x\n", __FUNCTION__, uStAddr);
 	return encodeDmaMove(mcode_ptr, 2, (u32)uStAddr);
 }
 
@@ -607,7 +623,7 @@ static int config_DMA_destination_address(u8 * mcode_ptr, int uStAddr)
  */
 static int config_DMA_control(u8 * mcode_ptr, pl330_DMA_control_t dmacon)
 {
-	dma_debug("%s entered - dmacon : 0x%x\n", __FUNCTION__, dmacon);
+	dma_debug("%s entered - dmacon : 0x%p\n", __FUNCTION__, &dmacon);
 	return encodeDmaMoveChCtrl(mcode_ptr, *(u32 *)&dmacon);
 }
 
@@ -620,17 +636,17 @@ static int config_DMA_control(u8 * mcode_ptr, pl330_DMA_control_t dmacon)
  *	dma_param	the parameter set for a DMA operation
  */
 static int config_DMA_transfer_remainder(u8 * mcode_ptr, int lcRemainder, pl330_DMA_parameters_t dma_param)
-{	
+{
 	int mcode_size = 0, msize = 0;
 	int lc0 = 0, lcSize = 0, mLoopStart0 = 0, dmaSent = 0;
-	
+
 	dma_debug("%s entered - lcRemainder=%d\n", __FUNCTION__, lcRemainder);
 
 	dmaSent = dma_param.mTrSize - lcRemainder;
 
 	msize = config_DMA_start_address(mcode_ptr+mcode_size, dma_param.mSrcAddr+dmaSent);
 	mcode_size+= msize;
-	
+
 	msize = config_DMA_destination_address(mcode_ptr+mcode_size, dma_param.mDstAddr+dmaSent);
 	mcode_size+= msize;
 
@@ -638,17 +654,17 @@ static int config_DMA_transfer_remainder(u8 * mcode_ptr, int lcRemainder, pl330_
 	dma_param.mControl.uSBLength = 0x0;	/* 1 transfer */
 	dma_param.mControl.uDBSize = 0x2;	/* 4 bytes    */
 	dma_param.mControl.uDBLength = 0x0;	/* 1 transfer */
-	
+
 	msize = config_DMA_control(mcode_ptr+mcode_size, dma_param.mControl);
 	mcode_size+= msize;
 
 	lcSize = (dma_param.mControl.uSBLength+1)*(1<<dma_param.mControl.uSBSize);
 	lc0 = lcRemainder/lcSize;
-	
+
 	msize = encodeDmaLoop(mcode_ptr+mcode_size, 0, lc0-1);
-	mcode_size+= msize;	
+	mcode_size+= msize;
 	mLoopStart0 = mcode_size;
-	
+
 	switch(dma_param.mDirection) {
 	case PL330_M2M_DMA:
 		msize = encodeDmaLoad(mcode_ptr+mcode_size);
@@ -656,7 +672,7 @@ static int config_DMA_transfer_remainder(u8 * mcode_ptr, int lcRemainder, pl330_
 		msize = encodeDmaStore(mcode_ptr+mcode_size);
 		mcode_size+= msize;
 		break;
-		
+
 	case PL330_M2P_DMA:
 		msize = encodeDmaWaitForPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 		mcode_size+= msize;
@@ -667,7 +683,7 @@ static int config_DMA_transfer_remainder(u8 * mcode_ptr, int lcRemainder, pl330_
 		msize = encodeDmaFlushPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 		mcode_size+= msize;
 		break;
-			
+
 	case PL330_P2M_DMA:
 		msize = encodeDmaWaitForPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 		mcode_size+= msize;
@@ -678,22 +694,22 @@ static int config_DMA_transfer_remainder(u8 * mcode_ptr, int lcRemainder, pl330_
 		msize = encodeDmaFlushPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 		mcode_size+= msize;
 		break;
-			
+
 	case PL330_P2P_DMA:
 		print_warning("[%s] P2P DMA selected !\n", __FUNCTION__);
 		break;
-			
+
 	default:
 		print_warning("[%s] Invaild DMA direction selected !\n", __FUNCTION__);
 		break;
 	}
-			
+
 	msize = encodeDmaLoopEnd(mcode_ptr+mcode_size, 0, (u8)(mcode_size-mLoopStart0));
 	mcode_size+= msize;
-	
+
 	return mcode_size;
-	
-}	
+
+}
 
 
 /* config_DMA_transfer_size
@@ -703,12 +719,12 @@ static int config_DMA_transfer_remainder(u8 * mcode_ptr, int lcRemainder, pl330_
  *	dma_param	the parameter set for a DMA operation
  */
 static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_param)
-{	
+{
 	int mcode_size = 0, msize = 0;
 	int lc0 = 0, lc1 = 0, lcRemainder = 0, lcSize = 0;
 	int mLoopStart0 = 0, mLoopStart1 = 0;
-	
-	dma_debug("%s entered - DMA parameters=0x%x\n", __FUNCTION__, dma_param);
+
+	dma_debug("%s entered \n", __FUNCTION__);
 
 	switch(dma_param.mDirection) {
 	case PL330_M2M_DMA:
@@ -725,34 +741,34 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 			return 0;
 		}
 		break;
-			
+
 	case PL330_P2P_DMA:
 		print_warning("[%s] P2P DMA selected !\n", __FUNCTION__);
 		break;
-			
+
 	default:
 		print_warning("[%s] Invaild DMA direction entered !\n", __FUNCTION__);
 		break;
-	}				
-					
-	lcSize = (dma_param.mControl.uSBLength+1)*(1<<dma_param.mControl.uSBSize);	
+	}
+
+	lcSize = (dma_param.mControl.uSBLength+1)*(1<<dma_param.mControl.uSBSize);
 	lc0 = dma_param.mTrSize/lcSize;
 	lcRemainder = dma_param.mTrSize - (lc0*lcSize);
 	dma_debug("lcSize=%d,  lc0=%d,  lcRemainder=%d\n",lcSize, lc0, lcRemainder);
-	
+
 	if(lc0 > PL330_MAX_ITERATION_NUM) {
 		lc1 = lc0/PL330_MAX_ITERATION_NUM;
 		dma_debug("Double loop : lc1=%d\n", lc1);
-		
+
 		if(lc1 <= PL330_MAX_ITERATION_NUM) {
 			msize = encodeDmaLoop(mcode_ptr+mcode_size, 1, lc1-1);
 			mcode_size+= msize;
 			mLoopStart1 = mcode_size;
 
 			msize = encodeDmaLoop(mcode_ptr+mcode_size, 0, PL330_MAX_ITERATION_NUM-1);
-			mcode_size+= msize;	
+			mcode_size+= msize;
 			mLoopStart0 = mcode_size;
-	
+
 			switch(dma_param.mDirection) {
 			case PL330_M2M_DMA:
 				msize = encodeDmaLoad(mcode_ptr+mcode_size);
@@ -762,7 +778,7 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 				msize = encodeDmaStore(mcode_ptr+mcode_size);
 				mcode_size+= msize;
 				break;
-		
+
 			case PL330_M2P_DMA:
 				msize = encodeDmaWaitForPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 				mcode_size+= msize;
@@ -773,7 +789,7 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 				msize = encodeDmaFlushPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 				mcode_size+= msize;
 				break;
-			
+
 			case PL330_P2M_DMA:
 				msize = encodeDmaWaitForPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 				mcode_size+= msize;
@@ -784,16 +800,16 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 				msize = encodeDmaFlushPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 				mcode_size+= msize;
 				break;
-			
+
 			case PL330_P2P_DMA:
 				print_warning("[%s] P2P DMA selected !\n", __FUNCTION__);
 				break;
-			
+
 			default:
 				print_warning("[%s] Invaild DMA direction selected !\n", __FUNCTION__);
 				break;
 			}
-			
+
 			msize = encodeDmaLoopEnd(mcode_ptr+mcode_size, 0, (u8)(mcode_size-mLoopStart0));
 			mcode_size+= msize;
 
@@ -810,9 +826,9 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 	if(lc0 > 0) {
 		dma_debug("Single loop : lc0=%d\n", lc0);
 		msize = encodeDmaLoop(mcode_ptr+mcode_size, 0, lc0-1);
-		mcode_size+= msize;	
+		mcode_size+= msize;
 		mLoopStart0 = mcode_size;
-	
+
 		switch(dma_param.mDirection) {
 		case PL330_M2M_DMA:
 			msize = encodeDmaLoad(mcode_ptr+mcode_size);
@@ -820,7 +836,7 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 			msize = encodeDmaStore(mcode_ptr+mcode_size);
 			mcode_size+= msize;
 			break;
-		
+
 		case PL330_M2P_DMA:
 			msize = encodeDmaWaitForPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 			mcode_size+= msize;
@@ -831,7 +847,7 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 			msize = encodeDmaFlushPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 			mcode_size+= msize;
 			break;
-			
+
 		case PL330_P2M_DMA:
 			msize = encodeDmaWaitForPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 			mcode_size+= msize;
@@ -842,19 +858,19 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 			msize = encodeDmaFlushPeri(mcode_ptr+mcode_size, (u8)dma_param.mPeriNum);
 			mcode_size+= msize;
 			break;
-			
+
 		case PL330_P2P_DMA:
 			print_warning("[%s] P2P DMA selected !\n", __FUNCTION__);
 			break;
-		
+
 		default:
 			break;
 		}
-			
+
 		msize = encodeDmaLoopEnd(mcode_ptr+mcode_size, 0, (u8)(mcode_size-mLoopStart0));
 		mcode_size+= msize;
 	}
-	
+
 	if(lcRemainder !=0) {
 		msize = config_DMA_transfer_remainder(mcode_ptr+mcode_size, lcRemainder, dma_param);
 		mcode_size += msize;
@@ -876,18 +892,18 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 #define MAX_ONENAND_PAGE_CNT	64
 
 static int config_DMA_transfer_size_for_oneNAND(u8 * mcode_ptr, pl330_DMA_parameters_t dma_param)
-{	
+{
 	int i = 0, pageCnt =0;
 	int mcode_size = 0, msize = 0;
 	int lc0 = 0, lcSize = 0;
 	int mLoopStart = 0;
-	
-	dma_debug("%s entered - DMA parameters=0x%x\n", __FUNCTION__, dma_param);
-	
+
+	dma_debug("%s entered\n", __FUNCTION__);
+
 	if(dma_param.mTrSize > (MAX_ONENAND_PAGE_CNT*ONENAND_PAGE_WITH_OOB)) {
 		print_warning("[%s] The chunk size is too big !: %lu\n", __FUNCTION__, dma_param.mTrSize);
 		return 0;
-	}	
+	}
 
 	/* Buffer address on SDRAM */
 	switch(dma_param.mDirection) {
@@ -895,12 +911,12 @@ static int config_DMA_transfer_size_for_oneNAND(u8 * mcode_ptr, pl330_DMA_parame
 		msize = config_DMA_start_address(mcode_ptr+mcode_size, dma_param.mSrcAddr);
 		mcode_size+= msize;
 		break;
-		
+
 	case PL330_P2M_DMA:		/* Read from oneNAND */
 		msize = config_DMA_destination_address(mcode_ptr+mcode_size, dma_param.mDstAddr);
-		mcode_size+= msize;		
+		mcode_size+= msize;
 		break;
-					
+
 	case PL330_P2P_DMA:
 	case PL330_M2M_DMA:
 	default:
@@ -912,9 +928,9 @@ static int config_DMA_transfer_size_for_oneNAND(u8 * mcode_ptr, pl330_DMA_parame
 	lc0 = ONENAND_PAGE_WITH_OOB/lcSize;						/* 2114(1 page+oob)/64 	 	  */
 	pageCnt = dma_param.mTrSize/ONENAND_PAGE_WITH_OOB;				/* mTrsize/2112	 	  	  */
 	dma_debug("lcSize=%d,  lc0=%d, No. of pages=%d\n",lcSize, lc0, pageCnt);
-	
+
 	for(i=0; i<pageCnt; i++) {
-		
+
 		msize = encodeDmaLoop(mcode_ptr+mcode_size, 0, lc0-1);
 		mcode_size+= msize;
 		mLoopStart = mcode_size;
@@ -925,29 +941,29 @@ static int config_DMA_transfer_size_for_oneNAND(u8 * mcode_ptr, pl330_DMA_parame
 			msize = config_DMA_destination_address(mcode_ptr+mcode_size, dma_param.mDstAddr+(i*0x80));
 			mcode_size+= msize;
 			break;
-		
+
 		case PL330_P2M_DMA:		/* Read from oneNAND */
 			msize = config_DMA_start_address(mcode_ptr+mcode_size, dma_param.mSrcAddr+(i*0x80));
-			mcode_size+= msize;		
+			mcode_size+= msize;
 			break;
-					
+
 		case PL330_P2P_DMA:
 		case PL330_M2M_DMA:
 		default:
 			print_warning("[%s] Invaild DMA direction selected !\n", __FUNCTION__);
 			break;
 		}
-			
+
 		msize = encodeDmaLoad(mcode_ptr+mcode_size);
 		mcode_size+= msize;
 		msize = encodeDmaStore(mcode_ptr+mcode_size);
 		mcode_size+= msize;
-					
+
 		msize = encodeDmaLoopEnd(mcode_ptr+mcode_size, 0, (u8)(mcode_size-mLoopStart));
 		mcode_size+= msize;
-		
+
 	}
-	
+
 	return mcode_size;
 }
 
@@ -983,7 +999,7 @@ static int config_DMA_set_infinite_loop(u8 * mcode_ptr, int uBwJump)
  *
  *	mcode_ptr	the pointer to the buffer for PL330 DMAEND micro code to be stored into
  */
-static int config_DMA_mark_end(u8 * mcode_ptr) 
+static int config_DMA_mark_end(u8 * mcode_ptr)
 {
 	dma_debug("%s entered \n", __FUNCTION__);
 	return encodeDmaEnd(mcode_ptr);
@@ -997,21 +1013,21 @@ static int config_DMA_mark_end(u8 * mcode_ptr)
 /* start_DMA_controller
  * - start the DMA controller
  */
-void start_DMA_controller(u32 * mbuf) 
+void start_DMA_controller(u32 * mbuf)
 {
-	dma_debug("%s entered - mbuf=0x%x\n", __FUNCTION__, mbuf);
+	dma_debug("%s entered - mbuf=0x%p\n", __FUNCTION__, mbuf);
 	return;
 }
 
 
 /* stop_DMA_controller
  * - stop the DMA controller
- *	
- *	mbuf		the address of the buffer for DMAKILL micro code to be stored at 
+ *
+ *	mbuf		the address of the buffer for DMAKILL micro code to be stored at
  */
-void stop_DMA_controller(u32 * mbuf) 
+void stop_DMA_controller(u32 * mbuf)
 {
-	dma_debug("%s entered - mbuf=0x%x\n", __FUNCTION__, mbuf);
+	dma_debug("%s entered - mbuf=0x%p\n", __FUNCTION__, mbuf);
 	config_DMA_stop_controller(mbuf);
 }
 
@@ -1023,17 +1039,18 @@ void stop_DMA_controller(u32 * mbuf)
  *	dma_param	the parameter set for a DMA operation
  *	chanNum		the DMA channel number to be started
  */
-int setup_DMA_channel(u8 * mbuf, pl330_DMA_parameters_t dma_param, int chanNum) 
+int setup_DMA_channel(u8 * mbuf, pl330_DMA_parameters_t dma_param, int chanNum)
 {
 	int mcode_size = 0, msize = 0;
-	dma_debug("%s entered - DMA parameters=0x%x, Channel Num=%d\n", __FUNCTION__, dma_param, chanNum);
-	
+	dma_debug("%s entered : Channel Num=%d\n", __FUNCTION__, chanNum);
+	print_dma_param_info(dma_param);
+
 	msize = config_DMA_start_address(mbuf+mcode_size, dma_param.mSrcAddr);
 	mcode_size+= msize;
-	
+
 	msize = config_DMA_destination_address(mbuf+mcode_size, dma_param.mDstAddr);
 	mcode_size+= msize;
-	
+
 	msize = config_DMA_control(mbuf+mcode_size, dma_param.mControl);
 	mcode_size+= msize;
 
@@ -1065,11 +1082,12 @@ int setup_DMA_channel(u8 * mbuf, pl330_DMA_parameters_t dma_param, int chanNum)
  *	dma_param	the parameter set for a DMA operation
  *	chanNum		the DMA channel number to be started
  */
-int setup_DMA_channel_for_oneNAND(u8 * mbuf, pl330_DMA_parameters_t dma_param, int chanNum) 
+int setup_DMA_channel_for_oneNAND(u8 * mbuf, pl330_DMA_parameters_t dma_param, int chanNum)
 {
 	int mcode_size = 0, msize = 0;
-	dma_debug("%s entered - DMA parameters=0x%x, Channel Num=%d\n", __FUNCTION__, dma_param, chanNum);
-	
+	dma_debug("%s entered : Channel Num=%d\n", __FUNCTION__, chanNum);
+	print_dma_param_info(dma_param);
+
 	msize = config_DMA_control(mbuf+mcode_size, dma_param.mControl);
 	mcode_size+= msize;
 
@@ -1093,11 +1111,11 @@ int setup_DMA_channel_for_oneNAND(u8 * mbuf, pl330_DMA_parameters_t dma_param, i
 /* start_DMA_channel
  * - get the DMA channel started
  *
- *	mbuf		the address of the buffer for DMAGO micro code to be stored at 
+ *	mbuf		the address of the buffer for DMAGO micro code to be stored at
  *	chanNum		the DMA channel number to be started
  *	mbufAddr	the start address of the buffer containing PL330 DMA micro codes
  */
-void start_DMA_channel(u32 * mbuf, int chanNum, u32 * mbufAddr, int secureMode) 
+void start_DMA_channel(u32 * mbuf, int chanNum, u32 mbufAddr, int secureMode)
 {
 	dma_debug("%s entered - channel Num=%d\n", __FUNCTION__, chanNum);
 	config_DMA_GO_command(mbuf, chanNum, mbufAddr, secureMode);
@@ -1106,10 +1124,10 @@ void start_DMA_channel(u32 * mbuf, int chanNum, u32 * mbufAddr, int secureMode)
 
 /* stop_DMA_channel
  * - get the DMA channel stopped
- *	mbuf		the address of the buffer for DMAKILL micro code to be stored at 
- *	chanNum		the DMA channel number to be stopped	
+ *	mbuf		the address of the buffer for DMAKILL micro code to be stored at
+ *	chanNum		the DMA channel number to be stopped
  */
-void stop_DMA_channel(u32 * mbuf, int chanNum) 
+void stop_DMA_channel(u32 * mbuf, int chanNum)
 {
 	dma_debug("%s entered - channel Num=%d\n", __FUNCTION__, chanNum);
 	config_DMA_stop_channel(mbuf, chanNum);
