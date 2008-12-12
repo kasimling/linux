@@ -7,7 +7,7 @@
  * License.  See the file COPYING in the main directory of this archive for
  * more details.
  *
- *	    S3C MEM driver
+ *	    S3C MEM driver for /dev/mem
  */
 
 #include <linux/init.h>
@@ -36,7 +36,31 @@
 #include <mach/map.h>
 #include <mach/hardware.h>
 
+#include <asm/dma.h>
+#include <mach/dma.h>
+#include <plat/dma.h>
+
 #include "s3c_mem.h"
+
+/*----------------------------------------------------------------------*/
+/*                      M2M DMA client 					*/
+/*--------------------------------------------------------------------- */
+
+static struct s3c2410_dma_client s3c_m2m_dma_client = {
+	.name		= "s3c-m2m-dma",
+};
+
+DECLARE_COMPLETION_ONSTACK(s3c_m2m_dma_complete);
+
+static void *s3c_m2m_dma_done = &s3c_m2m_dma_complete;			/* completion */
+
+static void s3c_m2m_dma_finish(struct s3c2410_dma_chan *dma_ch, void *buf_id,
+        int size, enum s3c2410_dma_buffresult result)
+{
+	printk("s3c_m2m_dma_finish() called\n");
+	complete(s3c_m2m_dma_done);
+}
+/*----------------------------------------------------------------------*/
 
 static int flag = 0;
 
@@ -44,9 +68,6 @@ static unsigned int physical_address;
 
 int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
-
-	u32 val;
-
 	u_int virt_addr;
 	struct mm_struct *mm = current->mm;
 	struct s3c_mem_alloc param;
@@ -55,7 +76,7 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 		case S3C_MEM_ALLOC:
 			mutex_lock(&mem_alloc_lock);
 			if(copy_from_user(&param, (struct s3c_mem_alloc *)arg, sizeof(struct s3c_mem_alloc))){
-				mutex_unlock(&mem_alloc_lock);			
+				mutex_unlock(&mem_alloc_lock);
 				return -EFAULT;
 			}
 			flag = MEM_ALLOC;
@@ -64,7 +85,7 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			if(param.vir_addr == -EINVAL) {
 				printk("S3C_MEM_ALLOC FAILED\n");
 				flag = 0;
-				mutex_unlock(&mem_alloc_lock);			
+				mutex_unlock(&mem_alloc_lock);
 				return -EFAULT;
 			}
 			param.phy_addr = physical_address;
@@ -73,17 +94,17 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			if(copy_to_user((struct s3c_mem_alloc *)arg, &param, sizeof(struct s3c_mem_alloc))){
 				flag = 0;
 				mutex_unlock(&mem_alloc_lock);
-				return -EFAULT;		
+				return -EFAULT;
 			}
 			flag = 0;
 			mutex_unlock(&mem_alloc_lock);
-			
+
 			break;
 
 		case S3C_MEM_CACHEABLE_ALLOC:
 			mutex_lock(&mem_cacheable_alloc_lock);
 			if(copy_from_user(&param, (struct s3c_mem_alloc *)arg, sizeof(struct s3c_mem_alloc))){
-				mutex_unlock(&mem_cacheable_alloc_lock);			
+				mutex_unlock(&mem_cacheable_alloc_lock);
 				return -EFAULT;
 			}
 			flag = MEM_ALLOC_CACHEABLE;
@@ -92,7 +113,7 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			if(param.vir_addr == -EINVAL) {
 				printk("S3C_MEM_ALLOC FAILED\n");
 				flag = 0;
-				mutex_unlock(&mem_cacheable_alloc_lock);			
+				mutex_unlock(&mem_cacheable_alloc_lock);
 				return -EFAULT;
 			}
 			param.phy_addr = physical_address;
@@ -105,10 +126,10 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			}
 			flag = 0;
 			mutex_unlock(&mem_cacheable_alloc_lock);
-			
+
 			break;
 
-		case S3C_MEM_SHARE_ALLOC:		
+		case S3C_MEM_SHARE_ALLOC:
 			mutex_lock(&mem_share_alloc_lock);
 			if(copy_from_user(&param, (struct s3c_mem_alloc *)arg, sizeof(struct s3c_mem_alloc))){
 				mutex_unlock(&mem_share_alloc_lock);
@@ -130,9 +151,9 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			if(copy_to_user((struct s3c_mem_alloc *)arg, &param, sizeof(struct s3c_mem_alloc))){
 				flag = 0;
 				mutex_unlock(&mem_share_alloc_lock);
-				return -EFAULT;		
+				return -EFAULT;
 			}
-			flag = 0;			
+			flag = 0;
 			mutex_unlock(&mem_share_alloc_lock);
 
 			break;
@@ -155,18 +176,18 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 				return -EFAULT;
 			}
 			DEBUG("MALLOC_SHARE : param.phy_addr = 0x%X \t size = %d \t param.vir_addr = 0x%X, %d\n", param.phy_addr, param.size, param.vir_addr, __LINE__);
-			
+
 			if(copy_to_user((struct s3c_mem_alloc *)arg, &param, sizeof(struct s3c_mem_alloc))){
 				flag = 0;
 				mutex_unlock(&mem_cacheable_share_alloc_lock);
-				return -EFAULT;		
+				return -EFAULT;
 			}
-			flag = 0;			
+			flag = 0;
 			mutex_unlock(&mem_cacheable_share_alloc_lock);
-			
+
 			break;
 
-		case S3C_MEM_FREE:	
+		case S3C_MEM_FREE:
 			mutex_lock(&mem_free_lock);
 			if(copy_from_user(&param, (struct s3c_mem_alloc *)arg, sizeof(struct s3c_mem_alloc))){
 				mutex_unlock(&mem_free_lock);
@@ -190,16 +211,16 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 				mutex_unlock(&mem_free_lock);
 				return -EFAULT;
 			}
-			
+
 			mutex_unlock(&mem_free_lock);
-			
+
 			break;
 
-		case S3C_MEM_SHARE_FREE:	
+		case S3C_MEM_SHARE_FREE:
 			mutex_lock(&mem_share_free_lock);
 			if(copy_from_user(&param, (struct s3c_mem_alloc *)arg, sizeof(struct s3c_mem_alloc))){
 				mutex_unlock(&mem_share_free_lock);
-				return -EFAULT;		
+				return -EFAULT;
 			}
 
 			DEBUG("MEM_SHARE_FREE : param.phy_addr = 0x%X \t size = %d \t param.vir_addr = 0x%X, %d\n", param.phy_addr, param.size, param.vir_addr, __LINE__);
@@ -215,18 +236,44 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 
 			if(copy_to_user((struct s3c_mem_alloc *)arg, &param, sizeof(struct s3c_mem_alloc))){
 				mutex_unlock(&mem_share_free_lock);
-				return -EFAULT;		
+				return -EFAULT;
 			}
 
 			mutex_unlock(&mem_share_free_lock);
-			
+
 			break;
-			
+
+
+		case S3C_MEM_DMA_COPY:
+			printk("S3C_MEM_DMA_COPY called\n");
+
+			if (s3c2410_dma_request(DMACH_3D_M2M, &s3c_m2m_dma_client, NULL)) {
+				printk(KERN_WARNING "Unable to get DMA channel.\n");
+				return -1;
+			}
+
+			s3c2410_dma_set_buffdone_fn(DMACH_3D_M2M, s3c_m2m_dma_finish);
+
+			/* Source address */
+			s3c2410_dma_devconfig(DMACH_3D_M2M, S3C_DMA_MEM2MEM, 1, 0x21000000);
+			s3c2410_dma_config(DMACH_3D_M2M, 8, 0);
+			//s3c2410_dma_setflags(DMACH_3D_M2M, S3C2410_DMAF_AUTOSTART);
+
+			/* Destination address : Data buffer address */
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000, 0x4000);
+			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
+
+			wait_for_completion(&s3c_m2m_dma_complete);
+
+			s3c2410_dma_free(DMACH_3D_M2M, &s3c_m2m_dma_client);
+
+			break;
+
 		default:
 			DEBUG("s3c_mem_ioctl() : default !!\n");
 			return -EINVAL;
 	}
-	
+
 	return 0;
 }
 
@@ -236,9 +283,9 @@ int s3c_mem_mmap(struct file* filp, struct vm_area_struct *vma)
 
 	size = vma->vm_end - vma->vm_start;
 
-	switch (flag) { 
+	switch (flag) {
 	case MEM_ALLOC :
-	case MEM_ALLOC_CACHEABLE :		
+	case MEM_ALLOC_CACHEABLE :
 		virt_addr = kmalloc(size, GFP_DMA|GFP_ATOMIC);
 
 		if (virt_addr == NULL) {
@@ -255,7 +302,7 @@ int s3c_mem_mmap(struct file* filp, struct vm_area_struct *vma)
 	case MEM_ALLOC_SHARE :
 	case MEM_ALLOC_CACHEABLE_SHARE :
 		DEBUG("MMAP_KMALLOC_SHARE : phys addr = 0x%08x, %d\n", physical_address, __LINE__);
-		
+
 		// page frame number of the address for the physical_address to be shared.
 		pageFrameNo = __phys_to_pfn(physical_address);
 		DEBUG("MMAP_KMALLOC_SHARE : vma->end = 0x%08x, vma->start = 0x%08x, size = %d, %d\n", vma->vm_end, vma->vm_start, size, __LINE__);
@@ -264,10 +311,10 @@ int s3c_mem_mmap(struct file* filp, struct vm_area_struct *vma)
 	default :
 		break;
 	}
-	
+
 	if( (flag == MEM_ALLOC) || (flag == MEM_ALLOC_SHARE) )
 		vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
-	
+
 	vma->vm_flags |= VM_RESERVED;
 
 	if (remap_pfn_range(vma, vma->vm_start, pageFrameNo, size, vma->vm_page_prot)) {

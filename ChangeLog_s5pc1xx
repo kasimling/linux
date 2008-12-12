@@ -255,3 +255,13 @@ dev-1-0-11: Ilho Lee
 
 rel-1-0-1: Kyoungil Kim
 	- Git Release (08.12.09)
+
+v2.6.28-rc7-s5pc1xx-r0d0: Kyoungil Kim
+	- s5pc1xx rc7 initial git tag
+
+v2.6.28-rc7-s5pc1xx-r0d1: Ilho Lee
+	- PL330 DMA D/D changed.
+
+	Modified files:
+		M arch/arm/plat-s3c/dma-pl330.c
+		M arch/arm/plat-s3c/dma-pl330-mcode.h
