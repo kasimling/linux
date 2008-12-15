@@ -285,3 +285,7 @@ v2.6.28-rc7-s5pc1xx-r0d3: Jongpill Lee
 		M arch/arm/plat-s3c/include/plat/map-base.h
 		M arch/arm/plat-s5pc1xx/Makefile
 		M arch/arm/plat-s5pc1xx/include/plat/regs-sys-timer.h
+
+v2.6.28-rc8-s5pc1xx: Kyoungil Kim
+	- s5pc1xx rc8 patch
+
