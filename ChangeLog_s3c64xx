@@ -258,3 +258,7 @@ rel-1-0-1: Kyoungil Kim
 
 v2.6.28-rc7-s3c64xx-r0d0: Kyoungil Kim
 	- s3c64xx rc7 initial git tag
+
+v2.6.28-rc8-s3c64xx: Kyoungil Kim
+	- s3c64xx rc8 patch
+
