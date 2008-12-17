@@ -21,6 +21,8 @@
 #include <linux/platform_device.h>
 #include <linux/io.h>
 #include <linux/i2c.h>
+#include <linux/mtd/nand.h>
+#include <linux/mtd/partitions.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -37,6 +39,7 @@
 #include <plat/iic.h>
 
 #include <plat/s5pc100.h>
+#include <plat/partition.h>
 #include <plat/clock.h>
 #include <plat/devs.h>
 #include <plat/cpu.h>
@@ -72,6 +75,7 @@ struct map_desc smdkc100_iodesc[] = {};
 
 static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_lcd,
+        &s3c_device_nand,
 	&s3c_device_ts,
 	&s3c_device_smc911x,
 	&s3c_device_i2c0,
@@ -97,6 +101,7 @@ static struct i2c_board_info i2c_devs1[] __initdata = {
 
 static void __init smdkc100_map_io(void)
 {
+	s3c_device_nand.name = "s5pc100-nand";
 	s5pc1xx_init_io(smdkc100_iodesc, ARRAY_SIZE(smdkc100_iodesc));
 	s3c24xx_init_clocks(0);
 	s3c24xx_init_uarts(smdkc100_uartcfgs, ARRAY_SIZE(smdkc100_uartcfgs));
@@ -122,6 +127,8 @@ static void __init smdkc100_smc911x_set(void)
 
 static void __init smdkc100_machine_init(void)
 {
+        s3c_device_nand.dev.platform_data = &s3c_nand_mtd_part_info;
+
 	smdkc100_smc911x_set();
 
 	/* i2c */
