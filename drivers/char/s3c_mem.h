@@ -18,6 +18,8 @@
 #define S3C_MEM_CACHEABLE_ALLOC		_IOWR(MEM_IOCTL_MAGIC, 316, struct s3c_mem_alloc)
 #define S3C_MEM_CACHEABLE_SHARE_ALLOC	_IOWR(MEM_IOCTL_MAGIC, 317, struct s3c_mem_alloc)
 
+#define S3C_MEM_DMA_COPY		_IO(MEM_IOCTL_MAGIC, 318)
+
 #define MEM_ALLOC			1
 #define MEM_ALLOC_SHARE			2
 #define MEM_ALLOC_CACHEABLE		3

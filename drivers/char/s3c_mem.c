@@ -36,7 +36,31 @@
 #include <mach/map.h>
 #include <mach/hardware.h>
 
+#include <asm/dma.h>
+#include <mach/dma.h>
+#include <plat/dma.h>
+
 #include "s3c_mem.h"
+
+/*----------------------------------------------------------------------*/
+/*                      M2M DMA client 					*/
+/*--------------------------------------------------------------------- */
+
+static struct s3c2410_dma_client s3c_m2m_dma_client = {
+	.name		= "s3c-m2m-dma",
+};
+
+DECLARE_COMPLETION_ONSTACK(s3c_m2m_dma_complete);
+
+static void *s3c_m2m_dma_done = &s3c_m2m_dma_complete;			/* completion */
+
+static void s3c_m2m_dma_finish(struct s3c2410_dma_chan *dma_ch, void *buf_id,
+        int size, enum s3c2410_dma_buffresult result)
+{
+	printk("s3c_m2m_dma_finish() called\n");
+	complete(s3c_m2m_dma_done);
+}
+/*----------------------------------------------------------------------*/
 
 static int flag = 0;
 
@@ -44,9 +68,6 @@ static unsigned int physical_address;
 
 int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
-
-	u32 val;
-
 	u_int virt_addr;
 	struct mm_struct *mm = current->mm;
 	struct s3c_mem_alloc param;
@@ -222,6 +243,32 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			
 			break;
 			
+
+		case S3C_MEM_DMA_COPY:
+			printk("S3C_MEM_DMA_COPY called\n");
+
+			if (s3c2410_dma_request(DMACH_3D_M2M, &s3c_m2m_dma_client, NULL)) {
+				printk(KERN_WARNING "Unable to get DMA channel.\n");
+				return -1;
+			}
+
+			s3c2410_dma_set_buffdone_fn(DMACH_3D_M2M, s3c_m2m_dma_finish);
+
+			/* Source address */
+			s3c2410_dma_devconfig(DMACH_3D_M2M, S3C_DMA_MEM2MEM, 1, 0x21000000);
+			s3c2410_dma_config(DMACH_3D_M2M, 8, 0);
+			//s3c2410_dma_setflags(DMACH_3D_M2M, S3C2410_DMAF_AUTOSTART);
+
+			/* Destination address : Data buffer address */
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000, 0x4000);
+			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
+
+			wait_for_completion(&s3c_m2m_dma_complete);
+
+			s3c2410_dma_free(DMACH_3D_M2M, &s3c_m2m_dma_client);
+
+			break;
+
 		default:
 			DEBUG("s3c_mem_ioctl() : default !!\n");
 			return -EINVAL;
