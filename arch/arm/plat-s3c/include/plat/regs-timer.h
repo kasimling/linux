@@ -1,4 +1,4 @@
-/* arch/arm/mach-s3c2410/include/mach/regs-timer.h
+/* linux/arch/arm/plat-s3c/include/plat/regs-timer.h
  *
  * Copyright (c) 2003 Simtec Electronics <linux@simtec.co.uk>
  *		      http://www.simtec.co.uk/products/SWLINUX/
@@ -10,7 +10,6 @@
  * S3C2410 Timer configuration
 */
 
-
 #ifndef __ASM_ARCH_REGS_TIMER_H
 #define __ASM_ARCH_REGS_TIMER_H
 
@@ -21,12 +20,15 @@
 #define S3C2410_TCFG1	      S3C_TIMERREG(0x04)
 #define S3C2410_TCON	      S3C_TIMERREG(0x08)
 
+#define S3C64XX_TINT_CSTAT    S3C_TIMERREG(0x44)
+
 #define S3C2410_TCFG_PRESCALER0_MASK (255<<0)
 #define S3C2410_TCFG_PRESCALER1_MASK (255<<8)
 #define S3C2410_TCFG_PRESCALER1_SHIFT (8)
 #define S3C2410_TCFG_DEADZONE_MASK   (255<<16)
 #define S3C2410_TCFG_DEADZONE_SHIFT  (16)
 
+#define S3C2410_TCFG1_MUX4_DIV1	  (0<<16)
 #define S3C2410_TCFG1_MUX4_DIV2	  (0<<16)
 #define S3C2410_TCFG1_MUX4_DIV4	  (1<<16)
 #define S3C2410_TCFG1_MUX4_DIV8	  (2<<16)

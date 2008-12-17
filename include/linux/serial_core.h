@@ -155,8 +155,11 @@
 
 #define PORT_SC26XX	82
 
+
 /* SH-SCI */
 #define PORT_SCIFA	83
+
+#define PORT_S3C6400	255
 
 #ifdef __KERNEL__
 
