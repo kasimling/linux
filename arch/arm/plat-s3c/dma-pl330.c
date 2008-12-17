@@ -193,7 +193,7 @@ static int s3c_dma_waitforload(struct s3c2410_dma_chan *chan, int line)
 		chan->stats->loads++;
 
 	while (--timeout > 0) {
-		if ((dma_rdreg(chan->dma_con, S3C_DMAC_CS(chan->number))) & S3C_DMAC_CS_EXECUTING) {
+		if ((dma_rdreg(chan->dma_con, S3C_DMAC_CS(chan->number))) & S3C_DMAC_CS_STOPPED) {
 			took = chan->load_timeout - timeout;
 			s3c_dma_stats_timeout(chan->stats, took);
 
@@ -373,7 +373,6 @@ static int s3c_dma_start(struct s3c2410_dma_chan *chan)
 			local_irq_restore(flags);
 			return -EINVAL;
 		}
-
 		s3c_dma_loadbuffer(chan, chan->next);
 	}
 
@@ -386,7 +385,9 @@ static int s3c_dma_start(struct s3c2410_dma_chan *chan)
 		chan->irq_enabled = 1;
 	}
 
-	start_DMA_channel(dma_regaddr(chan->dma_con, S3C_DMAC_DBGSTATUS), chan->number, virt_to_phys(chan->curr->mcptr), PL330_NON_SECURE_DMA);
+	start_DMA_channel(dma_regaddr(chan->dma_con, S3C_DMAC_DBGSTATUS), chan->number,
+					virt_to_phys(chan->curr->mcptr),
+					PL330_NON_SECURE_DMA);
 
 	/* Start the DMA operation on Peripheral */
 	s3c_dma_call_op(chan, S3C2410_DMAOP_START);
@@ -599,11 +600,11 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 	for (i = 0; i < S3C_CHANNELS_PER_DMA; i++) {
 		if (tmp & 0x01) {
 
-			pr_debug("# DMA Controller %d: requestor %d\n", dcon_num, i);
+			pr_debug("# DMAC %d: requestor %d, load state %d\n", dcon_num, i, chan->load_state);
 
 			channel = i;
 			chan = &s3c_dma_chans[channel + dcon_num * S3C_CHANNELS_PER_DMA];
-			pr_debug("# DMA channel number : %d, index : %d\n", chan->number, chan->index);
+			pr_debug("# DMA CH : %d, index : %d\n", chan->number, chan->index);
 
 			buf = chan->curr;
 
@@ -658,7 +659,7 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 				buf->next = NULL;
 
 				if (buf->magic != BUF_MAGIC) {
-					printk(KERN_ERR "dma%d: %s: buf %p incorrect magic\n",
+					printk(KERN_ERR "dma CH %d: %s: buf %p incorrect magic\n",
 					       chan->number, __FUNCTION__, buf);
 					goto next_channel;
 				}
@@ -686,7 +687,7 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 				case S3C_DMALOAD_1LOADED:
 					if (s3c_dma_waitforload(chan, __LINE__) == 0) {
 						/* flag error? */
-						printk(KERN_ERR "dma%d: timeout waiting for load\n",
+						printk(KERN_ERR "dma CH %d: timeout waiting for load\n",
 						       chan->number);
 						goto next_channel;
 					}
@@ -703,6 +704,9 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 				}
 
 				local_irq_save(flags);
+				start_DMA_channel(dma_regaddr(chan->dma_con, S3C_DMAC_DBGSTATUS), chan->number,
+								virt_to_phys(chan->curr->mcptr),
+								PL330_NON_SECURE_DMA);
 				s3c_dma_loadbuffer(chan, chan->next);
 				local_irq_restore(flags);
 
@@ -893,19 +897,7 @@ static void s3c_dma_showchan(struct s3c2410_dma_chan * chan)
 
 void s3c_waitforstop(struct s3c2410_dma_chan *chan)
 {
-#if 0
-	unsigned long tmp;
-	unsigned int timeout = 0x10000;
 
-	while (timeout-- > 0) {
-		tmp = dma_rdreg(chan, S3C2410_DMA_DMASKTRIG);
-
-		if (!(tmp & S3C2410_DMASKTRIG_ON))
-			return;
-	}
-
-	pr_debug("dma%d: failed to stop?\n", chan->number);
-#endif
 }
 
 static int s3c_dma_flush(struct s3c2410_dma_chan *chan)

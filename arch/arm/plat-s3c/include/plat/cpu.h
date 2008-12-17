@@ -71,7 +71,7 @@ extern void s3c24xx_init_uartdevs(char *name,
 
 struct sys_timer;
 extern struct sys_timer s3c24xx_timer;
-
+extern struct sys_timer s3c64xx_timer;
 /* system device classes */
 
 extern struct sysdev_class s3c2410_sysclass;
