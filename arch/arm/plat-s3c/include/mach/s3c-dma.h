@@ -1,9 +1,9 @@
-/* /arch/arm/plat-s3c/include/mach/s3c-dma.h
+/* linux/arch/arm/plat-s3c/include/mach/s3c-dma.h
  *
  */
 
-#ifndef __ARM_MACH_S3C_DMA_H 
-#define __ARM_MACH_S3C_DMA_H 
+#ifndef __ARM_MACH_S3C_DMA_H
+#define __ARM_MACH_S3C_DMA_H
 
 #include <linux/sysdev.h>
 #include <mach/hardware.h>
@@ -264,7 +264,7 @@ struct s3c2410_dma_chan {
 
 	/* system device */
 	struct sys_device	dev;
-	
+
 	unsigned int            index;        	/* channel index */
 	unsigned int            config_flags;        /* channel flags */
 	unsigned int            control_flags;        /* channel flags */

@@ -1,4 +1,4 @@
-/* arch/arm/mach-s3c2410/include/mach/regs-timer.h
+/* linux/arch/arm/plat-s3c/include/plat/regs-timer.h
  *
  * Copyright (c) 2003 Simtec Electronics <linux@simtec.co.uk>
  *		      http://www.simtec.co.uk/products/SWLINUX/

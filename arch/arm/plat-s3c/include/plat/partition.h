@@ -1,4 +1,4 @@
-/* arch/arm/plat-s3c/include/plat/partition.h
+/* linux/arch/arm/plat-s3c/include/plat/partition.h
  *
  * Copyright (c) 2008 Samsung Electronics
  *

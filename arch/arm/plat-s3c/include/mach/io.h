@@ -1,4 +1,4 @@
-/* arch/arm/plat-s3c/include/mach/io.h
+/* linux/arch/arm/plat-s3c/include/mach/io.h
  *
  * Copyright 2008 Simtec Electronics
  *	Ben Dooks <ben-linux@fluff.org>

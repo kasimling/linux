@@ -106,11 +106,11 @@ static struct i2c_board_info i2c_devs1[] __initdata = {
 
 
 static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
-                .delay 			= 10000,
-                .presc 			= 49,
-                .oversampling_shift	= 2,
-		.resol_bit 		= 12,
-		.s3c_adc_con		= ADC_TYPE_2,
+	.delay 			= 10000,
+	.presc 			= 49,
+	.oversampling_shift	= 2,
+	.resol_bit 		= 12,
+	.s3c_adc_con		= ADC_TYPE_2,
 };
 
 #if 0

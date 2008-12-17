@@ -814,9 +814,6 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_OSD_STOP:
-		if (fbi->win_id > 0)
-			s3cfb_set_alpha_level(fbi, S3C_FB_MAX_ALPHA_LEVEL, 1);
-
 		s3cfb_onoff_win(fbi, OFF);
 		break;
 
@@ -1111,7 +1108,7 @@ int s3cfb_set_gpio(void)
 
 		gpio_direction_output(S3C64XX_GPN(5), 1);
 	}
-	
+
 	mdelay(100);
 
 	gpio_set_value(S3C64XX_GPN(5), 0);

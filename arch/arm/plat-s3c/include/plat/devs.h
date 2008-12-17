@@ -1,4 +1,4 @@
-/* linux/include/asm-arm/plat-s3c24xx/devs.h
+/* linux/arch/arm/plat-s3c/include/plat/devs.h
  *
  * Copyright (c) 2004 Simtec Electronics
  * Ben Dooks <ben@simtec.co.uk>

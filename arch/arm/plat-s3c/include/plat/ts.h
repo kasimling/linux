@@ -1,4 +1,4 @@
-/* arch/arm/plat-s3c/include/plat/ts.h
+/* linux/arch/arm/plat-s3c/include/plat/ts.h
  *
  * Copyright (c) 2004 Simtec Electronics
  *	Ben Dooks <ben@simtec.co.uk>

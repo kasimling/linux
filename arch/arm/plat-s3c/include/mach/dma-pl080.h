@@ -1,4 +1,4 @@
-/* /arch/arm/plat-s3c/include/mach/dma-pl080.h
+/* linux/arch/arm/plat-s3c/include/mach/dma-pl080.h
  *
  */
 
@@ -110,11 +110,11 @@
 #define S3C_DMAC_C7CONFIGURATION   	(0x1F4)
 
 /* DMACConfiguration(0x30) */
-#define S3C_DMA_CONTROLLER_ENABLE 	(1<<0)		
+#define S3C_DMA_CONTROLLER_ENABLE 	(1<<0)
 
 /* DMACCxControl0 : Channel control register 0 */
-#define S3C_DMACONTROL_TC_INT_ENABLE 	(1<<31)	
-#define S3C_DMACONTROL_DEST_NO_INC	(0<<27)	
+#define S3C_DMACONTROL_TC_INT_ENABLE 	(1<<31)
+#define S3C_DMACONTROL_DEST_NO_INC	(0<<27)
 #define S3C_DMACONTROL_DEST_INC		(1<<27)
 #define S3C_DMACONTROL_SRC_NO_INC	(0<<26)
 #define S3C_DMACONTROL_SRC_INC		(1<<26)
@@ -180,4 +180,4 @@
 
 
 
-#endif //__ARM_MACH_DMA_PL080_H 
+#endif //__ARM_MACH_DMA_PL080_H

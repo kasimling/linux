@@ -1,4 +1,4 @@
-/* linux/include/asm-arm/arch-s3c64XX/regs-iis.h
+/* linux/arch/arm/plat-s3c/include/plat/regs-iis.h
  *
  * Copyright (c) 2003 Simtec Electronics <linux@simtec.co.uk>
  *		      http://www.simtec.co.uk/products/SWLINUX/

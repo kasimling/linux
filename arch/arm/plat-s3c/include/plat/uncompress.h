@@ -1,4 +1,4 @@
-/* linux/include/asm-arm/plat-s3c/uncompress.h
+/* linux/arch/arm/plat-s3c/include/plat/uncompress.h
  *
  * Copyright 2003, 2007 Simtec Electronics
  *	http://armlinux.simtec.co.uk/
