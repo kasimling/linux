@@ -1,4 +1,4 @@
-/* arch/arm/mach-s3c2410/include/mach/iic.h
+/* linux/arch/arm/plat-s3c/include/plat/iic.h
  *
  * Copyright (c) 2004 Simtec Electronics
  *	Ben Dooks <ben@simtec.co.uk>

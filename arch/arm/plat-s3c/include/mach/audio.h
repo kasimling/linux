@@ -1,4 +1,4 @@
-/* arch/arm/mach-s3c2410/include/mach/audio.h
+/* linux/arch/arm/plat-s3c/include/mach/audio.h
  *
  * Copyright (c) 2004-2005 Simtec Electronics
  *	http://www.simtec.co.uk/products/SWLINUX/

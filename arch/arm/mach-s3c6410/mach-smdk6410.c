@@ -106,11 +106,11 @@ static struct i2c_board_info i2c_devs1[] __initdata = {
 
 
 static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
-                .delay 			= 10000,
-                .presc 			= 49,
-                .oversampling_shift	= 2,
-		.resol_bit 		= 12,
-		.s3c_adc_con		= ADC_TYPE_2,
+	.delay 			= 10000,
+	.presc 			= 49,
+	.oversampling_shift	= 2,
+	.resol_bit 		= 12,
+	.s3c_adc_con		= ADC_TYPE_2,
 };
 
 #if 0
@@ -134,7 +134,7 @@ static void __init smdk6410_map_io(void)
 static void __init smdk6410_smc911x_set(void)
 {
 	unsigned int tmp;
-	
+
 	tmp = __raw_readl(S3C64XX_SROM_BW);
 	tmp &=~(0xF<<4);
 	tmp |= (1<<7) | (1<<6) | (1<<4);
@@ -146,7 +146,7 @@ static void __init smdk6410_smc911x_set(void)
 static void __init smdk6410_machine_init(void)
 {
 	s3c_device_nand.dev.platform_data = &s3c_nand_mtd_part_info;
-	
+
 	smdk6410_smc911x_set();
 
 	s3c_i2c0_set_platdata(NULL);

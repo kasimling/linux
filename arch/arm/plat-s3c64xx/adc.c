@@ -1,4 +1,5 @@
-/*
+/* linux/arch/arm/plat-s3c64xx/adc.c
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -100,9 +101,9 @@ unsigned int s3c_adc_convert(void)
 	unsigned int adc_return = 0;
 	unsigned long data0;
 	unsigned long data1;
-	
+
 	writel(readl(base_addr+S3C_ADCCON)|S3C_ADCCON_SELMUX(adc_port), base_addr+S3C_ADCCON);
-	
+
 	udelay(10);
 
 	writel(readl(base_addr+S3C_ADCCON)|S3C_ADCCON_ENABLE_START, base_addr+S3C_ADCCON);
@@ -231,7 +232,7 @@ static int __init s3c_adc_probe(struct platform_device *pdev)
 	}
 
 	size = (res->end - res->start) + 1;
-	
+
 #ifdef ADC_WITH_TOUCHSCREEN
 	adc_mem = request_mem_region(res->start, size, pdev->name);
 	if(adc_mem == NULL){
@@ -247,7 +248,7 @@ static int __init s3c_adc_probe(struct platform_device *pdev)
 		ret = -ENOENT;
 		goto err_map;
 	}
-	
+
 	adc_clock = clk_get(&pdev->dev, "adc");
 
 	if(IS_ERR(adc_clock)){
@@ -270,7 +271,7 @@ static int __init s3c_adc_probe(struct platform_device *pdev)
 	if ((plat_data->delay&0xffff) > 0)
 		writel(plat_data->delay & 0xffff, base_addr+S3C_ADCDLY);
 
-	if (plat_data->resolution == 12) 
+	if (plat_data->resolution == 12)
 		writel(readl(base_addr+S3C_ADCCON)|S3C_ADCCON_RESSEL_12BIT, base_addr+S3C_ADCCON);
 
 	ret = misc_register(&s3c_adc_miscdev);

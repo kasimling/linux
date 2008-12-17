@@ -1,4 +1,4 @@
-/* arch/arm/mach-s3c6400/include/mach/idle.h
+/* linux/arch/arm/mach-s3c6400/include/mach/idle.h
  *
  * Copyright (c) 2004 Simtec Electronics <linux@simtec.co.uk>
  *		http://www.simtec.co.uk/products/SWLINUX/
