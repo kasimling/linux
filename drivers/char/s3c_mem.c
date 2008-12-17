@@ -7,7 +7,7 @@
  * License.  See the file COPYING in the main directory of this archive for
  * more details.
  *
- *	    S3C MEM driver for /dev/mem
+ *	    S3C MEM driver for /dev/mem1
  */
 
 #include <linux/init.h>
