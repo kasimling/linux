@@ -248,9 +248,111 @@ static void s3c2410_timer_setup (void)
 	__raw_writel(tcon, S3C2410_TCON);
 }
 
+static void s3c64xx_timer_setup (void)
+{
+	unsigned long tcon;
+	unsigned long tcnt;
+	unsigned long tcfg1;
+	unsigned long tcfg0;
+
+	tcnt = TICK_MAX;  /* default value for tcnt */
+
+	/* read the current timer configuration bits */
+
+	tcon = __raw_readl(S3C2410_TCON);
+	tcfg1 = __raw_readl(S3C2410_TCFG1);
+	tcfg0 = __raw_readl(S3C2410_TCFG0);
+
+	/* configure the system for whichever machine is in use */
+
+	if (use_tclk1_12()) {
+		/* timer is at 12MHz, scaler is 1 */
+		timer_usec_ticks = timer_mask_usec_ticks(1, 12000000);
+		tcnt = 12000000 / HZ;
+
+		tcfg1 &= ~S3C2410_TCFG1_MUX4_MASK;
+		tcfg1 |= S3C2410_TCFG1_MUX4_TCLK1;
+	} else {
+		unsigned long pclk;
+		struct clk *clk;
+
+		/* for the h1940 (and others), we use the pclk from the core
+		 * to generate the timer values. since values around 50 to
+		 * 70MHz are not values we can directly generate the timer
+		 * value from, we need to pre-scale and divide before using it.
+		 *
+		 * for instance, using 50.7MHz and dividing by 6 gives 8.45MHz
+		 * (8.45 ticks per usec)
+		 */
+
+		/* this is used as default if no other timer can be found */
+
+		clk = clk_get(NULL, "timers");
+		if (IS_ERR(clk))
+			panic("failed to get clock for system timer");
+
+		clk_enable(clk);
+
+		pclk = clk_get_rate(clk);
+
+		/* configure clock tick */
+
+		timer_usec_ticks = timer_mask_usec_ticks(6, pclk);
+
+		tcfg1 &= ~S3C2410_TCFG1_MUX4_MASK;
+		tcfg1 |= S3C2410_TCFG1_MUX4_DIV1;
+
+		tcfg0 &= ~S3C2410_TCFG_PRESCALER1_MASK;
+		tcfg0 |= (6) << S3C2410_TCFG_PRESCALER1_SHIFT;
+
+		tcnt = (pclk / 6) / HZ;
+	}
+
+	/* timers reload after counting zero, so reduce the count by 1 */
+
+	tcnt--;
+
+	printk(KERN_DEBUG "timer tcon=%08lx, tcnt %04lx, tcfg %08lx,%08lx, usec %08lx\n",
+	       tcon, tcnt, tcfg0, tcfg1, timer_usec_ticks);
+
+	/* check to see if timer is within 16bit range... */
+	if (tcnt > TICK_MAX) {
+		panic("setup_timer: HZ is too small, cannot configure timer!");
+		return;
+	}
+
+	__raw_writel(tcfg1, S3C2410_TCFG1);
+	__raw_writel(tcfg0, S3C2410_TCFG0);
+
+	timer_startval = tcnt;
+	__raw_writel(tcnt, S3C2410_TCNTB(4));
+
+	/* ensure timer is stopped... */
+
+	tcon &= ~(7<<20);
+	tcon |= S3C2410_TCON_T4RELOAD;
+	tcon |= S3C2410_TCON_T4MANUALUPD;
+
+	__raw_writel(tcon, S3C2410_TCON);
+	__raw_writel(tcnt, S3C2410_TCNTB(4));
+	__raw_writel(tcnt, S3C2410_TCMPB(4));
+
+	/* start the timer running */
+	tcon |= S3C2410_TCON_T4START;
+	tcon &= ~S3C2410_TCON_T4MANUALUPD;
+	__raw_writel(tcon, S3C2410_TCON);
+}
+
+
 static void __init s3c2410_timer_init(void)
 {
 	s3c2410_timer_setup();
+	setup_irq(IRQ_TIMER4, &s3c2410_timer_irq);
+}
+
+static void __init s3c64xx_timer_init(void)
+{
+	s3c64xx_timer_setup();
 	setup_irq(IRQ_TIMER4, &s3c2410_timer_irq);
 }
 
@@ -259,3 +361,10 @@ struct sys_timer s3c24xx_timer = {
 	.offset		= s3c2410_gettimeoffset,
 	.resume		= s3c2410_timer_setup
 };
+
+struct sys_timer s3c64xx_timer = {
+	.init		= s3c64xx_timer_init,
+	.offset		= s3c2410_gettimeoffset,
+	.resume		= s3c64xx_timer_setup
+};
+

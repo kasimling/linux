@@ -134,7 +134,7 @@ static void __init smdk6410_map_io(void)
 static void __init smdk6410_smc911x_set(void)
 {
 	unsigned int tmp;
-	
+
 	tmp = __raw_readl(S3C64XX_SROM_BW);
 	tmp &=~(0xF<<4);
 	tmp |= (1<<7) | (1<<6) | (1<<4);
@@ -146,7 +146,7 @@ static void __init smdk6410_smc911x_set(void)
 static void __init smdk6410_machine_init(void)
 {
 	s3c_device_nand.dev.platform_data = &s3c_nand_mtd_part_info;
-	
+
 	smdk6410_smc911x_set();
 
 	s3c_i2c0_set_platdata(NULL);
@@ -170,7 +170,7 @@ MACHINE_START(SMDK6410, "SMDK6410")
 	.init_irq	= s3c6410_init_irq,
 	.map_io		= smdk6410_map_io,
 	.init_machine	= smdk6410_machine_init,
-	.timer		= &s3c24xx_timer,
+	.timer		= &s3c64xx_timer,
 MACHINE_END
 
 #if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
