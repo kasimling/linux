@@ -1,4 +1,4 @@
-/* linux/arch/arm/plat-s3c24xx/pwm-clock.c
+/* linux/arch/arm/plat-s3c/pwm-clock.c
  *
  * Copyright (c) 2007 Simtec Electronics
  * Copyright (c) 2007, 2008 Ben Dooks

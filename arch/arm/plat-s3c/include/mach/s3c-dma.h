@@ -1,4 +1,4 @@
-/* /arch/arm/plat-s3c/include/mach/s3c-dma.h
+/* linux/arch/arm/plat-s3c/include/mach/s3c-dma.h
  *
  */
 

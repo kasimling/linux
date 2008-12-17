@@ -1,4 +1,4 @@
-/* linux/arch/arm/plat-s3c24xx/clock.c
+/* linux/arch/arm/plat-s3c/clock.c
  *
  * Copyright (c) 2004-2005 Simtec Electronics
  *	Ben Dooks <ben@simtec.co.uk>

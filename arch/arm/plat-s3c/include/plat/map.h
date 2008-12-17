@@ -1,4 +1,4 @@
-/* linux/include/asm-arm/plat-s3c/map.h
+/* linux/arch/arm/plat-s3c/include/plat/map.h
  *
  * Copyright 2003, 2007 Simtec Electronics
  *	http://armlinux.simtec.co.uk/

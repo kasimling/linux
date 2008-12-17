@@ -1,4 +1,4 @@
-/* linux/include/asm-arm/arch-s3c2410/regs-lcd.h
+/* linux/arch/arm/plat-s3c/include/plat/regs-lcd.h
  *
  * Copyright (c) 2003 Simtec Electronics <linux@simtec.co.uk>
  *		      http://www.simtec.co.uk/products/SWLINUX/

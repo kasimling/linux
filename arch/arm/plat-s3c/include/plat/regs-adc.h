@@ -1,4 +1,4 @@
-/* arch/arm/mach-s3c2410/include/mach/regs-adc.h
+/* linux/arch/arm/plat-s3c/include/plat/regs-adc.h
  *
  * Copyright (c) 2004 Shannon Holland <holland@loser.net>
  *

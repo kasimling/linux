@@ -1,4 +1,4 @@
-/* linux/include/asm-arm/arch-s3c2410/regs-udc.h
+/* linux/arch/arm/plat-s3c/include/plat/regs-otg.h
  *
  * Copyright (C) 2004 Herbert Poetzl <herbert@13thfloor.at>
  *
