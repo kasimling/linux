@@ -62,16 +62,16 @@ static struct s3c2410_uartcfg smdk6410_uartcfgs[] __initdata = {
 	[0] = {
 		.hwport	     = 0,
 		.flags	     = 0,
-		.ucon	     = 0x3c5,
-		.ulcon	     = 0x03,
-		.ufcon	     = 0x51,
+		.ucon	     = S3C64XX_UCON_DEFAULT,
+		.ulcon	     = S3C64XX_ULCON_DEFAULT,
+		.ufcon	     = S3C64XX_UFCON_DEFAULT,
 	},
 	[1] = {
 		.hwport	     = 1,
 		.flags	     = 0,
-		.ucon	     = 0x3c5,
-		.ulcon	     = 0x03,
-		.ufcon	     = 0x51,
+		.ucon	     = S3C64XX_UCON_DEFAULT,
+		.ulcon	     = S3C64XX_ULCON_DEFAULT,
+		.ufcon	     = S3C64XX_UFCON_DEFAULT,
 	},
 };
 
@@ -87,7 +87,6 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
 	&s3c_device_ts,
-	//&s3c_device_adc,
 	&s3c_device_smc911x,
 	&s3c_device_lcd,
 	&s3c_device_nand,
@@ -113,15 +112,6 @@ static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
 	.s3c_adc_con		= ADC_TYPE_2,
 };
 
-#if 0
-static struct s3c_adc_mach_info s3c_adc_platform __initdata = {
-	/* s3c6410 support 12-bit resolution */
-	.delay		= 10000,
-	.presc 		= 49,
-	.resolution 	= 12,
-};
-#endif
-
 static void __init smdk6410_map_io(void)
 {
 	s3c_device_nand.name = "s3c6410-nand";
@@ -136,11 +126,17 @@ static void __init smdk6410_smc911x_set(void)
 	unsigned int tmp;
 
 	tmp = __raw_readl(S3C64XX_SROM_BW);
-	tmp &=~(0xF<<4);
-	tmp |= (1<<7) | (1<<6) | (1<<4);
+	tmp &= ~(S3C64XX_SROM_BW_WAIT_ENABLE1_MASK | S3C64XX_SROM_BW_WAIT_ENABLE1_MASK |
+		S3C64XX_SROM_BW_DATA_WIDTH1_MASK);
+	tmp |= S3C64XX_SROM_BW_BYTE_ENABLE1_ENABLE | S3C64XX_SROM_BW_WAIT_ENABLE1_ENABLE |
+		S3C64XX_SROM_BW_DATA_WIDTH1_16BIT;
+
 	__raw_writel(tmp, S3C64XX_SROM_BW);
 
-	__raw_writel((0x0<<28)|(0x4<<24)|(0xd<<16)|(0x1<<12)|(0x4<<8)|(0x6<<4)|(0x0<<0), S3C64XX_SROM_BC1);
+	__raw_writel(S3C64XX_SROM_BCn_TACS(0) | S3C64XX_SROM_BCn_TCOS(4) |
+			S3C64XX_SROM_BCn_TACC(13) | S3C64XX_SROM_BCn_TCOH(1) |
+			S3C64XX_SROM_BCn_TCAH(4) | S3C64XX_SROM_BCn_TACP(6) |
+			S3C64XX_SROM_BCn_PMC_NORMAL, S3C64XX_SROM_BC1);
 }
 
 static void __init smdk6410_machine_init(void)
@@ -153,7 +149,6 @@ static void __init smdk6410_machine_init(void)
 	s3c_i2c1_set_platdata(NULL);
 
 	s3c_ts_set_platdata(&s3c_ts_platform);
-//	s3c_adc_set_platdata(&s3c_adc_platform);
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
