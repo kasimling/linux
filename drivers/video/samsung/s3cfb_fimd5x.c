@@ -300,7 +300,7 @@ irqreturn_t s3cfb_irq(int irqno, void *param)
 	unsigned int i;
 	unsigned int buffer_page_offset, buffer_page_width;
 	unsigned int fb_start_address, fb_end_address;
-	
+
 	if (s3c_fb_info[s3c_palette_win].palette_ready)
 		s3cfb_write_palette(&s3c_fb_info[s3c_palette_win]);
 
@@ -309,11 +309,11 @@ irqreturn_t s3cfb_irq(int irqno, void *param)
 			/* fb variable setting */
 			s3c_fb_info[i].fb.fix.smem_start = s3c_fb_info[i].next_fb_info.phy_start_addr;
 
-			s3c_fb_info[i].fb.fix.line_length = s3c_fb_info[i].next_fb_info.xres_virtual * 
+			s3c_fb_info[i].fb.fix.line_length = s3c_fb_info[i].next_fb_info.xres_virtual *
 								s3c_fimd.bytes_per_pixel;
 
-			s3c_fb_info[i].fb.fix.smem_len = s3c_fb_info[i].next_fb_info.xres_virtual * 
-								s3c_fb_info[i].next_fb_info.yres_virtual * 
+			s3c_fb_info[i].fb.fix.smem_len = s3c_fb_info[i].next_fb_info.xres_virtual *
+								s3c_fb_info[i].next_fb_info.yres_virtual *
 								s3c_fimd.bytes_per_pixel;
 
 			s3c_fb_info[i].fb.var.xres = s3c_fb_info[i].next_fb_info.xres;
@@ -328,11 +328,11 @@ irqreturn_t s3cfb_irq(int irqno, void *param)
 
 
 			/* fb start / end address setting */
-			fb_start_address = s3c_fb_info[i].next_fb_info.phy_start_addr + 
-						s3c_fb_info[i].fb.fix.line_length * s3c_fb_info[i].next_fb_info.yoffset + 
+			fb_start_address = s3c_fb_info[i].next_fb_info.phy_start_addr +
+						s3c_fb_info[i].fb.fix.line_length * s3c_fb_info[i].next_fb_info.yoffset +
 						s3c_fb_info[i].next_fb_info.xoffset * s3c_fimd.bytes_per_pixel;
 
-			fb_end_address = fb_start_address + s3c_fb_info[i].fb.fix.line_length * 
+			fb_end_address = fb_start_address + s3c_fb_info[i].fb.fix.line_length *
 						s3c_fb_info[i].next_fb_info.yres;
 
 			writel(fb_start_address, S3C_VIDW00ADD0B0 + 0x8 * i);
@@ -342,19 +342,19 @@ irqreturn_t s3cfb_irq(int irqno, void *param)
 			/* fb virtual / visible size setting */
 			buffer_page_width = s3c_fb_info[i].next_fb_info.xres * s3c_fimd.bytes_per_pixel;
 
-			buffer_page_offset = (s3c_fb_info[i].next_fb_info.xres_virtual - 
+			buffer_page_offset = (s3c_fb_info[i].next_fb_info.xres_virtual -
 						s3c_fb_info[i].next_fb_info.xres) * s3c_fimd.bytes_per_pixel;
 
-			buffer_size = S3C_VIDWxxADD2_OFFSIZE_F(buffer_page_offset) | 
+			buffer_size = S3C_VIDWxxADD2_OFFSIZE_F(buffer_page_offset) |
 					(S3C_VIDWxxADD2_PAGEWIDTH_F(buffer_page_width));
 
 			writel(buffer_size, S3C_VIDW00ADD2 + 0x04 * i);
 
 			/* LCD position setting */
-			writel(S3C_VIDOSDxA_OSD_LTX_F(s3c_fb_info[i].next_fb_info.lcd_offset_x) | 
+			writel(S3C_VIDOSDxA_OSD_LTX_F(s3c_fb_info[i].next_fb_info.lcd_offset_x) |
 				S3C_VIDOSDxA_OSD_LTY_F(s3c_fb_info[i].next_fb_info.lcd_offset_y), S3C_VIDOSD0A+(0x10 * i));
 
-			writel(S3C_VIDOSDxB_OSD_RBX_F(s3c_fb_info[i].next_fb_info.lcd_offset_x - 1 + s3c_fb_info[i].next_fb_info.xres) | 
+			writel(S3C_VIDOSDxB_OSD_RBX_F(s3c_fb_info[i].next_fb_info.lcd_offset_x - 1 + s3c_fb_info[i].next_fb_info.xres) |
 				S3C_VIDOSDxB_OSD_RBY_F(s3c_fb_info[i].next_fb_info.lcd_offset_y - 1 + s3c_fb_info[i].next_fb_info.yres),
 				S3C_VIDOSD0B + (0x10 * i));
 
@@ -398,7 +398,7 @@ EXPORT_SYMBOL(s3cfb_enable_local_post);
 void s3cfb_enable_dma(void)
 {
 	u32 value;
-	
+
 	s3c_fimd.wincon0 &= ~((1<<22)| (1<<13));
 	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_ENWIN_F_ENABLE;
 
@@ -814,9 +814,6 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_OSD_STOP:
-		if (fbi->win_id > 0)
-			s3cfb_set_alpha_level(fbi, S3C_FB_MAX_ALPHA_LEVEL, 1);
-
 		s3cfb_onoff_win(fbi, OFF);
 		break;
 
@@ -853,9 +850,9 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		if (copy_from_user(&alpha_level, (int *) arg, sizeof(int)))
 			return -EFAULT;
 
-		if (alpha_level > S3C_FB_MAX_ALPHA_LEVEL) 
+		if (alpha_level > S3C_FB_MAX_ALPHA_LEVEL)
 			alpha_level = S3C_FB_MAX_ALPHA_LEVEL;
-		else if (alpha_level < 0) 
+		else if (alpha_level < 0)
 			alpha_level = 0;
 
 		s3cfb_set_alpha_level(fbi, alpha_level, 1);
@@ -1065,7 +1062,7 @@ void s3cfb_pre_init(void)
 int s3cfb_set_gpio(void)
 {
 	int i, err;
-	
+
 	/* LCD_HSYNC, LCD_VSYNC, LCD_VDEN, LCD_VCLK, VD[23:0] */
 	for (i = 0; i < 8; i++)
 		s3c_gpio_cfgpin(S5PC1XX_GPF0(i), S3C_GPIO_SFN(2));
@@ -1104,7 +1101,7 @@ int s3cfb_set_gpio(void)
 
 		gpio_direction_output(S5PC1XX_GPH0(6), 1);
 	}
-	
+
 	mdelay(100);
 
 	gpio_set_value(S5PC1XX_GPH0(6), 0);
@@ -1234,7 +1231,7 @@ static struct sleep_save s3c_lcd_save[] = {
 	SAVE_ITEM(S3C_W3PDATA23),
 	SAVE_ITEM(S3C_W3PDATA45),
 	SAVE_ITEM(S3C_W3PDATA67),
-	SAVE_ITEM(S3C_W3PDATA89), 
+	SAVE_ITEM(S3C_W3PDATA89),
 	SAVE_ITEM(S3C_W3PDATAAB),
 	SAVE_ITEM(S3C_W3PDATACD),
 	SAVE_ITEM(S3C_W3PDATAEF),

@@ -1,4 +1,4 @@
-/* linux/arch/arm/plat-s5pc1xx/include/mach/regs-gpio.h
+/* linux/arch/arm/plat-s5pc1xx/include/plat/regs-gpio.h
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics

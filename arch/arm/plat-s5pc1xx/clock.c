@@ -1,11 +1,11 @@
-/* linux/arch/arm/plat-s3c64xx/clock.c
+/* linux/arch/arm/plat-s5pc1xx/clock.c
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics
  *	Ben Dooks <ben@simtec.co.uk>
  *	http://armlinux.simtec.co.uk/
  *
- * S3C64XX Base clock support
+ * S5PC1XX Base clock support
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as

@@ -1,4 +1,4 @@
-/* linux/arch/arm/plat-s5pc1xx/include/mach/irqs.h
+/* linux/arch/arm/plat-s5pc1xx/include/plat/irqs.h
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics
@@ -133,7 +133,7 @@
 #define IRQ_HSMMC2		S5PC1XX_IRQ_VIC1(28)
 #define IRQ_MIPICSI		S5PC1XX_IRQ_VIC1(29)
 #define IRQ_MIPIDSI		S5PC1XX_IRQ_VIC1(30)
-                                       
+
 /*
  * VIC2: multimedia, audio, security
  */

@@ -1,11 +1,11 @@
-/* linux/arch/arm/plat-s3c64xx/dev-uart.c
+/* linux/arch/arm/plat-s5pc1xx/dev-uart.c
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics
  *	Ben Dooks <ben@simtec.co.uk>
  *	http://armlinux.simtec.co.uk/
  *
- * Base S3C64XX UART resource and device definitions
+ * Base S5PC1XX UART resource and device definitions
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as

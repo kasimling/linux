@@ -1,4 +1,4 @@
-/* linux/arch/arm/mach-s3c6400/include/mach/hardware.h
+/* linux/arch/arm/mach-s5pc100/include/mach/hardware.h
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics
@@ -13,4 +13,4 @@
 
 /* currently nothing here, placeholder */
 
-#endif /* __ASM_ARCH_IRQ_H */
+#endif /* __ASM_ARCH_HARDWARE_H */

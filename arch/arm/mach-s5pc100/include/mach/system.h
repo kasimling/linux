@@ -1,11 +1,11 @@
-/* linux/arch/arm/mach-s3c6400/include/mach/system.h
+/* linux/arch/arm/mach-s5pc100/include/mach/system.h
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics
  *      Ben Dooks <ben@simtec.co.uk>
  *      http://armlinux.simtec.co.uk/
  *
- * S3C6400 - system implementation
+ * S5PC100 - system implementation
  */
 
 #ifndef __ASM_ARCH_SYSTEM_H

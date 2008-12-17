@@ -5,7 +5,7 @@
  * 	Ben Dooks <ben@simtec.co.uk>
  * 	http://armlinux.simtec.co.uk/
  *
- * GPIO Bank A register and configuration definitions
+ * GPIO Bank G0 register and configuration definitions
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as

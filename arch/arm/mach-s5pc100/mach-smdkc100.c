@@ -1,4 +1,4 @@
-/* linux/arch/arm/mach-s3c6410/mach-smdk6410.c
+/* linux/arch/arm/mach-s5pc100/mach-smdkc100.c
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics

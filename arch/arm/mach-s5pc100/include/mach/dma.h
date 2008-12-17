@@ -5,7 +5,7 @@
  *      Ben Dooks <ben@simtec.co.uk>
  *      http://armlinux.simtec.co.uk/
  *
- * S3C6400 - DMA support
+ * S5PC100 - DMA support
  */
 
 #ifndef __ASM_ARCH_DMA_H
@@ -13,5 +13,5 @@
 
 #include <mach/s3c-dma.h>
 
-#endif /* __ASM_ARCH_IRQ_H */
+#endif /* __ASM_ARCH_DMA_H */
 

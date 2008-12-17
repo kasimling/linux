@@ -1,11 +1,11 @@
-/* arch/arm/plat-s3c64xx/include/plat/regs-sys.h
+/* arch/arm/plat-s5pc1xx/include/plat/regs-sys.h
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics
  *	Ben Dooks <ben@simtec.co.uk>
  *	http://armlinux.simtec.co.uk/
  *
- * S3C64XX system register definitions
+ * S5PC1XX system register definitions
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as

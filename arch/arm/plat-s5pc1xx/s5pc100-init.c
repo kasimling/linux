@@ -1,11 +1,11 @@
-/* linux/arch/arm/plat-s3c64xx/s3c6400-init.c
+/* linux/arch/arm/plat-s5pc1xx/s5pc100-init.c
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics
  *      Ben Dooks <ben@simtec.co.uk>
  *      http://armlinux.simtec.co.uk/
  *
- * S3C6400 - CPU initialisation (common with other S3C64XX chips)
+ * S5PC100 - CPU initialisation (common with other S5PC1XX chips)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as

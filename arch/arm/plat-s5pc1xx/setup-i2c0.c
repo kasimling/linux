@@ -1,4 +1,4 @@
-/* linux/arch/arm/plat-s3c64xx/setup-i2c0.c
+/* linux/arch/arm/plat-s5pc1xx/setup-i2c0.c
  *
  * Copyright 2008 Openmoko, Inc.
  * Copyright 2008 Simtec Electronics

@@ -1,4 +1,4 @@
-/* arch/arm/mach-s3c6400/include/mach/regs-mem.h
+/* arch/arm/mach-s5pc100/include/mach/regs-mem.h
  *
  * Copyright (c) 2004 Simtec Electronics <linux@simtec.co.uk>
  *		http://www.simtec.co.uk/products/SWLINUX/
@@ -7,7 +7,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  *
- * S3C2410 Memory Control register definitions
+ * S5PC100 Memory Control register definitions
 */
 
 #ifndef __ASM_ARM_MEMREGS_H

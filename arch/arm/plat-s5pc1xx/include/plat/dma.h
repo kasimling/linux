@@ -1,4 +1,4 @@
-/* linux/include/asm-arm/plat-s5pc1xx/dma.h
+/* linux/arch/arm/plat-s5pc1xx/include/plat/dma.h
  *
  * Copyright (C) 2006 Simtec Electronics
  *	Ben Dooks <ben@simtec.co.uk>

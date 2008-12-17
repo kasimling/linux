@@ -1,4 +1,4 @@
-/* arch/arm/mach-s3c2410/include/mach/regs-sys-timer.h
+/* arch/arm/plat-s5pc1xx/include/plat/regs-sys-timer.h
  *
  * Copyright (c) 2008 Samsung Electronics
  *
