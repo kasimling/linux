@@ -76,7 +76,7 @@ struct map_desc smdkc100_iodesc[] = {};
 static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_lcd,
         &s3c_device_nand,
-	&s3c_device_ts,
+	//&s3c_device_ts,
 	&s3c_device_smc911x,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
