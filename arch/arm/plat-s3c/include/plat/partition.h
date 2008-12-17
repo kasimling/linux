@@ -8,6 +8,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
 */
+#include <plat/nand.h>
 
 struct mtd_partition s3c_partition_info[] = {
         {

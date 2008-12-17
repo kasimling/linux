@@ -117,3 +117,22 @@ void __init s3c_adc_set_platdata(struct s3c_adc_mach_info *pd)
 		printk(KERN_ERR "no memory for ADC platform data\n");
 	}
 }
+
+/* NAND Controller */
+
+static struct resource s3c_nand_resource[] = {
+        [0] = {
+                .start = S5PC1XX_PA_NAND,
+                .end   = S5PC1XX_PA_NAND + S5PC1XX_SZ_NAND - 1,
+                .flags = IORESOURCE_MEM,
+        }
+};
+
+struct platform_device s3c_device_nand = {
+        .name             = "s3c-nand",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_nand_resource),
+        .resource         = s3c_nand_resource,
+};
+
+EXPORT_SYMBOL(s3c_device_nand);

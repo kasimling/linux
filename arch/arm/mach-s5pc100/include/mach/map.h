@@ -67,6 +67,10 @@
 #define S5PC1XX_PA_CHIPID	(0xE0000000)
 #define S5PC1XX_VA_CHIPID	S3C_ADDR(0x00700000)
 
+/* NAND flash controller */
+#define S5PC1XX_PA_NAND         (0xE7200000)
+#define S5PC1XX_SZ_NAND         SZ_1M
+
 /* DMA controller */
 #define S5PC1XX_PA_DMA   	(0xE8100000)
 
