@@ -906,11 +906,7 @@ static int config_DMA_transfer_size_for_oneNAND(u8 * mcode_ptr, pl330_DMA_parame
 	int lc0 = 0, lcSize = 0;
 	int mLoopStart = 0;
 
-<<<<<<< HEAD:arch/arm/plat-s3c/dma-pl330-mcode.h
-	dma_debug("%s entered\n", __FUNCTION__);
-=======
 	dma_debug("%s entered - DMA parameters=0x%x\n", __FUNCTION__, dma_param);
->>>>>>> e32d8ace0e2b563c44cb6c6529d719f354fc5c2d:arch/arm/plat-s3c/dma-pl330-mcode.h
 
 	if(dma_param.mTrSize > (MAX_ONENAND_PAGE_CNT*ONENAND_PAGE_WITH_OOB)) {
 		print_warning("[%s] The chunk size is too big !: %lu\n", __FUNCTION__, dma_param.mTrSize);
@@ -1054,12 +1050,8 @@ void stop_DMA_controller(u32 * mbuf)
 int setup_DMA_channel(u8 * mbuf, pl330_DMA_parameters_t dma_param, int chanNum)
 {
 	int mcode_size = 0, msize = 0;
-<<<<<<< HEAD:arch/arm/plat-s3c/dma-pl330-mcode.h
-	dma_debug("%s entered : Channel Num=%d\n", __FUNCTION__, chanNum);
-	print_dma_param_info(dma_param);
-=======
+
 	dma_debug("%s entered - DMA parameters=0x%x, Channel Num=%d\n", __FUNCTION__, dma_param, chanNum);
->>>>>>> e32d8ace0e2b563c44cb6c6529d719f354fc5c2d:arch/arm/plat-s3c/dma-pl330-mcode.h
 
 	msize = config_DMA_start_address(mbuf+mcode_size, dma_param.mSrcAddr);
 	mcode_size+= msize;
