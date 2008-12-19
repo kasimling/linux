@@ -193,7 +193,7 @@ static int s3c_dma_waitforload(struct s3c2410_dma_chan *chan, int line)
 		chan->stats->loads++;
 
 	while (--timeout > 0) {
-		if ((dma_rdreg(chan->dma_con, S3C_DMAC_CS(chan->number))) & S3C_DMAC_CS_STOPPED) {
+		if ((dma_rdreg(chan->dma_con, S3C_DMAC_CS(chan->number))) & S3C_DMAC_CS_EXECUTING) {
 			took = chan->load_timeout - timeout;
 			s3c_dma_stats_timeout(chan->stats, took);
 
@@ -237,20 +237,8 @@ static inline int s3c_dma_loadbuffer(struct s3c2410_dma_chan *chan,
 		return -EINVAL;
 	}
 
-	/* check the state of the channel before we do anything */
-#if 0
-	if (chan->load_state == S3C_DMALOAD_1LOADED) {
-		dmawarn("load_state is S3C2410_DMALOAD_1LOADED\n");
-		reload = (buf->next == NULL) ? S3C2410_DCON_NORELOAD : 0;
-	}
-
-	if (chan->load_state == S3C_DMALOAD_1LOADED_1RUNNING) {
-		dmawarn("state is S3C2410_DMALOAD_1LOADED_1RUNNING\n");
-		reload = S3C2410_DCON_AUTORELOAD;
-	}
-#endif
-	pr_debug("%s: DMA control0 - %08x\n", __FUNCTION__, chan->dcon);
-	pr_debug("%s: DMA control1 - %08x\n", __FUNCTION__, (buf->size / chan->xfer_unit));
+	pr_debug("%s: DMA CCR - %08x\n", __FUNCTION__, chan->dcon);
+	pr_debug("%s: DMA Loop count - %08x\n", __FUNCTION__, (buf->size / chan->xfer_unit));
 
 	dma_param.mPeriNum = chan->config_flags;
 	dma_param.mDirection = chan->source;
@@ -600,7 +588,7 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 	for (i = 0; i < S3C_CHANNELS_PER_DMA; i++) {
 		if (tmp & 0x01) {
 
-			pr_debug("# DMAC %d: requestor %d, load state %d\n", dcon_num, i, chan->load_state);
+			pr_debug("# DMAC %d: requestor %d\n", dcon_num, i);
 
 			channel = i;
 			chan = &s3c_dma_chans[channel + dcon_num * S3C_CHANNELS_PER_DMA];

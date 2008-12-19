@@ -81,16 +81,16 @@ typedef struct DMA_parameters
 static void print_dma_param_info(pl330_DMA_parameters_t dma_param)
 {
 	/* Parameter list for a DMA operation */
-	dma_debug("mDirection = %lu\n", dma_param.mDirection);
-	dma_debug("mPeriNum = %lu\n", dma_param.mPeriNum);
-	dma_debug("mSrcAddr = 0x%x\n", dma_param.mSrcAddr);
-	dma_debug("mDstAddr = 0x%x\n", dma_param.mDstAddr);
-	dma_debug("mTrSize = %lu\n", dma_param.mTrSize);
-	dma_debug("mControl = 0x%x\n", dma_param.mControl);
-	dma_debug("mIrqEnable = %lu\n", dma_param.mIrqEnable);
-	dma_debug("mLoop = %lu\n", dma_param.mLoop);
-	dma_debug("mBwJump = %lu\n", dma_param.mBwJump);
-	dma_debug("mLastReq = %lu\n", dma_param.mLastReq);
+	dma_debug("	mDirection = %lu\n", dma_param.mDirection);
+	dma_debug("	mPeriNum = %lu\n", dma_param.mPeriNum);
+	dma_debug("	mSrcAddr = 0x%x\n", dma_param.mSrcAddr);
+	dma_debug("	mDstAddr = 0x%x\n", dma_param.mDstAddr);
+	dma_debug("	mTrSize = %lu\n", dma_param.mTrSize);
+	dma_debug("	mControl = 0x%x\n", dma_param.mControl);
+	dma_debug("	mIrqEnable = %lu\n", dma_param.mIrqEnable);
+	dma_debug("	mLoop = %lu\n", dma_param.mLoop);
+	dma_debug("	mBwJump = %lu\n", dma_param.mBwJump);
+	dma_debug("	mLastReq = %lu\n", dma_param.mLastReq);
 }
 
 /*---------------------- Primitive functions -------------*/
@@ -571,7 +571,7 @@ static void encodeDmaKillDMACOverDBGINST(u32 * mcode_ptr)
 static void config_DMA_GO_command(u32 * mcode_ptr, int chanNum, u32 mbufAddr, int secureMode)
 {
 	dma_debug("%s entered - channel Num=%d\n", __FUNCTION__, chanNum);
-	dma_debug("mcode_ptr=0x%p, mbufAddr=0x%x, secureMode=%d\n", mcode_ptr, mbufAddr, secureMode);
+	dma_debug("mcode_ptr=0x%p, mbufAddr=0x%x, secureMode=%d\n\n", mcode_ptr, mbufAddr, secureMode);
 	encodeDmaGoOverDBGINST(mcode_ptr, (u8)chanNum, mbufAddr, (u8)secureMode);
 }
 
@@ -766,7 +766,7 @@ static int config_DMA_transfer_size(u8 * mcode_ptr, pl330_DMA_parameters_t dma_p
 
 	if(lc0 > PL330_MAX_ITERATION_NUM) {
 		lc1 = lc0/PL330_MAX_ITERATION_NUM;
-		dma_debug("Double loop : lc1=%d\n", lc1);
+		dma_debug("  Inner loop : lc1=%d\n", lc1);
 
 		if(lc1 <= PL330_MAX_ITERATION_NUM) {
 			msize = encodeDmaLoop(mcode_ptr+mcode_size, 1, lc1-1);
@@ -1009,7 +1009,7 @@ static int config_DMA_set_infinite_loop(u8 * mcode_ptr, int uBwJump)
  */
 static int config_DMA_mark_end(u8 * mcode_ptr)
 {
-	dma_debug("%s entered \n", __FUNCTION__);
+	dma_debug("%s entered \n\n", __FUNCTION__);
 	return encodeDmaEnd(mcode_ptr);
 }
 
