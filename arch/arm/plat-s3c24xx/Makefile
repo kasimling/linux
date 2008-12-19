@@ -34,7 +34,6 @@ obj-$(CONFIG_S3C2410_DMA)	+= dma.o
 
 # device specific setup and/or initialisation
 obj-$(CONFIG_ARCH_S3C2410)	+= setup-i2c.o
-obj-$(CONFIG_S3C24XX_ADC))	+= adc.o
 
 # SPI gpio central GPIO functions
 

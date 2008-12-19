@@ -84,3 +84,4 @@ config MACH_SMDK
 	  Common machine code for SMDK2410 and SMDK2440
 
 endif
+
