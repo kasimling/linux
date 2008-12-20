@@ -192,8 +192,9 @@ static int s3c_dma_waitforload(struct s3c2410_dma_chan *chan, int line)
 	if (chan->stats != NULL)
 		chan->stats->loads++;
 
+#if 0
 	while (--timeout > 0) {
-		if ((dma_rdreg(chan->dma_con, S3C_DMAC_CS(chan->number))) & S3C_DMAC_CS_STOPPED) {
+		if ((dma_rdreg(chan->dma_con, S3C_DMAC_CS(chan->number))) & S3C_DMAC_CS_EXECUTING) {
 			took = chan->load_timeout - timeout;
 			s3c_dma_stats_timeout(chan->stats, took);
 
@@ -214,8 +215,10 @@ static int s3c_dma_waitforload(struct s3c2410_dma_chan *chan, int line)
 	if (chan->stats != NULL) {
 		chan->stats->timeout_failed++;
 	}
-
-	return 0;
+#else
+	chan->load_state = S3C_DMALOAD_1RUNNING;
+#endif
+	return 1;
 }
 
 
@@ -600,7 +603,7 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 	for (i = 0; i < S3C_CHANNELS_PER_DMA; i++) {
 		if (tmp & 0x01) {
 
-			pr_debug("# DMAC %d: requestor %d, load state %d\n", dcon_num, i, chan->load_state);
+			pr_debug("# DMAC %d: requestor %d\n", dcon_num, i);
 
 			channel = i;
 			chan = &s3c_dma_chans[channel + dcon_num * S3C_CHANNELS_PER_DMA];

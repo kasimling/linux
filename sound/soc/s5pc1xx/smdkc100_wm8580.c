@@ -19,6 +19,7 @@
 #include <linux/interrupt.h>
 #include <linux/platform_device.h>
 #include <linux/i2c.h>
+
 #include <sound/core.h>
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
@@ -37,6 +38,7 @@
 
 #include <mach/hardware.h>
 #include <mach/audio.h>
+#include <mach/map.h>
 #include <asm/io.h>
 #include <plat/regs-clock.h>
 
@@ -51,6 +53,8 @@
 #define s3cdbg(x...)
 #endif
 
+extern void msleep(unsigned int msecs);
+
 static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 	struct snd_pcm_hw_params *params)
 {
@@ -60,14 +64,46 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 	unsigned int pll_out = 0; /*bclk = 0; */
 	int ret = 0;
 	unsigned int prescaler;
+	u32 *iiscon;
 
 	s3cdbg("Entered %s, rate = %d\n", __FUNCTION__, params_rate(params));
 
-	/*PCLK & SCLK gating enable*/
-#if 0 
+	iiscon = ioremap(S3C_PA_IIS, 0x100) + S3C64XX_IIS0CON;	
 
-	writel(readl(S3C_PCLK_GATE)|S3C6410_CLKCON_PCLK_IIS2, S3C_PCLK_GATE);
-	writel(readl(S3C_SCLK_GATE)|S3C_CLKCON_SCLK_AUDIO0, S3C_SCLK_GATE);
+	writel(readl(iiscon)&~(0x0<<31),iiscon);
+	msleep(100);
+	writel(readl(iiscon)|(0x1<<31),iiscon);
+	
+	//writel(readl(S5P_CLK_SRC0)|S5P_CLKSRC0_EPLL_MASK,S5P_CLK_SRC0);
+	printk("CLK_SRC0 : %x\n",readl(S5P_CLK_SRC0));
+
+	//writel(readl(S5P_CLK_SRC3)|(0x0<<12)|(0x0<<24)|(0x0<<4),S5P_CLK_SRC3);
+	//writel(readl(S5P_CLK_SRC3)|(0x2<<8),S5P_CLK_SRC3);
+	printk("MUX Audio 0: %x\n",readl(S5P_CLK_SRC3));
+
+	writel(readl(S5P_CLK_OUT)|(0x2<<12),S5P_CLK_OUT);
+	printk("CLK OUT : %x\n",readl(S5P_CLK_OUT));
+
+	writel(readl(S5P_CLKGATE_D20)|S5P_CLKGATE_D20_HCLKD2|S5P_CLKGATE_D20_I2SD2,S5P_CLKGATE_D20);
+	printk("HCLKD2 Gate : %x\n",readl(S5P_CLKGATE_D20));
+
+	writel(readl(S5P_SCLKGATE1)|S5P_CLKGATE_SCLK1_AUDIO0,S5P_SCLKGATE1);
+	printk("S5P_SCLKGATE1 : %x\n",readl(S5P_SCLKGATE1));
+
+	writel(readl(S5P_CLKGATE_D15)|(1<<0),S5P_CLKGATE_D15);
+	printk("GATE D1_5 : %x\n",readl(S5P_CLKGATE_D15));
+
+	writel(readl(S5P_EPLL_CON)|(0x1<<31),S5P_EPLL_CON);
+	printk("EPLL CON : %x\n",readl(S5P_EPLL_CON));
+
+//	writel((readl(S5P_CLK_DIV4)&~(0x07<<12))|(0x0<<12),S5P_CLK_DIV4);
+	////writel((readl(S5P_CLK_DIV4)&~(0x07<<8))|(0x1<<8),S5P_CLK_DIV4);
+	printk("DIV4: %x\n",readl(S5P_CLK_DIV4));
+
+	/*PCLK & SCLK gating enable*/
+
+//	writel(readl(S3C_PCLK_GATE)|S3C6410_CLKCON_PCLK_IIS2, S3C_PCLK_GATE);
+//	writel(readl(S3C_SCLK_GATE)|S3C_CLKCON_SCLK_AUDIO0, S3C_SCLK_GATE);
 
 	/*Clear I2S prescaler value [13:8] and disable prescaler*/
 	/* set prescaler division for sample rate */
@@ -75,7 +111,8 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 
 	if (ret < 0)
 		return ret;
-	
+//
+//
 	s3cdbg("%s: %d , params = %d\n", __FUNCTION__, __LINE__, params_rate(params));
 
 	switch (params_rate(params)) {
@@ -83,39 +120,25 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 	case 16000:
 	case 32000:
 	case 64100:
-		writel(50332, S3C_EPLL_CON1);
-		writel((1<<31)|(32<<16)|(1<<8)|(3<<0) ,S3C_EPLL_CON0);
+		/* M=99, P=3, S=3 -- Fout=49.152*/
+		writel((1<<31)|(99<<16)|(3<<8)|(3<<0) ,S5P_EPLL_CON);
 		break;
 	case 11025:
 	case 22050:
 	case 44100:
 	case 88200:
-		/* K=10398, M=45, P=1, S=3 -- Fout=67.738 */
-		writel(10398, S3C_EPLL_CON1);
-		writel((1<<31)|(45<<16)|(1<<8)|(3<<0) ,S3C_EPLL_CON0);
+		/* M=135, P=3, S=3 -- Fout=67.738 */
+		writel((1<<31)|(135<<16)|(3<<8)|(3<<0) ,S5P_EPLL_CON);
 		break;
 	case 48000:
 	case 96000:
-		/* K=9961, M=49, P=1, S=3 -- Fin=12, Fout=73.728; r=1536 */
-		writel(9961, S3C_EPLL_CON1);
-		writel((1<<31)|(49<<16)|(1<<8)|(3<<0) ,S3C_EPLL_CON0);
+		/* M=147, P=3, S=3 -- Fin=12, Fout=73.728; */
+		writel((1<<31)|(147<<16)|(3<<8)|(3<<0) ,S5P_EPLL_CON);
 		break;
 	default:
-		writel(0, S3C_EPLL_CON1);
-		writel((1<<31)|(128<<16)|(25<<8)|(0<<0) ,S3C_EPLL_CON0);
+		writel((1<<31)|(128<<16)|(25<<8)|(0<<0) ,S5P_EPLL_CON);
 		break;
 	}
-
-	while(!(__raw_readl(S3C_EPLL_CON0)&(1<<30)));
-
-	/* MUXepll : FOUTepll */
-	writel(readl(S3C_CLK_SRC)|S3C6400_CLKSRC_EPLL_MOUT, S3C_CLK_SRC);
-
-	/* AUDIO2 sel : FOUTepll */
-	writel((readl(S3C_CLK_SRC2)&~(0x7<<0))|(0<<0), S3C_CLK_SRC2);
-
-	/* CLK_DIV2 setting */
-	writel(0x0,S3C_CLK_DIV2);
 
 	switch (params_rate(params)) {
 	case 8000:
@@ -139,12 +162,10 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 		prescaler = 2; 
 		break;
 	case 44100:
-		/* Fout=73.728 */
 		pll_out = 11289600;
 		prescaler = 2;
 		break;
 	case 48000:
-		/* Fout=67.738 */
 		pll_out = 12288000;
 		prescaler = 2; 
 		break;
@@ -183,11 +204,13 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 	prescaler = prescaler - 1; 
 
 	/* set cpu DAI configuration */
+	/*
 	ret = cpu_dai->dai_ops.set_fmt(cpu_dai,
 		SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF |
 		SND_SOC_DAIFMT_CBS_CFS); 
 	if (ret < 0)
 		return ret;
+		*/
 
 	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S3C24XX_DIV_BCLK,
 		S3C64XX_IIS0MOD_256FS);
@@ -199,7 +222,6 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 		(prescaler << 0x8));
 	if (ret < 0)
 		return ret;
-#endif
 
 	return 0;
 }
@@ -273,7 +295,7 @@ static struct snd_soc_machine smdkc100 = {
 };
 
 static struct wm8580_setup_data smdkc100_wm8580_setup = {
-	.i2c_address = 0x36,
+	.i2c_address = 0x1b,
 };
 
 static struct snd_soc_device smdkc100_snd_devdata = {
@@ -288,33 +310,6 @@ static struct platform_device *smdkc100_snd_device;
 static int __init smdkc100_init(void)
 {
 	int ret;
-	unsigned int *reg_GPHCON0;
-	unsigned int *reg_GPHCON1;
-	unsigned int *reg_GPCCON;
-
-#if 0
-	reg_GPHCON0 = ioremap(0x7f0080e0,0x100);
-	reg_GPHCON1 = ioremap(0x7f0080e4,0x100);
-	reg_GPCCON = ioremap(0x7f008040,0x100);
-
-	s3c_gpio_cfgpin(S3C64XX_GPH(6), S3C64XX_GPH6_I2S_V40_BCLK);
-	s3c_gpio_cfgpin(S3C64XX_GPH(7), S3C64XX_GPH7_I2S_V40_CDCLK);
-	writel(0x50550000, reg_GPCCON);
-	writel(0x00000055, reg_GPHCON1);
-
-	s3c_gpio_cfgpin(S3C64XX_GPC(4), S3C64XX_GPC4_I2S_V40_DO0);
-	s3c_gpio_cfgpin(S3C64XX_GPC(5), S3C64XX_GPC5_I2S_V40_DO1);
-	s3c_gpio_cfgpin(S3C64XX_GPC(7), S3C64XX_GPC7_I2S_V40_DO2);
-
-	/* pull-up-enable, pull-down-disable*/
-	s3c_gpio_setpull(S3C64XX_GPH(6), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S3C64XX_GPH(7), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S3C64XX_GPH(8), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S3C64XX_GPH(9), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S3C64XX_GPC(4), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S3C64XX_GPC(5), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S3C64XX_GPC(7), S3C_GPIO_PULL_UP);
-#endif
 
 	smdkc100_snd_device = platform_device_alloc("soc-audio", -1);
 	if (!smdkc100_snd_device)
