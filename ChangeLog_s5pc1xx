@@ -305,3 +305,10 @@ v2.6.28-rc8-s5pc1xx-r0d1: Abhilash Kesavan
 		M arch/arm/plat-s5pc1xx/devs.c
 		M drivers/mtd/nand/Kconfig
 		M drivers/mtd/nand/s3c_nand.c
+
+v2.6.28-rc8-s5pc1xx-r0d4: Abhilash Kesavan
+	- Touch-up for Nand
+
+	Modified Files:
+		M arch/arm/configs/smdkc100mtd_defconfig
+		M arch/arm/mach-s5pc100/mach-smdkc100.c
