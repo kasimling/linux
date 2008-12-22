@@ -394,7 +394,7 @@ static int s3c_dma_start(struct s3c2410_dma_chan *chan)
 		if (chan->load_state == S3C_DMALOAD_1LOADED) {
 
 			if (s3c_dma_waitforload(chan, __LINE__) == 0) {
-				pr_debug("%s: buff not yet loaded, no more todo\n",
+				pr_debug("%s: buff not yet loaded, no more to do\n",
 					 __FUNCTION__);
 			} else {
 				chan->load_state = S3C_DMALOAD_1RUNNING;
