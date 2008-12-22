@@ -77,14 +77,14 @@ static DEFINE_MUTEX(adc_mutex);
 static unsigned long data_for_ADCCON;
 static unsigned long data_for_ADCTSC;
 
-static void s3c_adc_save_SFR_on_ADC(void) {
-
+static void s3c_adc_save_SFR_on_ADC(void)
+{
 	data_for_ADCCON = readl(base_addr + S3C_ADCCON);
 	data_for_ADCTSC = readl(base_addr + S3C_ADCTSC);
 }
 
-static void s3c_adc_restore_SFR_on_ADC(void) {
-
+static void s3c_adc_restore_SFR_on_ADC(void)
+{
 	writel(data_for_ADCCON, base_addr + S3C_ADCCON);
 	writel(data_for_ADCTSC, base_addr + S3C_ADCTSC);
 }
