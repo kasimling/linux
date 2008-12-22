@@ -156,18 +156,18 @@ static void s3cfb_change_buff(int req_win, int req_fb)
 	switch (req_win) {
 	case 0:
 		if (req_fb == 0)
-			s3c_fimd.wincon0 &= ~(1 << 20);
+			s3c_fimd.wincon0 &= ~S3C_WINCONx_BUFSEL_MASK;
 		else
-			s3c_fimd.wincon0 |= (1 << 20);
+			s3c_fimd.wincon0 |= S3C_WINCONx_BUFSEL_1;
 
 		writel(s3c_fimd.wincon0 | S3C_WINCONx_ENWIN_F_ENABLE, S3C_WINCON0);
 		break;
 
 	case 1:
 		if (req_fb == 0)
-			s3c_fimd.wincon1 &= ~(1 << 20);
+			s3c_fimd.wincon1 &= ~S3C_WINCONx_BUFSEL_MASK;
 		else
-			s3c_fimd.wincon1 |= (1 << 20);
+			s3c_fimd.wincon1 |= S3C_WINCONx_BUFSEL_1;
 
 		writel(s3c_fimd.wincon1 | S3C_WINCONx_ENWIN_F_ENABLE, S3C_WINCON1);
 		break;
@@ -385,7 +385,7 @@ void s3cfb_enable_local_post(int in_yuv)
 {
 	unsigned int value;
 
-	s3c_fimd.wincon0 &= ~(1 << 22 | 1 << 13);
+	s3c_fimd.wincon0 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
 	value = S3C_WINCONx_ENLOCAL_POST | S3C_WINCONx_ENWIN_F_ENABLE;
 
 	if (in_yuv)
@@ -400,7 +400,7 @@ void s3cfb_enable_dma(void)
 {
 	u32 value;
 
-	s3c_fimd.wincon0 &= ~((1<<22)| (1<<13));
+	s3c_fimd.wincon0 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
 	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_ENWIN_F_ENABLE;
 
 	__raw_writel(s3c_fimd.wincon0 | value, S3C_WINCON0);
@@ -750,10 +750,10 @@ void s3cfb_set_output_path(int out)
 
 	/* if output mode is LCD mode, Scan mode always should be progressive mode */
 	if (out == S3C_FB_OUTPUT_TV)
-		tmp &= ~(1 << 29);
+		tmp &= ~S3C_VIDCON0_INTERLACE_F_MASK;
 
-	tmp &= ~(0x7 << 26);
-	tmp |= (out << 26);
+	tmp &= ~S3C_VIDCON0_VIDOUT_MASK;
+	tmp |= S3C_VIDCON0_VIDOUT(out);
 
 	writel(tmp, S3C_VIDCON0);
 }
@@ -763,9 +763,9 @@ EXPORT_SYMBOL(s3cfb_set_output_path);
 void s3cfb_enable_rgbport(int on)
 {
 	if (on)
-		writel(0x380, S3C_VIDCON2);
+		writel(S3C_VIDCON2_ORGYUV_CBCRY | S3C_VIDCON2_YUVORD_CRCB, S3C_VIDCON2);
 	else
-		writel(0x0, S3C_VIDCON2);
+		writel(0, S3C_VIDCON2);
 }
 
 EXPORT_SYMBOL(s3cfb_enable_rgbport);
