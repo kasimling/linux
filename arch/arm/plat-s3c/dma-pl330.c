@@ -184,7 +184,7 @@ static int s3c_dma_waitforload(struct s3c2410_dma_chan *chan, int line)
 
 	if (chan->load_state != S3C_DMALOAD_1LOADED) {
 		printk(KERN_ERR
-		       "dma%d: s3c_dma_waitforload() called in loadstate %d from line %d\n",
+		       "dma CH %d: s3c_dma_waitforload() called in loadstate %d from line %d\n",
 		       chan->number, chan->load_state, line);
 		return 0;
 	}
@@ -193,7 +193,7 @@ static int s3c_dma_waitforload(struct s3c2410_dma_chan *chan, int line)
 		chan->stats->loads++;
 
 	while (--timeout > 0) {
-		if ((dma_rdreg(chan->dma_con, S3C_DMAC_CS(chan->number))) & S3C_DMAC_CS_EXECUTING) {
+		//if ((dma_rdreg(chan->dma_con, S3C_DMAC_CS(chan->number))) & S3C_DMAC_CS_EXECUTING) {
 			took = chan->load_timeout - timeout;
 			s3c_dma_stats_timeout(chan->stats, took);
 
@@ -204,11 +204,11 @@ static int s3c_dma_waitforload(struct s3c2410_dma_chan *chan, int line)
 
 			default:
 				printk(KERN_ERR
-				       "dma%d: unknown load_state in s3c_dma_waitforload() %d\n",
+				       "dma CH %d: unknown load_state in s3c_dma_waitforload() %d\n",
 				       chan->number, chan->load_state);
 			}
 			return 1;
-		}
+		//}
 	}
 
 	if (chan->stats != NULL) {
@@ -356,7 +356,7 @@ static int s3c_dma_start(struct s3c2410_dma_chan *chan)
 
 	if (chan->load_state == S3C_DMALOAD_NONE) {
 		if (chan->next == NULL) {
-			printk(KERN_ERR "dma%d: dcon_num has nothing loaded\n", chan->number);
+			printk(KERN_ERR "dma CH %d: dcon_num has nothing loaded\n", chan->number);
 			chan->state = S3C_DMA_IDLE;
 			local_irq_restore(flags);
 			return -EINVAL;
@@ -390,16 +390,16 @@ static int s3c_dma_start(struct s3c2410_dma_chan *chan)
 	if (chan->next != NULL) {
 		if (chan->load_state == S3C_DMALOAD_1LOADED) {
 
-			if (s3c2410_dma_waitforload(chan, __LINE__) == 0) {
+			if (s3c_dma_waitforload(chan, __LINE__) == 0) {
 				pr_debug("%s: buff not yet loaded, no more todo\n",
 					 __FUNCTION__);
 			} else {
 				chan->load_state = S3C_DMALOAD_1RUNNING;
-				s3c2410_dma_loadbuffer(chan, chan->next);
+				s3c_dma_loadbuffer(chan, chan->next);
 			}
 
 		} else if (chan->load_state == S3C_DMALOAD_1RUNNING) {
-			s3c2410_dma_loadbuffer(chan, chan->next);
+			s3c_dma_loadbuffer(chan, chan->next);
 		}
 	}
 #endif
@@ -413,7 +413,7 @@ static int s3c_dma_start(struct s3c2410_dma_chan *chan)
  * work out if we can queue another buffer into the DMA engine
  */
 
-#if 0
+
 static int s3c_dma_canload(struct s3c2410_dma_chan * chan)
 {
 	if (chan->load_state == S3C_DMALOAD_NONE || chan->load_state == S3C_DMALOAD_1RUNNING)
@@ -421,7 +421,7 @@ static int s3c_dma_canload(struct s3c2410_dma_chan * chan)
 
 	return 0;
 }
-#endif
+
 
 
 /* s3c2410_dma_enqueue
@@ -479,11 +479,11 @@ int s3c2410_dma_enqueue(unsigned int channel, void *id,
 		chan->end = buf;
 		chan->next = NULL;
 	} else {
-		pr_debug("dma%d: %s: buffer %p queued onto non-empty channel\n",
+		pr_debug("dma CH %d: %s: buffer %p queued onto non-empty channel\n",
 			 chan->number, __FUNCTION__, buf);
 
 		if (chan->end == NULL)   /* In case of flushing */
-			pr_debug("dma%d: %s: %p not empty, and chan->end==NULL?\n",
+			pr_debug("dma CH %d: %s: %p not empty, and chan->end==NULL?\n",
 				 chan->number, __FUNCTION__, chan);
 		else {
 			chan->end->next = buf;
@@ -555,13 +555,13 @@ static inline void s3c_dma_lastxfer(struct s3c2410_dma_chan *chan)
 	case S3C_DMALOAD_1LOADED:
 		if (s3c_dma_waitforload(chan, __LINE__) == 0) {
 			/* flag error? */
-			printk(KERN_ERR "dma%d: timeout waiting for load\n", chan->number);
+			printk(KERN_ERR "dma CH %d: timeout waiting for load\n", chan->number);
 			return;
 		}
 		break;
 
 	default:
-		pr_debug("dma%d: lastxfer: unhandled load_state %d with no next",
+		pr_debug("dma CH %d: lastxfer: unhandled load_state %d with no next",
 			 chan->number, chan->load_state);
 		return;
 
