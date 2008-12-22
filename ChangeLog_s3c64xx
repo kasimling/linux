@@ -264,6 +264,9 @@ v2.6.28-rc8-s3c64xx: Kyoungil Kim
 
 v2.6.28-rc8-s3c64xx-r0d0: Kyoungil Kim
 
+v2.6.28-rc8-s3c64xx-r0d1: Jinsung Yang
+	- Fix for wrong comments
+
 v2.6.28-rc8-s3c64xx-r0d2: Jongpill Lee
 
 	- bug fixed about OS Timer

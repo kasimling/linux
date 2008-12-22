@@ -33,7 +33,7 @@
 static struct resource s3c64xx_uart0_resource[] = {
 	[0] = {
 		.start	= S3C_PA_UART0,
-		.end	= S3C_PA_UART0 + 0x100,
+		.end	= S3C_PA_UART0 + S3C_SZ_UART,
 		.flags	= IORESOURCE_MEM,
 	},
 	[1] = {
@@ -57,7 +57,7 @@ static struct resource s3c64xx_uart0_resource[] = {
 static struct resource s3c64xx_uart1_resource[] = {
 	[0] = {
 		.start = S3C_PA_UART1,
-		.end   = S3C_PA_UART1 + 0x100,
+		.end   = S3C_PA_UART1 + S3C_SZ_UART,
 		.flags = IORESOURCE_MEM,
 	},
 	[1] = {
@@ -81,7 +81,7 @@ static struct resource s3c64xx_uart1_resource[] = {
 static struct resource s3c6xx_uart2_resource[] = {
 	[0] = {
 		.start = S3C_PA_UART2,
-		.end   = S3C_PA_UART2 + 0x100,
+		.end   = S3C_PA_UART2 + S3C_SZ_UART,
 		.flags = IORESOURCE_MEM,
 	},
 	[1] = {
@@ -105,7 +105,7 @@ static struct resource s3c6xx_uart2_resource[] = {
 static struct resource s3c64xx_uart3_resource[] = {
 	[0] = {
 		.start = S3C_PA_UART3,
-		.end   = S3C_PA_UART3 + 0x100,
+		.end   = S3C_PA_UART3 + S3C_SZ_UART,
 		.flags = IORESOURCE_MEM,
 	},
 	[1] = {

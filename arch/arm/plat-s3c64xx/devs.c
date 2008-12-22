@@ -32,7 +32,7 @@
 static struct resource s3c_smc911x_resources[] = {
       [0] = {
               .start  = S3C64XX_PA_SMC9115,
-              .end    = S3C64XX_PA_SMC9115 + 0x1fffffff,
+              .end    = S3C64XX_PA_SMC9115 + S3C64XX_SZ_SMC9115 - 1,
               .flags  = IORESOURCE_MEM,
       },
       [1] = {
@@ -73,7 +73,7 @@ EXPORT_SYMBOL(s3c_device_nand);
 static struct resource s3c_usbgadget_resource[] = {
 	[0] = {
 		.start = S3C_PA_OTG,
-		.end   = S3C_PA_OTG+S3C_SZ_OTG - 1,
+		.end   = S3C_PA_OTG + S3C_SZ_OTG - 1,
 		.flags = IORESOURCE_MEM,
 	},
 	[1] = {
