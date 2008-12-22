@@ -101,7 +101,7 @@ static struct resource s3c_lcd_resource[] = {
 		.flags = IORESOURCE_MEM,
 	},
 	[1] = {
-		.start = IRQ_LCD_VSYNC ,
+		.start = IRQ_LCD_VSYNC,
 		.end   = IRQ_LCD_SYSTEM,
 		.flags = IORESOURCE_IRQ,
 	}

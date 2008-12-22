@@ -427,7 +427,7 @@ static int s3cfb_set_bpp(s3c_fb_info_t *fbi, int bpp)
 	val = readl(S3C_WINCON0 + (0x04 * win_num));
 	val &= ~(S3C_WINCONx_BPPMODE_F_MASK | S3C_WINCONx_BLD_PIX_MASK);
 	val |= S3C_WINCONx_ALPHA_SEL_1;
-		
+
 	switch (bpp) {
 	case 1:
 	case 2:
@@ -747,7 +747,7 @@ static void s3cfb_init_fbinfo(s3c_fb_info_t *finfo, char *drv_name, int index)
 	finfo->fb.var.lower_margin = s3c_fimd.lower_margin;
 	finfo->fb.var.sync = s3c_fimd.sync;
 	finfo->fb.var.grayscale = s3c_fimd.cmap_grayscale;
-	
+
 	finfo->fb.fix.smem_len = finfo->fb.var.xres_virtual * finfo->fb.var.yres_virtual * s3c_fimd.bytes_per_pixel;
 
 	finfo->fb.fix.line_length = finfo->fb.var.width * s3c_fimd.bytes_per_pixel;
@@ -818,7 +818,7 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 	if (!info->clk || IS_ERR(info->clk)) {
 		printk(KERN_INFO "failed to get lcd clock source\n");
 		ret =  -ENOENT;
-		goto release_irq;
+		goto release_io;
 	}
 
 	clk_enable(info->clk);
@@ -827,20 +827,19 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 	s3c_vsync_info.count = 0;
 	init_waitqueue_head(&s3c_vsync_info.wait_queue);
 
-#if defined(CONFIG_CPU_S3C2443) || defined(CONFIG_CPU_S3C2450) || defined(CONFIG_CPU_S3C2416)
-	ret = request_irq(IRQ_S3C2443_LCD3, s3cfb_irq, 0, "s3c-lcd", pdev);
+	res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
 
-#elif defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410)
-	ret = request_irq(IRQ_LCD_VSYNC, s3cfb_irq, 0, "s3c-lcd", pdev);
+	if (res == NULL) {
+		dev_err(&pdev->dev, "failed to get irq\n");
+		ret = -ENXIO;
+		goto release_clock;
+	}
 
-#elif defined(CONFIG_PLAT_S5PC1XX)
-	ret = request_irq(IRQ_LCD0, s3cfb_irq, 0, "s3c-lcd", pdev);
-
-#endif
+	ret = request_irq(res->start, s3cfb_irq, 0, "s3c-lcd", pdev);
 
 	if (ret != 0) {
 		printk("Failed to install irq (%d)\n", ret);
-		goto release_irq;
+		goto release_clock;
 	}
 
 	msleep(5);
@@ -858,7 +857,7 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 		if (ret) {
 			printk("Failed to allocate video RAM: %d\n", ret);
 			ret = -ENOMEM;
-			goto release_clock;
+			goto release_irq;
 		}
 
 		ret = s3cfb_init_registers(&s3c_fb_info[index]);
@@ -903,24 +902,22 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 free_video_memory:
 	s3cfb_unmap_video_memory(&s3c_fb_info[index]);
 
+release_irq:
+	free_irq(res->start, &info);
+
 release_clock:
 	clk_disable(info->clk);
 	clk_put(info->clk);
+
+release_io:
+	iounmap(info->io);
 
 release_mem:
 	release_resource(info->mem);
 	kfree(info->mem);
 
-release_irq:
-#if defined(CONFIG_CPU_S3C2443) || defined(CONFIG_CPU_S3C2450) || defined(CONFIG_CPU_S3C2416)
-	free_irq(IRQ_S3C2443_LCD3, &info);
-
-#elif defined(CONFIG_CPU_S3C6400)|| defined(CONFIG_CPU_S3C6410)
-	free_irq(IRQ_LCD_VSYNC, &info);
-#endif
-
 dealloc_fb:
-	framebuffer_release(&s3c_fb_info[index].fb);
+	framebuffer_release(fbinfo);
 	return ret;
 }
 
