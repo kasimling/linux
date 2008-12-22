@@ -38,8 +38,9 @@
 #include <plat/regs-serial.h>
 #include <plat/iic.h>
 
-#include <plat/s5pc100.h>
+#include <plat/nand.h>
 #include <plat/partition.h>
+#include <plat/s5pc100.h>
 #include <plat/clock.h>
 #include <plat/devs.h>
 #include <plat/cpu.h>

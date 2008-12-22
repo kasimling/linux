@@ -192,6 +192,7 @@ static int s3c_dma_waitforload(struct s3c2410_dma_chan *chan, int line)
 	if (chan->stats != NULL)
 		chan->stats->loads++;
 
+#if 0
 	while (--timeout > 0) {
 		if ((dma_rdreg(chan->dma_con, S3C_DMAC_CS(chan->number))) & S3C_DMAC_CS_EXECUTING) {
 			took = chan->load_timeout - timeout;
@@ -214,8 +215,10 @@ static int s3c_dma_waitforload(struct s3c2410_dma_chan *chan, int line)
 	if (chan->stats != NULL) {
 		chan->stats->timeout_failed++;
 	}
-
-	return 0;
+#else
+	chan->load_state = S3C_DMALOAD_1RUNNING;
+#endif
+	return 1;
 }
 
 

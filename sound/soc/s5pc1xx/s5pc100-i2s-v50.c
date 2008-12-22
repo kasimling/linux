@@ -29,6 +29,8 @@
 #include <linux/delay.h>
 #include <linux/interrupt.h>
 #include <linux/clk.h>
+#include <linux/timer.h>
+
 #include <sound/core.h>
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
@@ -77,7 +79,7 @@ static struct s3c2410_dma_client s3c24xx_dma_client_in = {
 
 static struct s3c24xx_pcm_dma_params s5pc1xx_i2s_pcm_stereo_out = {
 	.client		= &s3c24xx_dma_client_out,
-	.channel	= DMACH_I2S_V40_OUT,
+	.channel	= DMACH_I2S_V50_OUT,
 	.dma_addr	= S3C_PA_IIS + S3C64XX_IISFIFO,
 	.dma_size	= 4,
 };
@@ -121,7 +123,7 @@ static void s3c24xx_snd_txctrl(int on)
 		 * engine and FIFOs to reset. If this isn't allowed, the
 		 * DMA engine will simply freeze randomly.
 		 */
-		iiscon &=~(S3C64XX_IIS0CON_I2SACTIVE);
+		iiscon &= ~(S3C64XX_IIS0CON_I2SACTIVE);
 		iismod &= ~S3C64XX_IIS0MOD_TXMODE;
 
 		writel(iiscon,  s5pc1xx_i2s.regs + S3C64XX_IIS0CON);
@@ -209,13 +211,14 @@ static inline int s3c24xx_snd_is_clkmaster(void)
 static int s3c_i2s_v50_set_fmt(struct snd_soc_dai *cpu_dai,
 		unsigned int fmt)
 {
-#if 0
 	u32 iismod;
 
 	s3cdbg("Entered %s: fmt = %d\n", __FUNCTION__, fmt);
+	printk("Entered %s: fmt = %d\n", __FUNCTION__, fmt);
 
 	iismod = readl(s5pc1xx_i2s.regs + S3C64XX_IIS0MOD);
 
+#if 0
 	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
 	case SND_SOC_DAIFMT_CBM_CFM:
 #ifndef CONFIG_CPU_S3C6400
@@ -480,6 +483,7 @@ static int s3c_i2s_v50_set_clkdiv(struct snd_soc_dai *cpu_dai,
 	u32 reg;
 
 	s3cdbg("Entered %s : div_id = %d, div = %x\n", __FUNCTION__, div_id, div);
+	printk("Entered %s : div_id = %d, div = %x\n", __FUNCTION__, div_id, div);
 
 	switch (div_id) {
 	case S3C24XX_DIV_MCLK:
@@ -550,6 +554,11 @@ static int s3c_i2s_v50_probe(struct platform_device *pdev,
 		printk("fail to claim i2s irq , ret = %d\n", ret);
 		return -ENODEV;
 	}
+
+printk("IIS Reset!\n");
+//	writel(readl(s5pc1xx_i2s.regs + S3C64XX_IIS0CON)&~(0x1<<31),(s5pc1xx_i2s.regs + S3C64XX_IIS0CON));
+//	msleep(100);
+	writel(readl(s5pc1xx_i2s.regs + S3C64XX_IIS0CON)|(0x1<<31),(s5pc1xx_i2s.regs + S3C64XX_IIS0CON));
 
 	return 0;
 }
