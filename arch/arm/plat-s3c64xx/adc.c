@@ -79,14 +79,14 @@ static unsigned long data_for_ADCTSC;
 
 static void s3c_adc_save_SFR_on_ADC(void) {
 
-	data_for_ADCCON = readl(base_addr+S3C_ADCCON);
-	data_for_ADCTSC = readl(base_addr+S3C_ADCTSC);
+	data_for_ADCCON = readl(base_addr + S3C_ADCCON);
+	data_for_ADCTSC = readl(base_addr + S3C_ADCTSC);
 }
 
 static void s3c_adc_restore_SFR_on_ADC(void) {
 
-	writel(data_for_ADCCON, base_addr+S3C_ADCCON);
-	writel(data_for_ADCTSC, base_addr+S3C_ADCTSC);
+	writel(data_for_ADCCON, base_addr + S3C_ADCCON);
+	writel(data_for_ADCTSC, base_addr + S3C_ADCTSC);
 }
 #endif
 
@@ -102,24 +102,22 @@ unsigned int s3c_adc_convert(void)
 	unsigned long data0;
 	unsigned long data1;
 
-	writel(readl(base_addr+S3C_ADCCON)|S3C_ADCCON_SELMUX(adc_port), base_addr+S3C_ADCCON);
+	writel(readl(base_addr + S3C_ADCCON) | S3C_ADCCON_SELMUX(adc_port), base_addr + S3C_ADCCON);
 
 	udelay(10);
 
-	writel(readl(base_addr+S3C_ADCCON)|S3C_ADCCON_ENABLE_START, base_addr+S3C_ADCCON);
+	writel(readl(base_addr + S3C_ADCCON) | S3C_ADCCON_ENABLE_START, base_addr + S3C_ADCCON);
 
-       do {
-	   	data0 = readl(base_addr+S3C_ADCCON);
+	do {
+		data0 = readl(base_addr + S3C_ADCCON);
 	} while(!(data0 & S3C_ADCCON_ECFLG));
 
-	data1 = readl(base_addr+S3C_ADCDAT0);
+	data1 = readl(base_addr + S3C_ADCDAT0);
 
-	if(plat_data->resolution == 12)
-	{
+	if (plat_data->resolution == 12)
 		adc_return = data1 & S3C_ADCDAT0_XPDATA_MASK_12BIT;
-	}else{
+	else
 		adc_return = data1 & S3C_ADCDAT0_XPDATA_MASK;
-	}
 
 	return adc_return;
 }
@@ -173,17 +171,15 @@ static int s3c_adc_ioctl(struct inode *inode, struct file *file,
        printk(KERN_INFO " s3c_adc_ioctl(cmd:: %d) entered\n", cmd);
 
 	switch (cmd) {
-
 		case ADC_INPUT_PIN:
-			  adc_port = (unsigned int) arg;
+			adc_port = (unsigned int) arg;
 
-                       if (adc_port >= 4)
-                            printk(" %d is already reserved for TouchScreen\n", adc_port);
-                      return 0;
+			if (adc_port >= 4)
+				printk(" %d is already reserved for TouchScreen\n", adc_port);
+			return 0;
 
               default:
 			return -ENOIOCTLCMD;
-
 	}
 }
 
@@ -262,17 +258,17 @@ static int __init s3c_adc_probe(struct platform_device *pdev)
 	/* read platform data from device struct */
 	plat_data = s3c_adc_get_platdata(&pdev->dev);
 
-	if ((plat_data->presc&0xff) > 0)
-		writel(S3C_ADCCON_PRSCEN | S3C_ADCCON_PRSCVL(plat_data->presc&0xFF), base_addr+S3C_ADCCON);
+	if ((plat_data->presc & 0xff) > 0)
+		writel(S3C_ADCCON_PRSCEN | S3C_ADCCON_PRSCVL(plat_data->presc & 0xff), base_addr + S3C_ADCCON);
 	else
-		writel(0, base_addr+S3C_ADCCON);
+		writel(0, base_addr + S3C_ADCCON);
 
 	/* Initialise registers */
-	if ((plat_data->delay&0xffff) > 0)
-		writel(plat_data->delay & 0xffff, base_addr+S3C_ADCDLY);
+	if ((plat_data->delay & 0xffff) > 0)
+		writel(plat_data->delay & 0xffff, base_addr + S3C_ADCDLY);
 
 	if (plat_data->resolution == 12)
-		writel(readl(base_addr+S3C_ADCCON)|S3C_ADCCON_RESSEL_12BIT, base_addr+S3C_ADCCON);
+		writel(readl(base_addr + S3C_ADCCON) | S3C_ADCCON_RESSEL_12BIT, base_addr + S3C_ADCCON);
 
 	ret = misc_register(&s3c_adc_miscdev);
 	if (ret) {
@@ -281,7 +277,7 @@ static int __init s3c_adc_probe(struct platform_device *pdev)
 		goto err_clk;
 	}
 
-	printk(KERN_INFO "S3C64XX ADC driver successfully probed !\n");
+	printk(KERN_INFO "S3C64XX ADC driver successfully probed\n");
 
 	return 0;
 
@@ -311,9 +307,9 @@ static unsigned int adccon, adctsc, adcdly;
 
 static int s3c_adc_suspend(struct platform_device *dev, pm_message_t state)
 {
-	adccon = readl(base_addr+S3C_ADCCON);
-	adctsc = readl(base_addr+S3C_ADCTSC);
-	adcdly = readl(base_addr+S3C_ADCDLY);
+	adccon = readl(base_addr + S3C_ADCCON);
+	adctsc = readl(base_addr + S3C_ADCTSC);
+	adcdly = readl(base_addr + S3C_ADCDLY);
 
 	clk_disable(adc_clock);
 
@@ -324,9 +320,9 @@ static int s3c_adc_resume(struct platform_device *pdev)
 {
 	clk_enable(adc_clock);
 
-	writel(adccon, base_addr+S3C_ADCCON);
-	writel(adctsc, base_addr+S3C_ADCTSC);
-	writel(adcdly, base_addr+S3C_ADCDLY);
+	writel(adccon, base_addr + S3C_ADCCON);
+	writel(adctsc, base_addr + S3C_ADCTSC);
+	writel(adcdly, base_addr + S3C_ADCDLY);
 
 	return 0;
 }
@@ -362,6 +358,6 @@ void __exit s3c_adc_exit(void)
 module_init(s3c_adc_init);
 module_exit(s3c_adc_exit);
 
-MODULE_AUTHOR("boyko.lee@samsung.com>");
+MODULE_AUTHOR("boyko.lee@samsung.com");
 MODULE_DESCRIPTION("S3C64XX ADC driver");
 MODULE_LICENSE("GPL");

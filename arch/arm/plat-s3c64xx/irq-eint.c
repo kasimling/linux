@@ -130,8 +130,8 @@ static int s3c_irq_eint_set_type(unsigned int irq, unsigned int type)
 	ctrl |= newvalue << shift;
 	__raw_writel(ctrl, reg);
 
-	s3c_gpio_cfgpin(S3C64XX_GPN(offs), 0x2<<(offs*2));
-	
+	s3c_gpio_cfgpin(S3C64XX_GPN(offs), 0x2 << (offs * 2));
+
 	return 0;
 }
 
