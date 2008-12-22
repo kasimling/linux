@@ -278,7 +278,7 @@ v2.6.28-rc8-s3c64xx-r0d2: Jongpill Lee
 		M       arch/arm/plat-s3c/time.c
 		M       arch/arm/plat-s3c24xx/include/plat/cpu.h
 
-v2.6.28-rc8-s3c64xx-r0d4: Jongpill Lee
+v2.6.28-rc8-s3c64xx-r0d3: Jongpill Lee
 	- Remove adc driver on s3c24xx
 	Modified Files:
 		M       arch/arm/plat-s3c24xx/Kconfig
