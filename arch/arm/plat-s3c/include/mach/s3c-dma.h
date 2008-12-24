@@ -38,6 +38,7 @@ enum dma_ch {
 	DMACH_I2S_OUT_1,	/* s3c2450 iis_1 tx */
 	DMACH_I2S_V40_IN,
 	DMACH_I2S_V40_OUT,
+	DMACH_I2S_V50_OUT,
 	DMACH_PCM_IN,
 	DMACH_PCM_OUT,
 	DMACH_MIC_IN,
@@ -158,7 +159,8 @@ struct s3c_dma_buf {
 	dma_addr_t		 data;		/* start of DMA data */
 	dma_addr_t		 ptr;		/* where the DMA got to [1] */
 	void			*id;		/* client's id */
-	dma_addr_t		*ucptr;		/* pointer to a set of micro codes */
+	dma_addr_t		mcptr;		/* physical pointer to a set of micro codes */
+	unsigned long 		*mcptr_cpu;	/* virtual pointer to a set of micro codes */
 };
 
 /* [1] is this updated for both recv/send modes? */
