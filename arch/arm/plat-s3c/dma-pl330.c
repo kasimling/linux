@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2003-2008,2009 Samsung Electronics
  *
- * S5PC1XX, S5P6440 DMAC core
+ * S5PC1XX, S5P6440 DMAC core (PL330 DMAC)
  *
  * http://www.samsung.com/
  *
@@ -29,6 +29,8 @@
 #include <asm/irq.h>
 #include <mach/hardware.h>
 #include <asm/io.h>
+#include <linux/dma-mapping.h>
+
 #include <asm/dma.h>
 
 #include <plat/regs-clock.h>
@@ -38,10 +40,18 @@
 
 #include "dma-pl330-mcode.h"
 
+#undef pr_debug
+//#define dma_dbg
+
+#ifdef dma_dbg
+#define pr_debug(fmt...) 	printk( fmt)
+#else
+#define pr_debug(fmt...)
+#endif
+
 /* io map for dma */
 static void __iomem 		*dma_base;
 static struct kmem_cache 	*dma_kmem;
-static struct kmem_cache 	*dma_mcode_kmem;
 
 static int dma_channels;
 struct s3c_dma_selection 	dma_sel;
@@ -50,17 +60,6 @@ static struct s3c2410_dma_chan *dma_chan_map[DMACH_MAX];
 /* dma channel state information */
 struct s3c2410_dma_chan 	s3c_dma_chans[S3C_DMA_CHANNELS];
 s3c_dma_controller_t 		s3c_dma_cntlrs[S3C_DMA_CONTROLLERS];
-
-/* debugging functions */
-#undef pr_debug
-
-#ifdef dma_dbg
-#define sh_printk(fmt...) 	printk( fmt)
-#define pr_debug(fmt...) 	printk( fmt)
-#else
-#define sh_printk(fmt...)
-#define pr_debug(fmt...)
-#endif
 
 #define SIZE_OF_MICRO_CODES		512
 #define PL330_NON_SECURE_DMA		1
@@ -277,7 +276,7 @@ static inline int s3c_dma_loadbuffer(struct s3c2410_dma_chan *chan,
 	dma_param.mLoop = 0;
 	dma_param.mLastReq = 1;
 	dma_param.mControl = *(pl330_DMA_control_t *) &chan->dcon;
-	dma_param.mBwJump = setup_DMA_channel((u8 *)buf->mcptr, dma_param, chan->number);
+	dma_param.mBwJump = setup_DMA_channel((u8 *)buf->mcptr_cpu, dma_param, chan->number);
 
 	chan->next = buf->next;
 
@@ -374,35 +373,13 @@ static int s3c_dma_start(struct s3c2410_dma_chan *chan)
 	}
 
 	start_DMA_channel(dma_regaddr(chan->dma_con, S3C_DMAC_DBGSTATUS), chan->number,
-					virt_to_phys(chan->curr->mcptr),
-					PL330_NON_SECURE_DMA);
+					chan->curr->mcptr, PL330_NON_SECURE_DMA);
 
 	/* Start the DMA operation on Peripheral */
 	s3c_dma_call_op(chan, S3C2410_DMAOP_START);
 
 	dbg_showchan(chan);
 
-	/* if we've only loaded one buffer onto the channel, then chec
-	 * to see if we have another, and if so, try and load it so when
-	 * the first buffer is finished, the new one will be loaded onto
-	 * the channel */
-#if 0
-	if (chan->next != NULL) {
-		if (chan->load_state == S3C_DMALOAD_1LOADED) {
-
-			if (s3c_dma_waitforload(chan, __LINE__) == 0) {
-				pr_debug("%s: buff not yet loaded, no more to do\n",
-					 __FUNCTION__);
-			} else {
-				chan->load_state = S3C_DMALOAD_1RUNNING;
-				s3c_dma_loadbuffer(chan, chan->next);
-			}
-
-		} else if (chan->load_state == S3C_DMALOAD_1RUNNING) {
-			s3c_dma_loadbuffer(chan, chan->next);
-		}
-	}
-#endif
 	local_irq_restore(flags);
 	return 0;
 }
@@ -451,7 +428,7 @@ int s3c2410_dma_enqueue(unsigned int channel, void *id,
 
 	buf = kmem_cache_alloc(dma_kmem, GFP_ATOMIC);
 	if (buf == NULL) {
-		printk(KERN_ERR "dma<%d> no memory for buffer\n", channel);
+		printk(KERN_ERR "dma <%d> no memory for buffer\n", channel);
 		return -ENOMEM;
 	}
 
@@ -463,13 +440,14 @@ int s3c2410_dma_enqueue(unsigned int channel, void *id,
 	buf->id = id;
 	buf->magic = BUF_MAGIC;
 
-	buf->mcptr = kmem_cache_alloc(dma_mcode_kmem, GFP_ATOMIC);
-	if (buf->mcptr == NULL) {
+	local_irq_save(flags);
+
+	buf->mcptr_cpu = dma_alloc_coherent(NULL, SIZE_OF_MICRO_CODES, &buf->mcptr, GFP_ATOMIC);
+
+	if (buf->mcptr_cpu == NULL) {
 		printk(KERN_ERR "%s: failed to allocate memory for micro codes\n", __FUNCTION__);
 		return -ENOMEM;
 	}
-
-	local_irq_save(flags);
 
 	if (chan->curr == NULL) {
 		/* we've got nothing loaded... */
@@ -499,18 +477,14 @@ int s3c2410_dma_enqueue(unsigned int channel, void *id,
 	if (chan->state == S3C_DMA_RUNNING) {
 		if (chan->load_state == S3C_DMALOAD_1LOADED && 1) {
 			if (s3c_dma_waitforload(chan, __LINE__) == 0) {
-				printk(KERN_ERR "dma%d: loadbuffer:"
+				printk(KERN_ERR "dma CH %d: loadbuffer:"
 				       "timeout loading buffer\n", chan->number);
 				dbg_showchan(chan);
 				local_irq_restore(flags);
 				return -EINVAL;
 			}
 		}
-#if 0
-		while (s3c_dma_canload(chan) && chan->next != NULL) {
-			s3c_dma_loadbuffer(chan, chan->next);
-		}
-#endif
+
 	} else if (chan->state == S3C_DMA_IDLE) {
 		if (chan->flags & S3C2410_DMAF_AUTOSTART) {
 			s3c2410_dma_ctrl(channel, S3C2410_DMAOP_START);
@@ -531,7 +505,10 @@ static inline void s3c_dma_freebuf(struct s3c_dma_buf * buf)
 	buf->magic = -1;
 
 	if (magicok) {
-		kmem_cache_free(dma_mcode_kmem, buf->mcptr);
+		local_irq_enable();
+		dma_free_coherent(NULL, SIZE_OF_MICRO_CODES, buf->mcptr_cpu, buf->mcptr);
+		local_irq_disable();
+
 		kmem_cache_free(dma_kmem, buf);
 	} else {
 		printk("s3c_dma_freebuf: buff %p with bad magic\n", buf);
@@ -686,16 +663,16 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 					goto next_channel;
 
 				default:
-					printk(KERN_ERR "dma%d: unknown load_state in irq, %d\n",
+					printk(KERN_ERR "dma CH %d: unknown load_state in irq, %d\n",
 					       chan->number, chan->load_state);
 					goto next_channel;
 				}
 
 				local_irq_save(flags);
-				start_DMA_channel(dma_regaddr(chan->dma_con, S3C_DMAC_DBGSTATUS), chan->number,
-								virt_to_phys(chan->curr->mcptr),
-								PL330_NON_SECURE_DMA);
 				s3c_dma_loadbuffer(chan, chan->next);
+				start_DMA_channel(dma_regaddr(chan->dma_con, S3C_DMAC_DBGSTATUS), chan->number,
+								chan->curr->mcptr, PL330_NON_SECURE_DMA);
+
 				local_irq_restore(flags);
 
 			} else {
@@ -703,7 +680,7 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 
 				/* see if we can stop this channel.. */
 				if (chan->load_state == S3C_DMALOAD_NONE) {
-					pr_debug("# DMA CH %d(index:%d): end of transfer, stopping channel (%ld)\n",
+					pr_debug("# DMA CH %d - (index:%d): end of transfer, stopping channel (%ld)\n",
 						 chan->number, chan->index, jiffies);
 					s3c2410_dma_ctrl(chan->index | DMACH_LOW_LEVEL, S3C2410_DMAOP_STOP);
 				}
@@ -848,7 +825,6 @@ int s3c2410_dma_free(dmach_t channel, struct s3c2410_dma_client *client)
 	return 0;
 }
 EXPORT_SYMBOL(s3c2410_dma_free);
-
 
 
 static int s3c_dma_dostop(struct s3c2410_dma_chan *chan)
@@ -1244,11 +1220,6 @@ static void s3c_dma_cache_ctor(void *p)
 	memset(p, 0, sizeof(struct s3c_dma_buf));
 }
 
-static void s3c_dma_mcode_cache_ctor(void *p)
-{
-	memset(p, 0, SIZE_OF_MICRO_CODES);
-}
-
 
 /* initialisation code */
 
@@ -1282,18 +1253,6 @@ int __init s3c_dma_init(unsigned int channels, unsigned int irq,
 		goto err;
 	}
 
-	dma_mcode_kmem = kmem_cache_create("dma_mcode_desc",
-				     SIZE_OF_MICRO_CODES, 0,
-				     SLAB_HWCACHE_ALIGN,
-				     s3c_dma_mcode_cache_ctor);
-
-	if (dma_mcode_kmem == NULL) {
-		printk(KERN_ERR "DMA failed to make kmem cache for micro codes\n");
-		ret = -ENOMEM;
-		goto err;
-	}
-
-
 	for (controller = 0; controller < S3C_DMA_CONTROLLERS; controller++) {
 		dconp = &s3c_dma_cntlrs[controller];
 
@@ -1322,7 +1281,7 @@ int __init s3c_dma_init(unsigned int channels, unsigned int irq,
 
 		dconp->number = controller;
 		dconp->regs = dma_base;
-		sh_printk("PL330 DMA controller : %d irq %d regs_base %x\n", dconp->number, dconp->irq,
+		pr_debug("PL330 DMA controller : %d irq %d regs_base %x\n", dconp->number, dconp->irq,
 			  dconp->regs);
 	}
 
@@ -1354,7 +1313,7 @@ int __init s3c_dma_init(unsigned int channels, unsigned int irq,
 		cp->dev.id = channel;
 		//ret = sysdev_register(&cp->dev);
 
-		sh_printk("DMA channel %d at %p, irq %d\n", cp->number, cp->regs, cp->irq);
+		pr_debug("DMA channel %d at %p, irq %d\n", cp->number, cp->regs, cp->irq);
 	}
 
 	return 0;

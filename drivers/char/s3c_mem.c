@@ -261,8 +261,16 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 
 			/* Destination address : Data buffer address */
 			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000, 0x4000);
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x10000, 0x4000);
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x20000, 0x4000);
 			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
 
+			wait_for_completion(&s3c_m2m_dma_complete);
+			wait_for_completion(&s3c_m2m_dma_complete);
+			wait_for_completion(&s3c_m2m_dma_complete);
+
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x30000, 0x4000);
+			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
 			wait_for_completion(&s3c_m2m_dma_complete);
 
 			s3c2410_dma_free(DMACH_3D_M2M, &s3c_m2m_dma_client);

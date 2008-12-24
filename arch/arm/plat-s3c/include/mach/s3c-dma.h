@@ -159,7 +159,8 @@ struct s3c_dma_buf {
 	dma_addr_t		 data;		/* start of DMA data */
 	dma_addr_t		 ptr;		/* where the DMA got to [1] */
 	void			*id;		/* client's id */
-	dma_addr_t		*mcptr;		/* pointer to a set of micro codes */
+	dma_addr_t		mcptr;		/* physical pointer to a set of micro codes */
+	unsigned long 		*mcptr_cpu;	/* virtual pointer to a set of micro codes */
 };
 
 /* [1] is this updated for both recv/send modes? */
