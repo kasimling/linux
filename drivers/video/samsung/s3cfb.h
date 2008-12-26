@@ -91,8 +91,6 @@ extern int s3c6410_timer_setup (int channel, int usec, unsigned long g_tcnt, uns
  */
 #define S3C_FB_GET_BRIGHTNESS		_IOR ('F', 1,  unsigned int)
 #define S3C_FB_SET_BRIGHTNESS		_IOW ('F', 2,  unsigned int)
-#define S3C_FB_WIN_ON			_IOW ('F', 10, unsigned int)
-#define S3C_FB_WIN_OFF			_IOW ('F', 11, unsigned int)
 #define FBIO_WAITFORVSYNC		_IOW ('F', 32, unsigned int)
 
 #if defined(CONFIG_FB_S3C_VIRTUAL_SCREEN)
@@ -170,22 +168,21 @@ typedef struct {
 	int count;
 } s3c_vsync_info_t;
 
-typedef struct
-{
+typedef struct {
 	dma_addr_t map_dma_f1;
 	dma_addr_t map_dma_f2;
 } s3c_fb_dma_info_t;
 
 typedef struct {
-	__u32 phy_start_addr;
-	__u32 xres;		/* visible resolution*/
-	__u32 yres;
-	__u32 xres_virtual;	/* virtual resolution*/
-	__u32 yres_virtual;
-	__u32 xoffset;		/* offset from virtual to visible */
-	__u32 yoffset;		/* resolution	*/
-	__u32 lcd_offset_x;
-	__u32 lcd_offset_y;
+	unsigned int phy_start_addr;
+	unsigned int xres;		/* visible resolution*/
+	unsigned int yres;
+	unsigned int xres_virtual;	/* virtual resolution*/
+	unsigned int yres_virtual;
+	unsigned int xoffset;		/* offset from virtual to visible */
+	unsigned int yoffset;		/* resolution */
+	unsigned int lcd_offset_x;
+	unsigned int lcd_offset_y;
 } s3c_fb_next_info_t;
 
 typedef struct {
