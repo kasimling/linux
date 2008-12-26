@@ -155,7 +155,7 @@ static void s3cfb_change_buff(int req_win, int req_fb)
 	switch (req_win) {
 	case 0:
 		if (req_fb == 0)
-			s3c_fimd.wincon0 &= ~S3C_WINCONx_BUF_MASK;
+			s3c_fimd.wincon0 &= ~S3C_WINCONx_BUFSEL_MASK;
 		else
 			s3c_fimd.wincon0 |= S3C_WINCONx_BUFSEL_1;
 
@@ -164,7 +164,7 @@ static void s3cfb_change_buff(int req_win, int req_fb)
 
 	case 1:
 		if (req_fb == 0)
-			s3c_fimd.wincon1 &= ~S3C_WINCONx_BUF_MASK;
+			s3c_fimd.wincon1 &= ~S3C_WINCONx_BUFSEL_MASK;
 		else
 			s3c_fimd.wincon1 |= S3C_WINCONx_BUFSEL_1;
 
@@ -667,11 +667,11 @@ int s3cfb_set_alpha_mode(s3c_fb_info_t *fbi, int mode)
 	alpha_mode &= ~(S3C_WINCONx_BLD_PIX_PIXEL | S3C_WINCONx_ALPHA_SEL_1);
 
 	switch (mode) {
-	case 0: /* Plane Blending */
+	case S3C_FB_ALPHA_MODE_PLANE: /* Plane Blending */
 		writel(alpha_mode | S3C_WINCONx_BLD_PIX_PLANE | S3C_WINCONx_ALPHA_SEL_1, S3C_WINCON0 + (0x04 * win_num));
 		break;
 
-	case 1: /* Pixel Blending & chroma(color) key */
+	case S3C_FB_ALPHA_MODE_PIXEL: /* Pixel Blending & chroma(color) key */
 		writel(alpha_mode | S3C_WINCONx_BLD_PIX_PIXEL | S3C_WINCONx_ALPHA_SEL_0, S3C_WINCON0 + (0x04 * win_num));
 		break;
 	}
