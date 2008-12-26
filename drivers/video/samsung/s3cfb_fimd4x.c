@@ -668,11 +668,11 @@ int s3cfb_set_alpha_mode(s3c_fb_info_t *fbi, int mode)
 	alpha_mode &= ~(S3C_WINCONx_BLD_PIX_PIXEL | S3C_WINCONx_ALPHA_SEL_1);
 
 	switch (mode) {
-	case 0: /* Plane Blending */
+	case S3C_FB_ALPHA_MODE_PLANE: /* Plane Blending */
 		writel(alpha_mode | S3C_WINCONx_BLD_PIX_PLANE | S3C_WINCONx_ALPHA_SEL_1, S3C_WINCON0 + (0x04 * win_num));
 		break;
 
-	case 1: /* Pixel Blending & chroma(color) key */
+	case S3C_FB_ALPHA_MODE_PIXEL: /* Pixel Blending & chroma(color) key */
 		writel(alpha_mode | S3C_WINCONx_BLD_PIX_PIXEL | S3C_WINCONx_ALPHA_SEL_0, S3C_WINCON0 + (0x04 * win_num));
 		break;
 	}
@@ -858,7 +858,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_OSD_ALPHA_MODE:
-		alpha_mode = arg;
+		alpha_mode = (unsigned int) arg;
 		s3cfb_set_alpha_mode(fbi, alpha_mode);
 		break;
 

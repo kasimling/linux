@@ -76,6 +76,8 @@ extern int s3c6410_timer_setup (int channel, int usec, unsigned long g_tcnt, uns
 #define S3C_FB_VS_MOVE_RIGHT		16
 #define S3C_FB_VS_MOVE_UP		17
 #define S3C_FB_VS_MOVE_DOWN		18
+#define S3C_FB_ALPHA_MODE_PLANE		0
+#define S3C_FB_ALPHA_MODE_PIXEL		1
 
 /*
  *  macros
