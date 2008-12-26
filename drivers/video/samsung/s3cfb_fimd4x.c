@@ -836,7 +836,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_OSD_ALPHA0_SET:
-		alpha_level = arg;
+		alpha_level = (unsigned int) arg;
 
 		if (alpha_level > S3C_FB_MAX_ALPHA_LEVEL)
 			alpha_level = S3C_FB_MAX_ALPHA_LEVEL;
