@@ -109,8 +109,8 @@ extern int s3c6410_timer_setup (int channel, int usec, unsigned long g_tcnt, uns
 #define S3C_FB_OSD_MOVE_UP		_IO  ('F', 207)
 #define S3C_FB_OSD_MOVE_DOWN		_IO  ('F', 208)
 #define S3C_FB_OSD_SET_INFO		_IOW ('F', 209, s3c_win_info_t)
-#define S3C_FB_OSD_ALPHA_SET		_IOW ('F', 210, unsigned int)
-#define S3C_FB_OSD_ALPHA0_SET		_IOW ('F', 211, unsigned int)
+#define S3C_FB_OSD_ALPHA0_SET		_IOW ('F', 210, unsigned int)
+#define S3C_FB_OSD_ALPHA1_SET		_IOW ('F', 211, unsigned int)
 #define S3C_FB_OSD_ALPHA_MODE		_IOW ('F', 212, unsigned int)
 
 #define S3C_FB_COLOR_KEY_START		_IO  ('F', 300)
