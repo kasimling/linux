@@ -836,7 +836,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_OSD_ALPHA0_SET:
-		alpha_level = arg;
+		alpha_level = (unsigned int) arg;
 
 		if (alpha_level > S3C_FB_MAX_ALPHA_LEVEL)
 			alpha_level = S3C_FB_MAX_ALPHA_LEVEL;
@@ -847,8 +847,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_OSD_ALPHA1_SET:
-		if (copy_from_user(&alpha_level, (int *) arg, sizeof(int)))
-			return -EFAULT;
+		alpha_level = (unsigned int) arg;
 
 		if (alpha_level > S3C_FB_MAX_ALPHA_LEVEL)
 			alpha_level = S3C_FB_MAX_ALPHA_LEVEL;
@@ -859,7 +858,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_OSD_ALPHA_MODE:
-		alpha_mode = arg;
+		alpha_mode = (unsigned int) arg;
 		s3cfb_set_alpha_mode(fbi, alpha_mode);
 		break;
 
