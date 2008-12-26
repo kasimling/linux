@@ -846,7 +846,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		s3cfb_set_alpha_level(fbi, alpha_level, 0);
 		break;
 
-	case S3C_FB_OSD_ALPHA_SET:
+	case S3C_FB_OSD_ALPHA1_SET:
 		if (copy_from_user(&alpha_level, (int *) arg, sizeof(int)))
 			return -EFAULT;
 
