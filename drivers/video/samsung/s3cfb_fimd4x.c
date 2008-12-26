@@ -858,7 +858,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_OSD_ALPHA_MODE:
-		alpha_mode = arg;
+		alpha_mode = (unsigned int) arg;
 		s3cfb_set_alpha_mode(fbi, alpha_mode);
 		break;
 
