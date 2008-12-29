@@ -259,6 +259,7 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			s3c2410_dma_config(DMACH_3D_M2M, 8, 0);
 			//s3c2410_dma_setflags(DMACH_3D_M2M, S3C2410_DMAF_AUTOSTART);
 
+
 			/* Destination address : Data buffer address */
 			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000, 0x4000);
 			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x10000, 0x4000);
@@ -266,10 +267,16 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
 
 			wait_for_completion(&s3c_m2m_dma_complete);
-			wait_for_completion(&s3c_m2m_dma_complete);
-			wait_for_completion(&s3c_m2m_dma_complete);
+			//wait_for_completion(&s3c_m2m_dma_complete);
+			//wait_for_completion(&s3c_m2m_dma_complete);
 
 			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x30000, 0x4000);
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x40000, 0x4000);
+			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
+			wait_for_completion(&s3c_m2m_dma_complete);
+			//wait_for_completion(&s3c_m2m_dma_complete);
+
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x50000, 0x4000);
 			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
 			wait_for_completion(&s3c_m2m_dma_complete);
 
@@ -287,7 +294,7 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 
 int s3c_mem_mmap(struct file* filp, struct vm_area_struct *vma)
 {
-	unsigned long pageFrameNo, size, virt_addr, phys_addr;
+	unsigned long pageFrameNo=0, size, virt_addr, phys_addr;
 
 	size = vma->vm_end - vma->vm_start;
 

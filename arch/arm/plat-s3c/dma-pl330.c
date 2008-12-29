@@ -227,6 +227,8 @@ static inline int s3c_dma_loadbuffer(struct s3c2410_dma_chan *chan,
 {
 	unsigned long tmp;
 	pl330_DMA_parameters_t dma_param;
+	struct s3c_dma_buf *firstbuf;
+	int bwJump = 0;
 
 	pr_debug("s3c_chan_loadbuffer: loading buffer %p (0x%08lx,0x%06x)\n",
 		 buf, (unsigned long) buf->data, buf->size);
@@ -239,46 +241,62 @@ static inline int s3c_dma_loadbuffer(struct s3c2410_dma_chan *chan,
 	pr_debug("%s: DMA CCR - %08x\n", __FUNCTION__, chan->dcon);
 	pr_debug("%s: DMA Loop count - %08x\n", __FUNCTION__, (buf->size / chan->xfer_unit));
 
-	dma_param.mPeriNum = chan->config_flags;
-	dma_param.mDirection = chan->source;
+	firstbuf = buf;
 
-	switch (dma_param.mDirection) {
-	case S3C2410_DMASRC_MEM:	/* source is Memory : Mem-to-Peri (Write into FIFO) */
-		dma_param.mSrcAddr = buf->data;
-		dma_param.mDstAddr = chan->dev_addr;
-		break;
+	do {
+		dma_param.mPeriNum = chan->config_flags;
+		dma_param.mDirection = chan->source;
 
-	case S3C2410_DMASRC_HW:		/* source is peripheral : Peri-to-Mem (Read from FIFO) */
-		dma_param.mSrcAddr = chan->dev_addr;
-		dma_param.mDstAddr = buf->data;
-		break;
+		switch (dma_param.mDirection) {
+		case S3C2410_DMASRC_MEM:	/* source is Memory : Mem-to-Peri (Write into FIFO) */
+			dma_param.mSrcAddr = buf->data;
+			dma_param.mDstAddr = chan->dev_addr;
+			break;
 
-	case S3C_DMA_MEM2MEM:		/* source & Destination : Mem-to-Mem  */
-		dma_param.mSrcAddr = chan->dev_addr;
-		dma_param.mDstAddr = buf->data;
-		break;
+		case S3C2410_DMASRC_HW:		/* source is peripheral : Peri-to-Mem (Read from FIFO) */
+			dma_param.mSrcAddr = chan->dev_addr;
+			dma_param.mDstAddr = buf->data;
+			break;
 
-	case S3C_DMA_PER2PER:
-	default:
-		printk("Peripheral-to-Peripheral DMA NOT YET implemented !! \n");
-		return -EINVAL;
-	}
+		case S3C_DMA_MEM2MEM:		/* source & Destination : Mem-to-Mem  */
+			dma_param.mSrcAddr = chan->dev_addr;
+			dma_param.mDstAddr = buf->data;
+			break;
 
-	dma_param.mTrSize = buf->size;
-	dma_param.mIrqEnable = 1;
+		case S3C_DMA_PER2PER:
+		default:
+			printk("Peripheral-to-Peripheral DMA NOT YET implemented !! \n");
+			return -EINVAL;
+		}
+
+		dma_param.mTrSize = buf->size;
+
+		dma_param.mLoop = 0;
+		dma_param.mControl = *(pl330_DMA_control_t *) &chan->dcon;
+
+		chan->next = buf->next;
+		buf = chan->next;
+
+		if(buf==NULL) {
+			firstbuf->next = NULL;
+			dma_param.mLastReq = 1;
+			dma_param.mIrqEnable = 1;
+		}
+		else {
+			dma_param.mLastReq = 0;
+			dma_param.mIrqEnable = 0;
+		}
+
+		bwJump += setup_DMA_channel(((u8 *)firstbuf->mcptr_cpu)+bwJump, dma_param, chan->number);
+		pr_debug("%s: DMA bwJump - %d\n", __FUNCTION__, bwJump);
+
+	}while(buf != NULL);
 
 	if(dma_param.mIrqEnable) {
 		tmp = dma_rdreg(chan->dma_con, S3C_DMAC_INTEN);
 		tmp |= (1 << chan->number);
 		dma_wrreg(chan->dma_con, S3C_DMAC_INTEN, tmp);
 	}
-
-	dma_param.mLoop = 0;
-	dma_param.mLastReq = 1;
-	dma_param.mControl = *(pl330_DMA_control_t *) &chan->dcon;
-	dma_param.mBwJump = setup_DMA_channel((u8 *)buf->mcptr_cpu, dma_param, chan->number);
-
-	chan->next = buf->next;
 
 	/* update the state of the channel */
 
@@ -526,7 +544,7 @@ static inline void s3c_dma_lastxfer(struct s3c2410_dma_chan *chan)
 
 	switch (chan->load_state) {
 	case S3C_DMALOAD_NONE:
-		pr_debug("DMA CH %d: s3c_dma_lastxfer: load_state : S3C2410_DMALOAD_NONE%d\n", chan->number);
+		pr_debug("DMA CH %d: s3c_dma_lastxfer: load_state : S3C2410_DMALOAD_NONE %d\n", chan->number);
 		break;
 
 	case S3C_DMALOAD_1LOADED:
@@ -569,7 +587,7 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 
 			channel = i;
 			chan = &s3c_dma_chans[channel + dcon_num * S3C_CHANNELS_PER_DMA];
-			pr_debug("# DMA CH : %d, index : %d\n", chan->number, chan->index);
+			pr_debug("# DMA CH:%d, index:%d load_state:%d\n", chan->number, chan->index, chan->load_state);
 
 			buf = chan->curr;
 
@@ -634,10 +652,13 @@ static irqreturn_t s3c_dma_irq(int irq, void *devpw)
 				/* free resouces */
 				s3c_dma_freebuf(buf);
 			} else {
-
 			}
 
-			if (chan->next != NULL) {
+			/* only reload if the channel is still running... our buffer done
+	 		* routine may have altered the state by requesting the dma channel
+			* to stop or shutdown... */
+
+			if (chan->next != NULL && chan->state != S3C_DMA_IDLE) {
 				unsigned long flags;
 
 				switch (chan->load_state) {
@@ -1311,7 +1332,6 @@ int __init s3c_dma_init(unsigned int channels, unsigned int irq,
 		/* register system device */
 		cp->dev.cls = &dma_sysclass;
 		cp->dev.id = channel;
-		//ret = sysdev_register(&cp->dev);
 
 		pr_debug("DMA channel %d at %p, irq %d\n", cp->number, cp->regs, cp->irq);
 	}
