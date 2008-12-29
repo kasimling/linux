@@ -347,3 +347,10 @@ v2.6.28-rc8-s5pc1xx-r0d5: Abhilash Kesavan
 	M       drivers/usb/gadget/s3c_udc_otg.c
 	M       drivers/usb/host/ohci-hcd.c
 	M       drivers/usb/host/ohci-s3c2410.c
+
+v2.6.28-rc8-s5pc1xx-r0d6: Ilho Lee
+	- Touchscreen D/D got enabled and PL330 S&G DMA operations supported.
+
+	Modified Files:
+		M arch/arm/mach-s5pc100/mach-smdkc100.c
+		M arch/arm/plat-s3c/dma-pl330.c
