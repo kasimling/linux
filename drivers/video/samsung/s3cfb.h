@@ -64,8 +64,8 @@ extern int s3c6410_timer_setup (int channel, int usec, unsigned long g_tcnt, uns
 #endif
 
 #define S3CFB_PALETTE_BUFF_CLEAR	(0x80000000)	/* entry is clear/invalid */
-#define S3CFB_COLOR_KEY_DIR_BG 	0
-#define S3CFB_COLOR_KEY_DIR_FG 	1
+#define S3CFB_COLOR_KEY_DIR_BG 		0
+#define S3CFB_COLOR_KEY_DIR_FG 		1
 #define S3CFB_DEFAULT_BACKLIGHT_LEVEL	2
 #define S3CFB_MAX_DISPLAY_OFFSET	200
 #define S3CFB_DEFAULT_DISPLAY_OFFSET	100
