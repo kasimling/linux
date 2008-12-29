@@ -44,7 +44,7 @@
 
 #include "s3cfb.h"
 
-int s3c_vs_offset = S3C_FB_DEFAULT_DISPLAY_OFFSET;
+int s3cfb_vs_offset = S3C_FB_DEFAULT_DISPLAY_OFFSET;
 int s3c_osd_alpha_level = S3C_FB_MAX_ALPHA_LEVEL;
 int s3c_display_brightness = S3C_FB_DEFAULT_BRIGHTNESS;
 static int s3c_palette_win;
@@ -195,10 +195,10 @@ static int s3cfb_set_vs_registers(int vs_cmd)
 		break;
 
 	case S3C_FB_VS_MOVE_LEFT:
-		if (s3c_fimd.xoffset < s3c_vs_offset)
+		if (s3c_fimd.xoffset < s3cfb_vs_offset)
 			shift_value = s3c_fimd.xoffset;
 		else
-			shift_value = s3c_vs_offset;
+			shift_value = s3cfb_vs_offset;
 
 		s3c_fimd.xoffset -= shift_value;
 
@@ -208,10 +208,10 @@ static int s3cfb_set_vs_registers(int vs_cmd)
 		break;
 
 	case S3C_FB_VS_MOVE_RIGHT:
-		if ((s3c_vs_info.v_width - (s3c_fimd.xoffset + s3c_vs_info.width)) < (s3c_vs_offset))
-			shift_value = s3c_vs_info.v_width - (s3c_fimd.xoffset + s3c_vs_info.width);
+		if ((s3cfb_vs_info.v_width - (s3c_fimd.xoffset + s3cfb_vs_info.width)) < (s3cfb_vs_offset))
+			shift_value = s3cfb_vs_info.v_width - (s3c_fimd.xoffset + s3cfb_vs_info.width);
 		else
-			shift_value = s3c_vs_offset;
+			shift_value = s3cfb_vs_offset;
 
 		s3c_fimd.xoffset += shift_value;
 
@@ -221,10 +221,10 @@ static int s3cfb_set_vs_registers(int vs_cmd)
 		break;
 
 	case S3C_FB_VS_MOVE_UP:
-		if (s3c_fimd.yoffset < s3c_vs_offset)
+		if (s3c_fimd.yoffset < s3cfb_vs_offset)
 			shift_value = s3c_fimd.yoffset;
 		else
-			shift_value = s3c_vs_offset;
+			shift_value = s3cfb_vs_offset;
 
 		s3c_fimd.yoffset -= shift_value;
 
@@ -234,10 +234,10 @@ static int s3cfb_set_vs_registers(int vs_cmd)
 		break;
 
 	case S3C_FB_VS_MOVE_DOWN:
-		if ((s3c_vs_info.v_height - (s3c_fimd.yoffset + s3c_vs_info.height)) < (s3c_vs_offset))
-			shift_value = s3c_vs_info.v_height - (s3c_fimd.yoffset + s3c_vs_info.height);
+		if ((s3cfb_vs_info.v_height - (s3c_fimd.yoffset + s3cfb_vs_info.height)) < (s3cfb_vs_offset))
+			shift_value = s3cfb_vs_info.v_height - (s3c_fimd.yoffset + s3cfb_vs_info.height);
 		else
-			shift_value = s3c_vs_offset;
+			shift_value = s3cfb_vs_offset;
 
 		s3c_fimd.yoffset += shift_value;
 
@@ -374,8 +374,8 @@ irqreturn_t s3cfb_irq(int irqno, void *param)
 	/* for clearing the interrupt source */
 	writel(readl(S3C_VIDINTCON1), S3C_VIDINTCON1);
 
-	s3c_vsync_info.count++;
-	wake_up_interruptible(&s3c_vsync_info.wait_queue);
+	s3cfb_vsync_info.count++;
+	wake_up_interruptible(&s3cfb_vsync_info.wait_queue);
 
 	return IRQ_HANDLED;
 }
@@ -772,11 +772,11 @@ EXPORT_SYMBOL(s3cfb_enable_rgbport);
 int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 {
 	s3c_fb_info_t *fbi = container_of(info, s3c_fb_info_t, fb);
-	s3c_win_info_t win_info;
-	s3c_color_key_info_t colkey_info;
-	s3c_color_val_info_t colval_info;
-	s3c_fb_dma_info_t dma_info;
-	s3c_fb_next_info_t next_fb_info;
+	s3cfb_win_info_t win_info;
+	s3cfb_color_val_info_t colkey_info;
+	s3cfb_color_val_info_t colval_info;
+	s3cfb_dma_info_t dma_info;
+	s3cfb_next_info_t next_fb_info;
 	struct fb_var_screeninfo *var= &fbi->fb.var;
 	unsigned int crt, alpha_level, alpha_mode;
 
@@ -790,7 +790,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 #endif
 
 #if defined(CONFIG_FB_S3C_VIRTUAL_SCREEN)
-	s3c_vs_info_t vs_info;
+	s3cfb_vs_info_t vs_info;
 #endif
 
 	switch(cmd){
@@ -798,12 +798,12 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		dma_info.map_dma_f1 = fbi->map_dma_f1;
 		dma_info.map_dma_f2 = fbi->map_dma_f2;
 
-		if(copy_to_user((void *) arg, (const void *) &dma_info, sizeof(s3c_fb_dma_info_t)))
+		if(copy_to_user((void *) arg, (const void *) &dma_info, sizeof(s3cfb_dma_info_t)))
 			return -EFAULT;
 		break;
 
 	case S3C_FB_OSD_SET_INFO:
-		if (copy_from_user(&win_info, (s3c_win_info_t *) arg, sizeof(s3c_win_info_t)))
+		if (copy_from_user(&win_info, (s3cfb_win_info_t *) arg, sizeof(s3cfb_win_info_t)))
 			return -EFAULT;
 
 		s3cfb_init_win(fbi, win_info.bpp, win_info.left_x, win_info.top_y, win_info.width, win_info.height, OFF);
@@ -913,14 +913,14 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_COLOR_KEY_SET_INFO:
-		if (copy_from_user(&colkey_info, (s3c_color_key_info_t *) arg, sizeof(s3c_color_key_info_t)))
+		if (copy_from_user(&colkey_info, (s3cfb_color_val_info_t *) arg, sizeof(s3cfb_color_val_info_t)))
 			return -EFAULT;
 
 		s3cfb_set_color_key_registers(fbi, colkey_info);
 		break;
 
 	case S3C_FB_COLOR_KEY_VALUE:
-		if (copy_from_user(&colval_info, (s3c_color_val_info_t *) arg, sizeof(s3c_color_val_info_t)))
+		if (copy_from_user(&colval_info, (s3cfb_color_val_info_t *) arg, sizeof(s3cfb_color_val_info_t)))
 			return -EFAULT;
 
 		s3cfb_set_color_value(fbi, colval_info);
@@ -939,7 +939,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_SET_NEXT_FB_INFO:
-		if (copy_from_user(&next_fb_info, (s3c_fb_next_info_t *) arg, sizeof(s3c_fb_next_info_t)))
+		if (copy_from_user(&next_fb_info, (s3cfb_next_info_t *) arg, sizeof(s3cfb_next_info_t)))
 			return -EFAULT;
 
 		/* check arguments */
@@ -964,7 +964,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		next_fb_info.lcd_offset_x = fbi->lcd_offset_x;
 		next_fb_info.lcd_offset_y = fbi->lcd_offset_y;
 
-		if (copy_to_user((void *)arg, (s3c_fb_next_info_t *) &next_fb_info, sizeof(s3c_fb_next_info_t)))
+		if (copy_to_user((void *)arg, (s3cfb_next_info_t *) &next_fb_info, sizeof(s3cfb_next_info_t)))
 			return -EFAULT;
 		break;
 
@@ -1004,7 +1004,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 	case S3C_FB_VS_SET_INFO:
-		if (copy_from_user(&vs_info, (s3c_vs_info_t *) arg, sizeof(s3c_vs_info_t)))
+		if (copy_from_user(&vs_info, (s3cfb_vs_info_t *) arg, sizeof(s3cfb_vs_info_t)))
 			return -EFAULT;
 
 		if (s3cfb_set_vs_info(vs_info)) {
