@@ -15,12 +15,7 @@
 #ifndef __PLAT_REGS_SYS_H
 #define __PLAT_REGS_SYS_H __FILE__
 
-#if defined (CONFIG_PLAT_S5PC1XX)
 #define S3C_SYSREG(x)		(S3C_VA_SYS + (x))
-#define S3C_OTHERS              S3C_SYSREG(0x8200)
-
-#define S3C_OTHERS_USB_SIG_MASK (1 << 16)
-#endif
 
 #define S3C64XX_OTHERS		S3C_SYSREG(0x900)
 

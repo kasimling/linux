@@ -58,7 +58,6 @@ struct s3c_sdhci_platdata {
 extern void s3c_sdhci0_set_platdata(struct s3c_sdhci_platdata *pd);
 extern void s3c_sdhci1_set_platdata(struct s3c_sdhci_platdata *pd);
 
-
 /* Default platform data, exported so that per-cpu initialisation can
  * set the correct one when there are more than one cpu type selected.
 */
@@ -68,7 +67,7 @@ extern struct s3c_sdhci_platdata s3c_hsmmc1_def_platdata;
 
 /* Helper function availablity */
 
-#if defined (CONFIG_S3C6410_SETUP_SDHCI) || defined (CONFIG_S5PC1XX_SETUP_SDHCI)
+#ifdef CONFIG_S3C6410_SETUP_SDHCI
 extern char *s3c6410_hsmmc_clksrcs[4];
 
 extern void s3c6410_setup_sdhci0_cfg_gpio(struct platform_device *, int w);
@@ -99,7 +98,7 @@ static inline void s3c6410_default_sdhci1(void)
 }
 #else
 static inline void s3c6410_default_sdhci1(void) { }
-#endif /* CONFIG_S3C_DEV_HSMMC1*/
+#endif /* CONFIG_S3C_DEV_HSMMC1 */
 
 #else
 static inline void s3c6410_default_sdhci0(void) { }

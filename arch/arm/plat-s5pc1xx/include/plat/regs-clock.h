@@ -56,9 +56,6 @@
 #define S5P_SCLKGATE0		S5P_CLKREG(0x560)
 #define S5P_SCLKGATE1		S5P_CLKREG(0x564)
 
-#define S5P_EPLL_EN     (1<<31)
-#define S5P_EPLL_MASK   0xffffffff 
-#define S5P_EPLLVAL(_m,_p,_s)   ((_m) << 16 | ((_p) << 8) | ((_s)))
 
 /* CLKSRC0 */
 #define S5P_CLKSRC0_APLL_MASK		(0x1<<0)
