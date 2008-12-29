@@ -15,6 +15,10 @@ obj-				:=
 obj-$(CONFIG_CPU_S5PC100)	+= cpu.o
 obj-$(CONFIG_CPU_S5PC100)	+= dma.o
 
+# Helper and device support
+
+obj-$(CONFIG_S5PC1XX_SETUP_SDHCI)       += setup-sdhci.o
+
 # machine support
 
 obj-$(CONFIG_MACH_SMDKC100)	+= mach-smdkc100.o

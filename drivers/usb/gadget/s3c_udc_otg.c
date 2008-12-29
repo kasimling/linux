@@ -159,7 +159,11 @@ static void udc_set_address(struct s3c_udc *dev, unsigned char address);
 static void reconfig_usbd(void);
 
 /* extern declarations in arch/arm/mach-s3c64xx*/
+#if defined (CONFIG_CPU_S5PC100)
+#define OTGD_PHY_CLK_VALUE	(0x22)	/* 12 MHz UTMI Interface, Oscillator */
+#else
 #define OTGD_PHY_CLK_VALUE	(0x20)	/* UTMI Interface, Oscillator */
+#endif
 extern void otg_phy_init(u32 otg_phy_clk);
 extern void otg_phy_off(void);
 

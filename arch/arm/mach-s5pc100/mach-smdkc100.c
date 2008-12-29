@@ -21,6 +21,7 @@
 #include <linux/platform_device.h>
 #include <linux/io.h>
 #include <linux/i2c.h>
+#include <linux/delay.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
 
@@ -48,6 +49,12 @@
 #include <plat/adc.h>
 #include <plat/regs-gpio.h>
 #include <plat/gpio-bank-k0.h>
+#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
+#include <plat/regs-otg.h>
+#include <plat/regs-sys.h>
+#include <plat/regs-clock.h>
+#include <plat/pll.h>
+#endif
 
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
@@ -81,6 +88,10 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_smc911x,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
+        &s3c_device_usb,
+	&s3c_device_usbgadget,
+        &s3c_device_hsmmc0,
+        &s3c_device_hsmmc1,
 };
 
 
@@ -152,3 +163,55 @@ MACHINE_START(SMDKC100, "SMDKC100")
 	.init_machine	= smdkc100_machine_init,
 	.timer		= &s5pc1xx_timer,
 MACHINE_END
+
+#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
+/* Initializes OTG Phy. */
+void otg_phy_init(u32 otg_phy_clk) {
+        writel(readl(S3C_OTHERS)|S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
+        writel(0x0, S3C_USBOTG_PHYPWR);         /* Power up */
+        writel(otg_phy_clk, S3C_USBOTG_PHYCLK);
+        writel(0x7, S3C_USBOTG_RSTCON);
+
+        udelay(50);
+        writel(0x0, S3C_USBOTG_RSTCON);
+        udelay(50);
+}
+#endif
+
+
+#if defined (CONFIG_USB_GADGET_S3C_OTGD)
+/* OTG PHY Power Off */
+void otg_phy_off(void) {
+        writel(readl(S3C_USBOTG_PHYCLK) | (0X1 << 4) , S3C_USBOTG_PHYCLK);
+        writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
+}
+#endif
+
+#if defined (CONFIG_USB_OHCI_HCD)
+void usb_host_clk_en(int usb_host_clksrc) {
+        switch (usb_host_clksrc) {
+        case 0: /* epll clk */
+                /* Setting the epll clk to 48 MHz, P=3, M=96, S=3 */
+                writel(readl(S5P_EPLL_CON) & ~(S5P_EPLL_MASK) | (S5P_EPLL_EN | 
+		S5P_EPLLVAL(96,3,3)), S5P_EPLL_CON);
+                writel((readl(S5P_CLK_SRC0) | S5P_CLKSRC0_EPLL_MASK) ,S5P_CLK_SRC0);
+                writel((readl(S5P_CLK_SRC1)& ~S5P_CLKSRC1_UHOST_MASK) ,S5P_CLK_SRC1);
+
+                /* USB host clock divider ratio is 1 */
+                writel((readl(S5P_CLK_DIV2)& ~S5P_CLKDIV2_UHOST_MASK), S5P_CLK_DIV2);
+                break;
+
+	/* Add other clock sources here */
+
+        default:
+                printk(KERN_INFO "Unknown USB Host Clock Source\n");
+                BUG();
+                break;
+        }
+
+        writel(readl(S5P_CLKGATE_D10)|S5P_CLKGATE_D10_USBHOST,
+                S5P_CLKGATE_D10);
+        writel(readl(S5P_SCLKGATE0)|S5P_CLKGATE_SCLK0_USBHOST, S5P_SCLKGATE0);
+
+}
+#endif
