@@ -42,43 +42,33 @@
 /*
  *  Globals
  */
-s3c_fb_info_t s3c_fb_info[S3C_FB_NUM];
-s3c_vsync_info_t s3c_vsync_info;
-
-#if defined(CONFIG_FB_S3C_VIRTUAL_SCREEN)
-s3c_vs_info_t s3c_vs_info;
-#endif
-
-static int backlight_level = S3C_FB_DEFAULT_BACKLIGHT_LEVEL;
-static int backlight_power = 1;
-static int lcd_power = 1;
-static int s3c_palette_win;
+s3cfb_info_t s3cfb_info[S3CFB_NUM];
 
 static void s3cfb_set_lcd_power(int to)
 {
-	lcd_power = to;
+	s3cfb_fimd.lcd_power = to;
 
-	if (s3c_fimd.set_lcd_power)
-		(s3c_fimd.set_lcd_power)(to);
+	if (s3cfb_fimd.set_lcd_power)
+		(s3cfb_fimd.set_lcd_power)(to);
 }
 
 static void s3cfb_set_backlight_power(int to)
 {
-	backlight_power = to;
+	s3cfb_fimd.backlight_power = to;
 
-	if (s3c_fimd.set_backlight_power)
-		(s3c_fimd.set_backlight_power)(to);
+	if (s3cfb_fimd.set_backlight_power)
+		(s3cfb_fimd.set_backlight_power)(to);
 }
 
 static void s3cfb_set_backlight_level(int to)
 {
-	backlight_level = to;
+	s3cfb_fimd.backlight_level = to;
 
-	if (s3c_fimd.set_brightness)
-		(s3c_fimd.set_brightness)(to);
+	if (s3cfb_fimd.set_brightness)
+		(s3cfb_fimd.set_brightness)(to);
 }
 
-static int __init s3cfb_map_video_memory(s3c_fb_info_t *fbi)
+static int __init s3cfb_map_video_memory(s3cfb_info_t *fbi)
 {
 	DPRINTK("map_video_memory(fbi=%p)\n", fbi);
 
@@ -120,13 +110,13 @@ static int __init s3cfb_map_video_memory(s3c_fb_info_t *fbi)
 	}
 #endif
 
-	if (s3c_fimd.map_video_memory)
-		(s3c_fimd.map_video_memory)(fbi);
+	if (s3cfb_fimd.map_video_memory)
+		(s3cfb_fimd.map_video_memory)(fbi);
 
 	return 0;
 }
 
-static void s3cfb_unmap_video_memory(s3c_fb_info_t *fbi)
+static void s3cfb_unmap_video_memory(s3cfb_info_t *fbi)
 {
 	dma_free_writecombine(fbi->dev, fbi->map_size_f1, fbi->map_cpu_f1,  fbi->map_dma_f1);
 
@@ -134,8 +124,8 @@ static void s3cfb_unmap_video_memory(s3c_fb_info_t *fbi)
 	dma_free_writecombine(fbi->dev, fbi->map_size_f2, fbi->map_cpu_f2,  fbi->map_dma_f2);
 #endif
 
-	if (s3c_fimd.unmap_video_memory)
-		(s3c_fimd.unmap_video_memory)(fbi);
+	if (s3cfb_fimd.unmap_video_memory)
+		(s3cfb_fimd.unmap_video_memory)(fbi);
 }
 
 /*
@@ -150,35 +140,35 @@ static int s3cfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 
 	switch (var->bits_per_pixel) {
 		case 8:
-			var->red = s3c_fb_rgb_8.red;
-			var->green = s3c_fb_rgb_8.green;
-			var->blue = s3c_fb_rgb_8.blue;
-			var->transp = s3c_fb_rgb_8.transp;
-			s3c_fimd.bytes_per_pixel = 1;
+			var->red = s3cfb_rgb_8.red;
+			var->green = s3cfb_rgb_8.green;
+			var->blue = s3cfb_rgb_8.blue;
+			var->transp = s3cfb_rgb_8.transp;
+			s3cfb_fimd.bytes_per_pixel = 1;
 			break;
 
 		case 16:
-			var->red = s3c_fb_rgb_16.red;
-			var->green = s3c_fb_rgb_16.green;
-			var->blue = s3c_fb_rgb_16.blue;
-			var->transp = s3c_fb_rgb_16.transp;
-			s3c_fimd.bytes_per_pixel = 2;
+			var->red = s3cfb_rgb_16.red;
+			var->green = s3cfb_rgb_16.green;
+			var->blue = s3cfb_rgb_16.blue;
+			var->transp = s3cfb_rgb_16.transp;
+			s3cfb_fimd.bytes_per_pixel = 2;
 			break;
 
 		case 24:
-			var->red = s3c_fb_rgb_24.red;
-			var->green = s3c_fb_rgb_24.green;
-			var->blue = s3c_fb_rgb_24.blue;
-			var->transp = s3c_fb_rgb_24.transp;
-			s3c_fimd.bytes_per_pixel = 4;
+			var->red = s3cfb_rgb_24.red;
+			var->green = s3cfb_rgb_24.green;
+			var->blue = s3cfb_rgb_24.blue;
+			var->transp = s3cfb_rgb_24.transp;
+			s3cfb_fimd.bytes_per_pixel = 4;
 			break;
 
 		case 32:
-			var->red = s3c_fb_rgb_32.red;
-			var->green = s3c_fb_rgb_32.green;
-			var->blue = s3c_fb_rgb_32.blue;
-			var->transp = s3c_fb_rgb_32.transp;
-			s3c_fimd.bytes_per_pixel = 4;
+			var->red = s3cfb_rgb_32.red;
+			var->green = s3cfb_rgb_32.green;
+			var->blue = s3cfb_rgb_32.blue;
+			var->transp = s3cfb_rgb_32.transp;
+			s3cfb_fimd.bytes_per_pixel = 4;
 			break;
 	}
 
@@ -193,14 +183,14 @@ static int s3cfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 static int s3cfb_set_par(struct fb_info *info)
 {
 	struct fb_var_screeninfo *var = &info->var;
-	s3c_fb_info_t *fbi = (s3c_fb_info_t *) info;
+	s3cfb_info_t *fbi = (s3cfb_info_t *) info;
 
         if (var->bits_per_pixel == 16 || var->bits_per_pixel == 24)
 		fbi->fb.fix.visual = FB_VISUAL_TRUECOLOR;
 	else
 		fbi->fb.fix.visual = FB_VISUAL_PSEUDOCOLOR;
 
-	fbi->fb.fix.line_length = var->width * s3c_fimd.bytes_per_pixel;
+	fbi->fb.fix.line_length = var->width * s3cfb_fimd.bytes_per_pixel;
 
 	/* activate this new configuration */
 	s3cfb_activate_var(fbi, var);
@@ -221,7 +211,7 @@ static int s3cfb_set_par(struct fb_info *info)
  */
 static int s3cfb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
 {
-	s3c_fb_info_t *fbi = (s3c_fb_info_t *)info;
+	s3cfb_info_t *fbi = (s3cfb_info_t *)info;
 
 	DPRINTK("s3c_fb_pan_display(var=%p, info=%p)\n", var, info);
 
@@ -284,10 +274,10 @@ static int s3cfb_blank(int blank_mode, struct fb_info *info)
 }
 
 #if defined(CONFIG_FB_S3C_VIRTUAL_SCREEN)
-int s3cfb_set_vs_info(s3c_vs_info_t vs_info)
+int s3cfb_set_vs_info(s3cfb_vs_info_t vs_info)
 {
 	/* check invalid value */
-	if (vs_info.width != s3c_fimd.width || vs_info.height != s3c_fimd.height)
+	if (vs_info.width != s3cfb_fimd.width || vs_info.height != s3cfb_fimd.height)
 		return 1;
 
 	if (!(vs_info.bpp == 8 || vs_info.bpp == 16 || vs_info.bpp == 24 || vs_info.bpp == 32))
@@ -296,25 +286,25 @@ int s3cfb_set_vs_info(s3c_vs_info_t vs_info)
 	if (vs_info.offset < 0)
 		return 1;
 
-	if (vs_info.v_width != s3c_fimd.xres_virtual || vs_info.v_height != s3c_fimd.yres_virtual)
+	if (vs_info.v_width != s3cfb_fimd.xres_virtual || vs_info.v_height != s3cfb_fimd.yres_virtual)
 		return 1;
 
 	/* save virtual screen information */
-	s3c_vs_info = vs_info;
+	s3cfb_fimd.vs_info = vs_info;
 
-	if (s3c_vs_info.offset < 1)
-		s3c_vs_info.offset = 1;
+	if (s3cfb_fimd.vs_info.offset < 1)
+		s3cfb_fimd.vs_info.offset = 1;
 
-	if (s3c_vs_info.offset > S3C_FB_MAX_DISPLAY_OFFSET)
-		s3c_vs_info.offset = S3C_FB_MAX_DISPLAY_OFFSET;
+	if (s3cfb_fimd.vs_info.offset > S3CFB_MAX_DISPLAY_OFFSET)
+		s3cfb_fimd.vs_info.offset = S3CFB_MAX_DISPLAY_OFFSET;
 
-	s3c_vs_offset = s3c_vs_info.offset;
+	s3cfb_fimd.vs_offset = s3cfb_fimd.vs_info.offset;
 
 	return 0;
 }
 #endif
 
-int s3cfb_onoff_win(s3c_fb_info_t *fbi, int onoff)
+int s3cfb_onoff_win(s3cfb_info_t *fbi, int onoff)
 {
 	int win_num =  fbi->win_id;
 
@@ -326,7 +316,7 @@ int s3cfb_onoff_win(s3c_fb_info_t *fbi, int onoff)
 	return 0;
 }
 
-int s3cfb_onoff_color_key_alpha(s3c_fb_info_t *fbi, int onoff)
+int s3cfb_onoff_color_key_alpha(s3cfb_info_t *fbi, int onoff)
 {
 	int win_num =  fbi->win_id - 1;
 
@@ -338,7 +328,7 @@ int s3cfb_onoff_color_key_alpha(s3c_fb_info_t *fbi, int onoff)
 	return 0;
 }
 
-int s3cfb_onoff_color_key(s3c_fb_info_t *fbi, int onoff)
+int s3cfb_onoff_color_key(s3cfb_info_t *fbi, int onoff)
 {
 	int win_num =  fbi->win_id - 1;
 
@@ -350,7 +340,7 @@ int s3cfb_onoff_color_key(s3c_fb_info_t *fbi, int onoff)
 	return 0;
 }
 
-int s3cfb_set_color_key_registers(s3c_fb_info_t *fbi, s3c_color_key_info_t colkey_info)
+int s3cfb_set_color_key_registers(s3cfb_info_t *fbi, s3cfb_color_key_info_t colkey_info)
 {
 	unsigned int compkey = 0;
 	int win_num =  fbi->win_id;
@@ -362,12 +352,12 @@ int s3cfb_set_color_key_registers(s3c_fb_info_t *fbi, s3c_color_key_info_t colke
 
 	win_num--;
 
-	if (fbi->fb.var.bits_per_pixel == S3C_FB_PIXEL_BPP_16) {
+	if (fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_16) {
 		/* RGB 5-6-5 mode */
 		compkey  = (((colkey_info.compkey_red & 0x1f) << 19) | 0x70000);
 		compkey |= (((colkey_info.compkey_green & 0x3f) << 10) | 0x300);
 		compkey |= (((colkey_info.compkey_blue  & 0x1f)  << 3 )| 0x7);
-	} else if (fbi->fb.var.bits_per_pixel == S3C_FB_PIXEL_BPP_24) {
+	} else if (fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_24) {
 		/* currently RGB 8-8-8 mode  */
 		compkey  = ((colkey_info.compkey_red & 0xff) << 16);
 		compkey |= ((colkey_info.compkey_green & 0xff) << 8);
@@ -375,10 +365,10 @@ int s3cfb_set_color_key_registers(s3c_fb_info_t *fbi, s3c_color_key_info_t colke
 	} else
 		printk("Invalid BPP has been given!\n");
 
-	if (colkey_info.direction == S3C_FB_COLOR_KEY_DIR_BG)
+	if (colkey_info.direction == S3CFB_COLOR_KEY_DIR_BG)
 		writel(S3C_WxKEYCON0_COMPKEY(compkey) | S3C_WxKEYCON0_DIRCON_MATCH_FG_IMAGE, S3C_W1KEYCON0 + (0x08 * win_num));
 
-	else if (colkey_info.direction == S3C_FB_COLOR_KEY_DIR_FG)
+	else if (colkey_info.direction == S3CFB_COLOR_KEY_DIR_FG)
 		writel(S3C_WxKEYCON0_COMPKEY(compkey) | S3C_WxKEYCON0_DIRCON_MATCH_BG_IMAGE, S3C_W1KEYCON0 + (0x08 * win_num));
 
 	else
@@ -387,7 +377,7 @@ int s3cfb_set_color_key_registers(s3c_fb_info_t *fbi, s3c_color_key_info_t colke
 	return 0;
 }
 
-int s3cfb_set_color_value(s3c_fb_info_t *fbi, s3c_color_val_info_t colval_info)
+int s3cfb_set_color_value(s3cfb_info_t *fbi, s3cfb_color_val_info_t colval_info)
 {
 	unsigned int colval = 0;
 
@@ -400,12 +390,12 @@ int s3cfb_set_color_value(s3c_fb_info_t *fbi, s3c_color_val_info_t colval_info)
 
 	win_num--;
 
-	if (fbi->fb.var.bits_per_pixel == S3C_FB_PIXEL_BPP_16) {
+	if (fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_16) {
 		/* RGB 5-6-5 mode */
 		colval  = (((colval_info.colval_red   & 0x1f) << 19) | 0x70000);
 		colval |= (((colval_info.colval_green & 0x3f) << 10) | 0x300);
 		colval |= (((colval_info.colval_blue  & 0x1f)  << 3 )| 0x7);
-	} else if (fbi->fb.var.bits_per_pixel == S3C_FB_PIXEL_BPP_24) {
+	} else if (fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_24) {
 		/* currently RGB 8-8-8 mode  */
 		colval  = ((colval_info.colval_red  & 0xff) << 16);
 		colval |= ((colval_info.colval_green & 0xff) << 8);
@@ -418,7 +408,7 @@ int s3cfb_set_color_value(s3c_fb_info_t *fbi, s3c_color_val_info_t colval_info)
 	return 0;
 }
 
-static int s3cfb_set_bpp(s3c_fb_info_t *fbi, int bpp)
+static int s3cfb_set_bpp(s3cfb_info_t *fbi, int bpp)
 {
 	struct fb_var_screeninfo *var= &fbi->fb.var;
 	int win_num =  fbi->win_id;
@@ -433,36 +423,36 @@ static int s3cfb_set_bpp(s3c_fb_info_t *fbi, int bpp)
 	case 2:
 	case 4:
 	case 8:
-		s3c_fimd.bytes_per_pixel = 1;
+		s3cfb_fimd.bytes_per_pixel = 1;
 		break;
 
 	case 16:
 		writel(val | S3C_WINCONx_BPPMODE_F_16BPP_565 | S3C_WINCONx_BLD_PIX_PLANE, S3C_WINCON0 + (0x04 * win_num));
 		var->bits_per_pixel = bpp;
-		s3c_fimd.bytes_per_pixel = 2;
+		s3cfb_fimd.bytes_per_pixel = 2;
 		break;
 
 	case 24:
 		writel(val | S3C_WINCONx_BPPMODE_F_24BPP_888 | S3C_WINCONx_BLD_PIX_PLANE, S3C_WINCON0 + (0x04 * win_num));
 		var->bits_per_pixel = bpp;
-		s3c_fimd.bytes_per_pixel = 4;
+		s3cfb_fimd.bytes_per_pixel = 4;
 		break;
 
 	case 25:
 		writel(val | S3C_WINCONx_BPPMODE_F_25BPP_A888 | S3C_WINCONx_BLD_PIX_PLANE, S3C_WINCON0 + (0x04 * win_num));
 		var->bits_per_pixel = bpp;
-		s3c_fimd.bytes_per_pixel = 4;
+		s3cfb_fimd.bytes_per_pixel = 4;
 		break;
 
 	case 28:
 		writel(val | S3C_WINCONx_BPPMODE_F_28BPP_A888 | S3C_WINCONx_BLD_PIX_PIXEL, S3C_WINCON0 + (0x04 * win_num));
 		var->bits_per_pixel = bpp;
-		s3c_fimd.bytes_per_pixel = 4;
+		s3cfb_fimd.bytes_per_pixel = 4;
 		break;
 
 	case 32:
 		var->bits_per_pixel = bpp;
-		s3c_fimd.bytes_per_pixel = 4;
+		s3cfb_fimd.bytes_per_pixel = 4;
 		break;
 	}
 
@@ -513,7 +503,7 @@ void s3cfb_set_clock(unsigned int clkval)
 
 EXPORT_SYMBOL(s3cfb_set_clock);
 
-int s3cfb_init_win(s3c_fb_info_t *fbi, int bpp, int left_x, int top_y, int width, int height, int onoff)
+int s3cfb_init_win(s3cfb_info_t *fbi, int bpp, int left_x, int top_y, int width, int height, int onoff)
 {
 	s3cfb_onoff_win(fbi, OFF);
 	s3cfb_set_bpp(fbi, bpp);
@@ -529,13 +519,13 @@ int s3cfb_wait_for_vsync(void)
 {
 	int cnt;
 
-	cnt = s3c_vsync_info.count;
-	wait_event_interruptible_timeout(s3c_vsync_info.wait_queue, cnt != s3c_vsync_info.count, HZ / 10);
+	cnt = s3cfb_fimd.vsync_info.count;
+	wait_event_interruptible_timeout(s3cfb_fimd.vsync_info.wait_queue, cnt != s3cfb_fimd.vsync_info.count, HZ / 10);
 
   	return cnt;
 }
 
-static void s3cfb_update_palette(s3c_fb_info_t *fbi, unsigned int regno, unsigned int val)
+static void s3cfb_update_palette(s3cfb_info_t *fbi, unsigned int regno, unsigned int val)
 {
 	unsigned long flags;
 
@@ -545,7 +535,7 @@ static void s3cfb_update_palette(s3c_fb_info_t *fbi, unsigned int regno, unsigne
 
 	if (!fbi->palette_ready) {
 		fbi->palette_ready = 1;
-		s3c_palette_win = fbi->win_id;
+		s3cfb_fimd.palette_win = fbi->win_id;
 	}
 
 	local_irq_restore(flags);
@@ -561,7 +551,7 @@ static inline unsigned int s3cfb_chan_to_field(unsigned int chan, struct fb_bitf
 
 static int s3cfb_setcolreg(unsigned int regno, unsigned int red, unsigned int green, unsigned int blue, unsigned int transp, struct fb_info *info)
 {
-	s3c_fb_info_t *fbi = (s3c_fb_info_t *)info;
+	s3cfb_info_t *fbi = (s3cfb_info_t *)info;
 	unsigned int val = 0;
 
 	switch (fbi->fb.fix.visual) {
@@ -606,7 +596,7 @@ static int s3cfb_setcolreg(unsigned int regno, unsigned int red, unsigned int gr
 /* sysfs export of baclight control */
 static int s3cfb_sysfs_show_lcd_power(struct device *dev, struct device_attribute *attr, char *buf)
 {
-	return snprintf(buf, PAGE_SIZE, "%d\n", lcd_power);
+	return snprintf(buf, PAGE_SIZE, "%d\n", s3cfb_fimd.lcd_power);
 }
 
 static int s3cfb_sysfs_store_lcd_power(struct device *dev, struct device_attribute *attr, const char *buf, size_t len)
@@ -626,7 +616,7 @@ static int s3cfb_sysfs_store_lcd_power(struct device *dev, struct device_attribu
 
 static int s3cfb_sysfs_show_backlight_power(struct device *dev, struct device_attribute *attr, char *buf)
 {
-	return snprintf(buf, PAGE_SIZE, "%d\n", backlight_power);
+	return snprintf(buf, PAGE_SIZE, "%d\n", s3cfb_fimd.backlight_power);
 }
 
 static int s3cfb_sysfs_store_backlight_power(struct device *dev, struct device_attribute *attr, const char *buf, size_t len)
@@ -646,14 +636,14 @@ static int s3cfb_sysfs_store_backlight_power(struct device *dev, struct device_a
 
 static int s3cfb_sysfs_show_backlight_level(struct device *dev, struct device_attribute *attr, char *buf)
 {
-	return snprintf(buf, PAGE_SIZE, "%d\n", backlight_level);
+	return snprintf(buf, PAGE_SIZE, "%d\n", s3cfb_fimd.backlight_level);
 }
 
 static int s3cfb_sysfs_store_backlight_level(struct device *dev, struct device_attribute *attr, const char *buf, size_t len)
 {
 	unsigned long value = simple_strtoul(buf, NULL, 10);
 
-	if (value < s3c_fimd.backlight_min || value > s3c_fimd.backlight_max)
+	if (value < s3cfb_fimd.backlight_min || value > s3cfb_fimd.backlight_max)
 		return -ERANGE;
 
 	s3cfb_set_backlight_level(value);
@@ -687,7 +677,7 @@ struct fb_ops s3cfb_ops = {
 	.fb_ioctl	= s3cfb_ioctl,
 };
 
-static void s3cfb_init_fbinfo(s3c_fb_info_t *finfo, char *drv_name, int index)
+static void s3cfb_init_fbinfo(s3cfb_info_t *finfo, char *drv_name, int index)
 {
 	int i = 0;
 
@@ -714,43 +704,43 @@ static void s3cfb_init_fbinfo(s3c_fb_info_t *finfo, char *drv_name, int index)
 	finfo->fb.var.accel_flags = 0;
 	finfo->fb.var.vmode = FB_VMODE_NONINTERLACED;
 
-	finfo->fb.var.xoffset = s3c_fimd.xoffset;
-	finfo->fb.var.yoffset = s3c_fimd.yoffset;
+	finfo->fb.var.xoffset = s3cfb_fimd.xoffset;
+	finfo->fb.var.yoffset = s3cfb_fimd.yoffset;
 
 	if (index == 0) {
-		finfo->fb.var.height = s3c_fimd.height;
-		finfo->fb.var.width = s3c_fimd.width;
+		finfo->fb.var.height = s3cfb_fimd.height;
+		finfo->fb.var.width = s3cfb_fimd.width;
 
-		finfo->fb.var.xres = s3c_fimd.xres;
-		finfo->fb.var.yres = s3c_fimd.yres;
+		finfo->fb.var.xres = s3cfb_fimd.xres;
+		finfo->fb.var.yres = s3cfb_fimd.yres;
 
-		finfo->fb.var.xres_virtual = s3c_fimd.xres_virtual;
-		finfo->fb.var.yres_virtual = s3c_fimd.yres_virtual;
+		finfo->fb.var.xres_virtual = s3cfb_fimd.xres_virtual;
+		finfo->fb.var.yres_virtual = s3cfb_fimd.yres_virtual;
 	} else {
-		finfo->fb.var.height = s3c_fimd.osd_height;
-		finfo->fb.var.width = s3c_fimd.osd_width;
+		finfo->fb.var.height = s3cfb_fimd.osd_height;
+		finfo->fb.var.width = s3cfb_fimd.osd_width;
 
-		finfo->fb.var.xres = s3c_fimd.osd_xres;
-		finfo->fb.var.yres = s3c_fimd.osd_yres;
+		finfo->fb.var.xres = s3cfb_fimd.osd_xres;
+		finfo->fb.var.yres = s3cfb_fimd.osd_yres;
 
-		finfo->fb.var.xres_virtual = s3c_fimd.osd_xres_virtual;
-		finfo->fb.var.yres_virtual = s3c_fimd.osd_yres_virtual;
+		finfo->fb.var.xres_virtual = s3cfb_fimd.osd_xres_virtual;
+		finfo->fb.var.yres_virtual = s3cfb_fimd.osd_yres_virtual;
 	}
 
-	finfo->fb.var.bits_per_pixel = s3c_fimd.bpp;
-        finfo->fb.var.pixclock = s3c_fimd.pixclock;
-	finfo->fb.var.hsync_len = s3c_fimd.hsync_len;
-	finfo->fb.var.left_margin = s3c_fimd.left_margin;
-	finfo->fb.var.right_margin = s3c_fimd.right_margin;
-	finfo->fb.var.vsync_len = s3c_fimd.vsync_len;
-	finfo->fb.var.upper_margin = s3c_fimd.upper_margin;
-	finfo->fb.var.lower_margin = s3c_fimd.lower_margin;
-	finfo->fb.var.sync = s3c_fimd.sync;
-	finfo->fb.var.grayscale = s3c_fimd.cmap_grayscale;
+	finfo->fb.var.bits_per_pixel = s3cfb_fimd.bpp;
+        finfo->fb.var.pixclock = s3cfb_fimd.pixclock;
+	finfo->fb.var.hsync_len = s3cfb_fimd.hsync_len;
+	finfo->fb.var.left_margin = s3cfb_fimd.left_margin;
+	finfo->fb.var.right_margin = s3cfb_fimd.right_margin;
+	finfo->fb.var.vsync_len = s3cfb_fimd.vsync_len;
+	finfo->fb.var.upper_margin = s3cfb_fimd.upper_margin;
+	finfo->fb.var.lower_margin = s3cfb_fimd.lower_margin;
+	finfo->fb.var.sync = s3cfb_fimd.sync;
+	finfo->fb.var.grayscale = s3cfb_fimd.cmap_grayscale;
 
-	finfo->fb.fix.smem_len = finfo->fb.var.xres_virtual * finfo->fb.var.yres_virtual * s3c_fimd.bytes_per_pixel;
+	finfo->fb.fix.smem_len = finfo->fb.var.xres_virtual * finfo->fb.var.yres_virtual * s3cfb_fimd.bytes_per_pixel;
 
-	finfo->fb.fix.line_length = finfo->fb.var.width * s3c_fimd.bytes_per_pixel;
+	finfo->fb.fix.line_length = finfo->fb.var.width * s3cfb_fimd.bytes_per_pixel;
 
 #if !defined(CONFIG_FB_S3C_VIRTUAL_SCREEN) && defined(CONFIG_FB_S3C_DOUBLE_BUFFERING)
 	if (index < 2)
@@ -758,7 +748,7 @@ static void s3cfb_init_fbinfo(s3c_fb_info_t *finfo, char *drv_name, int index)
 #endif
 
 	for (i = 0; i < 256; i++)
-		finfo->palette_buffer[i] = S3C_FB_PALETTE_BUFF_CLEAR;
+		finfo->palette_buffer[i] = S3CFB_PALETTE_BUFF_CLEAR;
 }
 
 /*
@@ -768,12 +758,12 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 {
 	struct resource *res;
 	struct fb_info *fbinfo;
-	s3c_fb_info_t *info;
+	s3cfb_info_t *info;
 
 	char driver_name[] = "s3cfb";
 	int index = 0, ret, size;
 
-	fbinfo = framebuffer_alloc(sizeof(s3c_fb_info_t), &pdev->dev);
+	fbinfo = framebuffer_alloc(sizeof(s3cfb_info_t), &pdev->dev);
 
 	if (!fbinfo)
 		return -ENOMEM;
@@ -811,7 +801,7 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 	s3cfb_pre_init();
 	s3cfb_set_backlight_power(1);
 	s3cfb_set_lcd_power(1);
-	s3cfb_set_backlight_level(S3C_FB_DEFAULT_BACKLIGHT_LEVEL);
+	s3cfb_set_backlight_level(S3CFB_DEFAULT_BACKLIGHT_LEVEL);
 
 	info->clk = clk_get(NULL, "lcd");
 
@@ -824,8 +814,8 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 	clk_enable(info->clk);
 	printk("S3C_LCD clock got enabled :: %ld.%03ld Mhz\n", PRINT_MHZ(clk_get_rate(info->clk)));
 
-	s3c_vsync_info.count = 0;
-	init_waitqueue_head(&s3c_vsync_info.wait_queue);
+	s3cfb_fimd.vsync_info.count = 0;
+	init_waitqueue_head(&s3cfb_fimd.vsync_info.wait_queue);
 
 	res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
 
@@ -844,15 +834,15 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 
 	msleep(5);
 
-	for (index = 0; index < S3C_FB_NUM; index++) {
-		s3c_fb_info[index].mem = info->mem;
-		s3c_fb_info[index].io = info->io;
-		s3c_fb_info[index].clk = info->clk;
+	for (index = 0; index < S3CFB_NUM; index++) {
+		s3cfb_info[index].mem = info->mem;
+		s3cfb_info[index].io = info->io;
+		s3cfb_info[index].clk = info->clk;
 
-		s3cfb_init_fbinfo(&s3c_fb_info[index], driver_name, index);
+		s3cfb_init_fbinfo(&s3cfb_info[index], driver_name, index);
 
 		/* Initialize video memory */
-		ret = s3cfb_map_video_memory(&s3c_fb_info[index]);
+		ret = s3cfb_map_video_memory(&s3cfb_info[index]);
 
 		if (ret) {
 			printk("Failed to allocate video RAM: %d\n", ret);
@@ -860,25 +850,25 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 			goto release_irq;
 		}
 
-		ret = s3cfb_init_registers(&s3c_fb_info[index]);
-		ret = s3cfb_check_var(&s3c_fb_info[index].fb.var, &s3c_fb_info[index].fb);
+		ret = s3cfb_init_registers(&s3cfb_info[index]);
+		ret = s3cfb_check_var(&s3cfb_info[index].fb.var, &s3cfb_info[index].fb);
 
 		if (index < 2){
-			if (fb_alloc_cmap(&s3c_fb_info[index].fb.cmap, 256, 0) < 0)
+			if (fb_alloc_cmap(&s3cfb_info[index].fb.cmap, 256, 0) < 0)
 				goto dealloc_fb;
 		} else {
-			if (fb_alloc_cmap(&s3c_fb_info[index].fb.cmap, 16, 0) < 0)
+			if (fb_alloc_cmap(&s3cfb_info[index].fb.cmap, 16, 0) < 0)
 				goto dealloc_fb;
 		}
 
-		ret = register_framebuffer(&s3c_fb_info[index].fb);
+		ret = register_framebuffer(&s3cfb_info[index].fb);
 
 		if (ret < 0) {
 			printk(KERN_ERR "Failed to register framebuffer device: %d\n", ret);
 			goto free_video_memory;
 		}
 
-		printk(KERN_INFO "fb%d: %s frame buffer device\n", s3c_fb_info[index].fb.node, s3c_fb_info[index].fb.fix.id);
+		printk(KERN_INFO "fb%d: %s frame buffer device\n", s3cfb_info[index].fb.node, s3cfb_info[index].fb.fix.id);
 	}
 
 	/* create device files */
@@ -900,7 +890,7 @@ static int __init s3cfb_probe(struct platform_device *pdev)
 	return 0;
 
 free_video_memory:
-	s3cfb_unmap_video_memory(&s3c_fb_info[index]);
+	s3cfb_unmap_video_memory(&s3cfb_info[index]);
 
 release_irq:
 	free_irq(res->start, &info);
@@ -927,7 +917,7 @@ dealloc_fb:
 static int s3cfb_remove(struct platform_device *pdev)
 {
 	struct fb_info *fbinfo = platform_get_drvdata(pdev);
-	s3c_fb_info_t *info = fbinfo->par;
+	s3cfb_info_t *info = fbinfo->par;
 	int index = 0, irq;
 
 	s3cfb_stop_lcd();
@@ -942,9 +932,9 @@ static int s3cfb_remove(struct platform_device *pdev)
 	irq = platform_get_irq(pdev, 0);
 	release_resource(info->mem);
 
-	for (index = 0; index < S3C_FB_NUM; index++) {
-		s3cfb_unmap_video_memory((s3c_fb_info_t *) &s3c_fb_info[index]);
-		free_irq(irq, &s3c_fb_info[index]);
+	for (index = 0; index < S3CFB_NUM; index++) {
+		s3cfb_unmap_video_memory((s3cfb_info_t *) &s3cfb_info[index]);
+		free_irq(irq, &s3cfb_info[index]);
 		unregister_framebuffer(&info[index].fb);
 	}
 
