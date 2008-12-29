@@ -69,24 +69,24 @@ static int extclk = 0;
 module_param(extclk, int, 0);
 MODULE_PARM_DESC(extclk, "set to 1 to disable s3c24XX i2s sysclk");
 
-static struct s3c2410_dma_client s3c24xx_dma_client_out = {
+static struct s3c2410_dma_client s5pc1xx_dma_client_out = {
 	.name = "I2S PCM Stereo out"
 };
 
-static struct s3c2410_dma_client s3c24xx_dma_client_in = {
+static struct s3c2410_dma_client s5pc1xx_dma_client_in = {
 	.name = "I2S PCM Stereo in"
 };
 
 static struct s3c24xx_pcm_dma_params s5pc1xx_i2s_pcm_stereo_out = {
-	.client		= &s3c24xx_dma_client_out,
+	.client		= &s5pc1xx_dma_client_out,
 	.channel	= DMACH_I2S_V50_OUT,
 	.dma_addr	= S3C_PA_IIS + S3C64XX_IISFIFO,
 	.dma_size	= 4,
 };
 
 static struct s3c24xx_pcm_dma_params s5pc1xx_i2s_pcm_stereo_in = {
-	.client		= &s3c24xx_dma_client_in,
-	.channel	= DMACH_I2S_V40_IN,
+	.client		= &s5pc1xx_dma_client_in,
+	.channel	= DMACH_I2S_V50_IN,
 	.dma_addr	= S3C_PA_IIS + S3C64XX_IISFIFORX,
 	.dma_size	= 4,
 };
@@ -98,7 +98,7 @@ struct s5pc1xx_i2s_info {
 };
 static struct s5pc1xx_i2s_info s5pc1xx_i2s;
 
-static void s3c24xx_snd_txctrl(int on)
+static void s5pc1xx_snd_txctrl(int on)
 {
 	u32 iiscon;
 	u32 iismod;
@@ -133,7 +133,7 @@ static void s3c24xx_snd_txctrl(int on)
 	s3cdbg("w: IISCON: %x IISMOD: %x\n", iiscon, iismod);
 }
 
-static void s3c24xx_snd_rxctrl(int on)
+static void s5pc1xx_snd_rxctrl(int on)
 {
 	u32 iisfcon;
 	u32 iiscon;
@@ -161,7 +161,7 @@ static void s3c24xx_snd_rxctrl(int on)
 		 * DMA engine will simply freeze randomly.
 		 */
 
-		iiscon &=~ S3C64XX_IIS0CON_I2SACTIVE;
+		iiscon &= ~S3C64XX_IIS0CON_I2SACTIVE;
 		iismod &= ~S3C64XX_IIS0MOD_RXMODE;
 
 		writel(iisfcon, s5pc1xx_i2s.regs + S3C64XX_IIS0FIC);
@@ -191,6 +191,7 @@ static int s3c24xx_snd_lrsync(void)
 		if (timeout < jiffies)
 			return -ETIMEDOUT;
 	}
+	printk("out!!----\n");
 
 	return 0;
 }
@@ -218,37 +219,6 @@ static int s3c_i2s_v50_set_fmt(struct snd_soc_dai *cpu_dai,
 
 	iismod = readl(s5pc1xx_i2s.regs + S3C64XX_IIS0MOD);
 
-#if 0
-	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
-	case SND_SOC_DAIFMT_CBM_CFM:
-#ifndef CONFIG_CPU_S3C6400
-		iismod |= S3C_IIS0MOD_SLAVE;
-#else
-		iismod |= S3C_IIS0MOD_MASTER;
-#endif
-		break;
-	case SND_SOC_DAIFMT_CBS_CFS:
-		break;
-	default:
-		return -EINVAL;
-	}
-
-	switch (fmt & SND_SOC_DAIFMT_FORMAT_MASK) {
-	case SND_SOC_DAIFMT_LEFT_J:
-#ifndef CONFIG_CPU_S3C6400
-		iismod |= S3C_IIS0MOD_MSB;
-#else
-		iismod |= S3C_IIS0MOD_MSB;
-#endif
-		break;
-	case SND_SOC_DAIFMT_I2S:
-		break;
-	default:
-		return -EINVAL;
-	}
-
-	writel(iismod, s5pc1xx_i2s.regs + S3C64XX_IIS0MOD);
-#endif
 	return 0;
 
 }
@@ -266,15 +236,6 @@ static int s3c_i2s_v50_hw_params(struct snd_pcm_substream *substream,
 
 	s5pc1xx_i2s.master = 1;
 	
-	/* Configure the I2S pins in correct mode */
-/*	s3c_gpio_cfgpin(S3C64XX_GPH(8),S3C64XX_GPH8_I2S_V40_LRCLK);
-
-	if (s5pc1xx_i2s.master && !extclk){
-		s3cdbg("Setting Clock Output as we are Master\n");
-		s3c_gpio_cfgpin(S3C64XX_GPH(6),S3C64XX_GPH6_I2S_V40_BCLK);
-	}
-	*/
-
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		rtd->dai->cpu_dai->dma_data = &s5pc1xx_i2s_pcm_stereo_out;
 	} else {
@@ -395,17 +356,17 @@ static int s3c_i2s_v50_trigger(struct snd_pcm_substream *substream, int cmd)
 		}
 
 		if (substream->stream == SNDRV_PCM_STREAM_CAPTURE)
-			s3c24xx_snd_rxctrl(1);
+			s5pc1xx_snd_rxctrl(1);
 		else
-			s3c24xx_snd_txctrl(1);
+			s5pc1xx_snd_txctrl(1);
 		break;
 	case SNDRV_PCM_TRIGGER_STOP:
 	case SNDRV_PCM_TRIGGER_SUSPEND:
 	case SNDRV_PCM_TRIGGER_PAUSE_PUSH:
 		if (substream->stream == SNDRV_PCM_STREAM_CAPTURE)
-			s3c24xx_snd_rxctrl(0);
+			s5pc1xx_snd_rxctrl(0);
 		else
-			s3c24xx_snd_txctrl(0);
+			s5pc1xx_snd_txctrl(0);
 		break;
 	default:
 		ret = -EINVAL;
@@ -436,15 +397,9 @@ static void s5pc1xx_i2s_shutdown(struct snd_pcm_substream *substream)
 	iiscon &= !S3C64XX_IIS0CON_I2SACTIVE;
 	writel(iiscon, s5pc1xx_i2s.regs + S3C64XX_IIS0CON);
 
-	/* Clock disable 
-	 * PCLK & SCLK gating disable 
-	 */
-/*	__raw_writel(__raw_readl(S3C_PCLK_GATE)&~(S3C_CLKCON_PCLK_IIS0), S3C_PCLK_GATE);
-	__raw_writel(__raw_readl(S3C_SCLK_GATE)&~(S3C_CLKCON_SCLK_AUDIO0), S3C_SCLK_GATE);
-*/
+	/* Clock disable */
 	/* EPLL disable */
-//	__raw_writel(__raw_readl(S3C_EPLL_CON0)&~(1<<31) ,S3C_EPLL_CON0);	
-	
+	writel(readl(S5P_EPLL_CON)&~(0x1<<31),S5P_EPLL_CON);
 }
 
 
@@ -461,9 +416,9 @@ static int s3c_i2s_v50_set_sysclk(struct snd_soc_dai *cpu_dai,
 	iismod &= ~S3C64XX_IISMOD_MPLL;
 
 	switch (clk_id) {
-	case S3C24XX_CLKSRC_PCLK:
+	case S5PC1XX_CLKSRC_PCLK:
 		break;
-	case S3C24XX_CLKSRC_MPLL:
+	case S5PC1XX_CLKSRC_MPLL:
 		iismod |= S3C64XX_IISMOD_MPLL;
 		break;
 	default:
@@ -483,16 +438,15 @@ static int s3c_i2s_v50_set_clkdiv(struct snd_soc_dai *cpu_dai,
 	u32 reg;
 
 	s3cdbg("Entered %s : div_id = %d, div = %x\n", __FUNCTION__, div_id, div);
-	printk("Entered %s : div_id = %d, div = %x\n", __FUNCTION__, div_id, div);
 
 	switch (div_id) {
-	case S3C24XX_DIV_MCLK:
+	case S5PC1XX_DIV_MCLK:
 		break;
-	case S3C24XX_DIV_BCLK:
+	case S5PC1XX_DIV_BCLK:
 		reg = readl(s5pc1xx_i2s.regs + S3C64XX_IIS0MOD) & ~(S3C64XX_IIS0MOD_FS_MASK);
 		writel(reg | div, s5pc1xx_i2s.regs + S3C64XX_IIS0MOD);
 		break;
-	case S3C24XX_DIV_PRESCALER:
+	case S5PC1XX_DIV_PRESCALER:
 		if (div)
 			div |= 1 << 15;
 		writel(div, s5pc1xx_i2s.regs + S3C64XX_IIS0PSR);
@@ -555,7 +509,7 @@ static int s3c_i2s_v50_probe(struct platform_device *pdev,
 		return -ENODEV;
 	}
 
-printk("IIS Reset!\n");
+	s3cdbg("IIS Reset!\n");
 //	writel(readl(s5pc1xx_i2s.regs + S3C64XX_IIS0CON)&~(0x1<<31),(s5pc1xx_i2s.regs + S3C64XX_IIS0CON));
 //	msleep(100);
 	writel(readl(s5pc1xx_i2s.regs + S3C64XX_IIS0CON)|(0x1<<31),(s5pc1xx_i2s.regs + S3C64XX_IIS0CON));
@@ -584,7 +538,7 @@ static int s3c_i2s_v50_resume(struct platform_device *pdev,
 #endif
 
 
-#define S3C24XX_I2S_RATES \
+#define S5PC1XX_I2S_RATES \
 	(SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_11025 | SNDRV_PCM_RATE_16000 | \
 	SNDRV_PCM_RATE_22050 | SNDRV_PCM_RATE_32000 | SNDRV_PCM_RATE_44100 | \
 	SNDRV_PCM_RATE_48000 | SNDRV_PCM_RATE_88200 | SNDRV_PCM_RATE_96000)
@@ -599,12 +553,12 @@ struct snd_soc_dai s3c_i2s_v50_dai = {
 	.playback = {
 		.channels_min = 2,
 		.channels_max = 6,
-		.rates = S3C24XX_I2S_RATES,
+		.rates = S5PC1XX_I2S_RATES,
 		.formats = SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S20_3LE | SNDRV_PCM_FMTBIT_S24_LE | SNDRV_PCM_FMTBIT_S32_LE,},
 	.capture = {
 		.channels_min = 2,
 		.channels_max = 2,
-		.rates = S3C24XX_I2S_RATES,
+		.rates = S5PC1XX_I2S_RATES,
 		.formats = SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S20_3LE | SNDRV_PCM_FMTBIT_S24_LE | SNDRV_PCM_FMTBIT_S32_LE,},
 	.ops = {
 		.shutdown = s5pc1xx_i2s_shutdown,

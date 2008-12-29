@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2007, Ryu Euiyoul <ryu.real@gmail.com>
  * 
- * Copyright (C) 2008, SungJun Bae<june.bae@samsung.com>
+ * Copyright (C) 2008, SungJun Bae <june.bae@samsung.com>
  *
  *  This program is free software; you can redistribute  it and/or modify it
  *  under  the terms of  the GNU General  Public License as published by the
@@ -75,30 +75,30 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 	writel(readl(iiscon)|(0x1<<31),iiscon);
 	
 	//writel(readl(S5P_CLK_SRC0)|S5P_CLKSRC0_EPLL_MASK,S5P_CLK_SRC0);
-	printk("CLK_SRC0 : %x\n",readl(S5P_CLK_SRC0));
+	s3cdbg("CLK_SRC0 : %x\n",readl(S5P_CLK_SRC0));
 
 	//writel(readl(S5P_CLK_SRC3)|(0x0<<12)|(0x0<<24)|(0x0<<4),S5P_CLK_SRC3);
 	//writel(readl(S5P_CLK_SRC3)|(0x2<<8),S5P_CLK_SRC3);
-	printk("MUX Audio 0: %x\n",readl(S5P_CLK_SRC3));
+	s3cdbg("MUX Audio 0: %x\n",readl(S5P_CLK_SRC3));
 
 	writel(readl(S5P_CLK_OUT)|(0x2<<12),S5P_CLK_OUT);
-	printk("CLK OUT : %x\n",readl(S5P_CLK_OUT));
+	s3cdbg("CLK OUT : %x\n",readl(S5P_CLK_OUT));
 
 	writel(readl(S5P_CLKGATE_D20)|S5P_CLKGATE_D20_HCLKD2|S5P_CLKGATE_D20_I2SD2,S5P_CLKGATE_D20);
-	printk("HCLKD2 Gate : %x\n",readl(S5P_CLKGATE_D20));
+	s3cdbg("HCLKD2 Gate : %x\n",readl(S5P_CLKGATE_D20));
 
 	writel(readl(S5P_SCLKGATE1)|S5P_CLKGATE_SCLK1_AUDIO0,S5P_SCLKGATE1);
-	printk("S5P_SCLKGATE1 : %x\n",readl(S5P_SCLKGATE1));
+	s3cdbg("S5P_SCLKGATE1 : %x\n",readl(S5P_SCLKGATE1));
 
 	writel(readl(S5P_CLKGATE_D15)|(1<<0),S5P_CLKGATE_D15);
-	printk("GATE D1_5 : %x\n",readl(S5P_CLKGATE_D15));
+	s3cdbg("GATE D1_5 : %x\n",readl(S5P_CLKGATE_D15));
 
 	writel(readl(S5P_EPLL_CON)|(0x1<<31),S5P_EPLL_CON);
-	printk("EPLL CON : %x\n",readl(S5P_EPLL_CON));
+	s3cdbg("EPLL CON : %x\n",readl(S5P_EPLL_CON));
 
 //	writel((readl(S5P_CLK_DIV4)&~(0x07<<12))|(0x0<<12),S5P_CLK_DIV4);
 	////writel((readl(S5P_CLK_DIV4)&~(0x07<<8))|(0x1<<8),S5P_CLK_DIV4);
-	printk("DIV4: %x\n",readl(S5P_CLK_DIV4));
+	s3cdbg("DIV4: %x\n",readl(S5P_CLK_DIV4));
 
 	/*PCLK & SCLK gating enable*/
 
@@ -107,7 +107,7 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 
 	/*Clear I2S prescaler value [13:8] and disable prescaler*/
 	/* set prescaler division for sample rate */
-	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S3C24XX_DIV_PRESCALER, 0);
+	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S5PC1XX_DIV_PRESCALER, 0);
 
 	if (ret < 0)
 		return ret;
@@ -212,13 +212,13 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 		return ret;
 		*/
 
-	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S3C24XX_DIV_BCLK,
+	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S5PC1XX_DIV_BCLK,
 		S3C64XX_IIS0MOD_256FS);
 	if (ret < 0)
 		return ret;
 
 	/* set prescaler division for sample rate */
-	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S3C24XX_DIV_PRESCALER,
+	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S5PC1XX_DIV_PRESCALER,
 		(prescaler << 0x8));
 	if (ret < 0)
 		return ret;
