@@ -1,0 +1,1404 @@
+diff --git a/arch/arm/configs/smdkc100mtd_defconfig b/arch/arm/configs/smdkc100mtd_defconfig
+index ca30fc3..b6ef5a3 100644
+--- a/arch/arm/configs/smdkc100mtd_defconfig
++++ b/arch/arm/configs/smdkc100mtd_defconfig
+@@ -1,7 +1,7 @@
+ #
+ # Automatically generated make config: don't edit
+ # Linux kernel version: 2.6.28-rc8
+-# Mon Dec 22 09:20:46 2008
++# Sat Dec 27 13:46:44 2008
+ #
+ CONFIG_ARM=y
+ CONFIG_SYS_SUPPORTS_APM_EMULATION=y
+@@ -185,9 +185,12 @@ CONFIG_S3C_GPIO_SPACE=0
+ CONFIG_S3C_GPIO_TRACK=y
+ CONFIG_S3C_GPIO_PULL_UPDOWN=y
+ CONFIG_S3C_GPIO_CFG_S5PC1XX=y
++CONFIG_S3C_DEV_HSMMC=y
++CONFIG_S3C_DEV_HSMMC1=y
+ CONFIG_S3C_DEV_I2C1=y
+ CONFIG_S3C_DMA_PL330=y
+ CONFIG_CPU_S5PC100=y
++CONFIG_S5PC1XX_SETUP_SDHCI=y
+ CONFIG_MACH_SMDKC100=y
+ 
+ #
+@@ -463,6 +466,7 @@ CONFIG_MTD_NAND_S3C_HWECC=y
+ # CONFIG_MTD_NAND_DISKONCHIP is not set
+ # CONFIG_MTD_NAND_NANDSIM is not set
+ # CONFIG_MTD_NAND_PLATFORM is not set
++# CONFIG_MTD_ALAUDA is not set
+ # CONFIG_MTD_ONENAND is not set
+ 
+ #
+@@ -475,6 +479,7 @@ CONFIG_BLK_DEV=y
+ CONFIG_BLK_DEV_LOOP=y
+ # CONFIG_BLK_DEV_CRYPTOLOOP is not set
+ # CONFIG_BLK_DEV_NBD is not set
++# CONFIG_BLK_DEV_UB is not set
+ CONFIG_BLK_DEV_RAM=y
+ CONFIG_BLK_DEV_RAM_COUNT=16
+ CONFIG_BLK_DEV_RAM_SIZE=8192
+@@ -493,12 +498,87 @@ CONFIG_HAVE_IDE=y
+ # SCSI device support
+ #
+ # CONFIG_RAID_ATTRS is not set
+-# CONFIG_SCSI is not set
+-# CONFIG_SCSI_DMA is not set
++CONFIG_SCSI=y
++CONFIG_SCSI_DMA=y
++# CONFIG_SCSI_TGT is not set
+ # CONFIG_SCSI_NETLINK is not set
++CONFIG_SCSI_PROC_FS=y
++
++#
++# SCSI support type (disk, tape, CD-ROM)
++#
++CONFIG_BLK_DEV_SD=y
++# CONFIG_CHR_DEV_ST is not set
++# CONFIG_CHR_DEV_OSST is not set
++# CONFIG_BLK_DEV_SR is not set
++CONFIG_CHR_DEV_SG=y
++# CONFIG_CHR_DEV_SCH is not set
++
++#
++# Some SCSI devices (e.g. CD jukebox) support multiple LUNs
++#
++# CONFIG_SCSI_MULTI_LUN is not set
++# CONFIG_SCSI_CONSTANTS is not set
++# CONFIG_SCSI_LOGGING is not set
++# CONFIG_SCSI_SCAN_ASYNC is not set
++CONFIG_SCSI_WAIT_SCAN=m
++
++#
++# SCSI Transports
++#
++# CONFIG_SCSI_SPI_ATTRS is not set
++# CONFIG_SCSI_FC_ATTRS is not set
++# CONFIG_SCSI_ISCSI_ATTRS is not set
++# CONFIG_SCSI_SAS_LIBSAS is not set
++# CONFIG_SCSI_SRP_ATTRS is not set
++CONFIG_SCSI_LOWLEVEL=y
++# CONFIG_ISCSI_TCP is not set
++# CONFIG_SCSI_DEBUG is not set
++# CONFIG_SCSI_DH is not set
+ # CONFIG_ATA is not set
+ # CONFIG_MD is not set
+-# CONFIG_NETDEVICES is not set
++CONFIG_NETDEVICES=y
++# CONFIG_DUMMY is not set
++# CONFIG_BONDING is not set
++# CONFIG_MACVLAN is not set
++# CONFIG_EQUALIZER is not set
++# CONFIG_TUN is not set
++# CONFIG_VETH is not set
++# CONFIG_NET_ETHERNET is not set
++CONFIG_NETDEV_1000=y
++CONFIG_NETDEV_10000=y
++
++#
++# Wireless LAN
++#
++# CONFIG_WLAN_PRE80211 is not set
++# CONFIG_WLAN_80211 is not set
++# CONFIG_IWLWIFI_LEDS is not set
++
++#
++# USB Network Adapters
++#
++# CONFIG_USB_CATC is not set
++# CONFIG_USB_KAWETH is not set
++# CONFIG_USB_PEGASUS is not set
++# CONFIG_USB_RTL8150 is not set
++# CONFIG_USB_USBNET is not set
++# CONFIG_WAN is not set
++CONFIG_PPP=y
++CONFIG_PPP_MULTILINK=y
++CONFIG_PPP_FILTER=y
++CONFIG_PPP_ASYNC=y
++CONFIG_PPP_SYNC_TTY=y
++# CONFIG_PPP_DEFLATE is not set
++# CONFIG_PPP_BSDCOMP is not set
++# CONFIG_PPP_MPPE is not set
++# CONFIG_PPPOE is not set
++# CONFIG_PPPOL2TP is not set
++# CONFIG_SLIP is not set
++CONFIG_SLHC=y
++# CONFIG_NETCONSOLE is not set
++# CONFIG_NETPOLL is not set
++# CONFIG_NET_POLL_CONTROLLER is not set
+ # CONFIG_ISDN is not set
+ 
+ #
+@@ -633,6 +713,7 @@ CONFIG_I2C_S3C2410=y
+ #
+ # CONFIG_I2C_PARPORT_LIGHT is not set
+ # CONFIG_I2C_TAOS_EVM is not set
++# CONFIG_I2C_TINY_USB is not set
+ 
+ #
+ # Other I2C/SMBus bus drivers
+@@ -843,8 +924,6 @@ CONFIG_LOGO=y
+ # CONFIG_LOGO_LINUX_VGA16 is not set
+ # CONFIG_LOGO_LINUX_CLUT224 is not set
+ CONFIG_LOGO_LINUX_LANDSCAPED_CLUT224=y
+-
+-# Sound
+ CONFIG_SOUND=y
+ # CONFIG_SOUND_OSS_CORE is not set
+ CONFIG_SND=y
+@@ -864,64 +943,210 @@ CONFIG_SND_DRIVERS=y
+ # CONFIG_SND_SERIAL_U16550 is not set
+ # CONFIG_SND_MPU401 is not set
+ CONFIG_SND_ARM=y
++CONFIG_SND_USB=y
++# CONFIG_SND_USB_AUDIO is not set
++# CONFIG_SND_USB_CAIAQ is not set
+ CONFIG_SND_SOC=y
+ 
+ #
+ # SoC Audio for the Samsung S3C
+ #
+ CONFIG_SND_S5PC1XX_SOC=y
+-CONFIG_SND_S5PC100_SOC_I2S=y
+-# CONFIG_SND_S3C64XX_SOC_SMDK6410_WM9713 is not set
++CONFIG_SND_SOC_I2S_V50=y
+ CONFIG_SND_SMDKC100_WM8580=y
+-CONFIG_SOUND_WM8580_INPUT_STREAM_LINE=y
+-# CONFIG_SOUND_WM8580_INPUT_STREAM_MIC is not set
+-# CONFIG_SND_S3C64XX_SOC_SMDK6410_WM8990 is not set
++CONFIG_SOUND_S5PC100_WM8580_INPUT_STREAM_LINE=y
++# CONFIG_SOUND_S5PC100_WM8580_INPUT_STREAM_MIC is not set
+ # CONFIG_SND_SOC_ALL_CODECS is not set
+ CONFIG_SND_SOC_WM8580=y
+ # CONFIG_SOUND_PRIME is not set
+-
+-
+-
+ CONFIG_HID_SUPPORT=y
+ CONFIG_HID=y
+ CONFIG_HID_DEBUG=y
+ # CONFIG_HIDRAW is not set
++
++#
++# USB Input Devices
++#
++CONFIG_USB_HID=y
+ # CONFIG_HID_PID is not set
++# CONFIG_USB_HIDDEV is not set
+ 
+ #
+ # Special HID drivers
+ #
+ # CONFIG_HID_COMPAT is not set
++CONFIG_HID_A4TECH=y
++CONFIG_HID_APPLE=y
++CONFIG_HID_BELKIN=y
++CONFIG_HID_BRIGHT=y
++CONFIG_HID_CHERRY=y
++CONFIG_HID_CHICONY=y
++CONFIG_HID_CYPRESS=y
++CONFIG_HID_DELL=y
++CONFIG_HID_EZKEY=y
++CONFIG_HID_GYRATION=y
++CONFIG_HID_LOGITECH=y
++# CONFIG_LOGITECH_FF is not set
++# CONFIG_LOGIRUMBLEPAD2_FF is not set
++CONFIG_HID_MICROSOFT=y
++CONFIG_HID_MONTEREY=y
++CONFIG_HID_PANTHERLORD=y
++# CONFIG_PANTHERLORD_FF is not set
++CONFIG_HID_PETALYNX=y
++CONFIG_HID_SAMSUNG=y
++CONFIG_HID_SONY=y
++CONFIG_HID_SUNPLUS=y
++# CONFIG_THRUSTMASTER_FF is not set
++# CONFIG_ZEROPLUS_FF is not set
+ CONFIG_USB_SUPPORT=y
+ CONFIG_USB_ARCH_HAS_HCD=y
+-# CONFIG_USB_ARCH_HAS_OHCI is not set
++CONFIG_USB_ARCH_HAS_OHCI=y
+ # CONFIG_USB_ARCH_HAS_EHCI is not set
+-# CONFIG_USB is not set
++CONFIG_USB=y
++# CONFIG_USB_DEBUG is not set
++# CONFIG_USB_ANNOUNCE_NEW_DEVICES is not set
++
++#
++# Miscellaneous USB options
++#
++CONFIG_USB_DEVICEFS=y
++CONFIG_USB_DEVICE_CLASS=y
++# CONFIG_USB_DYNAMIC_MINORS is not set
++# CONFIG_USB_OTG is not set
++# CONFIG_USB_MON is not set
++# CONFIG_USB_WUSB is not set
++# CONFIG_USB_WUSB_CBAF is not set
++
++#
++# USB Host Controller Drivers
++#
++# CONFIG_USB_C67X00_HCD is not set
++# CONFIG_USB_ISP116X_HCD is not set
++CONFIG_USB_OHCI_HCD=y
++# CONFIG_USB_OHCI_BIG_ENDIAN_DESC is not set
++# CONFIG_USB_OHCI_BIG_ENDIAN_MMIO is not set
++CONFIG_USB_OHCI_LITTLE_ENDIAN=y
++# CONFIG_USB_SL811_HCD is not set
++# CONFIG_USB_R8A66597_HCD is not set
++# CONFIG_USB_HWA_HCD is not set
++# CONFIG_USB_MUSB_HDRC is not set
++# CONFIG_USB_GADGET_MUSB_HDRC is not set
+ 
+ #
+-# Enable Host or Gadget support to see Inventra options
++# USB Device Class drivers
+ #
++CONFIG_USB_ACM=y
++# CONFIG_USB_PRINTER is not set
++# CONFIG_USB_WDM is not set
++# CONFIG_USB_TMC is not set
+ 
+ #
+ # NOTE: USB_STORAGE depends on SCSI but BLK_DEV_SD may also be needed;
+ #
+-# CONFIG_USB_GADGET is not set
++
++#
++# see USB_STORAGE Help for more information
++#
++CONFIG_USB_STORAGE=y
++# CONFIG_USB_STORAGE_DEBUG is not set
++# CONFIG_USB_STORAGE_DATAFAB is not set
++# CONFIG_USB_STORAGE_FREECOM is not set
++# CONFIG_USB_STORAGE_ISD200 is not set
++# CONFIG_USB_STORAGE_DPCM is not set
++# CONFIG_USB_STORAGE_USBAT is not set
++# CONFIG_USB_STORAGE_SDDR09 is not set
++# CONFIG_USB_STORAGE_SDDR55 is not set
++# CONFIG_USB_STORAGE_JUMPSHOT is not set
++# CONFIG_USB_STORAGE_ALAUDA is not set
++# CONFIG_USB_STORAGE_ONETOUCH is not set
++# CONFIG_USB_STORAGE_KARMA is not set
++# CONFIG_USB_STORAGE_CYPRESS_ATACB is not set
++# CONFIG_USB_LIBUSUAL is not set
++
++#
++# USB Imaging devices
++#
++# CONFIG_USB_MDC800 is not set
++# CONFIG_USB_MICROTEK is not set
++
++#
++# USB port drivers
++#
++# CONFIG_USB_SERIAL is not set
++
++#
++# USB Miscellaneous drivers
++#
++# CONFIG_USB_EMI62 is not set
++# CONFIG_USB_EMI26 is not set
++# CONFIG_USB_ADUTUX is not set
++# CONFIG_USB_SEVSEG is not set
++# CONFIG_USB_RIO500 is not set
++# CONFIG_USB_LEGOTOWER is not set
++# CONFIG_USB_LCD is not set
++# CONFIG_USB_BERRY_CHARGE is not set
++# CONFIG_USB_LED is not set
++# CONFIG_USB_CYPRESS_CY7C63 is not set
++# CONFIG_USB_CYTHERM is not set
++# CONFIG_USB_PHIDGET is not set
++# CONFIG_USB_IDMOUSE is not set
++# CONFIG_USB_FTDI_ELAN is not set
++# CONFIG_USB_APPLEDISPLAY is not set
++# CONFIG_USB_LD is not set
++# CONFIG_USB_TRANCEVIBRATOR is not set
++# CONFIG_USB_IOWARRIOR is not set
++# CONFIG_USB_TEST is not set
++# CONFIG_USB_ISIGHTFW is not set
++# CONFIG_USB_VST is not set
++CONFIG_USB_GADGET=y
++# CONFIG_USB_GADGET_DEBUG is not set
++# CONFIG_USB_GADGET_DEBUG_FILES is not set
++CONFIG_USB_GADGET_VBUS_DRAW=2
++CONFIG_USB_GADGET_SELECTED=y
++# CONFIG_USB_GADGET_AT91 is not set
++# CONFIG_USB_GADGET_ATMEL_USBA is not set
++# CONFIG_USB_GADGET_FSL_USB2 is not set
++# CONFIG_USB_GADGET_LH7A40X is not set
++# CONFIG_USB_GADGET_OMAP is not set
++# CONFIG_USB_GADGET_PXA25X is not set
++# CONFIG_USB_GADGET_PXA27X is not set
++# CONFIG_USB_GADGET_S3C2410 is not set
++CONFIG_USB_GADGET_S3C_OTGD=y
++CONFIG_USB_S3C_OTGD=y
++# CONFIG_USB_GADGET_M66592 is not set
++# CONFIG_USB_GADGET_AMD5536UDC is not set
++# CONFIG_USB_GADGET_FSL_QE is not set
++# CONFIG_USB_GADGET_NET2280 is not set
++# CONFIG_USB_GADGET_GOKU is not set
++# CONFIG_USB_GADGET_DUMMY_HCD is not set
++CONFIG_USB_GADGET_DUALSPEED=y
++# CONFIG_USB_ZERO is not set
++CONFIG_USB_ETH=m
++CONFIG_USB_ETH_RNDIS=y
++# CONFIG_USB_GADGETFS is not set
++CONFIG_USB_FILE_STORAGE=m
++# CONFIG_USB_FILE_STORAGE_TEST is not set
++CONFIG_USB_G_SERIAL=m
++# CONFIG_USB_MIDI_GADGET is not set
++# CONFIG_USB_G_PRINTER is not set
++# CONFIG_USB_CDC_COMPOSITE is not set
+ CONFIG_MMC=y
+-CONFIG_MMC_DEBUG=y
+-CONFIG_MMC_UNSAFE_RESUME=y
++# CONFIG_MMC_DEBUG is not set
++# CONFIG_MMC_UNSAFE_RESUME is not set
+ 
+ #
+ # MMC/SD/SDIO Card Drivers
+ #
+ CONFIG_MMC_BLOCK=y
+ CONFIG_MMC_BLOCK_BOUNCE=y
+-CONFIG_SDIO_UART=y
++# CONFIG_SDIO_UART is not set
+ # CONFIG_MMC_TEST is not set
+ 
+ #
+ # MMC/SD/SDIO Host Controller Drivers
+ #
+ CONFIG_MMC_SDHCI=y
++CONFIG_MMC_SDHCI_S3C=y
+ # CONFIG_MEMSTICK is not set
+ # CONFIG_ACCESSIBILITY is not set
+ # CONFIG_NEW_LEDS is not set
+@@ -1260,7 +1485,7 @@ CONFIG_CRYPTO_HW=y
+ # Library routines
+ #
+ CONFIG_BITREVERSE=y
+-# CONFIG_CRC_CCITT is not set
++CONFIG_CRC_CCITT=y
+ # CONFIG_CRC16 is not set
+ # CONFIG_CRC_T10DIF is not set
+ # CONFIG_CRC_ITU_T is not set
+diff --git a/arch/arm/configs/smdkc100nfs_defconfig b/arch/arm/configs/smdkc100nfs_defconfig
+index 6be7446..fc6bc22 100644
+--- a/arch/arm/configs/smdkc100nfs_defconfig
++++ b/arch/arm/configs/smdkc100nfs_defconfig
+@@ -1,7 +1,7 @@
+ #
+ # Automatically generated make config: don't edit
+-# Linux kernel version: 2.6.28-rc7
+-# Thu Dec 11 15:31:58 2008
++# Linux kernel version: 2.6.28-rc8
++# Sat Dec 27 13:45:02 2008
+ #
+ CONFIG_ARM=y
+ CONFIG_SYS_SUPPORTS_APM_EMULATION=y
+@@ -180,13 +180,17 @@ CONFIG_PLAT_S3C=y
+ # Power management
+ #
+ CONFIG_S3C_LOWLEVEL_UART_PORT=0
++CONFIG_SPLIT_ROOT_FILESYSTEM=y
+ CONFIG_S3C_GPIO_SPACE=0
+ CONFIG_S3C_GPIO_TRACK=y
+ CONFIG_S3C_GPIO_PULL_UPDOWN=y
+ CONFIG_S3C_GPIO_CFG_S5PC1XX=y
++CONFIG_S3C_DEV_HSMMC=y
++CONFIG_S3C_DEV_HSMMC1=y
+ CONFIG_S3C_DEV_I2C1=y
+ CONFIG_S3C_DMA_PL330=y
+ CONFIG_CPU_S5PC100=y
++CONFIG_S5PC1XX_SETUP_SDHCI=y
+ CONFIG_MACH_SMDKC100=y
+ 
+ #
+@@ -386,13 +390,96 @@ CONFIG_EXTRA_FIRMWARE=""
+ # CONFIG_DEBUG_DEVRES is not set
+ # CONFIG_SYS_HYPERVISOR is not set
+ # CONFIG_CONNECTOR is not set
+-# CONFIG_MTD is not set
++CONFIG_MTD=y
++# CONFIG_MTD_DEBUG is not set
++CONFIG_MTD_CONCAT=y
++CONFIG_MTD_PARTITIONS=y
++CONFIG_MTD_REDBOOT_PARTS=y
++CONFIG_MTD_REDBOOT_DIRECTORY_BLOCK=-1
++CONFIG_MTD_REDBOOT_PARTS_UNALLOCATED=y
++# CONFIG_MTD_REDBOOT_PARTS_READONLY is not set
++CONFIG_MTD_CMDLINE_PARTS=y
++# CONFIG_MTD_AFS_PARTS is not set
++# CONFIG_MTD_AR7_PARTS is not set
++
++#
++# User Modules And Translation Layers
++#
++CONFIG_MTD_CHAR=y
++CONFIG_MTD_BLKDEVS=y
++CONFIG_MTD_BLOCK=y
++# CONFIG_FTL is not set
++# CONFIG_NFTL is not set
++# CONFIG_INFTL is not set
++# CONFIG_RFD_FTL is not set
++# CONFIG_SSFDC is not set
++# CONFIG_MTD_OOPS is not set
++
++#
++# RAM/ROM/Flash chip drivers
++#
++# CONFIG_MTD_CFI is not set
++# CONFIG_MTD_JEDECPROBE is not set
++CONFIG_MTD_MAP_BANK_WIDTH_1=y
++CONFIG_MTD_MAP_BANK_WIDTH_2=y
++CONFIG_MTD_MAP_BANK_WIDTH_4=y
++# CONFIG_MTD_MAP_BANK_WIDTH_8 is not set
++# CONFIG_MTD_MAP_BANK_WIDTH_16 is not set
++# CONFIG_MTD_MAP_BANK_WIDTH_32 is not set
++CONFIG_MTD_CFI_I1=y
++CONFIG_MTD_CFI_I2=y
++# CONFIG_MTD_CFI_I4 is not set
++# CONFIG_MTD_CFI_I8 is not set
++# CONFIG_MTD_RAM is not set
++# CONFIG_MTD_ROM is not set
++# CONFIG_MTD_ABSENT is not set
++
++#
++# Mapping drivers for chip access
++#
++# CONFIG_MTD_COMPLEX_MAPPINGS is not set
++# CONFIG_MTD_PLATRAM is not set
++
++#
++# Self-contained MTD device drivers
++#
++# CONFIG_MTD_SLRAM is not set
++# CONFIG_MTD_PHRAM is not set
++# CONFIG_MTD_MTDRAM is not set
++# CONFIG_MTD_BLOCK2MTD is not set
++
++#
++# Disk-On-Chip Device Drivers
++#
++# CONFIG_MTD_DOC2000 is not set
++# CONFIG_MTD_DOC2001 is not set
++# CONFIG_MTD_DOC2001PLUS is not set
++CONFIG_MTD_NAND=y
++# CONFIG_MTD_NAND_VERIFY_WRITE is not set
++# CONFIG_MTD_NAND_ECC_SMC is not set
++# CONFIG_MTD_NAND_MUSEUM_IDS is not set
++# CONFIG_MTD_NAND_GPIO is not set
++CONFIG_MTD_NAND_IDS=y
++CONFIG_MTD_NAND_S3C=y
++# CONFIG_MTD_NAND_S3C_DEBUG is not set
++CONFIG_MTD_NAND_S3C_HWECC=y
++# CONFIG_MTD_NAND_DISKONCHIP is not set
++# CONFIG_MTD_NAND_NANDSIM is not set
++# CONFIG_MTD_NAND_PLATFORM is not set
++# CONFIG_MTD_ALAUDA is not set
++# CONFIG_MTD_ONENAND is not set
++
++#
++# UBI - Unsorted block images
++#
++# CONFIG_MTD_UBI is not set
+ # CONFIG_PARPORT is not set
+ CONFIG_BLK_DEV=y
+ # CONFIG_BLK_DEV_COW_COMMON is not set
+ CONFIG_BLK_DEV_LOOP=y
+ # CONFIG_BLK_DEV_CRYPTOLOOP is not set
+ # CONFIG_BLK_DEV_NBD is not set
++# CONFIG_BLK_DEV_UB is not set
+ CONFIG_BLK_DEV_RAM=y
+ CONFIG_BLK_DEV_RAM_COUNT=16
+ CONFIG_BLK_DEV_RAM_SIZE=8192
+@@ -411,9 +498,43 @@ CONFIG_HAVE_IDE=y
+ # SCSI device support
+ #
+ # CONFIG_RAID_ATTRS is not set
+-# CONFIG_SCSI is not set
+-# CONFIG_SCSI_DMA is not set
++CONFIG_SCSI=y
++CONFIG_SCSI_DMA=y
++# CONFIG_SCSI_TGT is not set
+ # CONFIG_SCSI_NETLINK is not set
++CONFIG_SCSI_PROC_FS=y
++
++#
++# SCSI support type (disk, tape, CD-ROM)
++#
++CONFIG_BLK_DEV_SD=y
++# CONFIG_CHR_DEV_ST is not set
++# CONFIG_CHR_DEV_OSST is not set
++# CONFIG_BLK_DEV_SR is not set
++CONFIG_CHR_DEV_SG=y
++# CONFIG_CHR_DEV_SCH is not set
++
++#
++# Some SCSI devices (e.g. CD jukebox) support multiple LUNs
++#
++# CONFIG_SCSI_MULTI_LUN is not set
++# CONFIG_SCSI_CONSTANTS is not set
++# CONFIG_SCSI_LOGGING is not set
++# CONFIG_SCSI_SCAN_ASYNC is not set
++CONFIG_SCSI_WAIT_SCAN=m
++
++#
++# SCSI Transports
++#
++# CONFIG_SCSI_SPI_ATTRS is not set
++# CONFIG_SCSI_FC_ATTRS is not set
++# CONFIG_SCSI_ISCSI_ATTRS is not set
++# CONFIG_SCSI_SAS_LIBSAS is not set
++# CONFIG_SCSI_SRP_ATTRS is not set
++CONFIG_SCSI_LOWLEVEL=y
++# CONFIG_ISCSI_TCP is not set
++# CONFIG_SCSI_DEBUG is not set
++# CONFIG_SCSI_DH is not set
+ # CONFIG_ATA is not set
+ # CONFIG_MD is not set
+ CONFIG_NETDEVICES=y
+@@ -447,9 +568,28 @@ CONFIG_NETDEV_10000=y
+ # CONFIG_WLAN_PRE80211 is not set
+ # CONFIG_WLAN_80211 is not set
+ # CONFIG_IWLWIFI_LEDS is not set
++
++#
++# USB Network Adapters
++#
++# CONFIG_USB_CATC is not set
++# CONFIG_USB_KAWETH is not set
++# CONFIG_USB_PEGASUS is not set
++# CONFIG_USB_RTL8150 is not set
++# CONFIG_USB_USBNET is not set
+ # CONFIG_WAN is not set
+-# CONFIG_PPP is not set
++CONFIG_PPP=y
++CONFIG_PPP_MULTILINK=y
++CONFIG_PPP_FILTER=y
++CONFIG_PPP_ASYNC=y
++CONFIG_PPP_SYNC_TTY=y
++# CONFIG_PPP_DEFLATE is not set
++# CONFIG_PPP_BSDCOMP is not set
++# CONFIG_PPP_MPPE is not set
++# CONFIG_PPPOE is not set
++# CONFIG_PPPOL2TP is not set
+ # CONFIG_SLIP is not set
++CONFIG_SLHC=y
+ # CONFIG_NETCONSOLE is not set
+ # CONFIG_NETPOLL is not set
+ # CONFIG_NET_POLL_CONTROLLER is not set
+@@ -587,6 +727,7 @@ CONFIG_I2C_S3C2410=y
+ #
+ # CONFIG_I2C_PARPORT_LIGHT is not set
+ # CONFIG_I2C_TAOS_EVM is not set
++# CONFIG_I2C_TINY_USB is not set
+ 
+ #
+ # Other I2C/SMBus bus drivers
+@@ -797,8 +938,6 @@ CONFIG_LOGO=y
+ # CONFIG_LOGO_LINUX_VGA16 is not set
+ # CONFIG_LOGO_LINUX_CLUT224 is not set
+ CONFIG_LOGO_LINUX_LANDSCAPED_CLUT224=y
+-
+-# Sound
+ CONFIG_SOUND=y
+ # CONFIG_SOUND_OSS_CORE is not set
+ CONFIG_SND=y
+@@ -818,62 +957,210 @@ CONFIG_SND_DRIVERS=y
+ # CONFIG_SND_SERIAL_U16550 is not set
+ # CONFIG_SND_MPU401 is not set
+ CONFIG_SND_ARM=y
++CONFIG_SND_USB=y
++# CONFIG_SND_USB_AUDIO is not set
++# CONFIG_SND_USB_CAIAQ is not set
+ CONFIG_SND_SOC=y
+ 
+ #
+ # SoC Audio for the Samsung S3C
+ #
+ CONFIG_SND_S5PC1XX_SOC=y
+-CONFIG_SND_S5PC100_SOC_I2S=y
+-# CONFIG_SND_S3C64XX_SOC_SMDK6410_WM9713 is not set
++CONFIG_SND_SOC_I2S_V50=y
+ CONFIG_SND_SMDKC100_WM8580=y
+-CONFIG_SOUND_WM8580_INPUT_STREAM_LINE=y
+-# CONFIG_SOUND_WM8580_INPUT_STREAM_MIC is not set
+-# CONFIG_SND_S3C64XX_SOC_SMDK6410_WM8990 is not set
++CONFIG_SOUND_S5PC100_WM8580_INPUT_STREAM_LINE=y
++# CONFIG_SOUND_S5PC100_WM8580_INPUT_STREAM_MIC is not set
+ # CONFIG_SND_SOC_ALL_CODECS is not set
+ CONFIG_SND_SOC_WM8580=y
+ # CONFIG_SOUND_PRIME is not set
+-
+ CONFIG_HID_SUPPORT=y
+ CONFIG_HID=y
+ CONFIG_HID_DEBUG=y
+ # CONFIG_HIDRAW is not set
++
++#
++# USB Input Devices
++#
++CONFIG_USB_HID=y
+ # CONFIG_HID_PID is not set
++# CONFIG_USB_HIDDEV is not set
+ 
+ #
+ # Special HID drivers
+ #
+ # CONFIG_HID_COMPAT is not set
++CONFIG_HID_A4TECH=y
++CONFIG_HID_APPLE=y
++CONFIG_HID_BELKIN=y
++CONFIG_HID_BRIGHT=y
++CONFIG_HID_CHERRY=y
++CONFIG_HID_CHICONY=y
++CONFIG_HID_CYPRESS=y
++CONFIG_HID_DELL=y
++CONFIG_HID_EZKEY=y
++CONFIG_HID_GYRATION=y
++CONFIG_HID_LOGITECH=y
++# CONFIG_LOGITECH_FF is not set
++# CONFIG_LOGIRUMBLEPAD2_FF is not set
++CONFIG_HID_MICROSOFT=y
++CONFIG_HID_MONTEREY=y
++CONFIG_HID_PANTHERLORD=y
++# CONFIG_PANTHERLORD_FF is not set
++CONFIG_HID_PETALYNX=y
++CONFIG_HID_SAMSUNG=y
++CONFIG_HID_SONY=y
++CONFIG_HID_SUNPLUS=y
++# CONFIG_THRUSTMASTER_FF is not set
++# CONFIG_ZEROPLUS_FF is not set
+ CONFIG_USB_SUPPORT=y
+ CONFIG_USB_ARCH_HAS_HCD=y
+-# CONFIG_USB_ARCH_HAS_OHCI is not set
++CONFIG_USB_ARCH_HAS_OHCI=y
+ # CONFIG_USB_ARCH_HAS_EHCI is not set
+-# CONFIG_USB is not set
++CONFIG_USB=y
++# CONFIG_USB_DEBUG is not set
++# CONFIG_USB_ANNOUNCE_NEW_DEVICES is not set
++
++#
++# Miscellaneous USB options
++#
++CONFIG_USB_DEVICEFS=y
++CONFIG_USB_DEVICE_CLASS=y
++# CONFIG_USB_DYNAMIC_MINORS is not set
++# CONFIG_USB_OTG is not set
++# CONFIG_USB_MON is not set
++# CONFIG_USB_WUSB is not set
++# CONFIG_USB_WUSB_CBAF is not set
++
++#
++# USB Host Controller Drivers
++#
++# CONFIG_USB_C67X00_HCD is not set
++# CONFIG_USB_ISP116X_HCD is not set
++CONFIG_USB_OHCI_HCD=y
++# CONFIG_USB_OHCI_BIG_ENDIAN_DESC is not set
++# CONFIG_USB_OHCI_BIG_ENDIAN_MMIO is not set
++CONFIG_USB_OHCI_LITTLE_ENDIAN=y
++# CONFIG_USB_SL811_HCD is not set
++# CONFIG_USB_R8A66597_HCD is not set
++# CONFIG_USB_HWA_HCD is not set
++# CONFIG_USB_MUSB_HDRC is not set
++# CONFIG_USB_GADGET_MUSB_HDRC is not set
+ 
+ #
+-# Enable Host or Gadget support to see Inventra options
++# USB Device Class drivers
+ #
++# CONFIG_USB_ACM is not set
++# CONFIG_USB_PRINTER is not set
++# CONFIG_USB_WDM is not set
++# CONFIG_USB_TMC is not set
+ 
+ #
+ # NOTE: USB_STORAGE depends on SCSI but BLK_DEV_SD may also be needed;
+ #
+-# CONFIG_USB_GADGET is not set
++
++#
++# see USB_STORAGE Help for more information
++#
++CONFIG_USB_STORAGE=y
++# CONFIG_USB_STORAGE_DEBUG is not set
++# CONFIG_USB_STORAGE_DATAFAB is not set
++# CONFIG_USB_STORAGE_FREECOM is not set
++# CONFIG_USB_STORAGE_ISD200 is not set
++# CONFIG_USB_STORAGE_DPCM is not set
++# CONFIG_USB_STORAGE_USBAT is not set
++# CONFIG_USB_STORAGE_SDDR09 is not set
++# CONFIG_USB_STORAGE_SDDR55 is not set
++# CONFIG_USB_STORAGE_JUMPSHOT is not set
++# CONFIG_USB_STORAGE_ALAUDA is not set
++# CONFIG_USB_STORAGE_ONETOUCH is not set
++# CONFIG_USB_STORAGE_KARMA is not set
++# CONFIG_USB_STORAGE_CYPRESS_ATACB is not set
++# CONFIG_USB_LIBUSUAL is not set
++
++#
++# USB Imaging devices
++#
++# CONFIG_USB_MDC800 is not set
++# CONFIG_USB_MICROTEK is not set
++
++#
++# USB port drivers
++#
++# CONFIG_USB_SERIAL is not set
++
++#
++# USB Miscellaneous drivers
++#
++# CONFIG_USB_EMI62 is not set
++# CONFIG_USB_EMI26 is not set
++# CONFIG_USB_ADUTUX is not set
++# CONFIG_USB_SEVSEG is not set
++# CONFIG_USB_RIO500 is not set
++# CONFIG_USB_LEGOTOWER is not set
++# CONFIG_USB_LCD is not set
++# CONFIG_USB_BERRY_CHARGE is not set
++# CONFIG_USB_LED is not set
++# CONFIG_USB_CYPRESS_CY7C63 is not set
++# CONFIG_USB_CYTHERM is not set
++# CONFIG_USB_PHIDGET is not set
++# CONFIG_USB_IDMOUSE is not set
++# CONFIG_USB_FTDI_ELAN is not set
++# CONFIG_USB_APPLEDISPLAY is not set
++# CONFIG_USB_LD is not set
++# CONFIG_USB_TRANCEVIBRATOR is not set
++# CONFIG_USB_IOWARRIOR is not set
++# CONFIG_USB_TEST is not set
++# CONFIG_USB_ISIGHTFW is not set
++# CONFIG_USB_VST is not set
++CONFIG_USB_GADGET=y
++# CONFIG_USB_GADGET_DEBUG is not set
++# CONFIG_USB_GADGET_DEBUG_FILES is not set
++CONFIG_USB_GADGET_VBUS_DRAW=2
++CONFIG_USB_GADGET_SELECTED=y
++# CONFIG_USB_GADGET_AT91 is not set
++# CONFIG_USB_GADGET_ATMEL_USBA is not set
++# CONFIG_USB_GADGET_FSL_USB2 is not set
++# CONFIG_USB_GADGET_LH7A40X is not set
++# CONFIG_USB_GADGET_OMAP is not set
++# CONFIG_USB_GADGET_PXA25X is not set
++# CONFIG_USB_GADGET_PXA27X is not set
++# CONFIG_USB_GADGET_S3C2410 is not set
++CONFIG_USB_GADGET_S3C_OTGD=y
++CONFIG_USB_S3C_OTGD=y
++# CONFIG_USB_GADGET_M66592 is not set
++# CONFIG_USB_GADGET_AMD5536UDC is not set
++# CONFIG_USB_GADGET_FSL_QE is not set
++# CONFIG_USB_GADGET_NET2280 is not set
++# CONFIG_USB_GADGET_GOKU is not set
++# CONFIG_USB_GADGET_DUMMY_HCD is not set
++CONFIG_USB_GADGET_DUALSPEED=y
++# CONFIG_USB_ZERO is not set
++CONFIG_USB_ETH=m
++# CONFIG_USB_ETH_RNDIS is not set
++# CONFIG_USB_GADGETFS is not set
++CONFIG_USB_FILE_STORAGE=m
++# CONFIG_USB_FILE_STORAGE_TEST is not set
++CONFIG_USB_G_SERIAL=m
++# CONFIG_USB_MIDI_GADGET is not set
++# CONFIG_USB_G_PRINTER is not set
++# CONFIG_USB_CDC_COMPOSITE is not set
+ CONFIG_MMC=y
+-CONFIG_MMC_DEBUG=y
+-CONFIG_MMC_UNSAFE_RESUME=y
++# CONFIG_MMC_DEBUG is not set
++# CONFIG_MMC_UNSAFE_RESUME is not set
+ 
+ #
+ # MMC/SD/SDIO Card Drivers
+ #
+ CONFIG_MMC_BLOCK=y
+ CONFIG_MMC_BLOCK_BOUNCE=y
+-CONFIG_SDIO_UART=y
++# CONFIG_SDIO_UART is not set
+ # CONFIG_MMC_TEST is not set
+ 
+ #
+ # MMC/SD/SDIO Host Controller Drivers
+ #
+ CONFIG_MMC_SDHCI=y
++CONFIG_MMC_SDHCI_S3C=y
+ # CONFIG_MEMSTICK is not set
+ # CONFIG_ACCESSIBILITY is not set
+ # CONFIG_NEW_LEDS is not set
+@@ -921,8 +1208,11 @@ CONFIG_GENERIC_ACL=y
+ #
+ # DOS/FAT/NT Filesystems
+ #
+-# CONFIG_MSDOS_FS is not set
+-# CONFIG_VFAT_FS is not set
++CONFIG_FAT_FS=y
++CONFIG_MSDOS_FS=y
++CONFIG_VFAT_FS=y
++CONFIG_FAT_DEFAULT_CODEPAGE=437
++CONFIG_FAT_DEFAULT_IOCHARSET="iso8859-1"
+ # CONFIG_NTFS_FS is not set
+ 
+ #
+@@ -947,6 +1237,7 @@ CONFIG_TMPFS_POSIX_ACL=y
+ # CONFIG_BEFS_FS is not set
+ # CONFIG_BFS_FS is not set
+ # CONFIG_EFS_FS is not set
++# CONFIG_JFFS2_FS is not set
+ CONFIG_CRAMFS=y
+ # CONFIG_VXFS_FS is not set
+ # CONFIG_MINIX_FS is not set
+@@ -1125,6 +1416,7 @@ CONFIG_CRYPTO=y
+ #
+ # CONFIG_CRYPTO_FIPS is not set
+ # CONFIG_CRYPTO_MANAGER is not set
++# CONFIG_CRYPTO_MANAGER2 is not set
+ # CONFIG_CRYPTO_GF128MUL is not set
+ # CONFIG_CRYPTO_NULL is not set
+ # CONFIG_CRYPTO_CRYPTD is not set
+@@ -1207,7 +1499,7 @@ CONFIG_CRYPTO_HW=y
+ # Library routines
+ #
+ CONFIG_BITREVERSE=y
+-# CONFIG_CRC_CCITT is not set
++CONFIG_CRC_CCITT=y
+ # CONFIG_CRC16 is not set
+ # CONFIG_CRC_T10DIF is not set
+ # CONFIG_CRC_ITU_T is not set
+diff --git a/arch/arm/mach-s5pc100/Kconfig b/arch/arm/mach-s5pc100/Kconfig
+index 4e8592d..1a30b37 100644
+--- a/arch/arm/mach-s5pc100/Kconfig
++++ b/arch/arm/mach-s5pc100/Kconfig
+@@ -14,11 +14,19 @@ config CPU_S5PC100
+ 	help
+ 	  Enable S5PC100 CPU support
+ 
++config S5PC1XX_SETUP_SDHCI
++        bool
++        help
++          Internal helper functions for S5PC1XX based SDHCI systems
++
+ config MACH_SMDKC100
+ 	bool "SMDKC100"
+ 	select CPU_S5PC100
+ 	select S3C_DMA_PL330
+ 	select S3C_DEV_I2C1
++        select S3C_DEV_HSMMC
++        select S3C_DEV_HSMMC1
++        select S5PC1XX_SETUP_SDHCI
+ 	select S3C64XX_SETUP_I2C1
+ 	help
+ 	  Machine support for the Samsung SMDKC100
+diff --git a/arch/arm/mach-s5pc100/Makefile b/arch/arm/mach-s5pc100/Makefile
+index 5bedd45..3f4aa8c 100644
+--- a/arch/arm/mach-s5pc100/Makefile
++++ b/arch/arm/mach-s5pc100/Makefile
+@@ -15,6 +15,10 @@ obj-				:=
+ obj-$(CONFIG_CPU_S5PC100)	+= cpu.o
+ obj-$(CONFIG_CPU_S5PC100)	+= dma.o
+ 
++# Helper and device support
++
++obj-$(CONFIG_S5PC1XX_SETUP_SDHCI)       += setup-sdhci.o
++
+ # machine support
+ 
+ obj-$(CONFIG_MACH_SMDKC100)	+= mach-smdkc100.o
+diff --git a/arch/arm/mach-s5pc100/cpu.c b/arch/arm/mach-s5pc100/cpu.c
+index 2e577eb..5dfbaee 100644
+--- a/arch/arm/mach-s5pc100/cpu.c
++++ b/arch/arm/mach-s5pc100/cpu.c
+@@ -46,6 +46,9 @@ static struct map_desc s5pc100_iodesc[] __initdata = {
+ 	IODESC_ENT(LCD),
+ 	IODESC_ENT(SROMC),
+ 	IODESC_ENT(SYSTIMER),
++        IODESC_ENT(OTG),
++        IODESC_ENT(OTGSFR),
++        IODESC_ENT(SYSCON),
+ 	//IODESC_ENT(HOSTIFB),
+ };
+ 
+@@ -58,11 +61,11 @@ void __init s5pc100_map_io(void)
+ {
+ 	iotable_init(s5pc100_iodesc, ARRAY_SIZE(s5pc100_iodesc));
+ 
+-#if 0
+-	/* initialise device information early */
+-	s3c6410_default_sdhci0();
+-	s3c6410_default_sdhci1();
++        /* initialise SDHCI device information early */
++        s3c6410_default_sdhci0();
++        s3c6410_default_sdhci1();
+ 
++#if 0
+ 	/* the i2c devices are directly compatible with s3c2440 */
+ 	s3c_i2c0_setname("s3c2440-i2c");
+ 	s3c_i2c1_setname("s3c2440-i2c");
+diff --git a/arch/arm/mach-s5pc100/include/mach/map.h b/arch/arm/mach-s5pc100/include/mach/map.h
+index 317e5d9..2c899a2 100644
+--- a/arch/arm/mach-s5pc100/include/mach/map.h
++++ b/arch/arm/mach-s5pc100/include/mach/map.h
+@@ -33,6 +33,9 @@
+ #define S3C_VA_UART3		S3C_VA_UARTx(3)
+ 
+ #define S5PC1XX_PA_SYSCON	(0xE0100000)
++#define S5PC1XX_VA_SYSCON       S3C_VA_SYS
++#define S5PC1XX_SZ_SYSCON       SZ_1M  
++
+ #define S5PC1XX_PA_TIMER	(0xEA000000)
+ #define S5PC1XX_PA_IIC0		(0xEC100000)
+ #define S5PC1XX_PA_IIC1		(0xEC200000)
+@@ -84,6 +87,38 @@
+ #define S3C_PA_IIC		S5PC1XX_PA_IIC0
+ #define S3C_PA_IIC1		S5PC1XX_PA_IIC1
+ 
++#define S3C_VA_OTG              S5PC1XX_VA_OTG
++#define S3C_PA_OTG              S5PC1XX_PA_OTG
++#define S3C_SZ_OTG              S5PC1XX_SZ_OTG
++
++#define S3C_VA_OTGSFR           S5PC1XX_VA_OTGSFR
++#define S3C_PA_OTGSFR           S5PC1XX_PA_OTGSFR
++#define S3C_SZ_OTGSFR           S5PC1XX_SZ_OTGSFR
++
++/* USB Host */
++#define S5PC1XX_PA_USBHOST      (0xED400000)
++#define S5PC1XX_SZ_USBHOST      SZ_1M
++
++/* USB OTG */
++#define S5PC1XX_VA_OTG          S3C_ADDR(0x00E00000)
++#define S5PC1XX_PA_OTG          (0xED200000)
++#define S5PC1XX_SZ_OTG          SZ_1M
++
++/* USB OTG SFR */
++#define S5PC1XX_VA_OTGSFR       S3C_ADDR(0x00F00000)
++#define S5PC1XX_PA_OTGSFR       (0xED300000)
++#define S5PC1XX_SZ_OTGSFR       SZ_1M
++
++/* HSMMC units */
++#define S5PC1XX_PA_HSMMC(x)     (0xED800000 + ((x) * 0x100000))
++#define S5PC1XX_PA_HSMMC0       S5PC1XX_PA_HSMMC(0)
++#define S5PC1XX_PA_HSMMC1       S5PC1XX_PA_HSMMC(1)
++#define S5PC1XX_PA_HSMMC2       S5PC1XX_PA_HSMMC(2)
++
++#define S3C_PA_HSMMC0           S5PC1XX_PA_HSMMC0
++#define S3C_PA_HSMMC1           S5PC1XX_PA_HSMMC1
++#define S3C_PA_HSMMC2           S5PC1XX_PA_HSMMC2
++
+ #define S3C_PA_IIS		S5PC1XX_PA_IIS
+ #define S3C_PA_ADC		S5PC1XX_PA_ADC
+ #define S3C_PA_DMA		S5PC1XX_PA_DMA
+diff --git a/arch/arm/mach-s5pc100/mach-smdkc100.c b/arch/arm/mach-s5pc100/mach-smdkc100.c
+index 550f36f..98c4191 100644
+--- a/arch/arm/mach-s5pc100/mach-smdkc100.c
++++ b/arch/arm/mach-s5pc100/mach-smdkc100.c
+@@ -21,6 +21,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/io.h>
+ #include <linux/i2c.h>
++#include <linux/delay.h>
+ #include <linux/mtd/nand.h>
+ #include <linux/mtd/partitions.h>
+ 
+@@ -48,6 +49,12 @@
+ #include <plat/adc.h>
+ #include <plat/regs-gpio.h>
+ #include <plat/gpio-bank-k0.h>
++#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
++#include <plat/regs-otg.h>
++#include <plat/regs-sys.h>
++#include <plat/regs-clock.h>
++#include <plat/pll.h>
++#endif
+ 
+ #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
+ #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
+@@ -81,6 +88,10 @@ static struct platform_device *smdkc100_devices[] __initdata = {
+ 	&s3c_device_smc911x,
+ 	&s3c_device_i2c0,
+ 	&s3c_device_i2c1,
++        &s3c_device_usb,
++	&s3c_device_usbgadget,
++        &s3c_device_hsmmc0,
++        &s3c_device_hsmmc1,
+ };
+ 
+ 
+@@ -152,3 +163,55 @@ MACHINE_START(SMDKC100, "SMDKC100")
+ 	.init_machine	= smdkc100_machine_init,
+ 	.timer		= &s5pc1xx_timer,
+ MACHINE_END
++
++#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
++/* Initializes OTG Phy. */
++void otg_phy_init(u32 otg_phy_clk) {
++        writel(readl(S3C_OTHERS)|S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
++        writel(0x0, S3C_USBOTG_PHYPWR);         /* Power up */
++        writel(otg_phy_clk, S3C_USBOTG_PHYCLK);
++        writel(0x7, S3C_USBOTG_RSTCON);
++
++        udelay(50);
++        writel(0x0, S3C_USBOTG_RSTCON);
++        udelay(50);
++}
++#endif
++
++
++#if defined (CONFIG_USB_GADGET_S3C_OTGD)
++/* OTG PHY Power Off */
++void otg_phy_off(void) {
++        writel(readl(S3C_USBOTG_PHYCLK) | (0X1 << 4) , S3C_USBOTG_PHYCLK);
++        writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
++}
++#endif
++
++#if defined (CONFIG_USB_OHCI_HCD)
++void usb_host_clk_en(int usb_host_clksrc) {
++        switch (usb_host_clksrc) {
++        case 0: /* epll clk */
++                /* Setting the epll clk to 48 MHz, P=3, M=96, S=3 */
++                writel(readl(S5P_EPLL_CON) & ~(S5P_EPLL_MASK) | (S5P_EPLL_EN | 
++		S5P_EPLLVAL(96,3,3)), S5P_EPLL_CON);
++                writel((readl(S5P_CLK_SRC0) | S5P_CLKSRC0_EPLL_MASK) ,S5P_CLK_SRC0);
++                writel((readl(S5P_CLK_SRC1)& ~S5P_CLKSRC1_UHOST_MASK) ,S5P_CLK_SRC1);
++
++                /* USB host clock divider ratio is 1 */
++                writel((readl(S5P_CLK_DIV2)& ~S5P_CLKDIV2_UHOST_MASK), S5P_CLK_DIV2);
++                break;
++
++	/* Add other clock sources here */
++
++        default:
++                printk(KERN_INFO "Unknown USB Host Clock Source\n");
++                BUG();
++                break;
++        }
++
++        writel(readl(S5P_CLKGATE_D10)|S5P_CLKGATE_D10_USBHOST,
++                S5P_CLKGATE_D10);
++        writel(readl(S5P_SCLKGATE0)|S5P_CLKGATE_SCLK0_USBHOST, S5P_SCLKGATE0);
++
++}
++#endif
+diff --git a/arch/arm/plat-s3c/include/plat/sdhci.h b/arch/arm/plat-s3c/include/plat/sdhci.h
+index c4ca392..a2d9e02 100644
+--- a/arch/arm/plat-s3c/include/plat/sdhci.h
++++ b/arch/arm/plat-s3c/include/plat/sdhci.h
+@@ -58,6 +58,7 @@ struct s3c_sdhci_platdata {
+ extern void s3c_sdhci0_set_platdata(struct s3c_sdhci_platdata *pd);
+ extern void s3c_sdhci1_set_platdata(struct s3c_sdhci_platdata *pd);
+ 
++
+ /* Default platform data, exported so that per-cpu initialisation can
+  * set the correct one when there are more than one cpu type selected.
+ */
+@@ -67,7 +68,7 @@ extern struct s3c_sdhci_platdata s3c_hsmmc1_def_platdata;
+ 
+ /* Helper function availablity */
+ 
+-#ifdef CONFIG_S3C6410_SETUP_SDHCI
++#if defined (CONFIG_S3C6410_SETUP_SDHCI) || defined (CONFIG_S5PC1XX_SETUP_SDHCI)
+ extern char *s3c6410_hsmmc_clksrcs[4];
+ 
+ extern void s3c6410_setup_sdhci0_cfg_gpio(struct platform_device *, int w);
+@@ -98,7 +99,7 @@ static inline void s3c6410_default_sdhci1(void)
+ }
+ #else
+ static inline void s3c6410_default_sdhci1(void) { }
+-#endif /* CONFIG_S3C_DEV_HSMMC1 */
++#endif /* CONFIG_S3C_DEV_HSMMC1*/
+ 
+ #else
+ static inline void s3c6410_default_sdhci0(void) { }
+diff --git a/arch/arm/plat-s5pc1xx/devs.c b/arch/arm/plat-s5pc1xx/devs.c
+index 53248e8..3b1fa9b 100644
+--- a/arch/arm/plat-s5pc1xx/devs.c
++++ b/arch/arm/plat-s5pc1xx/devs.c
+@@ -136,3 +136,57 @@ struct platform_device s3c_device_nand = {
+ };
+ 
+ EXPORT_SYMBOL(s3c_device_nand);
++
++/* USB Host Controller */
++
++static struct resource s3c_usb_resource[] = {
++        [0] = {
++                .start = S5PC1XX_PA_USBHOST,
++                .end   = S5PC1XX_PA_USBHOST + S5PC1XX_SZ_USBHOST - 1,
++                .flags = IORESOURCE_MEM,
++        },
++        [1] = {
++                .start = IRQ_UHOST,
++                .end   = IRQ_UHOST,
++                .flags = IORESOURCE_IRQ,
++        }
++};
++
++static u64 s3c_device_usb_dmamask = 0xffffffffUL;
++
++struct platform_device s3c_device_usb = {
++        .name             = "s3c2410-ohci",
++        .id               = -1,
++        .num_resources    = ARRAY_SIZE(s3c_usb_resource),
++        .resource         = s3c_usb_resource,
++        .dev              = {
++                .dma_mask = &s3c_device_usb_dmamask,
++                .coherent_dma_mask = 0xffffffffUL
++        }
++};
++
++EXPORT_SYMBOL(s3c_device_usb);
++
++/* USB Device (Gadget)*/
++
++static struct resource s3c_usbgadget_resource[] = {
++        [0] = {
++                .start = S5PC1XX_PA_OTG,
++                .end   = S5PC1XX_PA_OTG+S5PC1XX_SZ_OTG-1,
++                .flags = IORESOURCE_MEM,
++        },
++        [1] = {
++                .start = IRQ_OTG,
++                .end   = IRQ_OTG,
++                .flags = IORESOURCE_IRQ,
++        }
++};
++
++struct platform_device s3c_device_usbgadget = {
++        .name             = "s3c2410-usbgadget",
++        .id               = -1,
++        .num_resources    = ARRAY_SIZE(s3c_usbgadget_resource),
++        .resource         = s3c_usbgadget_resource,
++};
++
++EXPORT_SYMBOL(s3c_device_usbgadget);
+diff --git a/arch/arm/plat-s5pc1xx/include/plat/regs-clock.h b/arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
+index 50ecf9f..d5bea1a 100644
+--- a/arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
++++ b/arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
+@@ -56,6 +56,9 @@
+ #define S5P_SCLKGATE0		S5P_CLKREG(0x560)
+ #define S5P_SCLKGATE1		S5P_CLKREG(0x564)
+ 
++#define S5P_EPLL_EN     (1<<31)
++#define S5P_EPLL_MASK   0xffffffff 
++#define S5P_EPLLVAL(_m,_p,_s)   ((_m) << 16 | ((_p) << 8) | ((_s)))
+ 
+ /* CLKSRC0 */
+ #define S5P_CLKSRC0_APLL_MASK		(0x1<<0)
+diff --git a/arch/arm/plat-s5pc1xx/include/plat/regs-sys.h b/arch/arm/plat-s5pc1xx/include/plat/regs-sys.h
+index b141a4f..3b96337 100644
+--- a/arch/arm/plat-s5pc1xx/include/plat/regs-sys.h
++++ b/arch/arm/plat-s5pc1xx/include/plat/regs-sys.h
+@@ -15,7 +15,12 @@
+ #ifndef __PLAT_REGS_SYS_H
+ #define __PLAT_REGS_SYS_H __FILE__
+ 
++#if defined (CONFIG_PLAT_S5PC1XX)
+ #define S3C_SYSREG(x)		(S3C_VA_SYS + (x))
++#define S3C_OTHERS              S3C_SYSREG(0x8200)
++
++#define S3C_OTHERS_USB_SIG_MASK (1 << 16)
++#endif
+ 
+ #define S3C64XX_OTHERS		S3C_SYSREG(0x900)
+ 
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index da40c58..e7f4a95 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -50,7 +50,7 @@ config MMC_SDHCI_PCI
+ 
+ config MMC_SDHCI_S3C
+ 	tristate "SDHCI support on Samsung S3C SoC"
+-	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
++	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX || PLAT_S5PC1XX)
+ 	help
+ 	  This selects the Secure Digital Host Controller Interface (SDHCI)
+ 	  often referrered to as the HSMMC block in some of the Samsung S3C
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index a1ddb13..32412ab 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -91,7 +91,11 @@ static unsigned int sdhci_s3c_get_max_clk(struct sdhci_host *host)
+ 
+ static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *host)
+ {
+-	return sdhci_s3c_get_max_clk(host) / 1000000;
++#if defined (CONFIG_CPU_S5PC100)        
++        return sdhci_s3c_get_max_clk(host) / 3000000;
++#else
++        return sdhci_s3c_get_max_clk(host) / 1000000;
++#endif
+ }
+ 
+ static void sdhci_s3c_set_ios(struct sdhci_host *host,
+diff --git a/drivers/usb/Kconfig b/drivers/usb/Kconfig
+index 289d81a..fb83dcd 100644
+--- a/drivers/usb/Kconfig
++++ b/drivers/usb/Kconfig
+@@ -32,6 +32,7 @@ config USB_ARCH_HAS_OHCI
+ 	default y if ARCH_OMAP
+ 	default y if ARCH_LH7A404
+ 	default y if ARCH_S3C2410
++	default y if ARCH_S5PC1XX
+ 	default y if PXA27x
+ 	default y if PXA3xx
+ 	default y if ARCH_EP93XX
+diff --git a/drivers/usb/gadget/Kconfig b/drivers/usb/gadget/Kconfig
+index f64a061..e572d40 100644
+--- a/drivers/usb/gadget/Kconfig
++++ b/drivers/usb/gadget/Kconfig
+@@ -112,7 +112,7 @@ config	USB_GADGET_SELECTED
+ choice
+ 	prompt "USB Peripheral Controller"
+ 	depends on USB_GADGET
+-	default USB_GADGET_S3C_OTGD if PLAT_S3C64XX
++	default USB_GADGET_S3C_OTGD if (PLAT_S3C64XX || PLAT_S5PC1XX)
+ 	help
+ 	   A USB device uses a controller to talk to its host.
+ 	   Systems should have only one such upstream link.
+@@ -294,7 +294,7 @@ config USB_S3C2410_DEBUG
+ 
+ config USB_GADGET_S3C_OTGD
+ 	boolean "S3C HS USB OTG Device"
+-	depends on PLAT_S3C64XX && !(USB_S3C_OTG_HOST) 
++	depends on (PLAT_S3C64XX || PLAT_S5PC1XX) && !(USB_S3C_OTG_HOST) 
+ 	help
+ 	  Samsung's S3C64XX processors include high speed USB OTG2.0
+ 	  controller. It has 15 configurable endpoints, as well as
+diff --git a/drivers/usb/gadget/f_rndis.c b/drivers/usb/gadget/f_rndis.c
+index 428b599..e1b67c0 100644
+--- a/drivers/usb/gadget/f_rndis.c
++++ b/drivers/usb/gadget/f_rndis.c
+@@ -172,6 +172,7 @@ static struct usb_interface_descriptor rndis_data_intf __initdata = {
+ 	.bDescriptorType =	USB_DT_INTERFACE,
+ 
+ 	/* .bInterfaceNumber = DYNAMIC */
++	.bAlternateSetting =    0,
+ 	.bNumEndpoints =	2,
+ 	.bInterfaceClass =	USB_CLASS_CDC_DATA,
+ 	.bInterfaceSubClass =	0,
+@@ -651,6 +652,9 @@ rndis_bind(struct usb_configuration *c, struct usb_function *f)
+ 				fs_in_desc.bEndpointAddress;
+ 		hs_out_desc.bEndpointAddress =
+ 				fs_out_desc.bEndpointAddress;
++		hs_notify_desc.bEndpointAddress =
++                               fs_notify_desc.bEndpointAddress;
++
+ 
+ 		/* copy descriptors, and track endpoint copies */
+ 		f->hs_descriptors = usb_copy_descriptors(eth_hs_function);
+@@ -662,6 +666,8 @@ rndis_bind(struct usb_configuration *c, struct usb_function *f)
+ 				f->hs_descriptors, &hs_in_desc);
+ 		rndis->hs.out = usb_find_endpoint(eth_hs_function,
+ 				f->hs_descriptors, &hs_out_desc);
++		rndis->hs.notify = usb_find_endpoint(eth_hs_function,
++                                f->hs_descriptors, &hs_notify_desc);
+ 	}
+ 
+ 	rndis->port.open = rndis_open;
+diff --git a/drivers/usb/gadget/s3c_udc_otg.c b/drivers/usb/gadget/s3c_udc_otg.c
+index e35993c..57f2f7c 100644
+--- a/drivers/usb/gadget/s3c_udc_otg.c
++++ b/drivers/usb/gadget/s3c_udc_otg.c
+@@ -159,7 +159,11 @@ static void udc_set_address(struct s3c_udc *dev, unsigned char address);
+ static void reconfig_usbd(void);
+ 
+ /* extern declarations in arch/arm/mach-s3c64xx*/
++#if defined (CONFIG_CPU_S5PC100)
++#define OTGD_PHY_CLK_VALUE	(0x22)	/* 12 MHz UTMI Interface, Oscillator */
++#else
+ #define OTGD_PHY_CLK_VALUE	(0x20)	/* UTMI Interface, Oscillator */
++#endif
+ extern void otg_phy_init(u32 otg_phy_clk);
+ extern void otg_phy_off(void);
+ 
+diff --git a/drivers/usb/host/ohci-hcd.c b/drivers/usb/host/ohci-hcd.c
+index 8aa3f45..e802b1f 100644
+--- a/drivers/usb/host/ohci-hcd.c
++++ b/drivers/usb/host/ohci-hcd.c
+@@ -997,7 +997,7 @@ MODULE_LICENSE ("GPL");
+ #define SA1111_DRIVER		ohci_hcd_sa1111_driver
+ #endif
+ 
+-#ifdef CONFIG_ARCH_S3C2410
++#if defined (CONFIG_ARCH_S3C2410) || defined (CONFIG_ARCH_S5PC1XX)
+ #include "ohci-s3c2410.c"
+ #define PLATFORM_DRIVER		ohci_hcd_s3c2410_driver
+ #endif
+diff --git a/drivers/usb/host/ohci-s3c2410.c b/drivers/usb/host/ohci-s3c2410.c
+index f46af7a..9351f4d 100644
+--- a/drivers/usb/host/ohci-s3c2410.c
++++ b/drivers/usb/host/ohci-s3c2410.c
+@@ -28,6 +28,9 @@
+ #define valid_port(idx) ((idx) == 1 || (idx) == 2)
+ 
+ /* clock device associated with the hcd */
++#define S3C_USB_CLKSRC_EPLL     0
++
++extern void usb_host_clk_en(int usb_host_clksrc);
+ 
+ static struct clk *clk;
+ static struct clk *usb_clk;
+@@ -49,8 +52,10 @@ static void s3c2410_start_hc(struct platform_device *dev, struct usb_hcd *hcd)
+ 
+ 	dev_dbg(&dev->dev, "s3c2410_start_hc:\n");
+ 
++#if !defined(CONFIG_PLAT_S5PC1XX)
+ 	clk_enable(usb_clk);
+ 	mdelay(2);			/* let the bus clock stabilise */
++#endif
+ 
+ 	clk_enable(clk);
+ 
+@@ -80,7 +85,9 @@ static void s3c2410_stop_hc(struct platform_device *dev)
+ 	}
+ 
+ 	clk_disable(clk);
++#if !defined(CONFIG_PLAT_S5PC1XX)
+ 	clk_disable(usb_clk);
++#endif
+ }
+ 
+ /* ohci_s3c2410_hub_status_data
+@@ -347,6 +354,10 @@ static int usb_hcd_s3c2410_probe (const struct hc_driver *driver,
+ 	struct usb_hcd *hcd = NULL;
+ 	int retval;
+ 
++#if defined(CONFIG_PLAT_S5PC1XX)
++        usb_host_clk_en(S3C_USB_CLKSRC_EPLL);
++#endif
++
+ 	s3c2410_usb_set_power(dev->dev.platform_data, 1, 1);
+ 	s3c2410_usb_set_power(dev->dev.platform_data, 2, 1);
+ 
+@@ -370,12 +381,14 @@ static int usb_hcd_s3c2410_probe (const struct hc_driver *driver,
+ 		goto err_mem;
+ 	}
+ 
++#if !defined(CONFIG_PLAT_S5PC1XX)
+ 	usb_clk = clk_get(&dev->dev, "usb-bus-host");
+ 	if (IS_ERR(usb_clk)) {
+ 		dev_err(&dev->dev, "cannot get usb-host clock\n");
+ 		retval = -ENOENT;
+ 		goto err_clk;
+ 	}
++#endif
+ 
+ 	s3c2410_start_hc(dev, hcd);
+ 
+@@ -399,8 +412,10 @@ static int usb_hcd_s3c2410_probe (const struct hc_driver *driver,
+ 	iounmap(hcd->regs);
+ 	clk_put(usb_clk);
+ 
++#if !defined(CONFIG_PLAT_S5PC1XX)
+  err_clk:
+ 	clk_put(clk);
++#endif
+ 
+  err_mem:
+ 	release_mem_region(hcd->rsrc_start, hcd->rsrc_len);

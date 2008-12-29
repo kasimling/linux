@@ -136,3 +136,57 @@ struct platform_device s3c_device_nand = {
 };
 
 EXPORT_SYMBOL(s3c_device_nand);
+
+/* USB Host Controller */
+
+static struct resource s3c_usb_resource[] = {
+        [0] = {
+                .start = S5PC1XX_PA_USBHOST,
+                .end   = S5PC1XX_PA_USBHOST + S5PC1XX_SZ_USBHOST - 1,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_UHOST,
+                .end   = IRQ_UHOST,
+                .flags = IORESOURCE_IRQ,
+        }
+};
+
+static u64 s3c_device_usb_dmamask = 0xffffffffUL;
+
+struct platform_device s3c_device_usb = {
+        .name             = "s3c2410-ohci",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_usb_resource),
+        .resource         = s3c_usb_resource,
+        .dev              = {
+                .dma_mask = &s3c_device_usb_dmamask,
+                .coherent_dma_mask = 0xffffffffUL
+        }
+};
+
+EXPORT_SYMBOL(s3c_device_usb);
+
+/* USB Device (Gadget)*/
+
+static struct resource s3c_usbgadget_resource[] = {
+        [0] = {
+                .start = S5PC1XX_PA_OTG,
+                .end   = S5PC1XX_PA_OTG+S5PC1XX_SZ_OTG-1,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_OTG,
+                .end   = IRQ_OTG,
+                .flags = IORESOURCE_IRQ,
+        }
+};
+
+struct platform_device s3c_device_usbgadget = {
+        .name             = "s3c2410-usbgadget",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_usbgadget_resource),
+        .resource         = s3c_usbgadget_resource,
+};
+
+EXPORT_SYMBOL(s3c_device_usbgadget);
