@@ -84,7 +84,7 @@ struct map_desc smdkc100_iodesc[] = {};
 static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_lcd,
         &s3c_device_nand,
-	//&s3c_device_ts,
+	&s3c_device_ts,
 	&s3c_device_smc911x,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
@@ -143,6 +143,8 @@ static void __init smdkc100_machine_init(void)
 
 	smdkc100_smc911x_set();
 
+	s3c_ts_set_platdata(&s3c_ts_platform);
+
 	/* i2c */
 	s3c_i2c0_set_platdata(NULL);
 	s3c_i2c1_set_platdata(NULL);
@@ -192,7 +194,7 @@ void usb_host_clk_en(int usb_host_clksrc) {
         switch (usb_host_clksrc) {
         case 0: /* epll clk */
                 /* Setting the epll clk to 48 MHz, P=3, M=96, S=3 */
-                writel(readl(S5P_EPLL_CON) & ~(S5P_EPLL_MASK) | (S5P_EPLL_EN | 
+                writel(readl(S5P_EPLL_CON) & ~(S5P_EPLL_MASK) | (S5P_EPLL_EN |
 		S5P_EPLLVAL(96,3,3)), S5P_EPLL_CON);
                 writel((readl(S5P_CLK_SRC0) | S5P_CLKSRC0_EPLL_MASK) ,S5P_CLK_SRC0);
                 writel((readl(S5P_CLK_SRC1)& ~S5P_CLKSRC1_UHOST_MASK) ,S5P_CLK_SRC1);
