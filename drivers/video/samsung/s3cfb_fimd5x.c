@@ -774,7 +774,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 {
 	s3cfb_info_t *fbi = container_of(info, s3cfb_info_t, fb);
 	s3cfb_win_info_t win_info;
-	s3cfb_color_val_info_t colkey_info;
+	s3cfb_color_key_info_t colkey_info;
 	s3cfb_color_val_info_t colval_info;
 	s3cfb_dma_info_t dma_info;
 	s3cfb_next_info_t next_fb_info;
