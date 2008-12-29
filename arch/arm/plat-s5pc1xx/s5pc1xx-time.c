@@ -199,6 +199,10 @@ static void s5pc1xx_timer_setup (void)
 	unsigned long tcfg;
 	unsigned long icntb;
 
+	/* clock configuration setting and enable */
+	unsigned long pclk;
+	struct clk *clk;
+
 	tcnt = TICK_MAX;  /* default value for tcnt */
 
 	/* TCFG must not be changed at run-time. If you want to change TCFG, stop timer(TCON[0] = 0) */
@@ -208,11 +212,6 @@ static void s5pc1xx_timer_setup (void)
 	tcon = s5pc1xx_systimer_read(S3C_SYSTIMER_TCON);
 	tcfg = s5pc1xx_systimer_read(S3C_SYSTIMER_TCFG);
 	icntb = s5pc1xx_systimer_read(S3C_SYSTIMER_ICNTB);
-
-	/* clock configuration setting and enable */
-
-	unsigned long pclk;
-	struct clk *clk;
 
 	clk = clk_get(NULL, "systimer");
 	if (IS_ERR(clk))
