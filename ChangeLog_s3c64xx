@@ -301,3 +301,12 @@ v2.6.28-rc8-s3c64xx-r0d4: Jinsung Yang
 		M       drivers/video/samsung/s3cfb_ltv350qv.c
 		M       drivers/video/samsung/s3cfb_spi.c
 
+v2.6.28-rc8-s3c64xx-r0d5: Jongpill Lee
+	-Support cpu freq on smdk6410
+
+	Added Files:
+		A 	arch/arm/plat-s3c64xx/s3c64xx-cpufreq.carch/arm/plat-s3c64xx/s3c64xx-cpufreq.c
+	Modified Files:
+		M	arch/arm/Kconfig
+		M	arch/arm/plat-s3c/clock.c
+		M	arch/arm/plat-s3c64xx/Makefile
