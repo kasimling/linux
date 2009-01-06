@@ -354,3 +354,28 @@ v2.6.28-rc8-s5pc1xx-r0d6: Ilho Lee
 	Modified Files:
 		M arch/arm/mach-s5pc100/mach-smdkc100.c
 		M arch/arm/plat-s3c/dma-pl330.c
+
+v2.6.28-rc8-s5pc1xx-r0d7: Abhilash Kesavan
+	- Support for HS-MMC for S5PC1XX (Completed)
+
+	Added Files:
+		A	drivers/mmc/host/s3c-hsmmc.c
+		A	drivers/mmc/host/s3c-hsmmc.h
+		A	arch/arm/plat-s5pc1xx/include/plat/regs-hsmmc.h
+
+	Deleted Files:	
+		D       arch/arm/mach-s5pc100/setup-sdhci.c
+
+	Modified Files:
+	        M       arch/arm/configs/smdkc100mtd_defconfig
+        	M       arch/arm/configs/smdkc100nfs_defconfig
+	        M       arch/arm/mach-s5pc100/Kconfig
+       		M       arch/arm/mach-s5pc100/Makefile
+        	M       arch/arm/mach-s5pc100/cpu.c
+        	M       arch/arm/mach-s5pc100/mach-smdkc100.c
+	        M       arch/arm/plat-s5pc1xx/devs.c
+	        M       drivers/mmc/host/Kconfig
+	        M       drivers/mmc/host/Makefile
+
+
+
