@@ -61,9 +61,6 @@ void __init s5pc100_map_io(void)
 {
 	iotable_init(s5pc100_iodesc, ARRAY_SIZE(s5pc100_iodesc));
 
-        /* initialise SDHCI device information early */
-        s3c6410_default_sdhci0();
-        s3c6410_default_sdhci1();
 
 #if 0
 	/* the i2c devices are directly compatible with s3c2440 */

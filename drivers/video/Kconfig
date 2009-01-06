@@ -242,7 +242,7 @@ config FB_S3C
 	select FB_CFB_FILLRECT
 	select FB_CFB_COPYAREA
 	select FB_CFB_IMAGEBLIT
-	depends on FB && (ARCH_S3C64XX || ARCH_S5PC1XX)
+	depends on FB && (ARCH_S3C64XX || ARCH_S5P64XX || ARCH_S5PC1XX)
 
 	default n
 	---help---
@@ -303,7 +303,7 @@ endchoice
 
 config FB_S3C_NUM
 	int "Number of Framebuffers"
-	depends on FB_S3C_BPP && (ARCH_S3C64XX || ARCH_S5PC1XX)
+	depends on FB_S3C_BPP && (ARCH_S3C64XX || ARCH_S5P64XX || ARCH_S5PC1XX)
 	default "1"
 	---help---
 	TBA

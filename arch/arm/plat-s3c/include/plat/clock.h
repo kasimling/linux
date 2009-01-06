@@ -75,6 +75,7 @@ extern int s3c24xx_register_clocks(struct clk **clk, int nr_clks);
 extern int s3c24xx_register_baseclocks(unsigned long xtal);
 
 extern void s3c64xx_register_clocks(void);
+extern void s5p64xx_register_clocks(void);
 
 extern void s3c24xx_setup_clocks(unsigned long fclk,
 				 unsigned long hclk,
@@ -88,6 +89,7 @@ extern void s3c2443_setup_clocks(void);
 /* S3C64XX specific functions and clocks */
 
 extern int s3c64xx_sclk_ctrl(struct clk *clk, int enable);
+extern int s5p64xx_sclk_ctrl(struct clk *clk, int enable);
 
 #ifdef CONFIG_CPU_S5PC100
 extern void s5pc1xx_register_clocks(void);

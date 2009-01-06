@@ -55,7 +55,7 @@ extern int s3c6410_timer_setup (int channel, int usec, unsigned long g_tcnt, uns
 #if defined(CONFIG_CPU_S3C2443) || defined(CONFIG_CPU_S3C2450) || defined(CONFIG_CPU_S3C2416)
 #define S3CFB_MAX_NUM	2
 
-#elif defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410)
+#elif defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410) || defined(CONFIG_CPU_S5P6440)
 #define S3CFB_MAX_NUM	5
 
 #else
