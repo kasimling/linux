@@ -117,7 +117,7 @@
 #define S3C_PDMA1_UART2CH1	5
 #define S3C_PDMA1_UART3CH0	6
 #define S3C_PDMA1_UART3CH1	7
-#define S3C_PDMA1_IRDA		8	
+#define S3C_PDMA1_IRDA		8
 #define S3C_PDMA1_I2S0_RX	9
 #define S3C_PDMA1_I2S0_TX	10
 #define S3C_PDMA1_I2S0S_TX	11
@@ -152,7 +152,7 @@
 #define S3C_PDMA0_UART2CH1	5
 #define S3C_PDMA0_UART3CH0	6
 #define S3C_PDMA0_UART3CH1	7
-#define S3C_PDMA0_IRDA		8	
+#define S3C_PDMA0_IRDA		8
 #define S3C_PDMA0_I2S0_RX	9
 #define S3C_PDMA0_I2S0_TX	10
 #define S3C_PDMA0_I2S0S_TX	11
@@ -187,7 +187,7 @@
 static struct s3c_dma_map __initdata s5pc100_dma_mappings[] = {
 
 	[DMACH_I2S_IN] = {
-		.name		= "i2s0-in",	
+		.name		= "i2s0-in",
 		.channels	= MAP1(S3C_PDMA0_I2S0_RX),
 		.hw_addr.from	= S3C_PDMA0_I2S0_RX,
 	},
@@ -241,22 +241,22 @@ static struct s3c_dma_map __initdata s5pc100_dma_mappings[] = {
 		.channels	= MAP2(S3C_PDMA0_AC_MICIN),
 		.hw_addr.from	= S3C_PDMA0_AC_MICIN,
 	},
-	[DMACH_I2S_V40_IN] = {                                                           
-		.name           = "i2s-v40-in",                                          
-		.channels       = MAP1(S3C_PDMA0_HSI_RX),                                 
-		.hw_addr.from   = S3C_PDMA0_HSI_RX,                                       
-	},                                                                               
-	[DMACH_I2S_V40_OUT] = {                                                          
-		.name           = "i2s-v40-out",                                         
-		.channels       = MAP1(S3C_PDMA0_HSI_TX),                                 
-		.hw_addr.to     = S3C_PDMA0_HSI_TX,                                       
+	[DMACH_I2S_V40_IN] = {
+		.name           = "i2s-v40-in",
+		.channels       = MAP1(S3C_PDMA0_HSI_RX),
+		.hw_addr.from   = S3C_PDMA0_HSI_RX,
 	},
-	[DMACH_I2S_V50_OUT] = {                
+	[DMACH_I2S_V40_OUT] = {
+		.name           = "i2s-v40-out",
+		.channels       = MAP1(S3C_PDMA0_HSI_TX),
+		.hw_addr.to     = S3C_PDMA0_HSI_TX,
+	},
+	[DMACH_I2S_V50_OUT] = {
 		.name           = "i2s-v50-out",
 		.channels       = MAP1(S3C_PDMA1_I2S0_TX),
 		.hw_addr.to     = S3C_PDMA1_I2S0_TX,
 	},
-	[DMACH_I2S_V50_IN] = {                
+	[DMACH_I2S_V50_IN] = {
 		.name           = "i2s-v50-out",
 		.channels       = MAP1(S3C_PDMA1_I2S0_RX),
 		.hw_addr.to     = S3C_PDMA1_I2S0_RX,
@@ -288,7 +288,7 @@ static struct s3c_dma_selection __initdata s5pc100_dma_sel = {
 
 static int __init s5pc100_dma_add(struct sys_device *sysdev)
 {
-	s3c_dma_init(S3C_DMA_CHANNELS, IRQ_MDMA, 0x20);
+	s3c_dma_init(S3C_DMA_CHANNELS, IRQ_MDMA, 0x1000);
 	return s3c_dma_init_map(&s5pc100_dma_sel);
 }
 
