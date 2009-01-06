@@ -78,7 +78,6 @@ static struct s3c2410_uartcfg smdk6440_uartcfgs[] __initdata = {
 struct map_desc smdk6440_iodesc[] = {};
 
 static struct platform_device *smdk6440_devices[] __initdata = {
-/*
 #ifdef CONFIG_SMDK6440_SD_CH0
 	&s3c_device_hsmmc0,
 #endif
@@ -89,12 +88,9 @@ static struct platform_device *smdk6440_devices[] __initdata = {
 	&s3c_device_i2c1,
 	&s3c_device_ts,
 	&s3c_device_smc911x,
-*/
 	&s3c_device_lcd,
-/*
 	&s3c_device_nand,
 	&s3c_device_usbgadget,
-*/
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {

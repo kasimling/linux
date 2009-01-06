@@ -310,3 +310,82 @@ v2.6.28-rc8-s3c64xx-r0d5: Jongpill Lee
 		M	arch/arm/Kconfig
 		M	arch/arm/plat-s3c/clock.c
 		M	arch/arm/plat-s3c64xx/Makefile
+
+v2.6.28-rc8-s3c64xx-r0d6: Kyoungil Kim
+	- split plat-s5p64xx, mach-s5p6440
+	- Support for s5p6440 serial
+
+	Added Files
+		A       arch/arm/configs/smdk6440ramdisk_defconfig
+		A       arch/arm/mach-s5p6440/Kconfig
+		A       arch/arm/mach-s5p6440/Makefile.boot
+		A       arch/arm/mach-s5p6440/cpu.c
+		A       arch/arm/mach-s5p6440/dma.c
+		A       arch/arm/mach-s5p6440/include/mach/debug-macro.S
+		A       arch/arm/mach-s5p6440/include/mach/dma.h
+		A       arch/arm/mach-s5p6440/include/mach/entry-macro.S
+		A       arch/arm/mach-s5p6440/include/mach/gpio-core.h
+		A       arch/arm/mach-s5p6440/include/mach/gpio.h
+		A       arch/arm/mach-s5p6440/include/mach/hardware.h
+		A       arch/arm/mach-s5p6440/include/mach/idle.h
+		A       arch/arm/mach-s5p6440/include/mach/irqs.h
+		A       arch/arm/mach-s5p6440/include/mach/map.h
+		A       arch/arm/mach-s5p6440/include/mach/memory.h
+		A       arch/arm/mach-s5p6440/include/mach/regs-irq.h
+		A       arch/arm/mach-s5p6440/include/mach/regs-mem.h
+		A       arch/arm/mach-s5p6440/include/mach/system.h
+		A       arch/arm/mach-s5p6440/include/mach/tick.h
+		A       arch/arm/mach-s5p6440/include/mach/uncompress.h
+		A       arch/arm/mach-s5p6440/mach-smdk6440.c
+		A       arch/arm/mach-s5p6440/setup-sdhci.c
+		A       arch/arm/plat-s5p64xx/Kconfig
+		A       arch/arm/plat-s5p64xx/Makefile
+		A       arch/arm/plat-s5p64xx/adc.c
+		A       arch/arm/plat-s5p64xx/clock.c
+		A       arch/arm/plat-s5p64xx/cpu.c
+		A       arch/arm/plat-s5p64xx/dev-uart.c
+		A       arch/arm/plat-s5p64xx/devs.c
+		A       arch/arm/plat-s5p64xx/gpiolib.c
+		A       arch/arm/plat-s5p64xx/include/plat/dma.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-a.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-b.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-c.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-f.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-g.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-h.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-i.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-j.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-n.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-p.h
+		A       arch/arm/plat-s5p64xx/include/plat/gpio-bank-r.h
+		A       arch/arm/plat-s5p64xx/include/plat/irqs.h
+		A       arch/arm/plat-s5p64xx/include/plat/pll.h
+		A       arch/arm/plat-s5p64xx/include/plat/regs-clock.h
+		A       arch/arm/plat-s5p64xx/include/plat/regs-gpio.h
+		A       arch/arm/plat-s5p64xx/include/plat/regs-sys.h
+		A       arch/arm/plat-s5p64xx/include/plat/s5p6440.h
+		A       arch/arm/plat-s5p64xx/irq-eint.c
+		A       arch/arm/plat-s5p64xx/irq.c
+		A       arch/arm/plat-s5p64xx/s5p6440-clock.c
+		A       arch/arm/plat-s5p64xx/s5p6440-init.c
+		A       arch/arm/plat-s5p64xx/setup-i2c0.c
+		A       arch/arm/plat-s5p64xx/setup-i2c1.c
+	Modified Files
+		M       arch/arm/Kconfig
+		M       arch/arm/Makefile
+		M       arch/arm/mach-s5p6440/Makefile
+		M       arch/arm/mm/Kconfig
+		M       arch/arm/plat-s3c/Kconfig
+		M       arch/arm/plat-s3c/include/plat/clock.h
+		M       arch/arm/plat-s3c/include/plat/cpu.h
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s3c/include/plat/regs-lcd.h
+		M       arch/arm/tools/mach-types
+		M       drivers/i2c/busses/Kconfig
+		M       drivers/input/touchscreen/Kconfig
+		M       drivers/mtd/nand/Kconfig
+		M       drivers/serial/Kconfig
+		M       drivers/video/Kconfig
+		M       drivers/video/samsung/Makefile
+		M       drivers/video/samsung/s3cfb.h
+		M       drivers/video/samsung/s3cfb_spi.c
