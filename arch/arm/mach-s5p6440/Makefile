@@ -12,4 +12,13 @@ obj-				:=
 
 # Core support for S5P6440 system
 
-obj-n				+= blank.o
+obj-$(CONFIG_CPU_S5P6440)	+= cpu.o
+obj-$(CONFIG_CPU_S5P6440)	+= dma.o
+
+# Helper and device support
+
+obj-$(CONFIG_S5P6440_SETUP_SDHCI)	+= setup-sdhci.o
+
+# machine support
+
+obj-$(CONFIG_MACH_SMDK6440)	+= mach-smdk6440.o

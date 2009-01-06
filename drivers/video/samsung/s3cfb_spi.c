@@ -53,7 +53,7 @@ static inline void s3cfb_spi_set_lcd_data(int ch)
 	s3c2410_gpio_pullup(S3CFB_SPI_CS(ch), 2);
 }
 
-#elif defined(CONFIG_PLAT_S3C64XX)
+#elif defined(CONFIG_PLAT_S3C64XX) || defined(CONFIG_PLAT_S5P64XX)
 
 #define S3CFB_SPI_CLK(x)	(S3C64XX_GPC(1 + (ch * 4)))
 #define S3CFB_SPI_MOSI(x)	(S3C64XX_GPC(2 + (ch * 4)))

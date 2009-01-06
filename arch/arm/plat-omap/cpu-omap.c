@@ -22,7 +22,7 @@
 #include <linux/clk.h>
 #include <linux/io.h>
 
-#include <mach/hardware.h>
+//#include <mach/hardware.h>
 #include <asm/system.h>
 
 #define VERY_HI_RATE	900000000
