@@ -1280,24 +1280,24 @@ int __init s3c_dma_init(unsigned int channels, unsigned int irq,
 		memset(dconp, 0, sizeof(s3c_dma_controller_t));
 
 		if(controller == 0) {
-			dma_base = ioremap(S3C_PA_DMA, 0x1000);
+			dma_base = ioremap(S3C_PA_DMA, stride);
 			if (dma_base == NULL) {
 				printk(KERN_ERR "M2M-DMA failed to ioremap register block\n");
 				return -ENOMEM;
 			}
 
 			/* dma controller's irqs are in order.. */
-			dconp->irq = controller + IRQ_MDMA;
+			dconp->irq = controller + irq;
 		}
 		else {
-			dma_base = ioremap(((S3C_PA_DMA + 0xF00000) + ((controller-1) * 0x200000)), 0x1000);
+			dma_base = ioremap(((S3C_PA_DMA + 0xF00000) + ((controller-1) * 0x200000)), stride);
 			if (dma_base == NULL) {
 				printk(KERN_ERR "Peri-DMA failed to ioremap register block\n");
 				return -ENOMEM;
 			}
 
 			/* dma controller's irqs are in order.. */
-			dconp->irq = (controller-1) + IRQ_PDMA0;
+			dconp->irq = controller + irq;
 		}
 
 		dconp->number = controller;
