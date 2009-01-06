@@ -175,7 +175,7 @@ config MTD_NAND_S3C2410_CLKSTOP
 
 config MTD_NAND_S3C
 	tristate "NAND Flash support for S3C SoC"
-	depends on ARCH_S3C64XX && MTD_NAND
+	depends on (ARCH_S3C64XX || ARCH_S5P64XX) && MTD_NAND
 	help
 	  This enables the NAND flash controller on the S3C.
 
