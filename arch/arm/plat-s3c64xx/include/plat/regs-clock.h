@@ -33,7 +33,7 @@
 #define S3C_HCLK_GATE		S3C_CLKREG(0x30)
 #define S3C_PCLK_GATE		S3C_CLKREG(0x34)
 #define S3C_SCLK_GATE		S3C_CLKREG(0x38)
-#define S3C_SDMA_SEL            S3C_CLKREG(0x110) 
+#define S3C_SDMA_SEL            S3C_CLKREG(0x110)
 #define S3C_SW_RST		S3C_CLKREG(0x114)
 #define S3C_SYS_ID		S3C_CLKREG(0x118)
 #define S3C_MEM_SYS_CFG		S3C_CLKREG(0x120)
@@ -213,6 +213,8 @@
 
 /*OTHERS Resgister */
 #define S3C_OTHERS_USB_SIG_MASK		(1<<16)
+#define S3C_OTHERS_SYNCMODE_SYNC	(1<<7)
+
 
 /* CLKSRC */
 
@@ -254,10 +256,10 @@
 #define S3C6400_CLKSRC_UHOST_SHIFT	(5)
 
 /*CLK SRC BITS*/
-#define S3C_CLKSRC_APLL_CLKSEL          (1<<0)                                           
-#define S3C_CLKSRC_MPLL_CLKSEL          (1<<1)                                           
-#define S3C_CLKSRC_EPLL_CLKSEL          (1<<2)                                           
-#define S3C_CLKSRC_UHOST_EPLL           (1<<5)                                           
-#define S3C_CLKSRC_UHOST_MASK           (3<<5) 
+#define S3C_CLKSRC_APLL_CLKSEL          (1<<0)
+#define S3C_CLKSRC_MPLL_CLKSEL          (1<<1)
+#define S3C_CLKSRC_EPLL_CLKSEL          (1<<2)
+#define S3C_CLKSRC_UHOST_EPLL           (1<<5)
+#define S3C_CLKSRC_UHOST_MASK           (3<<5)
 
 #endif /* _PLAT_REGS_CLOCK_H */

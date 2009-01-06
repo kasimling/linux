@@ -389,3 +389,10 @@ v2.6.28-rc8-s3c64xx-r0d6: Kyoungil Kim
 		M       drivers/video/samsung/Makefile
 		M       drivers/video/samsung/s3cfb.h
 		M       drivers/video/samsung/s3cfb_spi.c
+
+v2.6.28-rc8-s3c64xx-r0d7: Ilho Lee
+	- ASYN/SYN mode select added.
+
+	Modified Files:
+		M       arch/arm/plat-s3c64xx/include/plat/regs-clock.h
+		M       arch/arm/plat-s3c64xx/s3c6400-clock.c
