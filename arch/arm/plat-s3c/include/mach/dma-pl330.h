@@ -5,13 +5,6 @@
 #ifndef __ARM_MACH_DMA_PL330_H
 #define __ARM_MACH_DMA_PL330_H __FILE__
 
-
-/* We have 3 dma controllers - Peri-DMA0, Peri-DMA1, M2M-DMAC */
-#define S3C_DMA_CONTROLLERS        	(3)
-#define S3C_CHANNELS_PER_DMA       	(8)
-#define S3C_CANDIDATE_CHANNELS_PER_DMA  (32)
-#define S3C_DMA_CHANNELS		(S3C_DMA_CONTROLLERS*S3C_CHANNELS_PER_DMA)
-
 #define DMACH_LOW_LEVEL			(1<<28)	/* use this to specifiy hardware ch no */
 
 

@@ -46,30 +46,19 @@
 #define S3C_DMA0_UART2CH1	5
 #define S3C_DMA0_UART3CH0	6
 #define S3C_DMA0_UART3CH1	7
-#define S3C_DMA0_Reserved	8
-#define S3C_DMA0_Reserved	9
 #define S3C_DMA0_PCM0_TX	10
 #define S3C_DMA0_PCM0_RX	11
 #define S3C_DMA0_I2S0_TX	12
 #define S3C_DMA0_I2S0_RX	13
 #define S3C_DMA0_SPI0_TX	14
 #define S3C_DMA0_SPI0_RX	15
-#define S3C_DMA0_Reserved	16
-#define S3C_DMA0_Reserved	17
-#define S3C_DMA0_Reserved	18
-#define S3C_DMA0_Reserved	19
 #define S3C_DMA0_SPI1_TX	20
 #define S3C_DMA0_SPI1_RX	21
-#define S3C_DMA0_Reserved	22
-#define S3C_DMA0_Reserved	23
 #define S3C_DMA0_GPS		24
-#define S3C_DMA0_Reserved	25
-#define S3C_DMA0_Reserved	26
-#define S3C_DMA0_Reserved	27
-#define S3C_DMA0_Reserved	28
 #define S3C_DMA0_PWM		29
-#define S3C_DMA0_Reserved	30
 #define S3C_DMA0_EXTERNAL	31
+
+#define S3C_DMA_M2M		0
 
 
 static struct s3c_dma_map __initdata s5p6440_dma_mappings[] = {
@@ -103,6 +92,11 @@ static struct s3c_dma_map __initdata s5p6440_dma_mappings[] = {
 		.name		= "ac97-pcm-in",
 		.channels	= MAP0(S3C_DMA0_PCM0_RX),
 		.hw_addr.from	= S3C_DMA0_PCM0_RX,
+	},
+	[DMACH_3D_M2M] = {
+		.name		= "3D-M2M",
+		.channels	= MAP0(S3C_DMA_M2M),
+		.hw_addr.from	= 0,
 	},
 };
 
