@@ -70,7 +70,7 @@ static int smdkc100_hifi_hw_params(struct snd_pcm_substream *substream,
 
 	iiscon = ioremap(S3C_PA_IIS, 0x100) + S3C64XX_IIS0CON;	
 
-	writel(readl(iiscon)&~(0x0<<31),iiscon);
+	writel(readl(iiscon)&~(0x1<<31),iiscon);
 	msleep(100);
 	writel(readl(iiscon)|(0x1<<31),iiscon);
 	

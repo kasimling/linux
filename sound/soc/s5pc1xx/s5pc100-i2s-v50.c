@@ -185,13 +185,14 @@ static int s3c24xx_snd_lrsync(void)
 
 	while (1) {
 		iiscon = readl(s5pc1xx_i2s.regs + S3C64XX_IIS0CON);
+
 		if (iiscon & S3C64XX_IISCON_LRINDEX)
 			break;
 
-		if (timeout < jiffies)
+		if (timeout < jiffies) 
 			return -ETIMEDOUT;
+		
 	}
-	printk("out!!----\n");
 
 	return 0;
 }
@@ -202,8 +203,11 @@ static int s3c24xx_snd_lrsync(void)
 static inline int s3c24xx_snd_is_clkmaster(void)
 {
 	s3cdbg("Entered %s\n", __FUNCTION__);
+	
+//	writel(readl(s5pc1xx_i2s.regs + S3C64XX_IIS0MOD)|~(S3C64XX_IISMOD_SLAVE),s5pc1xx_i2s.regs + S3C64XX_IIS0MOD);
 
-	return (readl(s5pc1xx_i2s.regs + S3C64XX_IIS0MOD) & S3C64XX_IISMOD_SLAVE) ? 0:1;
+//	return (readl(s5pc1xx_i2s.regs + S3C64XX_IIS0MOD) & S3C64XX_IISMOD_SLAVE) ? 0:1;
+	return (readl(s5pc1xx_i2s.regs + S3C64XX_IIS0MOD) & S3C64XX_IIS0MOD_IMS_SLAVE) ? 0:1;
 }
 
 /*
@@ -215,7 +219,6 @@ static int s3c_i2s_v50_set_fmt(struct snd_soc_dai *cpu_dai,
 	u32 iismod;
 
 	s3cdbg("Entered %s: fmt = %d\n", __FUNCTION__, fmt);
-	printk("Entered %s: fmt = %d\n", __FUNCTION__, fmt);
 
 	iismod = readl(s5pc1xx_i2s.regs + S3C64XX_IIS0MOD);
 
