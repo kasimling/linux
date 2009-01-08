@@ -21,14 +21,14 @@
 #define S5P64XX_GPIO_A_NR	(6)
 #define S5P64XX_GPIO_B_NR	(7)
 #define S5P64XX_GPIO_C_NR	(8)
-#define S5P64XX_GPIO_F_NR	(2)
+#define S5P64XX_GPIO_F_NR	(16)
 #define S5P64XX_GPIO_G_NR	(7)
 #define S5P64XX_GPIO_H_NR	(10)
 #define S5P64XX_GPIO_I_NR	(16)
 #define S5P64XX_GPIO_J_NR	(12)
 #define S5P64XX_GPIO_N_NR	(16)
-#define S5P64XX_GPIO_P_NR	(8)
-#define S5P64XX_GPIO_R_NR	(15)
+#define S5P64XX_GPIO_P_NR	(11)
+#define S5P64XX_GPIO_R_NR	(16)
 
 /* GPIO bank numbes */
 

@@ -26,6 +26,16 @@
 
 #define S3CFB_SPI_CH		0	/* spi channel for module init */
 
+#if defined(CONFIG_CPU_S5P6440)
+#define S3CFB_HFP		6	/* front porch */
+#define S3CFB_HSW		3	/* hsync width */
+#define S3CFB_HBP		1	/* back porch */
+
+#define S3CFB_VFP		10	/* front porch */
+#define S3CFB_VSW		3	/* vsync width */
+#define S3CFB_VBP		9	/* back porch */
+
+#else
 #define S3CFB_HFP		7	/* front porch */
 #define S3CFB_HSW		4	/* hsync width */
 #define S3CFB_HBP		2	/* back porch */
@@ -33,6 +43,7 @@
 #define S3CFB_VFP		11	/* front porch */
 #define S3CFB_VSW		4	/* vsync width */
 #define S3CFB_VBP		10	/* back porch */
+#endif
 
 #define S3CFB_HRES		240	/* horizon pixel  x resolition */
 #define S3CFB_VRES		320	/* line cnt       y resolution */
@@ -288,8 +299,30 @@ static void s3cfb_init_ldi(void)
 	endtime = get_jiffies_64() + 4; while(jiffies < endtime);
 }
 
+#if defined(CONFIG_CPU_S5P6440)
+static void InitStartPosOnLcd(void)
+{
+	// start addr setting
+	s3cfb_spi_write(0x44, 0x00);            // y addr 2
+	s3cfb_spi_write(0x42, 0x00);            // x addr
+	s3cfb_spi_write(0x43, 0x00);            // y addr 1
+}
+#endif
+
 static void s3cfb_set_gpio_lts222qv(void)
 {
+#if defined(CONFIG_CPU_S5P6440) 
+	gpio_request(S5P64XX_GPN(1), "GPN");
+	gpio_direction_output(S5P64XX_GPN(1), 1);
+	gpio_request(S5P64XX_GPN(2), "GPN");
+	gpio_direction_output(S5P64XX_GPN(2), 1);
+	gpio_request(S5P64XX_GPN(3), "GPN");
+	gpio_direction_output(S5P64XX_GPN(3), 1);
+
+	s3c_gpio_setpull(S5P64XX_GPN(1), S3C_GPIO_PULL_NONE);
+	s3c_gpio_setpull(S5P64XX_GPN(2), S3C_GPIO_PULL_NONE);
+	s3c_gpio_setpull(S5P64XX_GPN(3), S3C_GPIO_PULL_NONE);
+#else
 	gpio_direction_output(S3C64XX_GPC(1), 1);
 	gpio_direction_output(S3C64XX_GPC(2), 1);
 	gpio_direction_output(S3C64XX_GPC(3), 1);
@@ -297,6 +330,7 @@ static void s3cfb_set_gpio_lts222qv(void)
 	s3c_gpio_setpull(S3C64XX_GPC(1), S3C_GPIO_PULL_NONE);
 	s3c_gpio_setpull(S3C64XX_GPC(2), S3C_GPIO_PULL_NONE);
 	s3c_gpio_setpull(S3C64XX_GPC(3), S3C_GPIO_PULL_NONE);
+#endif
 }
 
 void s3cfb_init_hw(void)
@@ -313,5 +347,8 @@ void s3cfb_init_hw(void)
 		s3cfb_init_ldi();
 		s3cfb_spi_gpio_free(S3CFB_SPI_CH);
 	}
+	#if defined(CONFIG_CPU_S5P6440)
+	InitStartPosOnLcd();
+	#endif
 }
 
