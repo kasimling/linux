@@ -55,9 +55,60 @@ static inline void s3cfb_spi_set_lcd_data(int ch)
 
 #elif defined(CONFIG_PLAT_S3C64XX) || defined(CONFIG_PLAT_S5P64XX)
 
-#define S3CFB_SPI_CLK(x)	(S3C64XX_GPC(1 + (ch * 4)))
-#define S3CFB_SPI_MOSI(x)	(S3C64XX_GPC(2 + (ch * 4)))
-#define S3CFB_SPI_CS(x)	(S3C64XX_GPC(3 + (ch * 4)))
+#if defined(CONFIG_PLAT_S5P64XX)
+#define S3CFB_SPI_CLK(x)	(S5P64XX_GPN(2 + (x * 4)))
+#define S3CFB_SPI_MOSI(x)	(S5P64XX_GPN(3 + (x * 4)))
+#define S3CFB_SPI_CS(x)		(S5P64XX_GPN(1 + (x * 4)))
+
+int s3cfb_spi_gpio_request(int ch)
+{
+	int err = 0;
+
+	if (gpio_is_valid(S3CFB_SPI_CLK(ch))) {
+		err = gpio_request(S3CFB_SPI_CLK(ch), "GPN");
+
+		if (err)
+			goto err_clk;
+	} else {
+		err = 1;
+		goto err_clk;
+	}
+
+	if (gpio_is_valid(S3CFB_SPI_MOSI(ch))) {
+		err = gpio_request(S3CFB_SPI_MOSI(ch), "GPN");
+
+		if (err)
+			goto err_mosi;
+	} else {
+		err = 1;
+		goto err_mosi;
+	}
+
+	if (gpio_is_valid(S3CFB_SPI_CS(ch))) {
+		err = gpio_request(S3CFB_SPI_CS(ch), "GPN");
+
+		if (err)
+			goto err_cs;
+	} else {
+		err = 1;
+		goto err_cs;
+	}
+
+err_cs:
+	gpio_free(S3CFB_SPI_MOSI(ch));
+
+err_mosi:
+	gpio_free(S3CFB_SPI_CLK(ch));
+
+err_clk:
+	return err;
+
+}
+
+#elif defined(CONFIG_PLAT_S3C64XX)
+#define S3CFB_SPI_CLK(x)	(S3C64XX_GPC(1 + (x * 4)))
+#define S3CFB_SPI_MOSI(x)	(S3C64XX_GPC(2 + (x * 4)))
+#define S3CFB_SPI_CS(x)		(S3C64XX_GPC(3 + (x * 4)))
 
 int s3cfb_spi_gpio_request(int ch)
 {
@@ -103,6 +154,7 @@ err_clk:
 	return err;
 
 }
+#endif
 
 inline void s3cfb_spi_lcd_dclk(int ch, int value)
 {
@@ -139,10 +191,10 @@ void s3cfb_spi_gpio_free(int ch)
 
 #elif 0 //defined(CONFIG_PLAT_S5PC1XX)
 
-#define S5P_FB_SPI_MISO(x)	(S5P_GPB0 + (ch * 4))
-#define S5P_FB_SPI_CLK(x)	(S5P_GPB1 + (ch * 4))
-#define S5P_FB_SPI_MOSI(x)	(S5P_GPB2 + (ch * 4))
-#define S5P_FB_SPI_nSS(x)	(S5P_GPB3 + (ch * 4))
+#define S5P_FB_SPI_MISO(x)	(S5P_GPB0 + (x * 4))
+#define S5P_FB_SPI_CLK(x)	(S5P_GPB1 + (x * 4))
+#define S5P_FB_SPI_MOSI(x)	(S5P_GPB2 + (x * 4))
+#define S5P_FB_SPI_nSS(x)	(S5P_GPB3 + (x * 4))
 
 inline void s3cfb_spi_lcd_dclk(int ch, int value)
 {

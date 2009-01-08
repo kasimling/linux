@@ -396,3 +396,12 @@ v2.6.28-rc8-s3c64xx-r0d7: Ilho Lee
 	Modified Files:
 		M       arch/arm/plat-s3c64xx/include/plat/regs-clock.h
 		M       arch/arm/plat-s3c64xx/s3c6400-clock.c
+
+v2.6.28-rc8-s3c64xx-r0d8: Kyoungil Kim
+	- Support for FPGA6440 lcd
+
+	Modified Files:
+		M       arch/arm/mach-s5p6440/include/mach/gpio.h
+		M       drivers/video/samsung/s3cfb_fimd5x.c
+		M       drivers/video/samsung/s3cfb_lts222qv.c
+		M       drivers/video/samsung/s3cfb_spi.c

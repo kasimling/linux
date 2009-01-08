@@ -38,6 +38,7 @@
 #include <plat/regs-lcd.h>
 #include <plat/regs-gpio.h>
 
+#include <mach/map.h>
 #if defined(CONFIG_PM)
 #include <plat/pm.h>
 #endif
@@ -448,6 +449,16 @@ int s3cfb_init_registers(s3cfb_info_t *fbi)
 		writel(S3C_VIDWxxADD1_VBASEL_F((unsigned long) video_phy_temp_f2 + (page_width + offset) * (var->yres)), S3C_VIDW00ADD1B1 + (0x08 * win_num));
 	}
 
+	#if defined(CONFIG_CPU_S5P6440)
+	#if defined(CONFIG_FB_S3C_BPP_24)
+		s3cfb_fimd.wincon0|= 0x8000;
+		s3cfb_fimd.wincon1|= 0x8000;
+		s3cfb_fimd.wincon2|= 0x8000;
+		s3cfb_fimd.wincon3|= 0x8000;
+		s3cfb_fimd.wincon4|= 0x8000;
+	#endif
+		s3cfb_fimd.vidcon0 = 0x153;
+	#endif
 	switch (win_num) {
 	case 0:
 		writel(s3cfb_fimd.wincon0, S3C_WINCON0);
@@ -555,6 +566,17 @@ void s3cfb_activate_var(s3cfb_info_t *fbi, struct fb_var_screeninfo *var)
 		s3cfb_fimd.bytes_per_pixel = 4;
 		break;
 	}
+
+	#if defined(CONFIG_CPU_S5P6440)
+	#if defined(CONFIG_FB_S3C_BPP_24)
+		s3cfb_fimd.wincon0|= 0x8000;
+		s3cfb_fimd.wincon1|= 0x8000;
+		s3cfb_fimd.wincon2|= 0x8000;
+		s3cfb_fimd.wincon3|= 0x8000;
+		s3cfb_fimd.wincon4|= 0x8000;
+	#endif
+		s3cfb_fimd.vidcon0 = 0x153;
+	#endif
 
 	/* write new registers */
 	writel(s3cfb_fimd.wincon0, S3C_WINCON0);
@@ -1059,6 +1081,7 @@ void s3cfb_pre_init(void)
 	writel(s3cfb_fimd.vidintcon0, S3C_VIDINTCON0);
 }
 
+#if defined(CONFIG_CPU_S5PC100)
 int s3cfb_set_gpio(void)
 {
 	int i, err;
@@ -1115,6 +1138,64 @@ int s3cfb_set_gpio(void)
 
 	return 0;
 }
+#elif defined(CONFIG_CPU_S5P6440)
+int s3cfb_set_gpio(void)
+{
+	int i, err;
+
+	int val;
+	val = readl(S5P64XX_SPC_BASE);
+	val &= ~0x3;
+	val |= (1 << 0);
+	writel(val, S5P64XX_SPC_BASE);
+
+	/* LCD_HSYNC, LCD_VSYNC, LCD_VDEN, LCD_VCLK, VD[23:0] */
+	for (i = 0; i < 16; i++)
+		s3c_gpio_cfgpin(S5P64XX_GPI(i), S3C_GPIO_SFN(2));
+
+	for (i = 0; i < 12; i++)
+		s3c_gpio_cfgpin(S5P64XX_GPJ(i), S3C_GPIO_SFN(2));
+
+	/* backlight ON */
+	if (gpio_is_valid(S5P64XX_GPF(15))) {
+		err = gpio_request(S5P64XX_GPF(15), "GPF");
+
+		if (err) {
+			printk(KERN_ERR "failed to request GPD for "
+				"lcd backlight control\n");
+			return err;
+		}
+
+		gpio_direction_output(S5P64XX_GPF(15), 1);
+	}
+
+	/* module reset */
+	if (gpio_is_valid(S5P64XX_GPN(5))) {
+		err = gpio_request(S5P64XX_GPN(5), "GPN");
+
+		if (err) {
+			printk(KERN_ERR "failed to request GPH0 for "
+				"lcd reset control\n");
+			return err;
+		}
+
+		gpio_direction_output(S5P64XX_GPN(5), 1);
+	}
+
+	mdelay(100);
+
+	gpio_set_value(S5P64XX_GPN(5), 0);
+	mdelay(10);
+
+	gpio_set_value(S5P64XX_GPN(5), 1);
+	mdelay(10);
+
+	gpio_free(S5P64XX_GPN(5));
+	gpio_free(S5P64XX_GPF(15));
+
+	return 0;
+}
+#endif
 
 #if defined(CONFIG_PM)
 
