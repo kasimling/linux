@@ -377,5 +377,9 @@ v2.6.28-rc8-s5pc1xx-r0d7: Abhilash Kesavan
 	        M       drivers/mmc/host/Kconfig
 	        M       drivers/mmc/host/Makefile
 
+v2.6.28-rc8-s5pc1xx-r0d8: Jongpill Lee
+	- Bug fixed on clock
 
+	Modified Files:
+		M	arch/arm/plat-s3c/clock.c
 
