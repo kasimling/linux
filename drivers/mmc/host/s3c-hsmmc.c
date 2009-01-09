@@ -598,11 +598,6 @@ static irqreturn_t s3c_hsmmc_irq (int irq, void *dev_id)
 	if (unlikely(intsts & S3C_HSMMC_INT_CARD_CHANGE)) {
 		u32 reg16;
 
-               if (intsts & S3C_HSMMC_INT_CARD_INSERT)
-                        printk(PFX "card inserted.\n");
-                else if (intsts & S3C_HSMMC_INT_CARD_REMOVE)
-                        printk(PFX "card removed.\n");
-
 		reg16 = s3c_hsmmc_readw(S3C_HSMMC_NORINTSTSEN);
 		s3c_hsmmc_writew(reg16 & ~S3C_HSMMC_INT_CARD_CHANGE,
 							S3C_HSMMC_NORINTSTSEN);

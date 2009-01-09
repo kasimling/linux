@@ -29,3 +29,5 @@ obj-$(CONFIG_CPU_S5PC100_CLOCK)	+= s5pc100-clock.o
 
 obj-$(CONFIG_S5PC1XX_SETUP_I2C0) += setup-i2c0.o
 obj-$(CONFIG_S5PC1XX_SETUP_I2C1) += setup-i2c1.o
+obj-$(CONFIG_S5PC1XX_ADC)        += adc.o
+obj-$(CONFIG_S5PC1XX_PWM)        += pwm-s5pc100.o

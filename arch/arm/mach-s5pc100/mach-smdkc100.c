@@ -88,6 +88,7 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_lcd,
         &s3c_device_nand,
 	&s3c_device_ts,
+	&s3c_device_adc,
 	&s3c_device_smc911x,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
@@ -104,6 +105,13 @@ static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
 	.oversampling_shift	= 2,
 	.resol_bit 		= 12,
 	.s3c_adc_con		= ADC_TYPE_2,
+};
+
+static struct s3c_adc_mach_info s3c_adc_platform __initdata = {
+        /* s5pc100 supports 12-bit resolution */
+        .delay  = 10000,
+        .presc  = 49,
+        .resolution = 12,
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
@@ -147,6 +155,7 @@ static void __init smdkc100_machine_init(void)
 	smdkc100_smc911x_set();
 
 	s3c_ts_set_platdata(&s3c_ts_platform);
+	s3c_adc_set_platdata(&s3c_adc_platform);
 
 	/* i2c */
 	s3c_i2c0_set_platdata(NULL);
@@ -169,7 +178,7 @@ MACHINE_START(SMDKC100, "SMDKC100")
 	.timer		= &s5pc1xx_timer,
 MACHINE_END
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
+#if defined(CONFIG_USB_GADGET_S3C_OTGD) 
 /* Initializes OTG Phy. */
 void otg_phy_init(u32 otg_phy_clk) {
         writel(readl(S3C_OTHERS)|S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
@@ -181,13 +190,10 @@ void otg_phy_init(u32 otg_phy_clk) {
         writel(0x0, S3C_USBOTG_RSTCON);
         udelay(50);
 }
-#endif
 
-
-#if defined (CONFIG_USB_GADGET_S3C_OTGD)
 /* OTG PHY Power Off */
 void otg_phy_off(void) {
-        writel(readl(S3C_USBOTG_PHYCLK) | (0X1 << 4) , S3C_USBOTG_PHYCLK);
+        writel(readl(S3C_USBOTG_PHYCLK) | (0X1 << 4), S3C_USBOTG_PHYCLK);
         writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
 }
 #endif
@@ -199,8 +205,8 @@ void usb_host_clk_en(int usb_host_clksrc) {
                 /* Setting the epll clk to 48 MHz, P=3, M=96, S=3 */
                 writel(readl(S5P_EPLL_CON) & ~(S5P_EPLL_MASK) | (S5P_EPLL_EN |
 		S5P_EPLLVAL(96,3,3)), S5P_EPLL_CON);
-                writel((readl(S5P_CLK_SRC0) | S5P_CLKSRC0_EPLL_MASK) ,S5P_CLK_SRC0);
-                writel((readl(S5P_CLK_SRC1)& ~S5P_CLKSRC1_UHOST_MASK) ,S5P_CLK_SRC1);
+                writel((readl(S5P_CLK_SRC0) | S5P_CLKSRC0_EPLL_MASK), S5P_CLK_SRC0);
+                writel((readl(S5P_CLK_SRC1)& ~S5P_CLKSRC1_UHOST_MASK), S5P_CLK_SRC1);
 
                 /* USB host clock divider ratio is 1 */
                 writel((readl(S5P_CLK_DIV2)& ~S5P_CLKDIV2_UHOST_MASK), S5P_CLK_DIV2);
@@ -214,8 +220,7 @@ void usb_host_clk_en(int usb_host_clksrc) {
                 break;
         }
 
-        writel(readl(S5P_CLKGATE_D10)|S5P_CLKGATE_D10_USBHOST,
-                S5P_CLKGATE_D10);
+        writel(readl(S5P_CLKGATE_D10)|S5P_CLKGATE_D10_USBHOST, S5P_CLKGATE_D10);
         writel(readl(S5P_SCLKGATE0)|S5P_CLKGATE_SCLK0_USBHOST, S5P_SCLKGATE0);
 
 }

@@ -178,12 +178,6 @@ config S3C_DEV_I2C1
 	help
 	  Compile in platform device definitions for I2C channel 1
 
-config S3C_DEV_ADC
-        bool
-	depends on PLAT_S3C
-        help
-          Compile in platform device definitions for ADC
-
 config S3C_DMA_PL080
 	bool
 	depends on PLAT_S3C

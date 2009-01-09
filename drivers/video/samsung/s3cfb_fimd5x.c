@@ -128,11 +128,15 @@ s3cfb_fimd_info_t s3cfb_fimd = {
 	.lcd_power = 1,
 };
 
-/* should be fixed for c100 */
-#if defined(CONFIG_S3C6410_PWM)
+#if defined(CONFIG_S3C6410_PWM) || defined(CONFIG_S5PC1XX_PWM)
 void s3cfb_set_brightness(int val)
 {
+#if defined(CONFIG_S3C6410_PWM)
 	int channel = 1;	/* must use channel-1 */
+#elif defined(CONFIG_S5PC1XX_PWM)
+	int channel = 0;	/* must use channel-0 */
+#endif
+
 	int usec = 0;		/* don't care value */
 	unsigned long tcnt = 1000;
 	unsigned long tcmp = 0;
@@ -146,7 +150,11 @@ void s3cfb_set_brightness(int val)
 	s3cfb_fimd.brightness = val;
 	tcmp = val * 50;
 
-	s3c6410_timer_setup(channel, usec, tcnt, tcmp);
+#if defined(CONFIG_S3C6410_PWM)
+        s3c6410_timer_setup(channel, usec, tcnt, tcmp);
+#elif defined(CONFIG_S5PC1XX_PWM)
+       s5pc100_timer_setup(channel, usec, tcnt, tcmp);
+#endif
 }
 #endif
 
@@ -804,7 +812,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 	unsigned int crt, alpha_level, alpha_mode;
 
 /* should be fixed for c100 */
-#if defined(CONFIG_S3C6410_PWM)
+#if defined(CONFIG_S3C6410_PWM) || defined(CONFIG_S5PC1XX_PWM)
 	int brightness;
 #endif
 
@@ -997,7 +1005,7 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		break;
 
 /* should be fixed for c100 */
-#if defined(CONFIG_S3C6410_PWM)
+#if defined(CONFIG_S3C6410_PWM) || defined(CONFIG_S5PC1XX_PWM)
 	case S3CFB_SET_BRIGHTNESS:
 		if (copy_from_user(&brightness, (int *) arg, sizeof(int)))
 			return -EFAULT;
