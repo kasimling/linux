@@ -324,29 +324,29 @@ v2.6.28-rc8-s5pc1xx-r0d5: Abhilash Kesavan
 	- Support for HS-MMC and USB 
 
 	Added Files:
-	A       arch/arm/mach-s5pc100/include/mach/usb-control.h
-	A       arch/arm/mach-s5pc100/setup-sdhci.c
+		A       arch/arm/mach-s5pc100/include/mach/usb-control.h
+		A       arch/arm/mach-s5pc100/setup-sdhci.c
 
 	Modified Files:
-	M       arch/arm/configs/smdkc100mtd_defconfig
-	M       arch/arm/configs/smdkc100nfs_defconfig
-	M       arch/arm/mach-s5pc100/Kconfig
-	M       arch/arm/mach-s5pc100/Makefile
-	M       arch/arm/mach-s5pc100/cpu.c
-	M       arch/arm/mach-s5pc100/include/mach/map.h
-	M       arch/arm/mach-s5pc100/mach-smdkc100.c
-	M       arch/arm/plat-s3c/include/plat/sdhci.h
-	M       arch/arm/plat-s5pc1xx/devs.c
-	M       arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
-	M       arch/arm/plat-s5pc1xx/include/plat/regs-sys.h
-	M       drivers/mmc/host/Kconfig
-	M       drivers/mmc/host/sdhci-s3c.c
-	M       drivers/usb/Kconfig
-	M       drivers/usb/gadget/Kconfig
-	M       drivers/usb/gadget/f_rndis.c
-	M       drivers/usb/gadget/s3c_udc_otg.c
-	M       drivers/usb/host/ohci-hcd.c
-	M       drivers/usb/host/ohci-s3c2410.c
+		M       arch/arm/configs/smdkc100mtd_defconfig
+		M       arch/arm/configs/smdkc100nfs_defconfig
+		M       arch/arm/mach-s5pc100/Kconfig
+		M       arch/arm/mach-s5pc100/Makefile
+		M       arch/arm/mach-s5pc100/cpu.c
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+		M       arch/arm/mach-s5pc100/mach-smdkc100.c
+		M       arch/arm/plat-s3c/include/plat/sdhci.h
+		M       arch/arm/plat-s5pc1xx/devs.c
+		M       arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
+		M       arch/arm/plat-s5pc1xx/include/plat/regs-sys.h
+		M       drivers/mmc/host/Kconfig
+		M       drivers/mmc/host/sdhci-s3c.c
+		M       drivers/usb/Kconfig
+		M       drivers/usb/gadget/Kconfig
+		M       drivers/usb/gadget/f_rndis.c
+		M       drivers/usb/gadget/s3c_udc_otg.c
+		M       drivers/usb/host/ohci-hcd.c
+		M       drivers/usb/host/ohci-s3c2410.c
 
 v2.6.28-rc8-s5pc1xx-r0d6: Ilho Lee
 	- Touchscreen D/D got enabled and PL330 S&G DMA operations supported.
@@ -368,11 +368,11 @@ v2.6.28-rc8-s5pc1xx-r0d7: Abhilash Kesavan
 
 	Modified Files:
 	        M       arch/arm/configs/smdkc100mtd_defconfig
-        	M       arch/arm/configs/smdkc100nfs_defconfig
+		M       arch/arm/configs/smdkc100nfs_defconfig
 	        M       arch/arm/mach-s5pc100/Kconfig
-       		M       arch/arm/mach-s5pc100/Makefile
-        	M       arch/arm/mach-s5pc100/cpu.c
-        	M       arch/arm/mach-s5pc100/mach-smdkc100.c
+		M       arch/arm/mach-s5pc100/Makefile
+		M       arch/arm/mach-s5pc100/cpu.c
+		M       arch/arm/mach-s5pc100/mach-smdkc100.c
 	        M       arch/arm/plat-s5pc1xx/devs.c
 	        M       drivers/mmc/host/Kconfig
 	        M       drivers/mmc/host/Makefile
@@ -383,3 +383,22 @@ v2.6.28-rc8-s5pc1xx-r0d8: Jongpill Lee
 	Modified Files:
 		M	arch/arm/plat-s3c/clock.c
 
+v2.6.28-rc8-s5pc1xx-r0d9: Abhilash Kesavan
+	- Support for ADC and PWM for S5PC100
+
+	Added Files:
+		A	arch/arm/plat-s5pc1xx/adc.c
+		A	arch/arm/plat-s5pc1xx/pwm-s5pc100.c
+		A	arch/arm/plat-s5pc1xx/pwm-s5pc100.h
+
+	Modified Files:
+		M	arch/arm/configs/smdkc100mtd_defconfig
+		M	arch/arm/configs/smdkc100nfs_defconfig
+		M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s3c/Kconfig
+		M	arch/arm/plat-s3c/include/plat/regs-timer.h
+		M	arch/arm/plat-s5pc1xx/Kconfig
+		M	arch/arm/plat-s5pc1xx/Makefile
+		M	drivers/mmc/host/s3c-hsmmc.c
+		M	drivers/video/samsung/s3cfb.h
+		M	drivers/video/samsung/s3cfb_fimd5x.c
