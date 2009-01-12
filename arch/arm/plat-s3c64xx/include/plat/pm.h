@@ -75,6 +75,6 @@ extern void s3c6410_pm_do_restore(struct sleep_save *ptr, int count);
 extern int s3c64xx_irq_suspend(struct sys_device *dev, pm_message_t state);
 extern int s3c64xx_irq_resume(struct sys_device *dev);
 #else
-#define s3c24xx_irq_suspend NULL
-#define s3c24xx_irq_resume  NULL
+#define s3c64xx_irq_suspend	NULL
+#define s3c64xx_irq_resume	NULL
 #endif
