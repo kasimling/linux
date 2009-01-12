@@ -16,12 +16,18 @@
 #include <linux/interrupt.h>
 #include <linux/irq.h>
 #include <linux/io.h>
+#include <linux/sysdev.h>
 
 #include <asm/hardware/vic.h>
 
 #include <mach/map.h>
 #include <plat/regs-timer.h>
+#include <plat/regs-clock.h>
+#include <plat/regs-gpio.h>
+#include <plat/gpio-cfg.h>
+#include <mach/regs-irq.h>
 #include <plat/cpu.h>
+#include <plat/pm.h>
 
 /* Timer interrupt handling */
 
@@ -225,6 +231,78 @@ static void __init s3c64xx_uart_irq(struct uart_irq *uirq)
 
 	set_irq_chained_handler(uirq->parent_irq, s3c_irq_demux_uart);
 }
+#ifdef CONFIG_PM
+static struct sleep_save irq_save[] = {
+	SAVE_ITEM(S3C64XX_VIC0INTSELECT),
+	SAVE_ITEM(S3C64XX_VIC1INTSELECT),
+	SAVE_ITEM(S3C64XX_VIC0INTENABLE),
+	SAVE_ITEM(S3C64XX_VIC1INTENABLE),
+	SAVE_ITEM(S3C64XX_VIC0SOFTINT),
+	SAVE_ITEM(S3C64XX_VIC1SOFTINT),
+};
+
+static struct sleep_save extirq_save[] = {
+	SAVE_ITEM(S3C64XX_EINT0CON0),
+	SAVE_ITEM(S3C64XX_EINT0CON1),
+	SAVE_ITEM(S3C64XX_EINT0FLTCON0),
+	SAVE_ITEM(S3C64XX_EINT0FLTCON1),
+	SAVE_ITEM(S3C64XX_EINT0FLTCON2),
+	SAVE_ITEM(S3C64XX_EINTF0LTCON3),
+	SAVE_ITEM(S3C64XX_EINT0MASK),
+	SAVE_ITEM(S3C64XX_EINT12CON),
+	SAVE_ITEM(S3C64XX_EINT34CON),
+	SAVE_ITEM(S3C64XX_EINT56CON),
+	SAVE_ITEM(S3C64XX_EINT78CON),
+	SAVE_ITEM(S3C64XX_EINT9CON),
+	SAVE_ITEM(S3C64XX_EINT12FLTCON),
+	SAVE_ITEM(S3C64XX_EINT34FLTCON),
+	SAVE_ITEM(S3C64XX_EINT56FLTCON),
+	SAVE_ITEM(S3C64XX_EINT78FLTCON),
+	SAVE_ITEM(S3C64XX_EINT9FLTCON),
+	SAVE_ITEM(S3C64XX_EINT12MASK),
+	SAVE_ITEM(S3C64XX_EINT34MASK),
+	SAVE_ITEM(S3C64XX_EINT56MASK),
+	SAVE_ITEM(S3C64XX_EINT78MASK),
+	SAVE_ITEM(S3C64XX_EINT9MASK),
+	SAVE_ITEM(S3C64XX_EINT34FLTCON),
+	SAVE_ITEM(S3C64XX_EINT56FLTCON),
+	SAVE_ITEM(S3C64XX_EINT78FLTCON),
+	SAVE_ITEM(S3C64XX_EINT9FLTCON),
+};
+
+static unsigned long save_eintmask;
+
+int s3c64xx_irq_suspend(struct sys_device *dev, pm_message_t state)
+{
+	s3c6410_pm_do_save(extirq_save, ARRAY_SIZE(extirq_save));
+//	s3c6410_pm_do_save(irq_save, ARRAY_SIZE(irq_save));
+	return 0;
+}
+
+int s3c64xx_irq_resume(struct sys_device *dev)
+{
+	int irqno;
+	int irqindex = 0;
+	/* For writing the IRQ number into the VICVECTADDR */
+	s3c6410_pm_do_restore(extirq_save, ARRAY_SIZE(extirq_save));
+//	s3c6410_pm_do_restore(irq_save, ARRAY_SIZE(irq_save));
+
+	for (irqno = IRQ_EINT0_3; irqno <= IRQ_LCD_SYSTEM; irqno++) {
+		__raw_writel(irqno, S3C64XX_VIC0VECTADDR0 + irqindex);
+		irqindex = irqindex + 4;
+	}
+
+	irqindex = 0;
+	for (irqno = IRQ_EINT12_19; irqno <= IRQ_ADC; irqno++) {
+		__raw_writel(irqno, S3C64XX_VIC1VECTADDR0 + irqindex);
+		irqindex = irqindex + 4;
+	}
+	return 0;
+}
+#else
+#define s3c64xx_irq_suspend	NULL
+#define s3c64xx_irq_resume	NULL
+#endif
 
 void __init s3c64xx_init_irq(u32 vic0_valid, u32 vic1_valid)
 {

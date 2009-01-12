@@ -111,6 +111,17 @@
 #define S3C2410_TCON_T0MANUALUPD  (1<<1)
 #define S3C2410_TCON_T0START	  (1<<0)
 
+#define S3C_TINT_CSTAT_T4INT    (1<<9)
+#define S3C_TINT_CSTAT_T3INT    (1<<8)
+#define S3C_TINT_CSTAT_T2INT    (1<<7)
+#define S3C_TINT_CSTAT_T1INT    (1<<6)
+#define S3C_TINT_CSTAT_T0INT    (1<<5)
+#define S3C_TINT_CSTAT_T4INTEN  (1<<4)
+#define S3C_TINT_CSTAT_T3INTEN  (1<<3)
+#define S3C_TINT_CSTAT_T2INTEN  (1<<2)
+#define S3C_TINT_CSTAT_T1INTEN  (1<<1)
+#define S3C_TINT_CSTAT_T0INTEN  (1<<0)
+
 #endif /*  __ASM_ARCH_REGS_TIMER_H */
 
 

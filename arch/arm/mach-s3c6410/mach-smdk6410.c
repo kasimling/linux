@@ -33,6 +33,7 @@
 #include <mach/map.h>
 #include <mach/regs-mem.h>
 
+#include <asm/setup.h>
 #include <asm/irq.h>
 #include <asm/mach-types.h>
 
@@ -48,6 +49,7 @@
 #include <plat/cpu.h>
 #include <plat/ts.h>
 #include <plat/adc.h>
+#include <plat/pm.h>
 
 #if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
 #include <plat/regs-otg.h>
@@ -57,7 +59,7 @@
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
-
+extern struct sys_timer s3c_timer;	// hskang
 static struct s3c2410_uartcfg smdk6410_uartcfgs[] __initdata = {
 	[0] = {
 		.hwport	     = 0,
@@ -154,6 +156,7 @@ static void __init smdk6410_machine_init(void)
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
 
 	platform_add_devices(smdk6410_devices, ARRAY_SIZE(smdk6410_devices));
+	s3c6410_pm_init();
 }
 
 MACHINE_START(SMDK6410, "SMDK6410")
