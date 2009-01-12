@@ -405,3 +405,27 @@ v2.6.28-rc8-s3c64xx-r0d8: Kyoungil Kim
 		M       drivers/video/samsung/s3cfb_fimd5x.c
 		M       drivers/video/samsung/s3cfb_lts222qv.c
 		M       drivers/video/samsung/s3cfb_spi.c
+
+v2.6.28-rc8-s3c64xx-r0d9: Jongpill Lee
+	- Support APM on SMDK6410
+
+	Modified Files:
+		M	arch/arm/configs/smdk6410mtd_defconfig
+		M	arch/arm/mach-s3c6400/include/mach/regs-irq.h
+		M	arch/arm/mach-s3c6410/Makefile
+		M	arch/arm/mach-s3c6410/mach-smdk6410.c
+		M	arch/arm/plat-s3c/Makefile
+		M	arch/arm/plat-s3c/include/plat/regs-serial.h
+		M	arch/arm/plat-s3c64xx/Makefile
+		M	arch/arm/plat-s3c64xx/include/plat/gpio-bank-k.h
+		M	arch/arm/plat-s3c64xx/include/plat/gpio-bank-l.h
+		M	arch/arm/plat-s3c64xx/include/plat/regs-gpio.h
+		M	arch/arm/plat-s3c64xx/irq.c
+		M	drivers/video/samsung/s3cfb_fimd4x.c
+	Added Files:
+		A	arch/arm/mach-s3c6410/irq.c
+		A	arch/arm/mach-s3c6410/pm.c
+		A	arch/arm/plat-s3c64xx/include/plat/gpio-bank-m.h
+		A	arch/arm/plat-s3c64xx/include/plat/pm.h
+		A	arch/arm/plat-s3c64xx/pm.c
+		A	arch/arm/plat-s3c64xx/sleep.S
