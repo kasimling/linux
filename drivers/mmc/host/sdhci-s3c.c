@@ -91,7 +91,7 @@ static unsigned int sdhci_s3c_get_max_clk(struct sdhci_host *host)
 
 static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *host)
 {
-	return sdhci_s3c_get_max_clk(host) / 1000000;
+        return sdhci_s3c_get_max_clk(host) / 1000000;
 }
 
 static void sdhci_s3c_set_ios(struct sdhci_host *host,

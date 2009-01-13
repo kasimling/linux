@@ -727,6 +727,9 @@ void mmc_start_host(struct mmc_host *host)
 {
 	mmc_power_off(host);
 	mmc_detect_change(host, 0);
+#ifdef CONFIG_USE_MMC_AS_ROOT
+        mmc_rescan(&host->detect.work);
+#endif    
 }
 
 void mmc_stop_host(struct mmc_host *host)
