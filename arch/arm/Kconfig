@@ -612,6 +612,7 @@ source "arch/arm/mach-kirkwood/Kconfig"
 
 source "arch/arm/plat-s3c24xx/Kconfig"
 source "arch/arm/plat-s3c64xx/Kconfig"
+source "arch/arm/plat-s5pc1xx/Kconfig"
 source "arch/arm/plat-s5p64xx/Kconfig"
 source "arch/arm/plat-s3c/Kconfig"
 
@@ -627,6 +628,10 @@ endif
 if ARCH_S3C64XX
 source "arch/arm/mach-s3c6400/Kconfig"
 source "arch/arm/mach-s3c6410/Kconfig"
+endif
+
+if ARCH_S5PC1XX
+source "arch/arm/mach-s5pc100/Kconfig"
 endif
 
 if ARCH_S5P64XX

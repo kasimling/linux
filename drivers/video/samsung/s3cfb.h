@@ -20,6 +20,8 @@
 
 #if  defined(CONFIG_S3C6410_PWM)
 extern int s3c6410_timer_setup (int channel, int usec, unsigned long g_tcnt, unsigned long g_tcmp);
+#elif defined(CONFIG_S5PC1XX_PWM)
+extern int s5pc100_timer_setup (int channel, int usec, unsigned long g_tcnt, unsigned long g_tcmp);
 #endif
 
 /*

@@ -70,6 +70,7 @@ enum s3c_cpu_type {
 	TYPE_S3C2450,	/* including s3c2416 */
 	TYPE_S3C6400,
 	TYPE_S3C6410,	/* including s3c6430/31 */
+        TYPE_S5PC100,
 };
 
 struct s3c_nand_info {
@@ -883,6 +884,11 @@ static int s3c6410_nand_probe(struct platform_device *dev)
 	return s3c_nand_probe(dev, TYPE_S3C6410);
 }
 
+static int s5pc100_nand_probe(struct platform_device *dev)
+{
+        return s3c_nand_probe(dev, TYPE_S5PC100);
+}
+
 /* PM Support */
 #if defined(CONFIG_PM)
 static int s3c_nand_suspend(struct platform_device *dev, pm_message_t pm)
@@ -942,13 +948,25 @@ static struct platform_driver s3c6410_nand_driver = {
 	},
 };
 
+static struct platform_driver s5pc100_nand_driver = {
+        .probe          = s5pc100_nand_probe,
+        .remove         = s3c_nand_remove,
+        .suspend        = s3c_nand_suspend,
+        .resume         = s3c_nand_resume,
+        .driver         = {
+                .name   = "s5pc100-nand",
+                .owner  = THIS_MODULE,
+        },
+};
+
 static int __init s3c_nand_init(void)
 {
 	printk("S3C NAND Driver, (c) 2008 Samsung Electronics\n");
 
 	platform_driver_register(&s3c2450_nand_driver);
 	platform_driver_register(&s3c6400_nand_driver);
-	return platform_driver_register(&s3c6410_nand_driver);
+        platform_driver_register(&s3c6410_nand_driver);
+        return platform_driver_register(&s5pc100_nand_driver);
 }
 
 static void __exit s3c_nand_exit(void)

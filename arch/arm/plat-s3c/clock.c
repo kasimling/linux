@@ -50,6 +50,7 @@
 #include <plat/clock.h>
 #include <plat/cpu.h>
 
+#if defined(CONFIG_CPU_FREQ)
 /* definition for cpu freq */
 
 #define ARM_PLL_CON 	S3C_APLL_CON
@@ -71,6 +72,7 @@ static const u32 s3c_cpu_clock_table[][6] = {
 	{266*MHZ, 266, 3, 1, 0, 1},
 	{133*MHZ, 266, 3, 1, 0, 3},
 };
+#endif
 
 /* clock information */
 
@@ -246,6 +248,7 @@ EXPORT_SYMBOL(clk_set_rate);
 EXPORT_SYMBOL(clk_get_parent);
 EXPORT_SYMBOL(clk_set_parent);
 
+#if defined(CONFIG_CPU_FREQ)
 unsigned long s3c_fclk_get_rate(void)
 {
 	unsigned long apll_con;
@@ -306,6 +309,7 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 
 	return ret;
 }
+#endif
 
 /* base clocks */
 
@@ -352,8 +356,10 @@ struct clk clk_f = {
 	.rate		= 0,
 	.parent		= &clk_mpll,
 	.ctrlbit	= 0,
+#if defined(CONFIG_CPU_FREQ)
 	.set_rate	= &s3c_fclk_set_rate,
 	.round_rate	= &s3c_fclk_round_rate,
+#endif
 };
 
 struct clk clk_h = {
