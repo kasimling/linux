@@ -411,3 +411,13 @@ v2.6.28-rc8-s5pc1xx-v1: Kyoungil Kim
 
 v2.6.28-rc8-s5pc1xx-r1d0: Kyoungil Kim
 
+v2.6.28-rc8-s5pc1xx-r1d1: JongPill Lee
+	- Support IDLE Function on S5PC100
+
+	Added Files:
+		A	arch/arm/plat-s5pc1xx/include/plat/regs-power.h
+
+	Modified Files:
+		M	arch/arm/mach-s5pc100/cpu.c
+		M	arch/arm/mach-s5pc100/include/mach/system.h
+

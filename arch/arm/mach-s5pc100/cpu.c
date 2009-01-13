@@ -25,9 +25,12 @@
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
 #include <asm/mach/irq.h>
+#include <asm/proc-fns.h>
+#include <asm/irq.h>
 
 #include <mach/hardware.h>
-#include <asm/irq.h>
+#include <mach/idle.h>
+#include <mach/map.h>
 
 #include <plat/cpu-freq.h>
 #include <plat/regs-serial.h>
@@ -38,7 +41,16 @@
 #include <plat/sdhci.h>
 #include <plat/iic-core.h>
 #include <plat/s5pc100.h>
-#include <mach/map.h>
+
+#include <plat/regs-power.h>
+
+#undef T32_PROBE_DEBUGGING
+
+#if defined(T32_PROBE_DEBUGGING)
+#include <linux/gpio.h>
+#include <plat/gpio-cfg.h>
+#include <plat/regs-gpio.h>
+#endif
 
 /* Initial IO mappings */
 
@@ -57,9 +69,39 @@ static struct map_desc s5pc100_iodesc[] __initdata = {
  * register the standard cpu IO areas
 */
 
+static void s5pc100_idle(void)
+{
+	unsigned int tmp;
+
+#if defined(T32_PROBE_DEBUGGING)
+/* debugging with T32  GPIO port GPD1 which is connected with 2 pin of J1 connector */
+	gpio_direction_output(S5PC1XX_GPD(1), 0);
+#endif
+/*
+ * 1. Set CFG_STANDBYWFI field of PWR_CFG to 2¡¯b01.
+ * 2. Set PMU_INT_DISABLE bit of OTHERS register to 1¡¯b1 to prevent interrupts from
+ *    occurring while entering IDLE mode.
+ * 3. Execute Wait For Interrupt instruction (WFI).
+*/
+	tmp = __raw_readl(S5P_PWR_CFG);
+	tmp &= S5P_CFG_WFI_CLEAN;
+	tmp |= S5P_CFG_WFI_IDLE;
+	__raw_writel(tmp, S5P_PWR_CFG);
+
+	cpu_do_idle();
+
+#if defined(T32_PROBE_DEBUGGING)
+	gpio_direction_output(S5PC1XX_GPD(1), 1);
+#endif
+}
+
 void __init s5pc100_map_io(void)
 {
 	iotable_init(s5pc100_iodesc, ARRAY_SIZE(s5pc100_iodesc));
+
+	/* set s5pc100 idle function */
+
+	s5pc1xx_idle = s5pc100_idle;
 
 
 #if 0
