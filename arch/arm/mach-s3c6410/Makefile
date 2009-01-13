@@ -14,10 +14,14 @@ obj-				:=
 
 obj-$(CONFIG_CPU_S3C6410)	+= cpu.o
 obj-$(CONFIG_CPU_S3C6410)	+= dma.o
+obj-$(CONFIG_CPU_S3C6410)	+= irq.o
+
 
 # Helper and device support
 
 obj-$(CONFIG_S3C6410_SETUP_SDHCI)	+= setup-sdhci.o
+
+obj-$(CONFIG_PM)    += pm.o
 
 # machine support
 

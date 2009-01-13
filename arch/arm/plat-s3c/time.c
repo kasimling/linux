@@ -341,6 +341,9 @@ static void s3c64xx_timer_setup (void)
 	tcon |= S3C2410_TCON_T4START;
 	tcon &= ~S3C2410_TCON_T4MANUALUPD;
 	__raw_writel(tcon, S3C2410_TCON);
+
+	/* Timer interrupt Enable */
+	__raw_writel(__raw_readl(S3C64XX_TINT_CSTAT) | S3C_TINT_CSTAT_T4INTEN , S3C64XX_TINT_CSTAT);
 }
 
 

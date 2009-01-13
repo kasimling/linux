@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
-# Linux kernel version: 2.6.28-rc4
-# Tue Nov 25 13:08:47 2008
+# Linux kernel version: 2.6.28-rc8
+# Mon Jan 12 12:42:41 2009
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -154,6 +154,7 @@ CONFIG_CLASSIC_RCU=y
 # CONFIG_ARCH_SA1100 is not set
 # CONFIG_ARCH_S3C2410 is not set
 CONFIG_ARCH_S3C64XX=y
+# CONFIG_ARCH_S5P64XX is not set
 # CONFIG_ARCH_S5PC1XX is not set
 # CONFIG_ARCH_SHARK is not set
 # CONFIG_ARCH_LH7A40X is not set
@@ -185,6 +186,7 @@ CONFIG_S3C_GPIO_CFG_S3C64XX=y
 CONFIG_S3C_DEV_HSMMC=y
 CONFIG_S3C_DEV_HSMMC1=y
 CONFIG_S3C_DEV_I2C1=y
+CONFIG_S3C_DMA_PL080=y
 CONFIG_CPU_S3C6410=y
 CONFIG_S3C6410_SETUP_SDHCI=y
 CONFIG_MACH_SMDK6410=y
@@ -266,6 +268,7 @@ CONFIG_CMDLINE="root=/dev/mtdblock2 rootfstype=cramfs init=/linuxrc console=ttyS
 #
 # CPU Power Management
 #
+# CONFIG_CPU_FREQ is not set
 # CONFIG_CPU_IDLE is not set
 
 #
@@ -277,7 +280,7 @@ CONFIG_CMDLINE="root=/dev/mtdblock2 rootfstype=cramfs init=/linuxrc console=ttyS
 #
 # CONFIG_FPE_NWFPE is not set
 # CONFIG_FPE_FASTFPE is not set
-CONFIG_VFP=y
+# CONFIG_VFP is not set
 
 #
 # Userspace binary formats
@@ -402,7 +405,9 @@ CONFIG_BLK_DEV_RAM_SIZE=8192
 # CONFIG_CDROM_PKTCDVD is not set
 CONFIG_MISC_DEVICES=y
 # CONFIG_EEPROM_93CX6 is not set
+# CONFIG_ICS932S401 is not set
 # CONFIG_ENCLOSURE_SERVICES is not set
+# CONFIG_C2PORT is not set
 CONFIG_HAVE_IDE=y
 # CONFIG_IDE is not set
 
@@ -463,6 +468,7 @@ CONFIG_MOUSE_PS2_TRACKPOINT=y
 # CONFIG_INPUT_TABLET is not set
 CONFIG_INPUT_TOUCHSCREEN=y
 CONFIG_TOUCHSCREEN_S3C=y
+CONFIG_TOUCHSCREEN_NEW=y
 # CONFIG_TOUCHSCREEN_FUJITSU is not set
 # CONFIG_TOUCHSCREEN_GUNZE is not set
 # CONFIG_TOUCHSCREEN_ELO is not set
@@ -521,10 +527,10 @@ CONFIG_LEGACY_PTY_COUNT=256
 # CONFIG_IPMI_HANDLER is not set
 CONFIG_HW_RANDOM=y
 # CONFIG_NVRAM is not set
-# CONFIG_S3C_ADC is not set
 # CONFIG_R3964 is not set
 # CONFIG_RAW_DRIVER is not set
 # CONFIG_TCG_TPM is not set
+CONFIG_S3C_MEM=y
 CONFIG_I2C=y
 CONFIG_I2C_BOARDINFO=y
 CONFIG_I2C_CHARDEV=y
@@ -578,6 +584,10 @@ CONFIG_GPIOLIB=y
 # CONFIG_GPIO_SYSFS is not set
 
 #
+# Memory mapped GPIO expanders:
+#
+
+#
 # I2C GPIO expanders:
 #
 # CONFIG_GPIO_MAX732X is not set
@@ -603,6 +613,7 @@ CONFIG_HWMON=y
 # CONFIG_SENSORS_ADM1029 is not set
 # CONFIG_SENSORS_ADM1031 is not set
 # CONFIG_SENSORS_ADM9240 is not set
+# CONFIG_SENSORS_ADT7462 is not set
 # CONFIG_SENSORS_ADT7470 is not set
 # CONFIG_SENSORS_ADT7473 is not set
 # CONFIG_SENSORS_ATXP1 is not set
@@ -647,11 +658,11 @@ CONFIG_HWMON=y
 # CONFIG_THERMAL is not set
 # CONFIG_THERMAL_HWMON is not set
 # CONFIG_WATCHDOG is not set
+CONFIG_SSB_POSSIBLE=y
 
 #
 # Sonics Silicon Backplane
 #
-CONFIG_SSB_POSSIBLE=y
 # CONFIG_SSB is not set
 
 #
@@ -806,7 +817,7 @@ CONFIG_USB_ARCH_HAS_HCD=y
 #
 
 #
-# NOTE: USB_STORAGE enables SCSI, and 'SCSI disk support'
+# NOTE: USB_STORAGE depends on SCSI but BLK_DEV_SD may also be needed;
 #
 # CONFIG_USB_GADGET is not set
 CONFIG_MMC=y

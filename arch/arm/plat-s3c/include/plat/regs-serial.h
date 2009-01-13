@@ -54,6 +54,7 @@
 #define S3C2410_UMSTAT	  (0x1C)
 #define S3C2410_UBRDIV	  (0x28)
 #define S3C2410_UDIVSLOT  (0x2C)
+#define S3C2410_UINTMSK  (0x38)
 
 #define S3C2410_LCON_CFGMASK	  ((0xF<<3)|(0x3))
 

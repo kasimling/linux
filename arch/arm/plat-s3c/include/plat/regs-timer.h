@@ -111,6 +111,18 @@
 #define S3C2410_TCON_T0MANUALUPD  (1<<1)
 #define S3C2410_TCON_T0START	  (1<<0)
 
+/* Interrupt Control and Status register*/
+#define S3C_TINT_CSTAT_T4INT    (1<<9)
+#define S3C_TINT_CSTAT_T3INT    (1<<8)
+#define S3C_TINT_CSTAT_T2INT    (1<<7)
+#define S3C_TINT_CSTAT_T1INT    (1<<6)
+#define S3C_TINT_CSTAT_T0INT    (1<<5)
+#define S3C_TINT_CSTAT_T4INTEN  (1<<4)
+#define S3C_TINT_CSTAT_T3INTEN  (1<<3)
+#define S3C_TINT_CSTAT_T2INTEN  (1<<2)
+#define S3C_TINT_CSTAT_T1INTEN  (1<<1)
+#define S3C_TINT_CSTAT_T0INTEN  (1<<0)
+
 #if defined(CONFIG_PLAT_S3C64XX) || defined(CONFIG_PLAT_S5PC1XX) 
 #define S3C_TCFG0       S3C_TIMERREG(0x00)
 #define S3C_TCFG1       S3C_TIMERREG(0x04)
@@ -200,17 +212,6 @@
 #define S3C_TCON_T0MANUALUPD  (1<<1)
 #define S3C_TCON_T0START          (1<<0)
 
-/* Interrupt Control and Status register*/
-#define S3C_TINT_CSTAT_T4INT    (1<<9)
-#define S3C_TINT_CSTAT_T3INT    (1<<8)
-#define S3C_TINT_CSTAT_T2INT    (1<<7)
-#define S3C_TINT_CSTAT_T1INT    (1<<6)
-#define S3C_TINT_CSTAT_T0INT    (1<<5)
-#define S3C_TINT_CSTAT_T4INTEN  (1<<4)
-#define S3C_TINT_CSTAT_T3INTEN  (1<<3)
-#define S3C_TINT_CSTAT_T2INTEN  (1<<2)
-#define S3C_TINT_CSTAT_T1INTEN  (1<<1)
-#define S3C_TINT_CSTAT_T0INTEN  (1<<0)
 #endif
 
 #endif /*  __ASM_ARCH_REGS_TIMER_H */
