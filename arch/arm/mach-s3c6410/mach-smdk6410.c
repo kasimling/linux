@@ -61,7 +61,9 @@
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
-extern struct sys_timer s3c_timer;	// hskang
+
+extern struct sys_timer s3c_timer;
+
 static struct s3c2410_uartcfg smdk6410_uartcfgs[] __initdata = {
 	[0] = {
 		.hwport	     = 0,
@@ -96,11 +98,14 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 	&s3c_device_lcd,
 	&s3c_device_nand,
 	&s3c_device_usbgadget,
+#ifdef CONFIG_S3C64XX_ADC
+	&s3c_device_adc,
+#endif
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
 	{ I2C_BOARD_INFO("24c08", 0x50), },
-//	{ I2C_BOARD_INFO("WM8580", 0x1b), },
+/*	{ I2C_BOARD_INFO("WM8580", 0x1b), },	*/
 };
 
 static struct i2c_board_info i2c_devs1[] __initdata = {
