@@ -12,7 +12,9 @@ obj-				:=
 # Core support for all Samsung SoCs
 
 obj-y				+= init.o
+ifndef CONFIG_ARCH_S5PC1XX
 obj-y				+= time.o
+endif 
 obj-y				+= clock.o
 obj-y				+= pwm-clock.o
 obj-y				+= gpio.o

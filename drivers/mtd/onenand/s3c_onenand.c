@@ -8,7 +8,7 @@
 #include <linux/mtd/partitions.h>
 
 #include <asm/io.h>
-#include <asm/arch/regs-s3c-clock.h>
+#include <plat/regs-clock.h>
 
 #include <linux/dma-mapping.h>
 #include "s3c_onenand.h"
@@ -29,6 +29,9 @@
 #if defined(CONFIG_CPU_S3C6400)
 #define onenand_phys_to_virt(x)		(void __iomem *)(chip->dev_base + (x & 0xffffff))
 #define onenand_virt_to_phys(x)		(void __iomem *)(ONENAND_AHB_ADDR + (x & 0xffffff))
+#elif defined(CONFIG_CPU_S5PC100)
+#define onenand_phys_to_virt(x)		(void __iomem *)(chip->dev_base + (x & 0xfffffff))
+#define onenand_virt_to_phys(x)		(void __iomem *)(ONENAND_AHB_ADDR + (x & 0xfffffff))
 #else
 #define onenand_phys_to_virt(x)		(void __iomem *)(chip->dev_base + (x & 0x3ffffff))
 #define onenand_virt_to_phys(x)		(void __iomem *)(ONENAND_AHB_ADDR + (x & 0x3ffffff))
@@ -316,8 +319,9 @@ static int onenand_command_map(int cmd)
  * @return		address field
  *
  * Refer to Table 7-1 MEM_ADDR Fields in S3C6400/10 User's Manual
+ * Refer to Table 5.3-1 MEM_ADDR Fields in S5PC100  User's Manual 
  */
-#if defined(CONFIG_CPU_S3C6400)
+#if defined(CONFIG_CPU_S3C6400) || defined (CONFIG_CPU_S5PC100)
 static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 {
 	u_int mem_addr = 0;
@@ -2337,12 +2341,25 @@ static int s3c_onenand_init (struct onenand_chip *chip)
 	/*** Initialize Controller ***/
 
 	/* SYSCON */
+#if defined(CONFIG_CPU_S5PC100)
+        value = readl(S5P_CLK_SRC0);
+        writel(value &~(S5P_CLKSRC0_ONENAND_MASK), S5P_CLK_SRC0);
+       /* value = readl(S5P_CLK_DIV1);
+        value = (value & ~(S5P_CLKDIV1_ONENAND_MASK)) | (1 << S5P_CLKDIV1_ONENAND_SHIFT);
+        writel(value, S5P_CLK_DIV1); */
+#else
 	value = readl(S3C_CLK_DIV0);
 	value = (value & ~(3 << 16)) | (1 << 16);
 	writel(value, S3C_CLK_DIV0);
+#endif
 
 #if defined(CONFIG_CPU_S3C6410)
 	writel(ONENAND_FLASH_AUX_WD_DISABLE, chip->base + ONENAND_REG_FLASH_AUX_CNTRL);
+#endif
+
+#if defined(CONFIG_CPU_S5PC100)
+	/* Skip Cold reset delay counting */
+	writel(0x0, chip->base + ONENAND_REG_COLD_RST_DLY);
 #endif
 
 	/* Cold Reset */
