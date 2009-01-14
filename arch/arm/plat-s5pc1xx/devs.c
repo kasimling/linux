@@ -270,3 +270,46 @@ struct platform_device s3c_device_hsmmc2 = {
 EXPORT_SYMBOL(s3c_device_hsmmc0);
 EXPORT_SYMBOL(s3c_device_hsmmc1);
 EXPORT_SYMBOL(s3c_device_hsmmc2);
+
+static struct resource s3c_rtc_resource[] = {
+        [0] = {
+                .start = S3C_PA_RTC,
+                .end   = S3C_PA_RTC + 0xff,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_RTC_ALARM,
+                .end   = IRQ_RTC_ALARM,
+                .flags = IORESOURCE_IRQ,
+        },
+        [2] = {
+                .start = IRQ_RTC_TIC,
+                .end   = IRQ_RTC_TIC,
+                .flags = IORESOURCE_IRQ
+        }
+};
+
+struct platform_device s3c_device_rtc = {
+        .name             = "s3c2410-rtc",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_rtc_resource),
+        .resource         = s3c_rtc_resource,
+};
+
+/* OneNAND Controller */
+static struct resource s3c_onenand_resource[] = {
+        [0] = {
+                .start = S5PC1XX_PA_ONENAND,
+                .end   = S5PC1XX_PA_ONENAND + S5PC1XX_SZ_ONENAND - 1,
+                .flags = IORESOURCE_MEM,
+        }
+};
+
+struct platform_device s3c_device_onenand = {
+        .name             = "onenand",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_onenand_resource),
+        .resource         = s3c_onenand_resource,
+};
+
+EXPORT_SYMBOL(s3c_device_onenand);

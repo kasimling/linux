@@ -28,6 +28,7 @@
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
 #include <asm/mach/irq.h>
+#include <asm/mach/flash.h>
 
 #include <mach/hardware.h>
 #include <mach/map.h>
@@ -39,6 +40,7 @@
 #include <asm/mach-types.h>
 
 #include <plat/regs-serial.h>
+#include <plat/regs-rtc.h>
 #include <plat/iic.h>
 
 #include <plat/nand.h>
@@ -87,8 +89,10 @@ struct map_desc smdkc100_iodesc[] = {};
 static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_lcd,
         &s3c_device_nand,
+        &s3c_device_onenand,
 	&s3c_device_ts,
 	&s3c_device_adc,
+        &s3c_device_rtc,
 	&s3c_device_smc911x,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
@@ -151,6 +155,7 @@ static void __init smdkc100_smc911x_set(void)
 static void __init smdkc100_machine_init(void)
 {
         s3c_device_nand.dev.platform_data = &s3c_nand_mtd_part_info;
+	s3c_device_onenand.dev.platform_data = &s3c_onenand_data;
 
 	smdkc100_smc911x_set();
 
@@ -391,3 +396,72 @@ struct s3c_hsmmc_cfg s3c_hsmmc2_platform = {
         },
 };
 
+#if defined(CONFIG_RTC_DRV_S3C)
+/* RTC common Function for samsung APs*/
+unsigned int s3c_rtc_set_bit_byte(void __iomem *base, uint offset, uint val)
+{
+        writeb(val, base + offset);
+
+        return 0;
+}
+
+unsigned int s3c_rtc_read_alarm_status(void __iomem *base)
+{
+        return 1;
+}
+
+void s3c_rtc_set_pie(void __iomem *base, uint to)
+{
+        unsigned int tmp;
+
+        tmp = readw(base + S3C2410_RTCCON) & ~S3C_RTCCON_TICEN;
+
+        if (to)
+                tmp |= S3C_RTCCON_TICEN;
+
+        writew(tmp, base + S3C2410_RTCCON);
+}
+
+void s3c_rtc_set_freq_regs(void __iomem *base, uint freq, uint *s3c_freq)
+{
+        unsigned int tmp;
+
+        tmp = readw(base + S3C2410_RTCCON) & (S3C_RTCCON_TICEN | S3C2410_RTCCON_RTCEN );
+        writew(tmp, base + S3C2410_RTCCON);
+        *s3c_freq = freq;
+        tmp = (32768 / freq)-1;
+        writel(tmp, base + S3C2410_TICNT);
+}
+
+void s3c_rtc_enable_set(struct platform_device *pdev,void __iomem *base, int en)
+{
+        unsigned int tmp;
+
+        if (!en) {
+                tmp = readw(base + S3C2410_RTCCON);
+                writew(tmp & ~ (S3C2410_RTCCON_RTCEN | S3C_RTCCON_TICEN), base + S3C2410_RTCCON);
+        } else {
+                /* re-enable the device, and check it is ok */
+                if ((readw(base+S3C2410_RTCCON) & S3C2410_RTCCON_RTCEN) == 0){
+                        dev_info(&pdev->dev, "rtc disabled, re-enabling\n");
+
+                        tmp = readw(base + S3C2410_RTCCON);
+                        writew(tmp|S3C2410_RTCCON_RTCEN, base+S3C2410_RTCCON);
+                }
+
+                if ((readw(base + S3C2410_RTCCON) & S3C2410_RTCCON_CNTSEL)){
+                        dev_info(&pdev->dev, "removing RTCCON_CNTSEL\n");
+
+                        tmp = readw(base + S3C2410_RTCCON);
+                        writew(tmp& ~S3C2410_RTCCON_CNTSEL, base+S3C2410_RTCCON);
+                }
+
+                if ((readw(base + S3C2410_RTCCON) & S3C2410_RTCCON_CLKRST)){
+                        dev_info(&pdev->dev, "removing RTCCON_CLKRST\n");
+
+                        tmp = readw(base + S3C2410_RTCCON);
+                        writew(tmp & ~S3C2410_RTCCON_CLKRST, base+S3C2410_RTCCON);
+                }
+        }
+}
+#endif

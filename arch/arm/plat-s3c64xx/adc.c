@@ -205,7 +205,6 @@ static struct s3c_adc_mach_info *s3c_adc_get_platdata(struct device *dev)
 {
 	if(dev->platform_data != NULL)
 	{
-		printk(KERN_INFO "ADC platform data read\n");
 		return (struct s3c_adc_mach_info*) dev->platform_data;
 	} else {
 		printk(KERN_INFO "No ADC platform data \n");

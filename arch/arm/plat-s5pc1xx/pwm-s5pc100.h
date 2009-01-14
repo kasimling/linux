@@ -26,7 +26,7 @@
 
 /* we have 4 pwm channels */
 #define S3C_PWM_CHANNELS        5
-#define PRESCALER 		((6-1)/2)
+#define PRESCALER 		((4-1)/2)
 
 struct s3c_pwm_client {
 	char                *name;
