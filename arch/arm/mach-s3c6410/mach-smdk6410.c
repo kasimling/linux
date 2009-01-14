@@ -113,13 +113,19 @@ static struct i2c_board_info i2c_devs1[] __initdata = {
 	{ I2C_BOARD_INFO("WM8580", 0x1b), },
 };
 
-
 static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
 	.delay 			= 10000,
 	.presc 			= 49,
 	.oversampling_shift	= 2,
 	.resol_bit 		= 12,
 	.s3c_adc_con		= ADC_TYPE_2,
+};
+
+static struct s3c_adc_mach_info s3c_adc_platform = {
+	/* s3c6410 support 12-bit resolution */
+	.delay	= 	10000,
+	.presc 	= 	49,
+	.resolution = 	12,
 };
 
 static void __init smdk6410_map_io(void)
@@ -159,6 +165,7 @@ static void __init smdk6410_machine_init(void)
 	s3c_i2c1_set_platdata(NULL);
 
 	s3c_ts_set_platdata(&s3c_ts_platform);
+	s3c_adc_set_platdata(&s3c_adc_platform);
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
@@ -178,6 +185,7 @@ MACHINE_START(SMDK6410, "SMDK6410")
 	.init_machine	= smdk6410_machine_init,
 	.timer		= &s3c64xx_timer,
 MACHINE_END
+
 
 #if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
 /* Initializes OTG Phy. */
