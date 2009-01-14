@@ -9,6 +9,8 @@
  * published by the Free Software Foundation.
 */
 
+#include <asm/mach/flash.h>
+
 struct mtd_partition s3c_partition_info[] = {
         {
                 .name		= "Bootloader",

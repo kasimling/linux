@@ -28,7 +28,6 @@
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
 #include <asm/mach/irq.h>
-#include <asm/mach/flash.h>
 
 #include <mach/hardware.h>
 #include <mach/map.h>

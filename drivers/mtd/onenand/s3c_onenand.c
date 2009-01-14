@@ -1809,7 +1809,7 @@ static int onenand_write_oob_nolock(struct mtd_info *mtd, loff_t to, struct mtd_
 		}
 
 		if (onenand_blkrw_complete(chip, ONENAND_CMD_PROG)) {
-			printk(KERN_WARNING "\onenand_write_oob_nolock: Program operation failed.\n");
+			printk(KERN_WARNING "\nonenand_write_oob_nolock: Program operation failed.\n");
 			chip->write(~ONENAND_TRANS_SPARE_TSRF_INC, chip->base + ONENAND_REG_TRANS_SPARE);
 			return -1;
 		}
