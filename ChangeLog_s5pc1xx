@@ -421,3 +421,20 @@ v2.6.28-rc8-s5pc1xx-r1d1: JongPill Lee
 		M	arch/arm/mach-s5pc100/cpu.c
 		M	arch/arm/mach-s5pc100/include/mach/system.h
 
+v2.6.28-rc8-s5pc1xx-r1d2: Abhilash Kesavan
+	- Support OneNand on S5PC100 (I)
+
+	Added Files:
+		A       arch/arm/plat-s3c/include/plat/regs-onenand.h
+
+	Modified Files:
+		M       arch/arm/mach-s5pc100/mach-smdkc100.c
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s3c/include/plat/partition.h
+		M       drivers/mtd/onenand/Makefile
+		M       drivers/mtd/onenand/onenand_bbt.c
+		M       drivers/mtd/onenand/s3c_onenand.c
+		M       drivers/mtd/onenand/s3c_onenand.h
+
+
