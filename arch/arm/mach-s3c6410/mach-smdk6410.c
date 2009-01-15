@@ -65,7 +65,9 @@
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
-extern struct sys_timer s3c_timer;	// hskang
+
+extern struct sys_timer s3c_timer;
+
 static struct s3c2410_uartcfg smdk6410_uartcfgs[] __initdata = {
 	[0] = {
 		.hwport	     = 0,
@@ -101,11 +103,14 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 	&s3c_device_lcd,
 	&s3c_device_nand,
 	&s3c_device_usbgadget,
+#ifdef CONFIG_S3C64XX_ADC
+	&s3c_device_adc,
+#endif
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
 	{ I2C_BOARD_INFO("24c08", 0x50), },
-//	{ I2C_BOARD_INFO("WM8580", 0x1b), },
+/*	{ I2C_BOARD_INFO("WM8580", 0x1b), },	*/
 };
 
 static struct i2c_board_info i2c_devs1[] __initdata = {
@@ -113,13 +118,19 @@ static struct i2c_board_info i2c_devs1[] __initdata = {
 	{ I2C_BOARD_INFO("WM8580", 0x1b), },
 };
 
-
 static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
 	.delay 			= 10000,
 	.presc 			= 49,
 	.oversampling_shift	= 2,
 	.resol_bit 		= 12,
 	.s3c_adc_con		= ADC_TYPE_2,
+};
+
+static struct s3c_adc_mach_info s3c_adc_platform = {
+	/* s3c6410 support 12-bit resolution */
+	.delay	= 	10000,
+	.presc 	= 	49,
+	.resolution = 	12,
 };
 
 static void __init smdk6410_map_io(void)
@@ -159,6 +170,7 @@ static void __init smdk6410_machine_init(void)
 	s3c_i2c1_set_platdata(NULL);
 
 	s3c_ts_set_platdata(&s3c_ts_platform);
+	s3c_adc_set_platdata(&s3c_adc_platform);
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
@@ -178,6 +190,7 @@ MACHINE_START(SMDK6410, "SMDK6410")
 	.init_machine	= smdk6410_machine_init,
 	.timer		= &s3c64xx_timer,
 MACHINE_END
+
 
 #if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
 /* Initializes OTG Phy. */

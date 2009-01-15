@@ -63,13 +63,14 @@
 #define ADC_MINOR 	131
 #define ADC_INPUT_PIN   _IOW('S', 0x0c, unsigned long)
 
-#undef ADC_WITH_TOUCHSCREEN
+#define ADC_WITH_TOUCHSCREEN
 
 static struct clk	*adc_clock;
-static struct resource	*adc_mem;
+
 static void __iomem 	*base_addr;
 static int adc_port =  0;
 struct s3c_adc_mach_info *plat_data;
+
 
 #ifdef ADC_WITH_TOUCHSCREEN
 static DEFINE_MUTEX(adc_mutex);
@@ -88,6 +89,8 @@ static void s3c_adc_restore_SFR_on_ADC(void)
 	writel(data_for_ADCCON, base_addr + S3C_ADCCON);
 	writel(data_for_ADCTSC, base_addr + S3C_ADCTSC);
 }
+#else
+static struct resource	*adc_mem;
 #endif
 
 static int s3c_adc_open(struct inode *inode, struct file *file)
@@ -123,17 +126,19 @@ unsigned int s3c_adc_convert(void)
 }
 
 
-static int s3c_adc_get(struct s3c_adc_request *req)
+int s3c_adc_get(struct s3c_adc_request *req)
 {
 	unsigned adc_channel = req->channel;
 	int adc_value_ret = 0;
 
 	adc_value_ret = s3c_adc_convert();
 
-	req->callback(adc_channel,req->param,adc_value_ret);
+	req->callback(adc_channel,req->param, adc_value_ret);
 
 	return 0;
 }
+EXPORT_SYMBOL(s3c_adc_get);
+
 
 static ssize_t
 s3c_adc_read(struct file *file, char __user * buffer,
@@ -200,9 +205,8 @@ static struct s3c_adc_mach_info *s3c_adc_get_platdata(struct device *dev)
 {
 	if(dev->platform_data != NULL)
 	{
-		printk(KERN_INFO "ADC platform data read\n");
 		return (struct s3c_adc_mach_info*) dev->platform_data;
-	}else{
+	} else {
 		printk(KERN_INFO "No ADC platform data \n");
 		return 0;
 	}
@@ -229,7 +233,7 @@ static int __init s3c_adc_probe(struct platform_device *pdev)
 
 	size = (res->end - res->start) + 1;
 
-#ifdef ADC_WITH_TOUCHSCREEN
+#if !defined(ADC_WITH_TOUCHSCREEN)
 	adc_mem = request_mem_region(res->start, size, pdev->name);
 	if(adc_mem == NULL){
 		dev_err(dev, "failed to get memory region\n");
@@ -288,9 +292,11 @@ err_clk:
 err_map:
 	iounmap(base_addr);
 
+#if !defined(ADC_WITH_TOUCHSCREEN)
 err_req:
 	release_resource(adc_mem);
 	kfree(adc_mem);
+#endif
 
 	return ret;
 }
@@ -342,7 +348,7 @@ static struct platform_driver s3c_adc_driver = {
 	},
 };
 
-static char banner[] __initdata = KERN_INFO "S3C64XX ADC driver, (c) 2007 Samsung Electronics\n";
+static char banner[] __initdata = KERN_INFO "S3C64XX ADC driver, (c) 2008 Samsung Electronics\n";
 
 int __init s3c_adc_init(void)
 {
@@ -361,3 +367,4 @@ module_exit(s3c_adc_exit);
 MODULE_AUTHOR("boyko.lee@samsung.com");
 MODULE_DESCRIPTION("S3C64XX ADC driver");
 MODULE_LICENSE("GPL");
+

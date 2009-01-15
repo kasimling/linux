@@ -140,6 +140,28 @@ static struct resource s3c_adc_resource[] = {
 
 };
 
+struct platform_device s3c_device_adc = {
+	.name		  = "s3c-adc",
+	.id		  = -1,
+	.num_resources	  = ARRAY_SIZE(s3c_adc_resource),
+	.resource	  = s3c_adc_resource,
+};
+
+void __init s3c_adc_set_platdata(struct s3c_adc_mach_info *pd)
+{
+	struct s3c_adc_mach_info *npd;
+
+	npd = kmalloc(sizeof(*npd), GFP_KERNEL);
+	if (npd) {
+		memcpy(npd, pd, sizeof(*npd));
+		s3c_device_adc.dev.platform_data = npd;
+	} else {
+		printk(KERN_ERR "no memory for ADC platform data\n");
+	}
+}
+EXPORT_SYMBOL(s3c_device_adc);
+
+
 static struct resource s3c_rtc_resource[] = {
 	[0] = {
 		.start = S3C_PA_RTC,
@@ -167,12 +189,6 @@ struct platform_device s3c_device_rtc = {
 
 EXPORT_SYMBOL(s3c_device_rtc);
 
-struct platform_device s3c_device_adc = {
-	.name		  = "s3c-adc",
-	.id		  = -1,
-	.num_resources	  = ARRAY_SIZE(s3c_adc_resource),
-	.resource	  = s3c_adc_resource,
-};
 
 /* Keypad interface */
 static struct resource s3c_keypad_resource[] = {
@@ -196,18 +212,4 @@ struct platform_device s3c_device_keypad = {
 };
 
 EXPORT_SYMBOL(s3c_device_keypad);
-
-void __init s3c_adc_set_platdata(struct s3c_adc_mach_info *pd)
-{
-	struct s3c_adc_mach_info *npd;
-
-	npd = kmalloc(sizeof(*npd), GFP_KERNEL);
-	if (npd) {
-		memcpy(npd, pd, sizeof(*npd));
-		s3c_device_adc.dev.platform_data = npd;
-	} else {
-		printk(KERN_ERR "no memory for ADC platform data\n");
-	}
-}
-
 
