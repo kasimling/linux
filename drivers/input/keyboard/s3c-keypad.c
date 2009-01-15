@@ -340,8 +340,8 @@ static unsigned int keyifcon, keyiffc;
 
 static int s3c_keypad_suspend(struct platform_device *dev, pm_message_t state)
 {
-	keyifcon = readl(keypad_base+S3C_KEYIFCON);
-	keyiffc = readl(keypad_base+S3C_KEYIFFC);
+	keyifcon = readl(key_base+S3C_KEYIFCON);
+	keyiffc = readl(key_base+S3C_KEYIFFC);
 	
 	disable_irq(IRQ_KEYPAD);
 
