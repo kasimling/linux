@@ -24,6 +24,7 @@
 #include <linux/i2c.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
+#include <linux/module.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -52,6 +53,9 @@
 #include <plat/ts.h>
 #include <plat/adc.h>
 #include <plat/pm.h>
+
+#include <mach/gpio.h>
+#include <plat/gpio-cfg.h>
 
 #if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
 #include <plat/regs-otg.h>
@@ -93,6 +97,7 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 	&s3c_device_rtc,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
+	&s3c_device_keypad,
 	&s3c_device_ts,
 	&s3c_device_smc911x,
 	&s3c_device_lcd,
@@ -314,3 +319,28 @@ void s3c_rtc_enable_set(struct platform_device *pdev,void __iomem *base, int en)
 }
 #endif
 
+#if defined(CONFIG_KEYPAD_S3C) || defined (CONFIG_KEYPAD_S3C_MODULE)
+void s3c_setup_keypad_cfg_gpio(int rows, int columns)
+{
+	unsigned int gpio;
+	unsigned int end;
+
+	end = S3C64XX_GPK(8 + rows);
+
+	/* Set all the necessary GPK pins to special-function 0 */
+	for (gpio = S3C64XX_GPK(8); gpio < end; gpio++) {
+		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(3));
+		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+	}
+
+	end = S3C64XX_GPL(0 + columns);
+
+	/* Set all the necessary GPK pins to special-function 0 */
+	for (gpio = S3C64XX_GPL(0); gpio < end; gpio++) {
+		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(3));
+		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+	}
+}
+
+EXPORT_SYMBOL(s3c_setup_keypad_cfg_gpio);
+#endif
