@@ -442,3 +442,27 @@ v2.6.28-rc8-s3c64xx-r0d10: Jongpill Lee
 		M       arch/arm/plat-s3c64xx/include/plat/pm.h
 		M       drivers/rtc/Kconfig
 		M       drivers/rtc/rtc-s3c.c
+
+v2.6.28-rc8-s3c64xx-r0d11: Kyoungil Kim
+	- Keypad Driver for SMDK6410
+
+	Modified Files:
+		M       arch/arm/configs/smdk6410mtd_defconfig
+		M       arch/arm/configs/smdk6410nfs_defconfig
+		M       arch/arm/configs/smdk6410ramdisk_defconfig
+		M       arch/arm/mach-s3c6400/include/mach/map.h
+		M       arch/arm/mach-s3c6410/mach-smdk6410.c
+		M       arch/arm/plat-s3c/gpio-config.c
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s3c64xx/clock.c
+		M       arch/arm/plat-s3c64xx/devs.c
+		M       arch/arm/plat-s3c64xx/include/plat/gpio-bank-k.h
+		M       arch/arm/plat-s3c64xx/include/plat/gpio-bank-l.h
+		M       drivers/input/keyboard/Kconfig
+		M       drivers/input/keyboard/Makefile
+		M       drivers/input/touchscreen/s3c-ts.c
+	Added Files:
+		A       arch/arm/plat-s3c64xx/include/plat/regs-keypad.h
+		A       drivers/input/keyboard/s3c-keypad.c
+		A       drivers/input/keyboard/s3c-keypad.h
+		
