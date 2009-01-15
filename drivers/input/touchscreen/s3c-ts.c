@@ -1,7 +1,5 @@
 /* linux/drivers/input/touchscreen/s3c-ts.c
  *
- * $Id: s3c-ts.c,v 1.13 2008/11/20 06:00:55 ihlee215 Exp $
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or

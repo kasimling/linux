@@ -1,7 +1,15 @@
-/*
- *	
- * $Id: s3c-keypad.h,v 1.5 2008/05/23 06:22:53 dark0351 Exp $
+/* linux/drivers/input/keyboard/s3c-keypad.h 
+ *
+ * Driver header for Samsung SoC keypad.
+ *
+ * Kim Kyoungil, Copyright (c) 2006-2009 Samsung Electronics
+ *      http://www.samsungsemi.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
  */
+
 
 #ifndef _S3C_KEYPAD_H_
 #define _S3C_KEYPAD_H_
@@ -27,20 +35,6 @@ int keypad_keycode[] = {
 
 
 #define KEYPAD_DELAY		(50)
-#define KEYPAD_ROW_GPIOCON	S3C_GPK1CON
-#define KEYPAD_ROW_GPIOPUD	S3C_GPKPU
-#define KEYPAD_COL_GPIOCON	S3C_GPL0CON
-#define KEYPAD_COL_GPIOPUD	S3C_GPLPU
-
-#define KEYPAD_ROW_GPIO_SET	\
-	((readl(KEYPAD_ROW_GPIOCON) & ~(0xfffffff)) | 0x33333333)
-	
-#define KEYPAD_COL_GPIO_SET	\
-	((readl(KEYPAD_COL_GPIOCON) & ~(0xfffffff)) | 0x33333333)
-
-#define KEYPAD_ROW_GPIOPUD_DIS	(readl(KEYPAD_ROW_GPIOPUD) & ~(0xffff<<16))
-#define KEYPAD_COL_GPIOPUD_DIS	(readl(KEYPAD_COL_GPIOPUD) & ~0xffff)
-
 #define	KEYIFCOL_CLEAR		(readl(key_base+S3C_KEYIFCOL) & ~0xffff)
 #define	KEYIFCON_CLEAR		(readl(key_base+S3C_KEYIFCON) & ~0x1f)
 #define KEYIFFC_DIV		(readl(key_base+S3C_KEYIFFC) | 0x1)
@@ -57,5 +51,6 @@ struct s3c_keypad {
 	int keycodes[MAX_KEYPAD_NR];
 };
 
+extern void s3c_setup_keypad_cfg_gpio(int rows, int columns);
 
 #endif				/* _S3C_KEYIF_H_ */

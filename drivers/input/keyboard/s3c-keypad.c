@@ -1,12 +1,13 @@
-/*
- * drivers/input/keyboard/s3c-keypad.c
- * KeyPad Interface on S3C 
+/* drivers/input/keyboard/s3c-keypad.c
  *
- * $Id: s3c-keypad.c,v 1.1 2008/06/09 07:43:16 dark0351 Exp $
- * 
- * This file is subject to the terms and conditions of the GNU General Public
- * License. See the file COPYING in the main directory of this archive
- * for more details.
+ * Driver core for Samsung SoC onboard UARTs.
+ *
+ * Kim Kyoungil, Copyright (c) 2006-2009 Samsung Electronics
+ *      http://www.samsungsemi.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
  */
 
 #include <linux/module.h>
@@ -16,14 +17,16 @@
 #include <linux/input.h>
 #include <linux/platform_device.h>
 #include <linux/miscdevice.h>
+#include <linux/clk.h>
 
-#include <asm/hardware.h>
-#include <asm/io.h>
+#include <linux/io.h>
+#include <mach/hardware.h>
 #include <asm/delay.h>
 #include <asm/irq.h>
 
-#include <asm/arch/regs-gpio.h>
-#include <asm/arch/regs-keypad.h>
+#include <plat/regs-gpio.h>
+#include <plat/regs-keypad.h>
+
 #include "s3c-keypad.h"
 
 #undef S3C_KEYPAD_DEBUG 
@@ -42,7 +45,7 @@
 
 static struct timer_list keypad_timer;
 static int is_timer_on = FALSE;
-
+static struct clk *keypad_clock;
 
 static int keypad_scan(u32 *keymask_low, u32 *keymask_high)
 {
@@ -150,7 +153,6 @@ static void keypad_timer_handler(unsigned long data)
 
 static irqreturn_t s3c_keypad_isr(int irq, void *dev_id)
 {
-
 	/* disable keypad interrupt and schedule for keypad timer handler */
 	writel(readl(key_base+S3C_KEYIFCON) & ~(INT_F_EN|INT_R_EN), key_base+S3C_KEYIFCON);
 
@@ -171,25 +173,49 @@ static irqreturn_t s3c_keypad_isr(int irq, void *dev_id)
 
 static int __init s3c_keypad_probe(struct platform_device *pdev)
 {
-	int ret = 0;
+	struct resource *res, *keypad_mem, *keypad_irq = NULL;
 	struct input_dev *input_dev;
-	int key, code;
 	struct s3c_keypad *s3c_keypad;
+	int ret, size;
+	int key, code;
 
-	key_base = ioremap(S3C24XX_PA_KEYPAD, S3C24XX_SZ_KEYPAD);
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if (res == NULL) {
+		dev_err(&pdev->dev,"no memory resource specified\n");
+		return -ENOENT;
+	}
 
+	size = (res->end - res->start) + 1;
+
+	keypad_mem = request_mem_region(res->start, size, pdev->name);
+	if (keypad_mem == NULL) {
+		dev_err(&pdev->dev, "failed to get memory region\n");
+		ret = -ENOENT;
+		goto err_req;
+	}
+
+	key_base = ioremap(S3C_PA_KEYPAD, S3C_SZ_KEYPAD);
 	if (key_base == NULL) {
 		printk(KERN_ERR "Failed to remap register block\n");
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto err_map;
 	}
+
+	keypad_clock = clk_get(&pdev->dev, "keypad");
+	if (IS_ERR(keypad_clock)) {
+		dev_err(&pdev->dev, "failed to find keypad clock source\n");
+		ret = PTR_ERR(keypad_clock);
+		goto err_clk;
+	}
+
+	clk_enable(keypad_clock);
 	
 	s3c_keypad = kzalloc(sizeof(struct s3c_keypad), GFP_KERNEL);
 	input_dev = input_allocate_device();
 
 	if (!s3c_keypad || !input_dev) {
-		kfree(s3c_keypad);
-		input_free_device(input_dev);
-		return -ENOMEM;
+		ret = -ENOMEM;
+		goto out;
 	}
 
 	platform_set_drvdata(pdev, s3c_keypad);
@@ -199,11 +225,7 @@ static int __init s3c_keypad_probe(struct platform_device *pdev)
 	writel(KEYIFFC_DIV, key_base+S3C_KEYIFFC);
 
 	/* Set GPIO Port for keypad mode and pull-up disable*/
-	writel(KEYPAD_ROW_GPIO_SET, KEYPAD_ROW_GPIOCON);
-	writel(KEYPAD_COL_GPIO_SET, KEYPAD_COL_GPIOCON);
-
-	writel(KEYPAD_ROW_GPIOPUD_DIS, KEYPAD_ROW_GPIOPUD);
-	writel(KEYPAD_COL_GPIOPUD_DIS, KEYPAD_COL_GPIOPUD);
+	s3c_setup_keypad_cfg_gpio(KEYPAD_ROWS, KEYPAD_COLUMNS);
 
 	writel(KEYIFCOL_CLEAR, key_base+S3C_KEYIFCOL);
 
@@ -223,8 +245,6 @@ static int __init s3c_keypad_probe(struct platform_device *pdev)
 
 	input_dev->name = DEVICE_NAME;
 	input_dev->phys = "s3c-keypad/input0";
-	input_dev->cdev.dev = &pdev->dev;
-	input_dev->private = s3c_keypad;
 	
 	input_dev->id.bustype = BUS_HOST;
 	input_dev->id.vendor = 0x0001;
@@ -232,23 +252,31 @@ static int __init s3c_keypad_probe(struct platform_device *pdev)
 	input_dev->id.version = 0x0001;
 
 	input_dev->keycode = keypad_keycode;
-	
-	ret = input_register_device(input_dev);
-	if (ret) {
-		printk("Unable to register s3c-keypad input device!!!\n");
-		goto out;
-	}
-
 
 	/* Scan timer init */
 	init_timer(&keypad_timer);
 	keypad_timer.function = keypad_timer_handler;
 	keypad_timer.data = (unsigned long)s3c_keypad;
-	
-	ret = request_irq(IRQ_KEYPAD, s3c_keypad_isr, IRQF_SAMPLE_RANDOM,
+
+	/* For IRQ_KEYPAD */
+	keypad_irq = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
+	if (keypad_irq == NULL) {
+		dev_err(&pdev->dev, "no irq resource specified\n");
+		ret = -ENOENT;
+		goto err_clk;
+	}
+
+	ret = request_irq(keypad_irq->start, s3c_keypad_isr, IRQF_SAMPLE_RANDOM,
 		DEVICE_NAME, (void *) pdev);
 	if (ret) {
 		printk("request_irq failed (IRQ_KEYPAD) !!!\n");
+		ret = -EIO;
+		goto err_irq;
+	}
+
+	ret = input_register_device(input_dev);
+	if (ret) {
+		printk("Unable to register s3c-keypad input device!!!\n");
 		goto out;
 	}
 
@@ -265,8 +293,24 @@ static int __init s3c_keypad_probe(struct platform_device *pdev)
 	return 0;
 
 out:
-	input_unregister_device(input_dev);
+	input_free_device(input_dev);
 	kfree(s3c_keypad);
+
+err_irq:
+	free_irq(keypad_irq->start, input_dev);
+	free_irq(keypad_irq->end, input_dev);
+	
+err_clk:
+	clk_disable(keypad_clock);
+	clk_put(keypad_clock);
+
+err_map:
+	iounmap(key_base);
+
+err_req:
+	release_resource(keypad_mem);
+	kfree(keypad_mem);
+
 	return ret;
 }
 
@@ -275,7 +319,14 @@ static int s3c_keypad_remove(struct platform_device *pdev)
 	struct input_dev *input_dev = platform_get_drvdata(pdev);
 	writel(KEYIFCON_CLEAR, key_base+S3C_KEYIFCON);
 
+	if(keypad_clock) {
+		clk_disable(keypad_clock);
+		clk_put(keypad_clock);
+		keypad_clock = NULL;
+	}
+
 	input_unregister_device(input_dev);
+	iounmap(key_base);
 	kfree(pdev->dev.platform_data);
 	free_irq(IRQ_KEYPAD, (void *) pdev);
 
@@ -285,15 +336,29 @@ static int s3c_keypad_remove(struct platform_device *pdev)
 }
 
 #ifdef CONFIG_PM
+static unsigned int keyifcon, keyiffc;
+
 static int s3c_keypad_suspend(struct platform_device *dev, pm_message_t state)
 {
-	/* TODO */
+	keyifcon = readl(keypad_base+S3C_KEYIFCON);
+	keyiffc = readl(keypad_base+S3C_KEYIFFC);
+	
+	disable_irq(IRQ_KEYPAD);
+
+	clk_disable(keypad_clock);
+
 	return 0;
 }
 
 static int s3c_keypad_resume(struct platform_device *dev)
 {
-	/* TODO */
+	clk_enable(keypad_clock);
+
+	writel(keyifcon, key_base+S3C_KEYIFCON);
+	writel(keyiffc, key_base+S3C_KEYIFFC);
+
+	enable_irq(IRQ_KEYPAD);
+
 	return 0;
 }
 #else
@@ -333,5 +398,5 @@ module_init(s3c_keypad_init);
 module_exit(s3c_keypad_exit);
 
 MODULE_AUTHOR("Samsung");
-MODULE_LICENSE("GPL");
+MODULE_LICENSE("GPL v2");
 MODULE_DESCRIPTION("KeyPad interface for Samsung S3C");
