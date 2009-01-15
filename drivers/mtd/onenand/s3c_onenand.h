@@ -3,10 +3,11 @@
 
 #include <linux/spinlock.h>
 #include <linux/completion.h>
-#include <asm/arch/regs-onenand.h>
+#include <plat/regs-onenand.h>
 #include <linux/mtd/bbm.h>
 #include <asm/dma.h>
-#include <asm/arch/dma.h>
+#include <mach/dma.h>
+#include <plat/dma.h>
 
 #define MAX_BUFFERRAM		2
 

@@ -97,6 +97,7 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 	&s3c_device_smc911x,
 	&s3c_device_lcd,
 	&s3c_device_nand,
+	&s3c_device_onenand,
 	&s3c_device_usbgadget,
 #ifdef CONFIG_S3C64XX_ADC
 	&s3c_device_adc,
@@ -158,6 +159,7 @@ static void __init smdk6410_smc911x_set(void)
 static void __init smdk6410_machine_init(void)
 {
 	s3c_device_nand.dev.platform_data = &s3c_nand_mtd_part_info;
+	//s3c_device_onenand.dev.platform_data = &s3c_nand_mtd_part_info;
 
 	smdk6410_smc911x_set();
 
