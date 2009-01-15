@@ -9,6 +9,7 @@
 
 #include <asm/io.h>
 #include <plat/regs-clock.h>
+#include <mach/map.h>
 
 #include <linux/dma-mapping.h>
 #include "s3c_onenand.h"

@@ -3,7 +3,7 @@
 #
 
 # Core functionality.
-obj-$(CONFIG_MTD_ONENAND)		+= onenand.o
+obj-$(CONFIG_MTD_ONENAND)		+= onenand.o onenand_bbt.o
 
 # Board specific.
 obj-$(CONFIG_MTD_ONENAND_GENERIC)	+= generic.o
