@@ -9,6 +9,8 @@
  * published by the Free Software Foundation.
 */
 
+#include <asm/mach/flash.h>
+
 struct mtd_partition s3c_partition_info[] = {
         {
                 .name		= "Bootloader",
@@ -40,4 +42,9 @@ struct s3c_nand_mtd_info s3c_nand_mtd_part_info = {
 	.chip_nr = 1,
 	.mtd_part_nr = ARRAY_SIZE(s3c_partition_info),
 	.partition = s3c_partition_info,
+};
+
+struct flash_platform_data s3c_onenand_data = {
+	.parts		= s3c_partition_info,
+	.nr_parts	= ARRAY_SIZE(s3c_partition_info),
 };
