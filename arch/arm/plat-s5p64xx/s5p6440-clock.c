@@ -156,7 +156,6 @@ static struct clk *clkset_spi_mmc_list[] = {
 	&clk_mout_epll.clk,
 	&clk_dout_mpll,
 	&clk_fin_epll,
-	&clk_27m,
 };
 
 static struct clk_sources clkset_spi_mmc = {
@@ -174,18 +173,6 @@ static struct clk *clkset_uart_list[] = {
 static struct clk_sources clkset_uart = {
 	.sources	= clkset_uart_list,
 	.nr_sources	= ARRAY_SIZE(clkset_uart_list),
-};
-
-static struct clk *clkset_uhost_list[] = {
-	&clk_mout_epll.clk,
-	&clk_dout_mpll,
-	&clk_fin_epll,
-	&clk_48m,
-};
-
-static struct clk_sources clkset_uhost = {
-	.sources	= clkset_uhost_list,
-	.nr_sources	= ARRAY_SIZE(clkset_uhost_list),
 };
 
 
@@ -436,18 +423,23 @@ void __init_or_cpufreq s5p6440_setup_clocks(void)
 	unsigned long xtal;
 	unsigned long fclk;
 	unsigned long hclk;
-	unsigned long hclk2;
+	unsigned long hclk_low;
 	unsigned long pclk;
+	unsigned long pclk_low;
 	unsigned long epll;
 	unsigned long apll;
 	unsigned long mpll;
 	unsigned int ptr;
 	u32 clkdiv0;
+	u32 clkdiv3;
 
 	printk(KERN_DEBUG "%s: registering clocks\n", __func__);
 
 	clkdiv0 = __raw_readl(S3C_CLK_DIV0);
 	printk(KERN_DEBUG "%s: clkdiv0 = %08x\n", __func__, clkdiv0);
+
+	clkdiv3 = __raw_readl(S3C_CLK_DIV3);
+	printk(KERN_DEBUG "%s: clkdiv3 = %08x\n", __func__, clkdiv3);
 
 	xtal_clk = clk_get(NULL, "xtal");
 	BUG_ON(IS_ERR(xtal_clk));
@@ -457,37 +449,39 @@ void __init_or_cpufreq s5p6440_setup_clocks(void)
 
 	printk(KERN_DEBUG "%s: xtal is %ld\n", __func__, xtal);
 
-	//epll = s5p6440_get_epll(xtal);
-	//mpll = s5p6440_get_pll(xtal, __raw_readl(S3C_MPLL_CON));
-	//apll = s5p6440_get_pll(xtal, __raw_readl(S3C_APLL_CON));
-
-        epll = 20000000;
-        mpll = 20000000;
-        apll = 20000000;
-
-	fclk = mpll;
+	epll = s5p6440_get_epll(xtal);
+	mpll = s5p6440_get_pll(xtal, __raw_readl(S3C_MPLL_CON));
+	apll = s5p6440_get_pll(xtal, __raw_readl(S3C_APLL_CON));
 
 	printk(KERN_INFO "S5P64XX: PLL settings, A=%ld, M=%ld, E=%ld\n",
 	       apll, mpll, epll);
 
-	//hclk2 = mpll / GET_DIV(clkdiv0, S3C_CLKDIV0_HCLK2);
-	//hclk = hclk2 / GET_DIV(clkdiv0, S3C_CLKDIV0_HCLK);
-	//pclk = hclk2 / GET_DIV(clkdiv0, S3C_CLKDIV0_PCLK);
+	fclk = apll / GET_DIV(clkdiv0, S3C_CLKDIV0_ARM);
+	hclk = fclk / GET_DIV(clkdiv0, S3C_CLKDIV0_HCLK);
+	pclk = hclk / GET_DIV(clkdiv0, S3C_CLKDIV0_PCLK);
 
-	hclk2 = 20000000;
-        hclk = 20000000;
-        pclk = 20000000;
+	if(__raw_readl(S3C_OTHERS) & S3C_OTHERS_HCLK_LOW_SEL_MPLL) {
+		/* Synchronous mode */
+		hclk_low = apll / GET_DIV(clkdiv3, S3C_CLKDIV3_HCLK_LOW);
+	} else {
+		/* Asynchronous mode */
+		hclk_low = mpll / GET_DIV(clkdiv3, S3C_CLKDIV3_HCLK_LOW);
+	}
 
-	printk(KERN_INFO "S5P64XX: HCLK2=%ld, HCLK=%ld, PCLK=%ld\n",
-	       hclk2, hclk, pclk);
+	pclk_low = hclk_low / GET_DIV(clkdiv3, S3C_CLKDIV3_PCLK_LOW);
+
+	printk(KERN_INFO "S5P64XX: HCLK=%ld, HCLK_LOW=%ld, PCLK=%ld, PCLK_LOW=%ld\n",
+	       hclk, hclk_low, pclk, pclk_low);
 
 	clk_fout_mpll.rate = mpll;
 	clk_fout_epll.rate = epll;
 	clk_fout_apll.rate = apll;
 
+	clk_f.rate = fclk;
 	clk_h.rate = hclk;
 	clk_p.rate = pclk;
-	clk_f.rate = fclk;
+	clk_h_low.rate = hclk_low;
+	clk_p_low.rate = pclk_low;
 
 	for (ptr = 0; ptr < ARRAY_SIZE(init_parents); ptr++)
 		s5p6440_set_clksrc(init_parents[ptr]);
