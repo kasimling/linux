@@ -16,7 +16,6 @@
 
 static void __iomem *key_base;
 
-#if defined(CONFIG_CPU_S3C6400) || defined (CONFIG_CPU_S3C6410)
 #define KEYPAD_COLUMNS	8
 #define KEYPAD_ROWS	8
 #define MAX_KEYPAD_NR	64	/* 8*8 */
@@ -38,10 +37,6 @@ int keypad_keycode[] = {
 #define	KEYIFCOL_CLEAR		(readl(key_base+S3C_KEYIFCOL) & ~0xffff)
 #define	KEYIFCON_CLEAR		(readl(key_base+S3C_KEYIFCON) & ~0x1f)
 #define KEYIFFC_DIV		(readl(key_base+S3C_KEYIFFC) | 0x1)
-
-#else
-#error "Not supported S3C Configuration!!"
-#endif
 
 struct s3c_keypad {
 	struct input_dev *dev;
