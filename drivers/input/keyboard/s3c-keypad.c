@@ -194,7 +194,7 @@ static int __init s3c_keypad_probe(struct platform_device *pdev)
 		goto err_req;
 	}
 
-	key_base = ioremap(S3C_PA_KEYPAD, S3C_SZ_KEYPAD);
+	key_base = ioremap(res->start, size);
 	if (key_base == NULL) {
 		printk(KERN_ERR "Failed to remap register block\n");
 		ret = -ENOMEM;
