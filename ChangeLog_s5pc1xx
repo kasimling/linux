@@ -451,3 +451,19 @@ v2.6.28-rc8-s5pc1xx-r1d3: Kyoungil Kim
 		M	drivers/input/keyboard/Kconfig
 		M	drivers/input/keyboard/s3c-keypad.h
 
+v2.6.28-rc8-s5pc1xx-r1d4: Abhilash Kesavan
+	- Support HS-SPI on S5PC100
+
+	Added Files:
+		A       arch/arm/plat-s3c/include/plat/regs-spi.h
+		A       drivers/spi/hspi-s3c.c
+		A       drivers/spi/hspi-s3c.h
+		A	drivers/spi/spi-dev.c
+		A	drivers/spi/spi-dev.h
+
+	Modified Files:
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+	        M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s5pc1xx/devs.c
+		M	drivers/spi/Kconfig
+		M	drivers/spi/Makefile

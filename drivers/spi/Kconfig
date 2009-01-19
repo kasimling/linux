@@ -181,6 +181,36 @@ config SPI_S3C24XX_GPIO
 	  the inbuilt hardware cannot provide the transfer mode, or
 	  where the board is using non hardware connected pins.
 
+config HS_SPI_S5PC100
+        tristate "S5PC100 High Speed SPI Driver"
+        depends on SPI && MACH_SMDKC100
+        help
+          Say Y here to include support for SPI controller in the
+          Samsung S5PC100 based System-on-Chip devices.
+
+choice
+        prompt "High Speed SPI Clock Implementations"
+        depends on HS_SPI_S5PC100
+
+config SPICLK_PCLK
+        bool "PCLK"
+        depends on HS_SPI_S5PC100
+        help
+          Say Y here to include support for pclk source.
+
+config SPICLK_SCLK_48M
+        bool "SCLK_48M"
+        depends on  HS_SPI_S5PC100
+        help
+          Say Y here to include support for SCLK (48 MHz) source.
+
+config SPICLK_SCLK
+        bool "SCLK"
+        depends on  HS_SPI_S5PC100
+        help
+          Say Y here to include support for SCLK source.
+endchoice
+
 config SPI_SH_SCI
 	tristate "SuperH SCI SPI controller"
 	depends on SUPERH
