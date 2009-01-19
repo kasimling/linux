@@ -170,6 +170,12 @@ static struct clk init_clocks_disable[] = {
 		.enable		= s5pc1xx_clk_d14_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D14_CCAN1,
 	}, {
+		.name		= "keypad",
+		.id		= -1,
+		.parent		= &clk_p,
+		.enable		= s5pc1xx_clk_d15_ctrl,
+		.ctrlbit	= S5P_CLKGATE_D15_KEYIF,
+	}, {
 		.name		= "hclkd2",
 		.id		= -1,
 		.parent		= NULL,

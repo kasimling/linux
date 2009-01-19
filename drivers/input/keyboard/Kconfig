@@ -297,7 +297,7 @@ config KEYBOARD_GPIO
 
 config KEYPAD_S3C
         tristate "S3C keypad support"
-        depends on (CPU_S3C6400 || CPU_S3C6410)
+        depends on (CPU_S3C6400 || CPU_S3C6410 || CPU_S5PC100)
         default n
         help
           Say Y here if you want to use the S3C SMDK keypad.
