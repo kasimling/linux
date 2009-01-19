@@ -6,8 +6,8 @@
 #include <plat/regs-onenand.h>
 #include <linux/mtd/bbm.h>
 #include <asm/dma.h>
+#include <mach/dma.h>
 #include <plat/dma.h>
-#include <mach/map.h>
 
 #define MAX_BUFFERRAM		2
 

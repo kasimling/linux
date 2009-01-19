@@ -9,6 +9,7 @@
 
 #include <asm/io.h>
 #include <plat/regs-clock.h>
+#include <mach/map.h>
 
 #include <linux/dma-mapping.h>
 #include "s3c_onenand.h"
@@ -29,9 +30,6 @@
 #if defined(CONFIG_CPU_S3C6400)
 #define onenand_phys_to_virt(x)		(void __iomem *)(chip->dev_base + (x & 0xffffff))
 #define onenand_virt_to_phys(x)		(void __iomem *)(ONENAND_AHB_ADDR + (x & 0xffffff))
-#elif defined(CONFIG_CPU_S5PC100)
-#define onenand_phys_to_virt(x)		(void __iomem *)(chip->dev_base + (x & 0xfffffff))
-#define onenand_virt_to_phys(x)		(void __iomem *)(ONENAND_AHB_ADDR + (x & 0xfffffff))
 #else
 #define onenand_phys_to_virt(x)		(void __iomem *)(chip->dev_base + (x & 0x3ffffff))
 #define onenand_virt_to_phys(x)		(void __iomem *)(ONENAND_AHB_ADDR + (x & 0x3ffffff))
@@ -147,7 +145,7 @@ static int onenand_blkrw_complete(struct onenand_chip *chip, int cmd)
 	} else {
 		ret = 1;
 	}
-	
+
 	onenand_irq_wait_ack(chip, ONENAND_INT_ERR_INT_ACT);
 	onenand_irq_wait_ack(chip, ONENAND_INT_ERR_BLK_RW_CMP);
 	onenand_irq_wait_ack(chip, cmp_bit);
@@ -173,7 +171,7 @@ static void onenand_read_burst(void *dest, const void *src, size_t len)
 		return;
 
 	count = len / 16;
-	
+
 	__asm__ __volatile__(
 		"	stmdb	r13!, {r0-r3,r9-r12}\n"
 		"	mov	r2, %0\n"
@@ -216,7 +214,7 @@ static void onenand_read_dma(struct onenand_chip *chip, unsigned int *dst, void 
 		printk(KERN_WARNING "Unable to get DMA channel.\n");
 		return;
 	}
-	
+
 	s3c_dma_set_buffdone_fn(chip->dma, chip->dma_ch, onenand_dma_finish);
 	s3c_dma_devconfig(chip->dma, chip->dma_ch, S3C_DMA_MEM2MEM, 1, 0, (u_long) phys_addr);
 	s3c_dma_config(chip->dma, chip->dma_ch, ONENAND_DMA_TRANSFER_WORD, ONENAND_DMA_TRANSFER_WORD);
@@ -232,7 +230,7 @@ static void onenand_read_dma(struct onenand_chip *chip, unsigned int *dst, void 
 		printk(KERN_WARNING "Unable to get DMA channel.\n");
 		return;
 	}
-	
+
 	s3c2410_dma_set_buffdone_fn(DMACH_ONENAND_IN, onenand_dma_finish);
 	s3c2410_dma_devconfig(DMACH_ONENAND_IN, S3C_DMA_MEM2MEM_P, 1, (u_long) phys_addr);
 	s3c2410_dma_config(DMACH_ONENAND_IN, ONENAND_DMA_TRANSFER_WORD, ONENAND_DMA_TRANSFER_WORD);
@@ -319,13 +317,12 @@ static int onenand_command_map(int cmd)
  * @return		address field
  *
  * Refer to Table 7-1 MEM_ADDR Fields in S3C6400/10 User's Manual
- * Refer to Table 5.3-1 MEM_ADDR Fields in S5PC100  User's Manual 
  */
-#if defined(CONFIG_CPU_S3C6400) || defined (CONFIG_CPU_S5PC100)
+#if defined(CONFIG_CPU_S3C6400)
 static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 {
 	u_int mem_addr = 0;
-	int ddp, density;	
+	int ddp, density;
 
 	ddp = dev_id & ONENAND_DEVICE_IS_DDP;
 	density = dev_id >> ONENAND_DEVICE_DENSITY_SHIFT;
@@ -360,7 +357,7 @@ static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 					((fpa & ONENAND_FPA_MASK) << ONENAND_FPA_SHIFT_1Gb) | \
 					((fsa & ONENAND_FSA_MASK) << ONENAND_FSA_SHIFT));
 		}
-		
+
 		break;
 
 	case ONENAND_DEVICE_DENSITY_2Gb:
@@ -374,7 +371,7 @@ static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 					((fpa & ONENAND_FPA_MASK) << ONENAND_FPA_SHIFT_2Gb) | \
 					((fsa & ONENAND_FSA_MASK) << ONENAND_FSA_SHIFT));
 		}
-		
+
 		break;
 
 	case ONENAND_DEVICE_DENSITY_4Gb:
@@ -388,7 +385,7 @@ static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 					((fpa & ONENAND_FPA_MASK) << ONENAND_FPA_SHIFT_4Gb) | \
 					((fsa & ONENAND_FSA_MASK) << ONENAND_FSA_SHIFT));
 		}
-		
+
 		break;
 	}
 
@@ -398,7 +395,7 @@ static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 {
 	u_int mem_addr = 0;
-	int ddp, density;	
+	int ddp, density;
 
 	ddp = dev_id & ONENAND_DEVICE_IS_DDP;
 	density = dev_id >> ONENAND_DEVICE_DENSITY_SHIFT;
@@ -433,7 +430,7 @@ static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 					((fpa & ONENAND_FPA_MASK) << ONENAND_FPA_SHIFT) | \
 					((fsa & ONENAND_FSA_MASK) << ONENAND_FSA_SHIFT));
 		}
-		
+
 		break;
 
 	case ONENAND_DEVICE_DENSITY_2Gb:
@@ -447,7 +444,7 @@ static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 					((fpa & ONENAND_FPA_MASK) << ONENAND_FPA_SHIFT) | \
 					((fsa & ONENAND_FSA_MASK) << ONENAND_FSA_SHIFT));
 		}
-		
+
 		break;
 
 	case ONENAND_DEVICE_DENSITY_4Gb:
@@ -461,7 +458,7 @@ static u_int onenand_addr_field(int dev_id, int fba, int fpa, int fsa)
 					((fpa & ONENAND_FPA_MASK) << ONENAND_FPA_SHIFT) | \
 					((fsa & ONENAND_FSA_MASK) << ONENAND_FSA_SHIFT));
 		}
-		
+
 		break;
 	}
 
@@ -488,7 +485,7 @@ static u_int onenand_command_address(struct mtd_info *mtd, int cmd_type, int fba
 	int dev_id;
 
 	dev_id = chip->read(chip->base + ONENAND_REG_DEVICE_ID);
-	
+
 	switch (cmd_type) {
 	case ONENAND_CMD_MAP_00:
 		cmd_addr |= ((onenand_addr & 0xffff) << 1);
@@ -498,11 +495,11 @@ static u_int onenand_command_address(struct mtd_info *mtd, int cmd_type, int fba
 	case ONENAND_CMD_MAP_10:
 		cmd_addr |= (onenand_addr_field(dev_id, fba, fpa, fsa) & ONENAND_MEM_ADDR_MASK);
 		break;
-		
+
 	case ONENAND_CMD_MAP_11:
 		cmd_addr |= ((onenand_addr & 0xffff) << 2);
 		break;
-		
+
 	default:
 		cmd_addr = 0;
 		break;
@@ -528,11 +525,11 @@ static u_int onenand_command(struct mtd_info *mtd, int cmd, loff_t addr)
 
 	cmd_type = onenand_command_map(cmd);
 
-	switch (cmd) {	
+	switch (cmd) {
 	case ONENAND_CMD_UNLOCK:
 	case ONENAND_CMD_UNLOCK_ALL:
 	case ONENAND_CMD_LOCK:
-	case ONENAND_CMD_LOCK_TIGHT:	
+	case ONENAND_CMD_LOCK_TIGHT:
 	case ONENAND_CMD_ERASE:
 		fba = (int) (addr >> chip->erase_shift);
 		page = -1;
@@ -616,7 +613,7 @@ static void onenand_release_device(struct mtd_info *mtd)
  *
  * OneNAND read out-of-band data from the spare area for bbt scan
  */
-int onenand_bbt_read_oob(struct mtd_info *mtd, loff_t from, 
+int onenand_bbt_read_oob(struct mtd_info *mtd, loff_t from,
 			    struct mtd_oob_ops *ops)
 {
 	struct onenand_chip *chip = mtd->priv;
@@ -675,7 +672,7 @@ int onenand_bbt_read_oob(struct mtd_info *mtd, loff_t from,
 		for (i = 0; i < (mtd->oobsize / 4) - 1; i++)
 			chip->read(cmd_addr);
 		break;
-	}	
+	}
 
 	onenand_blkrw_complete(chip, ONENAND_CMD_READ);
 
@@ -701,7 +698,7 @@ int onenand_bbt_read_oob(struct mtd_info *mtd, loff_t from,
 static int onenand_block_isbad_nolock(struct mtd_info *mtd, loff_t ofs, int allowbbt)
 {
 	struct onenand_chip *chip = mtd->priv;
-	
+
 	if (chip->options & ONENAND_CHECK_BAD) {
 		struct bbm_info *bbm = chip->bbm;
 
@@ -768,7 +765,7 @@ static int onenand_default_block_markbad(struct mtd_info *mtd, loff_t ofs)
  */
 static int onenand_set_pipeline(struct mtd_info *mtd, loff_t from, size_t len)
 {
-	struct onenand_chip *chip = mtd->priv;	
+	struct onenand_chip *chip = mtd->priv;
 	int page_cnt = (int) (len >> chip->page_shift);
 	void __iomem *cmd_addr;
 
@@ -842,7 +839,7 @@ static int onenand_read(struct mtd_info *mtd, loff_t from, size_t len,
 				continue;
 			}
 		}
-		
+
 		/* get start address to read data */
 		cmd_addr = onenand_phys_to_virt(chip->command(mtd, ONENAND_CMD_READ, from));
 
@@ -851,8 +848,8 @@ static int onenand_read(struct mtd_info *mtd, loff_t from, size_t len,
 			onenand_read_burst(buf_poi, cmd_addr, mtd->writesize);
 			break;
 
-		case ONENAND_READ_DMA:			
-			onenand_read_dma(chip, buf_poi, cmd_addr, mtd->writesize);			
+		case ONENAND_READ_DMA:
+			onenand_read_dma(chip, buf_poi, cmd_addr, mtd->writesize);
 			break;
 
 		case ONENAND_READ_POLLING:
@@ -881,9 +878,9 @@ static int onenand_read(struct mtd_info *mtd, loff_t from, size_t len,
 
 		if (read == len)
  			break;
-		
+
 		buf += thislen;
-		from += mtd->writesize;	
+		from += mtd->writesize;
 		col = 0;
  	}
 
@@ -972,7 +969,7 @@ static int onenand_read_ops_nolock(struct mtd_info *mtd, loff_t from, struct mtd
 	int len = ops->ooblen;
 	u_char *buf = ops->datbuf;
 	u_char *sparebuf = ops->oobbuf;
-	
+
 	DEBUG(MTD_DEBUG_LEVEL3, "onenand_read_ops_nolock: from = 0x%08x, len = %i\n", (unsigned int) from, (int) len);
 
 	/* Initialize return length value */
@@ -1025,11 +1022,11 @@ static int onenand_read_ops_nolock(struct mtd_info *mtd, loff_t from, struct mtd
 
 		/* get start address to read data */
 		cmd_addr = onenand_phys_to_virt(chip->command(mtd, ONENAND_CMD_READ, from));
-		
+
 		thislen = oobsize - column;
 		thislen = min_t(int, thislen, len);
 
-		//if (ops->mode == MTD_OOB_AUTO) 
+		//if (ops->mode == MTD_OOB_AUTO)
 			buf_poi = (u_int *)chip->oob_buf;
 		//else
 			//buf_poi = (u_int *)buf;
@@ -1091,7 +1088,7 @@ static int onenand_read_ops_nolock(struct mtd_info *mtd, loff_t from, struct mtd
 
 	ops->retlen = mtd->writesize;
 	ops->oobretlen = read;
-	
+
 	return ret;
 }
 
@@ -1115,7 +1112,7 @@ static int onenand_read_oob_nolock(struct mtd_info *mtd, loff_t from, struct mtd
 	size_t len = ops->ooblen;
 	mtd_oob_mode_t mode = ops->mode;
 	u_char *buf = ops->oobbuf;
-	
+
 	DEBUG(MTD_DEBUG_LEVEL3, "onenand_read_oob_nolock: from = 0x%08x, len = %i\n", (unsigned int) from, (int) len);
 
 	/* Initialize return length value */
@@ -1165,11 +1162,11 @@ static int onenand_read_oob_nolock(struct mtd_info *mtd, loff_t from, struct mtd
 
 		/* get start address to read data */
 		cmd_addr = onenand_phys_to_virt(chip->command(mtd, ONENAND_CMD_READ, from));
-		
+
 		thislen = oobsize - column;
 		thislen = min_t(int, thislen, len);
 
-		if (mode == MTD_OOB_AUTO) 
+		if (mode == MTD_OOB_AUTO)
 			buf_poi = (u_int *)chip->oob_buf;
 		else
 			buf_poi = (u_int *)buf;
@@ -1243,7 +1240,7 @@ static int onenand_read_oob(struct mtd_info *mtd, loff_t from,
 			    struct mtd_oob_ops *ops)
 {
 	int ret = 0;
-	
+
 	switch (ops->mode) {
 	case MTD_OOB_PLACE:
 	case MTD_OOB_AUTO:
@@ -1258,7 +1255,7 @@ static int onenand_read_oob(struct mtd_info *mtd, loff_t from,
 		ret = onenand_read_ops_nolock(mtd, from, ops);
 	else
 		ret = onenand_read_oob_nolock(mtd, from, ops);
-	
+
 	return ret;
 }
 
@@ -1272,7 +1269,7 @@ static int onenand_read_oob(struct mtd_info *mtd, loff_t from,
  */
 static int onenand_verify_page(struct mtd_info *mtd, const u_int *buf, loff_t addr)
 {
-	struct onenand_chip *chip = mtd->priv;	
+	struct onenand_chip *chip = mtd->priv;
 	void __iomem *cmd_addr;
 	int i, ret = 0;
 	u_int *written = (u_int *)kmalloc(mtd->writesize, GFP_KERNEL);
@@ -1282,7 +1279,7 @@ static int onenand_verify_page(struct mtd_info *mtd, const u_int *buf, loff_t ad
 	/* write all data of 1 page by 4 bytes at a time */
 	for (i = 0; i < (mtd->writesize / 4); i++) {
 		*written = chip->read(cmd_addr);
-		written++;		
+		written++;
 	}
 
 	written -= (mtd->writesize / 4);
@@ -1319,15 +1316,15 @@ static int onenand_verify_oob(struct mtd_info *mtd, const u_char *buf, loff_t to
 
 	column = to & (mtd->oobsize - 1);
 	dbuf_poi = (u_int *)chip->page_buf;
-	
+
 	while (read < len) {
 		/* get start address to read data */
 		cmd_addr = onenand_phys_to_virt(chip->command(mtd, ONENAND_CMD_READ, to));
-		
+
 		thislen = oobsize - column;
 		thislen = min_t(int, thislen, len);
 
-		if (mode == MTD_OOB_AUTO) 
+		if (mode == MTD_OOB_AUTO)
 			buf_poi = (u_int *)chip->oob_buf;
 		else
 			buf_poi = (u_int *)buf;
@@ -1350,12 +1347,12 @@ static int onenand_verify_oob(struct mtd_info *mtd, const u_char *buf, loff_t to
 
 		if (read == len)
 			break;
-		
+
 	}
 
-	
+
 	for (i = 0; i < len; i++)
-		if (buf[i] != oobbuf[i]) 
+		if (buf[i] != oobbuf[i])
 			return -EBADMSG;
 
 	return 0;
@@ -1385,17 +1382,17 @@ static int onenand_verify_ops(struct mtd_info *mtd, struct mtd_oob_ops *ops, lof
 		oobsize = mtd->oobsize;
 
 	column = to & (mtd->oobsize - 1);
-	
+
 	while (read < len) {
 		/* get start address to read data */
 		cmd_addr = onenand_phys_to_virt(chip->command(mtd, ONENAND_CMD_READ, to));
-		
+
 		thislen = oobsize - column;
 		thislen = min_t(int, thislen, len);
 
 		dbuf_poi = (u_int *)chip->page_buf;
-		
-		if (ops->mode == MTD_OOB_AUTO) 
+
+		if (ops->mode == MTD_OOB_AUTO)
 			buf_poi = (u_int *)chip->oob_buf;
 		else
 			buf_poi = (u_int *)oobbuf;
@@ -1415,15 +1412,15 @@ static int onenand_verify_ops(struct mtd_info *mtd, struct mtd_oob_ops *ops, lof
 
 		if (read == len)
 			break;
-		
+
 	}
-	
+
 	/* Check, if data is same */
 	if (memcmp(chip->page_buf, ops->datbuf, mtd->writesize)) {
 		printk("Invalid data buffer : 0x%x\n", (unsigned int)to);
 		ret = -EBADMSG;
 	}
-	
+
 	for (i = 0; i < len; i++)
 		if (ops->oobbuf[i] != oobbuf[i]) {
 			printk("Invalid OOB buffer :0x%x\n", (unsigned int)to);
@@ -1487,7 +1484,7 @@ int onenand_write(struct mtd_info *mtd, loff_t to, size_t len,
 
 		/* get start address to write data */
 		cmd_addr = onenand_phys_to_virt(chip->command(mtd, ONENAND_CMD_PROG, to));
-		
+
 		/* write all data of 1 page by 4 bytes at a time */
 		for (i = 0; i < (mtd->writesize / 4); i++) {
 			chip->write(*buf_poi, cmd_addr);
@@ -1581,12 +1578,12 @@ static int onenand_write_ops_nolock(struct mtd_info *mtd, loff_t to, struct mtd_
 	u_char *buf = ops->datbuf;
 	u_char *sparebuf = ops->oobbuf;
 	u_char *oobbuf;
-	
+
 	void __iomem *cmd_addr;
 	u_int *buf_poi;
 
 	DEBUG(MTD_DEBUG_LEVEL3, "onenand_write_ops_nolock: to = 0x%08x, len = %i\n", (unsigned int) to, (int) len);
-	
+
 	/* Initialize retlen, in case of early exit */
 	ops->retlen = 0;
 	ops->oobretlen = 0;
@@ -1626,7 +1623,7 @@ static int onenand_write_ops_nolock(struct mtd_info *mtd, loff_t to, struct mtd_
 
 	/* on the TRANSFER SPARE bit */
 	chip->write(ONENAND_TRANS_SPARE_TSRF_INC, chip->base + ONENAND_REG_TRANS_SPARE);
-	
+
 	/* Loop until all data write */
 	while (written < len) {
 		int thislen = min_t(int, oobsize, len - written);
@@ -1704,7 +1701,7 @@ static int onenand_write_ops_nolock(struct mtd_info *mtd, loff_t to, struct mtd_
 	return ret;
 }
 
-	
+
 /**
  * onenand_write_oob_nolock - [Internal] OneNAND write out-of-band
  * @param mtd		MTD device structure
@@ -1731,7 +1728,7 @@ static int onenand_write_oob_nolock(struct mtd_info *mtd, loff_t to, struct mtd_
 
 
 	DEBUG(MTD_DEBUG_LEVEL3, "onenand_write_oob_nolock: to = 0x%08x, len = %i\n", (unsigned int) to, (int) len);
-	
+
 	/* Initialize retlen, in case of early exit */
 	ops->oobretlen = 0;
 
@@ -1771,7 +1768,7 @@ static int onenand_write_oob_nolock(struct mtd_info *mtd, loff_t to, struct mtd_
 
 	/* on the TRANSFER SPARE bit */
 	chip->write(ONENAND_TRANS_SPARE_TSRF_INC, chip->base + ONENAND_REG_TRANS_SPARE);
-	
+
 	/* Loop until all data write */
 	while (written < len) {
 		int thislen = min_t(int, oobsize, len - written);
@@ -1802,14 +1799,14 @@ static int onenand_write_oob_nolock(struct mtd_info *mtd, loff_t to, struct mtd_
 
 		for (i = 0; i < (mtd->writesize / 4); i++)
 			chip->write(0xffffffff, cmd_addr);
-		
+
 		for (i = 0; i < (mtd->oobsize / 4); i++) {
 			chip->write(*buf_poi, cmd_addr);
 			buf_poi++;
 		}
 
 		if (onenand_blkrw_complete(chip, ONENAND_CMD_PROG)) {
-			printk(KERN_WARNING "\nonenand_write_oob_nolock: Program operation failed.\n");
+			printk(KERN_WARNING "\onenand_write_oob_nolock: Program operation failed.\n");
 			chip->write(~ONENAND_TRANS_SPARE_TSRF_INC, chip->base + ONENAND_REG_TRANS_SPARE);
 			return -1;
 		}
@@ -1851,9 +1848,9 @@ static int onenand_write_oob_nolock(struct mtd_info *mtd, loff_t to, struct mtd_
  */
 static int onenand_write_oob(struct mtd_info *mtd, loff_t to,
 			     struct mtd_oob_ops *ops)
-{	
+{
 	int ret;
-	
+
 	switch (ops->mode) {
 	case MTD_OOB_PLACE:
 	case MTD_OOB_AUTO:
@@ -1922,7 +1919,7 @@ static int onenand_erase(struct mtd_info *mtd, struct erase_info *instr)
 
 	while (len) {
 		if (chip->options & ONENAND_CHECK_BAD) {
-			
+
 			/* Check if we have a bad block, we do not erase bad blocks */
 			if (onenand_block_isbad_nolock(mtd, addr, 0)) {
 				printk (KERN_WARNING "onenand_erase: attempt to erase a bad block at addr 0x%08x\n", (unsigned int) addr);
@@ -2024,8 +2021,8 @@ static int onenand_do_lock_cmd(struct mtd_info *mtd, loff_t ofs, size_t len, int
 	if (ofs < ofs_end) {
 		cmd_addr = onenand_phys_to_virt(chip->command(mtd, cmd, ofs));
 		chip->write(datain1, cmd_addr);
-	}	
-	
+	}
+
 	cmd_addr = onenand_phys_to_virt(chip->command(mtd, cmd, ofs));
 	chip->write(datain2, cmd_addr);
 
@@ -2083,8 +2080,8 @@ static void onenand_check_lock_status(struct mtd_info *mtd)
 	void __iomem *cmd_addr;
 	int tmp;
 
-	end = chip->chipsize >> chip->erase_shift;	
-	
+	end = chip->chipsize >> chip->erase_shift;
+
 	for (block = 0; block < end; block++) {
 		cmd_addr = onenand_phys_to_virt(chip->command(mtd, ONENAND_CMD_READ, block << chip->erase_shift));
 		tmp = chip->read(cmd_addr);
@@ -2092,7 +2089,7 @@ static void onenand_check_lock_status(struct mtd_info *mtd)
 		if (chip->read(chip->base + ONENAND_REG_INT_ERR_STAT) & ONENAND_INT_ERR_LOCKED_BLK) {
 			printk(KERN_ERR "block %d is write-protected!\n", block);
 			chip->write(ONENAND_INT_ERR_LOCKED_BLK, chip->base + ONENAND_REG_INT_ERR_ACK);
-		}		
+		}
 	}
 }
 
@@ -2288,9 +2285,9 @@ static void s3c_onenand_width_regs(struct onenand_chip *chip)
 		}
 
 		w_fpa = 6;
-		w_fsa = 2;		
+		w_fsa = 2;
 		break;
-		
+
 	case ONENAND_DEVICE_DENSITY_2Gb:
 		if (ddp) {
 			w_dfs_dbs = 1;
@@ -2337,34 +2334,21 @@ static int s3c_onenand_init (struct onenand_chip *chip)
 	int value;
 
 	chip->options |= (ONENAND_READ_BURST | ONENAND_CHECK_BAD | ONENAND_PIPELINE_AHEAD);
-	
+
 	/*** Initialize Controller ***/
 
 	/* SYSCON */
-#if defined(CONFIG_CPU_S5PC100)
-        value = readl(S5P_CLK_SRC0);
-        writel(value &~(S5P_CLKSRC0_ONENAND_MASK), S5P_CLK_SRC0);
-       /* value = readl(S5P_CLK_DIV1);
-        value = (value & ~(S5P_CLKDIV1_ONENAND_MASK)) | (1 << S5P_CLKDIV1_ONENAND_SHIFT);
-        writel(value, S5P_CLK_DIV1); */
-#else
 	value = readl(S3C_CLK_DIV0);
 	value = (value & ~(3 << 16)) | (1 << 16);
 	writel(value, S3C_CLK_DIV0);
-#endif
 
 #if defined(CONFIG_CPU_S3C6410)
 	writel(ONENAND_FLASH_AUX_WD_DISABLE, chip->base + ONENAND_REG_FLASH_AUX_CNTRL);
 #endif
 
-#if defined(CONFIG_CPU_S5PC100)
-	/* Skip Cold reset delay counting */
-	writel(0x0, chip->base + ONENAND_REG_COLD_RST_DLY);
-#endif
-
 	/* Cold Reset */
 	writel(ONENAND_MEM_RESET_COLD, chip->base + ONENAND_REG_MEM_RESET);
-	
+
 	/* Access Clock Register */
 	writel(ONENAND_ACC_CLOCK_134_67, chip->base + ONENAND_REG_ACC_CLOCK);
 
@@ -2374,7 +2358,7 @@ static int s3c_onenand_init (struct onenand_chip *chip)
 	/* Enable Interrupts */
 	writel(0x3ff, chip->base + ONENAND_REG_INT_ERR_MASK);
 	writel(ONENAND_INT_PIN_ENABLE, chip->base + ONENAND_REG_INT_PIN_ENABLE);
-	writel(readl(chip->base + ONENAND_REG_INT_ERR_MASK) & ~(ONENAND_INT_ERR_RDY_ACT), 
+	writel(readl(chip->base + ONENAND_REG_INT_ERR_MASK) & ~(ONENAND_INT_ERR_RDY_ACT),
 		chip->base + ONENAND_REG_INT_ERR_MASK);
 
 	/* Memory Device Configuration Register */
@@ -2588,7 +2572,7 @@ int onenand_scan(struct mtd_info *mtd, int maxchips)
 		chip->ecclayout->oobavail +=
 			chip->ecclayout->oobfree[i].length;
 	mtd->oobavail = chip->ecclayout->oobavail;
-	
+
 	mtd->ecclayout = chip->ecclayout;
 
 	/* Fill in remaining MTD driver data */
