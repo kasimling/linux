@@ -5,10 +5,13 @@
  * DMA for OneNAND
  */
 #define ONENAND_DMA_CON			(0)
+#if defined(CONFIG_CPU_S3C6410)
+#define ONENAND_DMA_BASE		(0x75000000)
+#endif
 #define ONENAND_DMA_TRANSFER_WORD	(4)
 
 /*
- * S5PC100 SFRs
+ * SFRs
  */
 #define ONENAND_REG_MEM_CFG		(0x000)
 #define ONENAND_REG_BURST_LEN		(0x010)
@@ -43,6 +46,13 @@
 #define ONENAND_REG_ERR_BLK_ADDR	(0x1E0)
 #define ONENAND_REG_FLASH_VER_ID	(0x1F0)
 
+#if defined(CONFIG_CPU_S3C6410)
+#define ONENAND_REG_FLASH_AUX_CNTRL     (0x300)
+#elif defined(CONFIG_CPU_S5PC100)
+#define ONENAND_REG_ECC_ERR_STAT2	(0x300)
+#endif
+
+#if defined(CONFIG_CPU_S5PC100)
 #define ONENAND_REG_BANK_EN		(0x220)
 #define ONENAND_REG_WTCHDOG_RST_L	(0x260)
 #define ONENAND_REG_WTCHDOG_RST_H	(0x270)
@@ -54,11 +64,7 @@
 #define ONENAND_REG_MEM_CNT		(0x2D0)
 #define ONENAND_REG_TRANS_MODE		(0x2E0)
 #define ONENAND_REG_DEV_STAT		(0x2F0)
-#if defined(CONFIG_CPU_S3C6410)
-#define ONENAND_REG_FLASH_AUX_CNTRL     (0x300)
-#elif defined(CONFIG_CPU_S5PC100)
-#define ONENAND_REG_ECC_ERR_STAT2	(0x300)
-#endif
+
 #define ONENAND_REG_ECC_ERR_STAT3	(0x310)
 #define ONENAND_REG_ECC_ERR_STAT4	(0x320)
 #define ONENAND_REG_EFCT_BUF_CNT	(0x330)
@@ -68,9 +74,10 @@
 #define ONENAND_REG_SINGLE_PAGE_BUF	(0x370)
 #define ONENAND_REG_OFFSET_ADDR		(0x380)
 #define ONENAND_REG_INT_MON_STATUS	(0x390)
+#endif
 
 /*
- * S5PC100 SFR values
+ * SFR values
  */
 #define ONENAND_MEM_CFG_SYNC_READ	(1 << 15)
 #define ONENAND_MEM_CFG_BRL_7		(7 << 12)
@@ -224,11 +231,12 @@
 #define ONENAND_CMD_PIPELINE_WRITE	(0x81)
 
 /*
- * Command Mapping for S5PC100 OneNAND Controller
+ * Command Mapping for OneNAND Controller
  */
 #if defined(CONFIG_CPU_S5PC100)
 #define ONENAND_AHB_ADDR		(0xB0000000)
-#else
+#elif defined(CONFIG_CPU_S3C6410)
+#define ONENAND_DUMMY_ADDR		(0x20400000)
 #define ONENAND_AHB_ADDR		(0x20000000)
 #endif
 #define ONENAND_CMD_MAP_00              (0x0)
@@ -346,6 +354,7 @@
 #define ONENAND_FPA_MASK                (0x3f)
 #define ONENAND_FPA_SHIFT               (2)
 #define ONENAND_FSA_MASK                (0x03)
+
 #endif
 
 /*

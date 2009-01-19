@@ -14,6 +14,7 @@
 
 #include <linux/kernel.h>
 #include <linux/gpio.h>
+#include <linux/module.h>
 #include <linux/io.h>
 
 #include <mach/gpio-core.h>
@@ -56,6 +57,9 @@ int s3c_gpio_setpull(unsigned int pin, s3c_gpio_pull_t pull)
 
 	return ret;
 }
+
+EXPORT_SYMBOL(s3c_gpio_cfgpin);
+EXPORT_SYMBOL(s3c_gpio_setpull);
 
 #ifdef CONFIG_S3C_GPIO_CFG_S3C24XX
 int s3c_gpio_setcfg_s3c24xx_banka(struct s3c_gpio_chip *chip,
