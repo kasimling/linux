@@ -437,4 +437,17 @@ v2.6.28-rc8-s5pc1xx-r1d2: Abhilash Kesavan
 		M       drivers/mtd/onenand/s3c_onenand.c
 		M       drivers/mtd/onenand/s3c_onenand.h
 
+v2.6.28-rc8-s5pc1xx-r1d3: Kyoungil Kim
+	- Support Keypad on S5PC100
+
+	Modified Files:
+		M	arch/arm/configs/smdkc100_defconfig
+		M	arch/arm/configs/smdkc100mtd_defconfig
+		M	arch/arm/configs/smdkc100nfs_defconfig
+		M	arch/arm/mach-s5pc100/include/mach/map.h
+		M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s5pc1xx/clock.c
+		M	arch/arm/plat-s5pc1xx/devs.c
+		M	drivers/input/keyboard/Kconfig
+		M	drivers/input/keyboard/s3c-keypad.h
 
