@@ -95,29 +95,7 @@ static int s3c_spi_hw_init(struct s3c_spi *spi)
 {
 	unsigned int gpio;
 
-#if defined(CONFIG_SPICLK_PCLK)
 	clk_enable(spi->clk);
-#elif defined(CONFIG_SPICLK_SCLK)
-        writel((readl(S5P_CLKGATE_D14)|S5P_CLKGATE_D14_SPI0|S5P_CLKGATE_D14_SPI1|S5P_CLKGATE_D14_SPI2),S5P_CLKGATE_D14);
-
-        /* Set SPi Clock to DOUT*/
-        if(SPI_CHANNEL == 0)
-                writel(readl(S5P_CLK_SRC1)&~(S5P_CLKSRC1_SPI0_MASK)|(1 << S5P_CLKSRC1_SPI0_SHIFT), S5P_CLK_SRC1);
-        else if(SPI_CHANNEL == 1)  /* SPI_CHANNEL = 1 */
-                writel(readl(S5P_CLK_SRC1)&~(S5P_CLKSRC1_SPI1_MASK)|(1 << S5P_CLKSRC1_SPI1_SHIFT), S5P_CLK_SRC1);
-        else /* SPI_CHANNEL = 2 */
-                writel(readl(S5P_CLK_SRC1)&~(S5P_CLKSRC1_SPI2_MASK)|(1 << S5P_CLKSRC1_SPI2_SHIFT), S5P_CLK_SRC1);
-
-        /* CLK_DIV2 setting */
-        if(SPI_CHANNEL == 0)
-                writel(((readl(S5P_CLK_DIV2) & ~(0xffffff << 0)) | (2 << 4)), S5P_CLK_DIV2);
-        else if(SPI_CHANNEL == 1)  /* SPI_CHANNEL = 1 */
-                writel(((readl(S5P_CLK_DIV2) & ~(0xffffff << 0)) | (2 << 8)), S5P_CLK_DIV2);
-        else /* SPI_CHANNEL = 2 */
-                writel(((readl(S5P_CLK_DIV2) & ~(0xffffff << 0)) | (2 << 12)), S5P_CLK_DIV2);
-#elif defined(CONFIG_SPICLK_SCLK_48M)
-	clk_enable(spi->clk);
-#endif
 
 	/* initialize the gpio */
 	if (SPI_CHANNEL == 0) {
@@ -288,8 +266,6 @@ static void s3c_spi_message_start(struct s3c_spi *spi)
 	spi_clkcfg |= SPI_CLKSEL_PCLK;
 #elif defined(CONFIG_SPICLK_SCLK_48M)
 	spi_clkcfg |= SPI_CLKSEL_SCLK_48;
-#elif defined CONFIG_SPICLK_SCLK
-        spi_clkcfg |= SPI_CLKSEL_SCLK;
 #endif
 	writel(spi_clkcfg, spi->regs + S3C_CLK_CFG);
 

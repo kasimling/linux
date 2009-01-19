@@ -204,11 +204,6 @@ config SPICLK_SCLK_48M
         help
           Say Y here to include support for SCLK (48 MHz) source.
 
-config SPICLK_SCLK
-        bool "SCLK"
-        depends on  HS_SPI_S5PC100
-        help
-          Say Y here to include support for SCLK source.
 endchoice
 
 config SPI_SH_SCI
