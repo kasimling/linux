@@ -24,6 +24,8 @@ obj-y				+= gpiolib.o
 
 obj-$(CONFIG_CPU_S5PC100_INIT)	+= s5pc100-init.o
 obj-$(CONFIG_CPU_S5PC100_CLOCK)	+= s5pc100-clock.o
+obj-$(CONFIG_PM)                += pm.o
+obj-$(CONFIG_PM)                += sleep.o
 
 # Device setup
 

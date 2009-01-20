@@ -491,10 +491,6 @@ static int setdma_tx(struct s3c_ep *ep, struct s3c_request *req)
 		ctrl =  readl(S3C_UDC_OTG_DIEPCTL3);
 		writel(DEPCTL_EPENA|DEPCTL_CNAK|(EP2_IN<<11)| ctrl, (u32) S3C_UDC_OTG_DIEPCTL3);
 
-	} else {
-		printk("%s: --> Error Unused Endpoint!!\n",
-			__FUNCTION__);
-		BUG();
 	}
 
 	return length;
@@ -729,11 +725,7 @@ static __inline__ int write_packet(struct s3c_ep *ep,
 
 		udelay(20);
 
-	} else {
-		printk("%s: --> Error Unused Endpoint!!\n",
-			__FUNCTION__);
-		BUG();
-	}
+	} 
 
 	for (count=0;count<length;count+=4) {
 	  	writel(*buf++, fifo);

@@ -16,6 +16,7 @@ obj-$(CONFIG_CPU_S5PC100)	+= cpu.o
 obj-$(CONFIG_CPU_S5PC100)	+= dma.o
 
 # Helper and device support
+obj-$(CONFIG_PM)    += pm.o
 
 
 # machine support

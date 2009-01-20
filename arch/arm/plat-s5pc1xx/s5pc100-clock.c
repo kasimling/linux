@@ -167,7 +167,7 @@ static unsigned long s5pc1xx_clk_doutmpll_get_rate(struct clk *clk)
 
 	printk(KERN_DEBUG "%s: parent is %ld\n", __func__, rate);
 
-	rate /= ((__raw_readl(S5P_CLK_DIV1) & S5P_CLKDIV1_MPLL_MASK) >> S5P_CLKDIV1_MPLL_SHIFT);
+	rate /= (((__raw_readl(S5P_CLK_DIV1) & S5P_CLKDIV1_MPLL_MASK) >> S5P_CLKDIV1_MPLL_SHIFT) + 1);
 
 	return rate;
 }
@@ -185,7 +185,7 @@ static unsigned long s5pc1xx_clk_doutmpll2_get_rate(struct clk *clk)
 
 	printk(KERN_DEBUG "%s: parent is %ld\n", __func__, rate);
 
-	rate /= ((__raw_readl(S5P_CLK_DIV1) & S5P_CLKDIV1_MPLL2_MASK) >> S5P_CLKDIV1_MPLL2_SHIFT);
+	rate /= (((__raw_readl(S5P_CLK_DIV1) & S5P_CLKDIV1_MPLL2_MASK) >> S5P_CLKDIV1_MPLL2_SHIFT) + 1);
 
 	return rate;
 }
@@ -203,7 +203,7 @@ static unsigned long s5pc1xx_clk_sclk_hdmi_get_rate(struct clk *clk)
 
 	printk(KERN_DEBUG "%s: parent is %ld\n", __func__, rate);
 
-	rate /= ((__raw_readl(S5P_CLK_DIV3) & S5P_CLKDIV3_HDMI_MASK) >> S5P_CLKDIV3_HDMI_SHIFT);
+	rate /= (((__raw_readl(S5P_CLK_DIV3) & S5P_CLKDIV3_HDMI_MASK) >> S5P_CLKDIV3_HDMI_SHIFT) + 1);
 
 	return rate;
 }

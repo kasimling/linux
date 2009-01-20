@@ -451,3 +451,47 @@ v2.6.28-rc8-s5pc1xx-r1d3: Kyoungil Kim
 		M	drivers/input/keyboard/Kconfig
 		M	drivers/input/keyboard/s3c-keypad.h
 
+v2.6.28-rc8-s5pc1xx-r1d4: Abhilash Kesavan
+	- Support HS-SPI on S5PC100
+
+	Added Files:
+		A       arch/arm/plat-s3c/include/plat/regs-spi.h
+		A       drivers/spi/hspi-s3c.c
+		A       drivers/spi/hspi-s3c.h
+		A	drivers/spi/spi-dev.c
+		A	drivers/spi/spi-dev.h
+
+	Modified Files:
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+	        M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s5pc1xx/devs.c
+		M	drivers/spi/Kconfig
+		M	drivers/spi/Makefile
+
+v2.6.28-rc8-s5pc1xx-r1d5: Jongpill Lee
+	- Support APM on S5PC100
+
+	Added Files:
+		A       arch/arm/plat-s5pc1xx/include/plat/pm.h
+		A       arch/arm/plat-s5pc1xx/pm.c
+		A       arch/arm/mach-s5pc100/pm.c
+		A       arch/arm/plat-s5pc1xx/sleep.S
+
+	Modified Files:
+		M       arch/arm/mach-s5pc100/Makefile
+		M       arch/arm/mach-s5pc100/include/mach/regs-irq.h
+		M       arch/arm/mach-s5pc100/mach-smdkc100.c
+		M       arch/arm/plat-s5pc1xx/Makefile
+		M       arch/arm/plat-s5pc1xx/include/plat/regs-power.h
+		M       arch/arm/plat-s5pc1xx/s5pc100-clock.c
+		M       drivers/serial/s5pc100.c
+		M       drivers/serial/samsung.c
+		M       drivers/serial/samsung.h
+		M       drivers/video/samsung/s3cfb_fimd5x.c
+
+v2.6.28-rc8-s5pc1xx-r1d6: Jongpill Lee
+	- Support RTC Wakeup from Sleep mode
+
+	Modified Files:
+		M arch/arm/plat-s5pc1xx/pm.c
+
