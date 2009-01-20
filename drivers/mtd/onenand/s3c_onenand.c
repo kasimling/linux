@@ -30,6 +30,9 @@
 #if defined(CONFIG_CPU_S3C6400)
 #define onenand_phys_to_virt(x)		(void __iomem *)(chip->dev_base + (x & 0xffffff))
 #define onenand_virt_to_phys(x)		(void __iomem *)(ONENAND_AHB_ADDR + (x & 0xffffff))
+#elif defined(CONFIG_CPU_S5PC100)
+#define onenand_phys_to_virt(x)		(void __iomem *)(chip->dev_base + (x & 0xfffffff))
+#define onenand_virt_to_phys(x)		(void __iomem *)(ONENAND_AHB_ADDR + (x & 0xfffffff))
 #else
 #define onenand_phys_to_virt(x)		(void __iomem *)(chip->dev_base + (x & 0x3ffffff))
 #define onenand_virt_to_phys(x)		(void __iomem *)(ONENAND_AHB_ADDR + (x & 0x3ffffff))
@@ -2337,12 +2340,29 @@ static int s3c_onenand_init (struct onenand_chip *chip)
 
 	/*** Initialize Controller ***/
 
+#if defined(CONFIG_CPU_S5PC100)
+        /* D0 Domain OneNAND Clock Gating */
+        value = readl(S5P_SCLKGATE0);
+        value = (value & ~(1 << 2)) | (1<< 2);
+        writel(value, S5P_SCLKGATE0);
+
+        /* ONENAND Select */
+        value = readl(S5P_CLK_SRC0);
+        value = value & ~(1 << 24);
+        value = value & ~(1 << 20);
+        writel(value, S5P_CLK_SRC0);
+
+        /* SYSCON */                                                                                                  
+        value = readl(S5P_CLK_DIV1);
+        value = (value & ~(3 << 16)) | (1 << 16);                                                                     
+        writel(value, S5P_CLK_DIV1);
+
+#elif defined(CONFIG_CPU_S3C6410)
 	/* SYSCON */
 	value = readl(S3C_CLK_DIV0);
 	value = (value & ~(3 << 16)) | (1 << 16);
 	writel(value, S3C_CLK_DIV0);
 
-#if defined(CONFIG_CPU_S3C6410)
 	writel(ONENAND_FLASH_AUX_WD_DISABLE, chip->base + ONENAND_REG_FLASH_AUX_CNTRL);
 #endif
 
