@@ -60,6 +60,10 @@
 #include <plat/pll.h>
 #endif
 
+#if defined(CONFIG_PM)
+#include <plat/pm.h>
+#endif
+
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
@@ -168,6 +172,9 @@ static void __init smdkc100_machine_init(void)
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
 
 	platform_add_devices(smdkc100_devices, ARRAY_SIZE(smdkc100_devices));
+#if defined(CONFIG_PM)
+	s5pc1xx_pm_init();
+#endif
 }
 
 MACHINE_START(SMDKC100, "SMDKC100")
@@ -182,7 +189,7 @@ MACHINE_START(SMDKC100, "SMDKC100")
 	.timer		= &s5pc1xx_timer,
 MACHINE_END
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) 
+#if defined(CONFIG_USB_GADGET_S3C_OTGD)
 /* Initializes OTG Phy. */
 void otg_phy_init(u32 otg_phy_clk) {
         writel(readl(S3C_OTHERS)|S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);

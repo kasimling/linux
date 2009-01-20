@@ -83,8 +83,6 @@ static int s3c6400_serial_resetport(struct uart_port *port,
 	dbg("s3c6400_serial_resetport: port=%p (%08lx), cfg=%p\n",
 	    port, port->mapbase, cfg);
 
-	/* ensure we don't change the clock settings... */
-
 	ucon &= S3C6400_UCON_CLKMASK;
 
 	wr_regl(port, S3C2410_UCON,  ucon | cfg->ucon);
@@ -114,7 +112,6 @@ static struct s3c24xx_uart_info s5p_uart_inf = {
 };
 
 /* device management */
-
 static int s5p_serial_probe(struct platform_device *dev)
 {
 	dbg("s5p_serial_probe: dev=%p\n", dev);
@@ -134,7 +131,7 @@ s3c24xx_console_init(&s5p_serial_drv, &s5p_uart_inf);
 
 static int __init s5p_serial_init(void)
 {
-	return s3c24xx_serial_init(&s5p_serial_drv, &s5p_uart_inf);
+	return s5pc1xx_serial_init(&s5p_serial_drv, &s5p_uart_inf);
 }
 
 static void __exit s5p_serial_exit(void)
