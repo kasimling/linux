@@ -231,3 +231,92 @@ struct platform_device s3c_device_keypad = {
 
 EXPORT_SYMBOL(s3c_device_keypad);
 
+/* HS-MMC controller */
+extern struct s3c_hsmmc_cfg s3c_hsmmc0_platform;
+extern struct s3c_hsmmc_cfg s3c_hsmmc1_platform;
+extern struct s3c_hsmmc_cfg s3c_hsmmc2_platform;
+
+static struct resource s3c_hsmmc0_resource[] = {
+	[0] = {
+		.start = S3C64XX_PA_HSMMC0,
+		.end   = S3C64XX_PA_HSMMC0+S3C_SZ_HSMMC-1,
+		.flags = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start = IRQ_HSMMC0,
+		.end   = IRQ_HSMMC0,
+		.flags = IORESOURCE_IRQ,
+	},
+	/* To detect a card inserted, use an external interrupt */
+	[2] = {
+		.start = IRQ_EINT(13),
+		.end   = IRQ_EINT(13),
+		.flags = IORESOURCE_IRQ,
+	}
+};
+
+static struct resource s3c_hsmmc1_resource[] = {
+	[0] = {
+		.start = S3C64XX_PA_HSMMC1,
+		.end   = S3C64XX_PA_HSMMC1+S3C_SZ_HSMMC-1,
+		.flags = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start = IRQ_HSMMC1,
+		.end   = IRQ_HSMMC1,
+		.flags = IORESOURCE_IRQ,
+	}
+};
+
+
+static struct resource s3c_hsmmc2_resource[] = {
+	[0] = {
+		.start = S3C64XX_PA_HSMMC2,
+		.end   = S3C64XX_PA_HSMMC2+S3C_SZ_HSMMC-1,
+		.flags = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start = IRQ_HSMMC2,
+		.end   = IRQ_HSMMC2,
+		.flags = IORESOURCE_IRQ,
+	},
+	[2] = {
+		.start = IRQ_EINT(15),
+		.end   = IRQ_EINT(15),
+		.flags = IORESOURCE_IRQ,
+	}
+};
+
+struct platform_device s3c_device_hsmmc0 = {
+	.name		  = "s3c-hsmmc",
+	.id		  = 0,
+	.num_resources	  = ARRAY_SIZE(s3c_hsmmc0_resource),
+	.resource	  = s3c_hsmmc0_resource,
+	.dev		= {
+		.platform_data = &s3c_hsmmc0_platform,
+	}
+};
+
+struct platform_device s3c_device_hsmmc1 = {
+	.name		  = "s3c-hsmmc",
+	.id		  = 1,
+	.num_resources	  = ARRAY_SIZE(s3c_hsmmc1_resource),
+	.resource	  = s3c_hsmmc1_resource,
+	.dev		= {
+		.platform_data = &s3c_hsmmc1_platform,
+	}
+};
+
+struct platform_device s3c_device_hsmmc2 = {
+	.name		  = "s3c-hsmmc",
+	.id		  = 2,
+	.num_resources	  = ARRAY_SIZE(s3c_hsmmc2_resource),
+	.resource	  = s3c_hsmmc2_resource,
+	.dev		= {
+		.platform_data = &s3c_hsmmc2_platform,
+	}
+};
+
+EXPORT_SYMBOL(s3c_device_hsmmc0);
+EXPORT_SYMBOL(s3c_device_hsmmc1);
+EXPORT_SYMBOL(s3c_device_hsmmc2);
