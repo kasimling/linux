@@ -489,3 +489,9 @@ v2.6.28-rc8-s5pc1xx-r1d5: Jongpill Lee
 		M       drivers/serial/samsung.h
 		M       drivers/video/samsung/s3cfb_fimd5x.c
 
+v2.6.28-rc8-s5pc1xx-r1d6: Jongpill Lee
+	- Support RTC Wakeup from Sleep mode
+
+	Modified Files:
+		M arch/arm/plat-s5pc1xx/pm.c
+

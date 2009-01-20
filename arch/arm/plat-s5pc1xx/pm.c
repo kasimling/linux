@@ -493,6 +493,8 @@ static int s5pc1xx_pm_enter(suspend_state_t state)
 	tmp = __raw_readl(S5P_PWR_CFG);
 	tmp &= ~(0x1 << 7);
 	tmp |= (0x7ff << 8);
+	/* unmask alarm wakeup source */
+	tmp &= ~(0x1 << 10);
 	__raw_writel(tmp , S5P_PWR_CFG);
 	__raw_writel(0xffffffff , S5P_EINT_WAKEUP_MASK);
 
