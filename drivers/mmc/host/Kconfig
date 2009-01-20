@@ -63,7 +63,7 @@ config MMC_SDHCI_S3C
 config HSMMC_S3C
         tristate "Samsung S3C High Speed MMC Interface support"
         select MMC_BLOCK
-        depends on PLAT_S5PC1XX && MMC
+        depends on (PLAT_S3C64XX || PLAT_S5PC1XX) && MMC
         help
           This selects the Samsung S3C Multimedia Card Interface
           support.
