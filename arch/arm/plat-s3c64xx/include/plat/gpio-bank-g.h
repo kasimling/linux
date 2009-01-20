@@ -37,6 +37,9 @@
 #define S3C64XX_GPG4_MMC0_DATA2		(0x02 << 16)
 #define S3C64XX_GPG4_EINT_G5_4		(0x07 << 16)
 
-#define S3C64XX_GPG5_MMC0_DATA3		(0x02 << 20)
+#define S3C64XX_GPG4_MMC0_DATA2		(0x02 << 20)
 #define S3C64XX_GPG5_EINT_G5_5		(0x07 << 20)
+
+#define S3C64XX_GPG6_MMC0_CD		(0x02 << 24)
+#define S3C64XX_GPG6_MMC1_CD		(0x03 << 24)
 
