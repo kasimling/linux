@@ -51,7 +51,7 @@ extern struct platform_device s3c_device_ts;
 
 extern struct platform_device s3c_device_smc911x;
 
-extern struct platform_device s5c_device_mfc;
+extern struct platform_device s3c_device_mfc;
 
 /* s3c2440 specific devices */
 
