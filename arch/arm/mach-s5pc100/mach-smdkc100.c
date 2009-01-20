@@ -33,7 +33,7 @@
 #include <mach/map.h>
 #include <mach/regs-mem.h>
 #include <mach/gpio.h>
-#include <mach/hsmmc.h>
+#include <plat/hsmmc.h>
 
 #include <asm/irq.h>
 #include <asm/mach-types.h>
