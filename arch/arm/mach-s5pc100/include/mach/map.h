@@ -140,4 +140,8 @@
 #define S3C_PA_KEYPAD           S5PC1XX_PA_KEYPAD
 #define S3C_SZ_KEYPAD           S5PC1XX_SZ_KEYPAD
 
+/* MFC V4.0 */
+#define S5PC1XX_PA_MFC		(0xF1000000)
+#define S5C_SZ_MFC		SZ_4K
+
 #endif /* __ASM_ARCH_6400_MAP_H */

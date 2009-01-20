@@ -50,6 +50,27 @@ struct platform_device s3c_device_smc911x = {
       .resource       = s3c_smc911x_resources,
 };
 
+/* FIMV MFC interface */
+static struct resource s5c_mfc_resources[] = {
+	[0] = {
+		.start  = S5PC1XX_PA_MFC,
+		.end    = S5PC1XX_PA_MFC + S5C_SZ_MFC - 1,
+		.flags  = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start  = IRQ_MFC,
+		.end    = IRQ_MFC,
+		.flags  = IORESOURCE_IRQ,
+	}
+};
+
+struct platform_device s5c_device_mfc = {
+	.name           = "s5c-mfc",
+	.id             = -1,
+	.num_resources  = ARRAY_SIZE(s5c_mfc_resources),
+	.resource       = s5c_mfc_resources,
+};
+
 /* LCD Controller */
 
 static struct resource s3c_lcd_resource[] = {
