@@ -68,7 +68,7 @@ extern struct s3c_sdhci_platdata s3c_hsmmc1_def_platdata;
 
 /* Helper function availablity */
 
-#if defined (CONFIG_S3C6410_SETUP_SDHCI) 
+#if defined (CONFIG_S3C6410_SETUP_SDHCI) || defined (CONFIG_S5PC1XX_SETUP_SDHCI) 
 extern char *s3c6410_hsmmc_clksrcs[4];
 
 extern void s3c6410_setup_sdhci0_cfg_gpio(struct platform_device *, int w);

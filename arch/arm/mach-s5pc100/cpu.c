@@ -71,6 +71,7 @@ static struct map_desc s5pc100_iodesc[] __initdata = {
 
 static void s5pc100_idle(void)
 {
+#if !defined(CONFIG_MMC_SDHCI_S3C)
 	unsigned int tmp;
 
 #if defined(T32_PROBE_DEBUGGING)
@@ -93,11 +94,17 @@ static void s5pc100_idle(void)
 #if defined(T32_PROBE_DEBUGGING)
 	gpio_direction_output(S5PC1XX_GPD(1), 1);
 #endif
+#endif
 }
 
 void __init s5pc100_map_io(void)
 {
 	iotable_init(s5pc100_iodesc, ARRAY_SIZE(s5pc100_iodesc));
+
+        /* HS-MMC Platform data */
+
+        s3c6410_default_sdhci0();
+        s3c6410_default_sdhci1();
 
 	/* set s5pc100 idle function */
 
