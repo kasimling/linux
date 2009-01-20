@@ -68,6 +68,24 @@ struct platform_device s3c_device_nand = {
 
 EXPORT_SYMBOL(s3c_device_nand);
 
+/* OneNAND Controller */
+static struct resource s3c_onenand_resource[] = {
+	[0] = {
+		.start = S3C64XX_PA_ONENAND,
+		.end   = S3C64XX_PA_ONENAND + S3C_SZ_ONENAND - 1,
+		.flags = IORESOURCE_MEM,
+	}
+};
+
+struct platform_device s3c_device_onenand = {
+	.name		  = "onenand",
+	.id		  = -1,
+	.num_resources	  = ARRAY_SIZE(s3c_onenand_resource),
+	.resource	  = s3c_onenand_resource,
+};
+
+EXPORT_SYMBOL(s3c_device_onenand);
+
 /* USB Device (Gadget)*/
 
 static struct resource s3c_usbgadget_resource[] = {
@@ -189,4 +207,27 @@ struct platform_device s3c_device_rtc = {
 
 EXPORT_SYMBOL(s3c_device_rtc);
 
+
+/* Keypad interface */
+static struct resource s3c_keypad_resource[] = {
+	[0] = {
+		.start = S3C_PA_KEYPAD,
+		.end   = S3C_PA_KEYPAD+ S3C_SZ_KEYPAD - 1,
+		.flags = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start = IRQ_KEYPAD,
+		.end   = IRQ_KEYPAD,
+		.flags = IORESOURCE_IRQ,
+	}
+};
+
+struct platform_device s3c_device_keypad = {
+	.name		  = "s3c-keypad",
+	.id		  = -1,
+	.num_resources	  = ARRAY_SIZE(s3c_keypad_resource),
+	.resource	  = s3c_keypad_resource,
+};
+
+EXPORT_SYMBOL(s3c_device_keypad);
 

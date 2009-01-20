@@ -165,6 +165,7 @@
 
 /*OTHERS Resgister */
 #define S3C_OTHERS_USB_SIG_MASK		(1<<16)
+#define S3C_OTHERS_HCLK_LOW_SEL_MPLL	(1<<6)
 
 /* CLKSRC */
 #define S3C_CLKSRC_APLL_MOUT	(1 << 0)

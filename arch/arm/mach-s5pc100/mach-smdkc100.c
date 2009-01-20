@@ -33,7 +33,7 @@
 #include <mach/map.h>
 #include <mach/regs-mem.h>
 #include <mach/gpio.h>
-#include <mach/hsmmc.h>
+#include <plat/hsmmc.h>
 
 #include <asm/irq.h>
 #include <asm/mach-types.h>
@@ -93,6 +93,7 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_lcd,
         &s3c_device_nand,
         &s3c_device_onenand,
+	&s3c_device_keypad,
 	&s3c_device_ts,
 	&s3c_device_adc,
         &s3c_device_rtc,
@@ -103,6 +104,8 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_usbgadget,
         &s3c_device_hsmmc0,
         &s3c_device_hsmmc1,
+        &s3c_device_spi0,
+        &s3c_device_spi1,
 };
 
 
@@ -470,4 +473,30 @@ void s3c_rtc_enable_set(struct platform_device *pdev,void __iomem *base, int en)
                 }
         }
 }
+#endif
+
+#if defined(CONFIG_KEYPAD_S3C) || defined (CONFIG_KEYPAD_S3C_MODULE)
+void s3c_setup_keypad_cfg_gpio(int rows, int columns)
+{
+	unsigned int gpio;
+	unsigned int end;
+
+	end = S5PC1XX_GPH3(rows);
+
+	/* Set all the necessary GPH2 pins to special-function 0 */
+	for (gpio = S5PC1XX_GPH3(0); gpio < end; gpio++) {
+		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(3));
+		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+	}
+
+	end = S5PC1XX_GPH2(columns);
+
+	/* Set all the necessary GPK pins to special-function 0 */
+	for (gpio = S5PC1XX_GPH2(0); gpio < end; gpio++) {
+		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(3));
+		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+	}
+}
+
+EXPORT_SYMBOL(s3c_setup_keypad_cfg_gpio);
 #endif

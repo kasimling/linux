@@ -46,6 +46,7 @@ extern struct platform_device s3c_device_nand;
 extern struct platform_device s3c_device_onenand;
 
 extern struct platform_device s3c_device_usbgadget;
+extern struct platform_device s3c_device_keypad;
 extern struct platform_device s3c_device_ts;
 
 extern struct platform_device s3c_device_smc911x;

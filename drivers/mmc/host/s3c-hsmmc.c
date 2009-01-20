@@ -44,8 +44,8 @@
 
 #include <plat/clock.h>
 #include <plat/regs-hsmmc.h>
+#include <plat/hsmmc.h>
 #include <mach/dma.h>
-#include <mach/hsmmc.h>
 
 
 #ifdef CONFIG_S3CMMC_DEBUG
@@ -73,6 +73,7 @@ struct s3c_hsmmc_host *global_host[3];
 
 static struct s3c_hsmmc_cfg s3c_hsmmc_platform = {
 	.hwport = 0,
+        .enabled = 0,
 	.host_caps = MMC_CAP_4_BIT_DATA,
 	.base = NULL,
 	.highspeed = 0,
@@ -657,6 +658,38 @@ out:
 	return result;
 }
 
+#if defined(CONFIG_CPU_S3C6410)
+static irqreturn_t s3c_hsmmc_irq_cd (int irq, void *dev_id)
+{
+        struct s3c_hsmmc_host *host = dev_id;
+        int ext_CD_int = 0;
+
+        ext_CD_int = readl(S3C_GPNDAT);
+        ext_CD_int &= 0x2000;   /* GPN13 */
+
+        if(ext_CD_int && card_detect) {
+                printk("s3c-hsmmc channel-0(EXT): card removed.\n");
+                set_irq_type(host->irq_cd, IRQT_FALLING);
+                card_detect = 0;
+        }
+        else if(!ext_CD_int && !card_detect) {
+                printk("s3c-hsmmc channel-0(EXT): card inserted.\n");
+                set_irq_type(host->irq_cd, IRQT_RISING);
+                card_detect = 1;
+        }
+        else
+                return IRQ_HANDLED;
+
+
+        tasklet_schedule(&host->card_tasklet);
+        mmiowb();
+
+        spin_unlock(&host->lock);
+
+        return IRQ_HANDLED;
+}
+#endif
+
 static void s3c_hsmmc_check_status (unsigned long data)
 {
         struct s3c_hsmmc_host *host = (struct s3c_hsmmc_host *)data;
@@ -837,7 +870,12 @@ static void s3c_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		s3c_hsmmc_ios_init(host);
 	}
 
-	hsmmc_set_gpio(host->plat_data->hwport, host->plat_data->bus_width);
+#if defined(CONFIG_CPU_S3C6410)
+        if (host->plat_data->enabled)
+                hsmmc_set_gpio(host->plat_data->hwport, host->plat_data->bus_width);
+#elif defined(CONFIG_CPU_S5PC100)
+                hsmmc_set_gpio(host->plat_data->hwport, host->plat_data->bus_width);
+#endif
 
 	DBG("\nios->clock: %d Hz\n", ios->clock);
 	s3c_hsmmc_set_clock(host, ios->clock);
@@ -915,6 +953,19 @@ static int s3c_hsmmc_probe (struct platform_device *pdev)
 		goto untasklet;
 	}
 
+#if defined(CONFIG_CPU_S3C6410) 
+        /* To detect a card inserted on channel 0,  an external interrupt is used. */
+        if ((plat_data->enabled == 1) && (plat_data->hwport == 0)) {
+                host->irq_cd = platform_get_irq(pdev, 1);
+                if (host->irq_cd == 0) {
+                        printk("Failed to get interrupt resouce.\n");
+                        ret = -EINVAL;
+                        goto untasklet;
+                }
+               set_irq_type(host->irq_cd, IRQT_LOW);
+        }
+#endif
+
 	host->flags |= S3C_HSMMC_USE_DMA;
 
 	s3c_hsmmc_reset(host, S3C_HSMMC_RESET_ALL);
@@ -989,6 +1040,14 @@ static int s3c_hsmmc_probe (struct platform_device *pdev)
 	ret = request_irq(host->irq, s3c_hsmmc_irq, 0, DRIVER_NAME, host);
 	if (ret)
 		goto untasklet;
+
+#if defined(CONFIG_CPU_S3C6410)
+        if ((plat_data->enabled == 1) && (plat_data->hwport == 0)) {
+                ret = request_irq(host->irq_cd, s3c_hsmmc_irq_cd, 0, DRIVER_NAME, host);
+                if (ret)
+                        goto untasklet;
+        }
+#endif
 
 	s3c_hsmmc_ios_init(host);
 
