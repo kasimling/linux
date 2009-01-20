@@ -121,6 +121,12 @@
 #define S3C_PA_HSMMC1           S5PC1XX_PA_HSMMC1
 #define S3C_PA_HSMMC2           S5PC1XX_PA_HSMMC2
 
+#define S5PC1XX_PA_SPI(x)       (0xEC300000 + ((x) * 0x100000))
+#define S5PC1XX_SZ_SPI          SZ_1M
+#define S5PC1XX_PA_SPI0         S5PC1XX_PA_SPI(0)
+#define S5PC1XX_PA_SPI1         S5PC1XX_PA_SPI(1)
+#define S5PC1XX_PA_SPI2         S5PC1XX_PA_SPI(2)
+
 #define S5PC1XX_PA_ONENAND      (0xE7100000)
 #define S5PC1XX_SZ_ONENAND      SZ_1M
 

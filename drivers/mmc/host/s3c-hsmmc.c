@@ -43,10 +43,15 @@
 #include <asm/sizes.h>
 
 #include <plat/clock.h>
-#include <plat/regs-hsmmc.h>
-#include <mach/dma.h>
-#include <mach/hsmmc.h>
 
+#include <plat/regs-hsmmc.h>
+#include <plat/hsmmc.h>
+#include <mach/dma.h>
+#if defined(CONFIG_CPU_S3C6410)
+#include <plat/regs-gpio.h>
+#include <plat/gpio-bank-n.h>
+static int card_detect = 0;
+#endif
 
 #ifdef CONFIG_S3CMMC_DEBUG
 #define DBG(x...)       printk(PFX x)
@@ -73,6 +78,7 @@ struct s3c_hsmmc_host *global_host[3];
 
 static struct s3c_hsmmc_cfg s3c_hsmmc_platform = {
 	.hwport = 0,
+        .enabled = 0,
 	.host_caps = MMC_CAP_4_BIT_DATA,
 	.base = NULL,
 	.highspeed = 0,
@@ -84,7 +90,7 @@ static struct s3c_hsmmc_cfg s3c_hsmmc_platform = {
 		.ctrl3[1] = 0x00000080,	/* ctrl3 for high speed */
 		.ctrl4 = 0,
 	},
-	
+
 	/* ctrl for sd */
 	.fd_ctrl[1] = {
 		.ctrl2    = 0xC0000100,	/* ctrl2 for sd */
@@ -205,8 +211,8 @@ static inline uint s3c_hsmmc_build_dma_table (struct s3c_hsmmc_host *host,
 		host->sdma_descr_tbl[i].dma_address = sg[i].dma_address;
 		host->sdma_descr_tbl[i].length_attr = (sg[i].length << 16) | (S3C_HSMMC_ADMA_ATTR_ACT_TRAN) |
 			(S3C_HSMMC_ADMA_ATTR_VALID);
-		
-		DBG("  ADMA2 descr table[%d] - addr: %08x, size+attr: %08x\n", i, host->sdma_descr_tbl[i].dma_address, 
+
+		DBG("  ADMA2 descr table[%d] - addr: %08x, size+attr: %08x\n", i, host->sdma_descr_tbl[i].dma_address,
 										host->sdma_descr_tbl[i].length_attr);
 	}
 
@@ -214,8 +220,8 @@ static inline uint s3c_hsmmc_build_dma_table (struct s3c_hsmmc_host *host,
 	host->sdma_descr_tbl[i].dma_address = sg[i].dma_address;
 	host->sdma_descr_tbl[i].length_attr = (sg[i].length << 16) | (S3C_HSMMC_ADMA_ATTR_ACT_TRAN) |
 			(S3C_HSMMC_ADMA_ATTR_END | S3C_HSMMC_ADMA_ATTR_VALID);
-	
-	DBG("  ADMA2 descr table[%d] - addr: %08x, size+attr: %08x\n", i, host->sdma_descr_tbl[i].dma_address, 
+
+	DBG("  ADMA2 descr table[%d] - addr: %08x, size+attr: %08x\n", i, host->sdma_descr_tbl[i].dma_address,
 										host->sdma_descr_tbl[i].length_attr);
 
  	return (i);
@@ -253,7 +259,7 @@ static inline void s3c_hsmmc_prepare_data (struct s3c_hsmmc_host *host,
 		reg |= S3C_HSMMC_NIS_DMA;
 	}
 	s3c_hsmmc_writel(reg, S3C_HSMMC_NORINTSTSEN);
-	
+
 	reg8 = s3c_hsmmc_readb(S3C_HSMMC_HOSTCTL);
 	reg8 |= S3C_HSMMC_CTRL_ADMA2_32;
 	s3c_hsmmc_writeb(reg8, S3C_HSMMC_HOSTCTL);
@@ -304,7 +310,7 @@ static inline void s3c_hsmmc_send_register (struct s3c_hsmmc_host *host)
 	u32 cmd_val;
 
 	if (data) {
-		
+
 #ifdef CONFIG_HSMMC_SCATTERGATHER
 		s3c_hsmmc_writew(S3C_HSMMC_MAKE_BLKSZ(0x7, data->blksz), S3C_HSMMC_BLKSIZE);
 		s3c_hsmmc_writel(virt_to_phys(host->sdma_descr_tbl), S3C_HSMMC_ADMASYSADDR);
@@ -347,7 +353,7 @@ static inline void s3c_hsmmc_send_command (struct s3c_hsmmc_host *host,
 {
 	u32 mask=1;
 	ulong timeout;
-	
+
 	while (s3c_hsmmc_readl(S3C_HSMMC_CONTROL4) & mask);
 
 	DBG("Sending cmd=(%d), arg=0x%x\n", cmd->opcode, cmd->arg);
@@ -381,7 +387,7 @@ static inline void s3c_hsmmc_send_command (struct s3c_hsmmc_host *host,
 }
 
 static void s3c_hsmmc_finish_data (struct s3c_hsmmc_host *host)
-{	
+{
 	struct mmc_data *data;
 	u16 blocks;
 
@@ -508,7 +514,7 @@ static void s3c_hsmmc_cmd_irq (struct s3c_hsmmc_host *host, u32 intmask)
 		host->cmd->error = -ETIMEDOUT;
 	else if (intmask & (S3C_HSMMC_INT_CRC | S3C_HSMMC_INT_END_BIT | S3C_HSMMC_INT_INDEX))
 		host->cmd->error = -EILSEQ;
-	
+
 	if (host->cmd->error)
 		tasklet_schedule(&host->finish_tasklet);
 }
@@ -571,7 +577,7 @@ static irqreturn_t s3c_hsmmc_irq (int irq, void *dev_id)
 	u32 intsts;
 
 	uint i, org_irq_sts;
-		
+
 	spin_lock(&host->lock);
 
 	mrq = host->mrq;
@@ -657,6 +663,38 @@ out:
 	return result;
 }
 
+#if defined(CONFIG_CPU_S3C6410)
+static irqreturn_t s3c_hsmmc_irq_cd (int irq, void *dev_id)
+{
+        struct s3c_hsmmc_host *host = dev_id;
+        int ext_CD_int = 0;
+
+        ext_CD_int = readl(S3C64XX_GPNDAT);
+        ext_CD_int &= 0x2000;   /* GPN13 */
+
+        if(ext_CD_int && card_detect) {
+                printk("s3c-hsmmc channel-0(EXT): card removed.\n");
+                set_irq_type(host->irq_cd, IRQ_TYPE_EDGE_FALLING);
+                card_detect = 0;
+        }
+        else if(!ext_CD_int && !card_detect) {
+                printk("s3c-hsmmc channel-0(EXT): card inserted.\n");
+                set_irq_type(host->irq_cd, IRQ_TYPE_EDGE_RISING);
+                card_detect = 1;
+        }
+        else
+                return IRQ_HANDLED;
+
+
+        tasklet_schedule(&host->card_tasklet);
+        mmiowb();
+
+        spin_unlock(&host->lock);
+
+        return IRQ_HANDLED;
+}
+#endif
+
 static void s3c_hsmmc_check_status (unsigned long data)
 {
         struct s3c_hsmmc_host *host = (struct s3c_hsmmc_host *)data;
@@ -684,7 +722,7 @@ static void s3c_hsmmc_request (struct mmc_host *mmc, struct mmc_request *mrq)
 		host->mrq->cmd->error = -ENOMEDIUM;
 		tasklet_schedule(&host->finish_tasklet);
 	}
-	
+
 	mmiowb();
 	spin_unlock_irqrestore(&host->lock, flags);
 }
@@ -703,18 +741,18 @@ static int s3c_set_bus_width (struct s3c_hsmmc_host *host, uint width)
 		reg &= ~(S3C_HSMMC_CTRL_4BIT | S3C_HSMMC_CTRL_8BIT);
 		DBG("bus width: 1 bit\n");
 		break;
-		
+
 	case MMC_BUS_WIDTH_4:
 		DBG("bus width: 4 bit\n");
 		reg &= ~(S3C_HSMMC_CTRL_8BIT);
 		reg |= S3C_HSMMC_CTRL_4BIT;
 		break;
-		
+
 	case MMC_BUS_WIDTH_8:
 		reg |= S3C_HSMMC_CTRL_8BIT;
 		DBG("bus width: 8 bit\n");
 		break;
-		
+
 	default:
 		DBG("bus width: Error\n");
 		return -1;
@@ -733,7 +771,7 @@ static void s3c_hsmmc_set_clock (struct s3c_hsmmc_host *host, ulong clock)
 	int cardtype = 0;
 	u32 val = 0, tmp_clk = 0, sel_clk = 0, i, j;
 	u16 div = (u16)-1;
-	ulong timeout;	
+	ulong timeout;
 	u8 ctrl;
 
 	if(host->mmc->card != NULL)
@@ -757,7 +795,7 @@ static void s3c_hsmmc_set_clock (struct s3c_hsmmc_host *host, ulong clock)
 		ctrl |= S3C_HSMMC_CTRL_HIGHSPEED;
 	else
 		ctrl &= ~S3C_HSMMC_CTRL_HIGHSPEED;
-	
+
 	s3c_hsmmc_writeb(ctrl, S3C_HSMMC_HOSTCTL);
 
 	if (clock == 0) {
@@ -837,7 +875,8 @@ static void s3c_hsmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 		s3c_hsmmc_ios_init(host);
 	}
 
-	hsmmc_set_gpio(host->plat_data->hwport, host->plat_data->bus_width);
+        if (host->plat_data->enabled)
+                hsmmc_set_gpio(host->plat_data->hwport, host->plat_data->bus_width);
 
 	DBG("\nios->clock: %d Hz\n", ios->clock);
 	s3c_hsmmc_set_clock(host, ios->clock);
@@ -867,13 +906,13 @@ static int s3c_hsmmc_probe (struct platform_device *pdev)
 {
 	struct mmc_host *mmc;
 	struct s3c_hsmmc_host *host;
-	struct s3c_hsmmc_cfg *plat_data;	
+	struct s3c_hsmmc_cfg *plat_data;
 	uint i;
 	int ret;
 
 	mmc = mmc_alloc_host(sizeof(struct s3c_hsmmc_host), &pdev->dev);
-	
-	if (mmc==NULL) {	
+
+	if (mmc==NULL) {
 		ret = -ENOMEM;
 		printk("Failed to get mmc_alloc_host.\n");
 		return ret;
@@ -915,6 +954,19 @@ static int s3c_hsmmc_probe (struct platform_device *pdev)
 		goto untasklet;
 	}
 
+#if defined(CONFIG_CPU_S3C6410)
+        /* To detect a card inserted on channel 0,  an external interrupt is used. */
+        if ((plat_data->enabled == 1) && (plat_data->hwport == 0)) {
+                host->irq_cd = platform_get_irq(pdev, 1);
+                if (host->irq_cd == 0) {
+                        printk("Failed to get interrupt resouce.\n");
+                        ret = -EINVAL;
+                        goto untasklet;
+                }
+               set_irq_type(host->irq_cd, IRQ_TYPE_LEVEL_LOW);
+        }
+#endif
+
 	host->flags |= S3C_HSMMC_USE_DMA;
 
 	s3c_hsmmc_reset(host, S3C_HSMMC_RESET_ALL);
@@ -943,7 +995,7 @@ static int s3c_hsmmc_probe (struct platform_device *pdev)
 	mmc->f_min = 400 * 1000; /* at least 400kHz */
 
 	/* you must make sure that our hsmmc block can support
-	 * up to 52MHz. 
+	 * up to 52MHz.
 	 */
 	mmc->f_max = 100 * MHZ;
 	mmc->caps = plat_data->host_caps;
@@ -953,7 +1005,7 @@ static int s3c_hsmmc_probe (struct platform_device *pdev)
 
 	/*
 	 * Maximum number of segments. Hardware cannot do scatter lists.
-	 * XXX: must modify later. 
+	 * XXX: must modify later.
 	 */
 #ifdef CONFIG_HSMMC_SCATTERGATHER
 	mmc->max_hw_segs = CONFIG_S3C_HSMMC_MAX_HW_SEGS;
@@ -968,10 +1020,10 @@ static int s3c_hsmmc_probe (struct platform_device *pdev)
 	 */
 	mmc->max_blk_size = 512;
 	mmc->max_seg_size = 128 * mmc->max_blk_size;
-	
+
 	mmc->max_blk_count = 128;
 	mmc->max_req_size = mmc->max_seg_size;
-	
+
 
 	init_timer(&host->timer);
         host->timer.data = (unsigned long)host;
@@ -989,6 +1041,14 @@ static int s3c_hsmmc_probe (struct platform_device *pdev)
 	ret = request_irq(host->irq, s3c_hsmmc_irq, 0, DRIVER_NAME, host);
 	if (ret)
 		goto untasklet;
+
+#if defined(CONFIG_CPU_S3C6410)
+        if ((plat_data->enabled == 1) && (plat_data->hwport == 0)) {
+                ret = request_irq(host->irq_cd, s3c_hsmmc_irq_cd, 0, DRIVER_NAME, host);
+                if (ret)
+                        goto untasklet;
+        }
+#endif
 
 	s3c_hsmmc_ios_init(host);
 

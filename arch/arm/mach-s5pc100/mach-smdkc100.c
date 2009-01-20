@@ -33,7 +33,7 @@
 #include <mach/map.h>
 #include <mach/regs-mem.h>
 #include <mach/gpio.h>
-#include <mach/hsmmc.h>
+#include <plat/hsmmc.h>
 
 #include <asm/irq.h>
 #include <asm/mach-types.h>
@@ -58,6 +58,10 @@
 #include <plat/regs-sys.h>
 #include <plat/regs-clock.h>
 #include <plat/pll.h>
+#endif
+
+#if defined(CONFIG_PM)
+#include <plat/pm.h>
 #endif
 
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
@@ -100,6 +104,8 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_usbgadget,
         &s3c_device_hsmmc0,
         &s3c_device_hsmmc1,
+        &s3c_device_spi0,
+        &s3c_device_spi1,
 };
 
 
@@ -169,6 +175,9 @@ static void __init smdkc100_machine_init(void)
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
 
 	platform_add_devices(smdkc100_devices, ARRAY_SIZE(smdkc100_devices));
+#if defined(CONFIG_PM)
+	s5pc1xx_pm_init();
+#endif
 }
 
 MACHINE_START(SMDKC100, "SMDKC100")
@@ -183,7 +192,7 @@ MACHINE_START(SMDKC100, "SMDKC100")
 	.timer		= &s5pc1xx_timer,
 MACHINE_END
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) 
+#if defined(CONFIG_USB_GADGET_S3C_OTGD)
 /* Initializes OTG Phy. */
 void otg_phy_init(u32 otg_phy_clk) {
         writel(readl(S3C_OTHERS)|S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
@@ -314,6 +323,7 @@ void hsmmc_set_gpio (uint channel, uint width)
 
 struct s3c_hsmmc_cfg s3c_hsmmc0_platform = {
         .hwport = 0,
+	.enabled = 1,
         .host_caps = HOST_CAPS,
         .bus_width = 4,
         .highspeed = 0,
@@ -342,6 +352,7 @@ struct s3c_hsmmc_cfg s3c_hsmmc0_platform = {
 
 struct s3c_hsmmc_cfg s3c_hsmmc1_platform = {
         .hwport = 1,
+	.enabled = 1,
         .host_caps = HOST_CAPS,
         .bus_width = 4,
         .highspeed = 0,
@@ -370,6 +381,7 @@ struct s3c_hsmmc_cfg s3c_hsmmc1_platform = {
 
 struct s3c_hsmmc_cfg s3c_hsmmc2_platform = {
         .hwport = 2,
+	.enabled = 0,
         .host_caps = HOST_CAPS,
         .bus_width = 4,
         .highspeed = 0,
