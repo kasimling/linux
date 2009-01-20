@@ -323,6 +323,7 @@ void hsmmc_set_gpio (uint channel, uint width)
 
 struct s3c_hsmmc_cfg s3c_hsmmc0_platform = {
         .hwport = 0,
+	.enabled = 1,
         .host_caps = HOST_CAPS,
         .bus_width = 4,
         .highspeed = 0,
@@ -351,6 +352,7 @@ struct s3c_hsmmc_cfg s3c_hsmmc0_platform = {
 
 struct s3c_hsmmc_cfg s3c_hsmmc1_platform = {
         .hwport = 1,
+	.enabled = 1,
         .host_caps = HOST_CAPS,
         .bus_width = 4,
         .highspeed = 0,
@@ -379,6 +381,7 @@ struct s3c_hsmmc_cfg s3c_hsmmc1_platform = {
 
 struct s3c_hsmmc_cfg s3c_hsmmc2_platform = {
         .hwport = 2,
+	.enabled = 0,
         .host_caps = HOST_CAPS,
         .bus_width = 4,
         .highspeed = 0,
