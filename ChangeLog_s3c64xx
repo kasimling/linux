@@ -482,3 +482,6 @@ v2.6.28-rc8-s3c64xx-r0d12: Jongpill Lee
 		M       drivers/rtc/rtc-s3c.c
 		M       drivers/spi/Kconfig
 		M       drivers/spi/Makefile
+
+v2.6.28-rc8-s3c64xx-r0d13: Ilho Lee
+	- Support HS-MMC on SMDK6410
