@@ -71,6 +71,7 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 	u_int virt_addr;
 	struct mm_struct *mm = current->mm;
 	struct s3c_mem_alloc param;
+	struct s3c_mem_dma_param dma_param;
 
 	switch (cmd) {
 		case S3C_MEM_ALLOC:
@@ -245,6 +246,9 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 
 
 		case S3C_MEM_DMA_COPY:
+			if(copy_from_user(&dma_param, (struct s3c_mem_dma_param *)arg, sizeof(struct s3c_mem_dma_param))) {
+				return -EFAULT;
+			}
 			printk("S3C_MEM_DMA_COPY called\n");
 
 			if (s3c2410_dma_request(DMACH_3D_M2M, &s3c_m2m_dma_client, NULL)) {
@@ -255,11 +259,15 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			s3c2410_dma_set_buffdone_fn(DMACH_3D_M2M, s3c_m2m_dma_finish);
 
 			/* Source address */
-			s3c2410_dma_devconfig(DMACH_3D_M2M, S3C_DMA_MEM2MEM, 1, 0x21000000);
+			s3c2410_dma_devconfig(DMACH_3D_M2M, S3C_DMA_MEM2MEM, 1, virt_to_phys(dma_param.src_addr));
 			s3c2410_dma_config(DMACH_3D_M2M, 8, 0);
-			//s3c2410_dma_setflags(DMACH_3D_M2M, S3C2410_DMAF_AUTOSTART);
+#if 1
+			/* Destination address : Data buffer address */
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, virt_to_phys(dma_param.dst_addr), dma_param.size);
+			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
 
-
+			wait_for_completion(&s3c_m2m_dma_complete);
+#else
 			/* Destination address : Data buffer address */
 			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000, 0x4000);
 			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x10000, 0x4000);
@@ -279,8 +287,12 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x50000, 0x4000);
 			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
 			wait_for_completion(&s3c_m2m_dma_complete);
-
+#endif
 			s3c2410_dma_free(DMACH_3D_M2M, &s3c_m2m_dma_client);
+
+			if(copy_to_user((struct s3c_mem_dma_param *)arg, &dma_param, sizeof(struct s3c_mem_dma_param))) {
+				return -EFAULT;
+			}
 
 			break;
 
