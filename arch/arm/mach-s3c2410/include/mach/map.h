@@ -43,7 +43,6 @@
 
 /* RTC */
 #define S3C2410_PA_RTC	   (0x57000000)
-#define S3C6400_PA_RTC	   (0x7E005000)
 #define S3C24XX_SZ_RTC	   SZ_1M
 
 /* ADC */
