@@ -50,7 +50,7 @@ config MMC_SDHCI_PCI
 
 config MMC_SDHCI_S3C
 	tristate "SDHCI support on Samsung S3C SoC"
-	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX)
+	depends on MMC_SDHCI && (PLAT_S3C24XX || PLAT_S3C64XX || PLAT_S5PC1XX)
 	help
 	  This selects the Secure Digital Host Controller Interface (SDHCI)
 	  often referrered to as the HSMMC block in some of the Samsung S3C
@@ -59,30 +59,6 @@ config MMC_SDHCI_S3C
 	  If you have a controller with this interface, say Y or M here.
 
 	  If unsure, say N.
-
-config HSMMC_S3C
-        tristate "Samsung S3C High Speed MMC Interface support"
-        select MMC_BLOCK
-        depends on (PLAT_S3C64XX || PLAT_S5PC1XX) && MMC
-        help
-          This selects the Samsung S3C Multimedia Card Interface
-          support.
-
-          If unsure, say N.
-
-config USE_MMC_AS_ROOT
-        bool "MMC can be used as a Root Filesystem Device"
-        depends on HSMMC_S3C
-        default y
-        help
-          Say Y here when you want to use MMC as a root file system.
-
-config HSMMC_SCATTERGATHER
-        bool "Support Scatter and Gather in HS-MMC"
-        depends on HSMMC_S3C
-        help
-          Say Y here. This option can support scatter and gather
-          using DMA boundary in HS-MMC DMA engine.
 
 config MMC_RICOH_MMC
 	tristate "Ricoh MMC Controller Disabler  (EXPERIMENTAL)"
