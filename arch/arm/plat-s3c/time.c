@@ -305,7 +305,7 @@ static void s3c64xx_timer_setup (void)
 		tcfg0 &= ~S3C2410_TCFG_PRESCALER1_MASK;
 		tcfg0 |= (6) << S3C2410_TCFG_PRESCALER1_SHIFT;
 
-		tcnt = (pclk / 6) / HZ;
+		tcnt = (pclk / 7) / HZ;
 	}
 
 	/* timers reload after counting zero, so reduce the count by 1 */
