@@ -58,6 +58,7 @@
 #include <plat/regs-sys.h>
 #include <plat/regs-clock.h>
 #include <plat/pll.h>
+#include <linux/usb/ch9.h>
 #endif
 
 #if defined(CONFIG_PM)
@@ -192,7 +193,10 @@ MACHINE_START(SMDKC100, "SMDKC100")
 	.timer		= &s5pc1xx_timer,
 MACHINE_END
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD)
+
+#if	defined(CONFIG_USB_GADGET_S3C_OTGD) || \
+	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+
 /* Initializes OTG Phy. */
 void otg_phy_init(u32 otg_phy_clk) {
         writel(readl(S3C_OTHERS)|S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
@@ -204,15 +208,21 @@ void otg_phy_init(u32 otg_phy_clk) {
         writel(0x0, S3C_USBOTG_RSTCON);
         udelay(50);
 }
+EXPORT_SYMBOL(otg_phy_init);
+
+/* USB Control request data struct must be located here for DMA transfer */
+struct usb_ctrlrequest usb_ctrl __attribute__((aligned(8)));
+EXPORT_SYMBOL(usb_ctrl);
 
 /* OTG PHY Power Off */
 void otg_phy_off(void) {
         writel(readl(S3C_USBOTG_PHYCLK) | (0X1 << 4), S3C_USBOTG_PHYCLK);
         writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
 }
+EXPORT_SYMBOL(otg_phy_off);
 #endif
 
-#if defined (CONFIG_USB_OHCI_HCD)
+#if defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
 void usb_host_clk_en(int usb_host_clksrc) {
         switch (usb_host_clksrc) {
         case 0: /* epll clk */
@@ -238,6 +248,8 @@ void usb_host_clk_en(int usb_host_clksrc) {
         writel(readl(S5P_SCLKGATE0)|S5P_CLKGATE_SCLK0_USBHOST, S5P_SCLKGATE0);
 
 }
+
+EXPORT_SYMBOL(usb_host_clk_en);
 #endif
 
 /*--------------------------------------------------------------

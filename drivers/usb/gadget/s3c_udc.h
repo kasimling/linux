@@ -73,6 +73,8 @@
 #define DATA_STATE_NEED_ZLP     2
 #define WAIT_FOR_OUT_STATUS     3
 #define DATA_STATE_RECV         4
+#define RegReadErr		5
+#define FAIL_TO_SETUP		6
 
 /* ********************************************************************************************* */
 /* IO
