@@ -485,3 +485,10 @@ v2.6.28-rc8-s3c64xx-r0d12: Jongpill Lee
 
 v2.6.28-rc8-s3c64xx-r0d13: Ilho Lee
 	- Support HS-MMC on SMDK6410
+
+v2.6.28-rc8-s3c64xx-r0d14: Jongpill Lee
+	- bug fiex on PM Driver
+
+	Modified Files:
+		M       arch/arm/configs/smdk6410mtd_defconfig
+		M       arch/arm/plat-s3c64xx/sleep.S
