@@ -22,7 +22,6 @@
 #include <mach/hardware.h>
 #include <mach/map.h>
 
-#include <plat/regs-sys.h>
 #include <plat/regs-clock.h>
 #include <plat/cpu.h>
 #include <plat/devs.h>
@@ -42,13 +41,13 @@ static int clk_48m_ctrl(struct clk *clk, int enable)
 	/* can't rely on clock lock, this register has other usages */
 	local_irq_save(flags);
 
-	val = __raw_readl(S3C64XX_OTHERS);
+	val = __raw_readl(S3C_OTHERS);
 	if (enable)
-		val |= S3C64XX_OTHERS_USBMASK;
+		val |= S3C_OTHERS_USB_SIG_MASK;
 	else
-		val &= ~S3C64XX_OTHERS_USBMASK;
+		val &= ~S3C_OTHERS_USB_SIG_MASK;
 
-	__raw_writel(val, S3C64XX_OTHERS);
+	__raw_writel(val, S3C_OTHERS);
 	local_irq_restore(flags);
 
 	return 0;
