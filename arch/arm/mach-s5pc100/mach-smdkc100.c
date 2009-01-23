@@ -33,7 +33,6 @@
 #include <mach/map.h>
 #include <mach/regs-mem.h>
 #include <mach/gpio.h>
-#include <plat/hsmmc.h>
 
 #include <asm/irq.h>
 #include <asm/mach-types.h>
@@ -107,6 +106,7 @@ static struct platform_device *smdkc100_devices[] __initdata = {
         &s3c_device_hsmmc1,
         &s3c_device_spi0,
         &s3c_device_spi1,
+	&s3c_device_mfc,
 };
 
 
@@ -251,174 +251,6 @@ void usb_host_clk_en(int usb_host_clksrc) {
 
 EXPORT_SYMBOL(usb_host_clk_en);
 #endif
-
-/*--------------------------------------------------------------
- *  * HS-MMC GPIO Set function
- *   *--------------------------------------------------------------*/
-void hsmmc_set_gpio (uint channel, uint width)
-{
-        unsigned int gpio;
-        unsigned int end;
-
-        switch (channel) {
-
-        case 0:
-        /* Channel 0 supports 1,4 and 8-bit bus width */
-        if (width == 1 || width == 4) {
-                end = S5PC1XX_GPG0(2 + width);
-
-                /* Set all the necessary GPG0 pins to special-function 2 */
-                for (gpio = S5PC1XX_GPG0(0); gpio < end; gpio++) {
-                        s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-                        s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
-                }
-        }
-        else if (width == 8) {
-                end = S5PC1XX_GPG0(width);
-
-                /* Set all the necessary GPG0 pins to special-function 2 */
-                for (gpio = S5PC1XX_GPG0(0); gpio < end; gpio++) {
-                        s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-                        s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
-                }
-                /* Set all the necessary GPG1 pins to special-function 2 */
-                for (gpio = S5PC1XX_GPG1(0); S5PC1XX_GPG1(3) < end; gpio++) {
-                        s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-                        s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
-                }
-        }
-
-        /* GPG1 chip Detect */
-        s3c_gpio_setpull(S5PC1XX_GPG1(2), S3C_GPIO_PULL_UP);
-        s3c_gpio_cfgpin(S5PC1XX_GPG1(2), S3C_GPIO_SFN(2));
-        break;
-
-        case 1:
-        /* Channel 1 supports 1 and 4-bit bus width */
-        end = S5PC1XX_GPG2(2 + width);
-
-        /* Set all the necessary GPG2 pins to special-function 2 */
-        for (gpio = S5PC1XX_GPG2(0); gpio < end; gpio++) {
-                s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-                s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
-        }
-
-        /* GPG2 chip Detect */
-        s3c_gpio_setpull(S5PC1XX_GPG2(6), S3C_GPIO_PULL_UP);
-        s3c_gpio_cfgpin(S5PC1XX_GPG2(6), S3C_GPIO_SFN(2));
-        break;
-
-        case 2:
-        /* Channel 2 supports 1 and 4-bit bus width */
-        end = S5PC1XX_GPG3(2 + width);
-
-        /* Set all the necessary GPG3 pins to special-function 2 */
-        for (gpio = S5PC1XX_GPG3(0); gpio < end; gpio++) {
-                s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-                s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
-        }
-
-        /* GPG3 chip Detect */
-        s3c_gpio_setpull(S5PC1XX_GPG3(6), S3C_GPIO_PULL_UP);
-        s3c_gpio_cfgpin(S5PC1XX_GPG3(6), S3C_GPIO_SFN(2));
-        break;
-
-        default:
-                break;
-        }
-}
-
-/* For host controller's capabilities */
-#define HOST_CAPS (MMC_CAP_4_BIT_DATA | \
-                        MMC_CAP_MMC_HIGHSPEED | MMC_CAP_SD_HIGHSPEED)
-
-
-struct s3c_hsmmc_cfg s3c_hsmmc0_platform = {
-        .hwport = 0,
-	.enabled = 1,
-        .host_caps = HOST_CAPS,
-        .bus_width = 4,
-        .highspeed = 0,
-
-        /* ctrl for mmc */
-        .fd_ctrl[MMC_TYPE_MMC] = {
-                .ctrl2 = 0xC0004100,                    /* ctrl2 for mmc */
-                .ctrl3[SPEED_NORMAL] = 0x80808080,      /* ctrl3 for low speed */
-                .ctrl3[SPEED_HIGH]   = 0x00008080,      /* ctrl3 for high speed */
-                .ctrl4 = 0x3,
-        },
-
-        /* ctrl for sd */
-        .fd_ctrl[MMC_TYPE_SD] = {
-                .ctrl2 = 0xC0004100,                    /* ctrl2 for sd */
-                .ctrl3[SPEED_NORMAL] = 0x80808080,      /* ctrl3 for low speed */
-                .ctrl3[SPEED_HIGH]   = 0x00008080,      /* ctrl3 for high speed */
-                .ctrl4 = 0x3,
-        },
-
-        .clocks[0] = {
-                .name = "hsmmc",
-                .src = 0x2,
-        },
-};
-
-struct s3c_hsmmc_cfg s3c_hsmmc1_platform = {
-        .hwport = 1,
-	.enabled = 1,
-        .host_caps = HOST_CAPS,
-        .bus_width = 4,
-        .highspeed = 0,
-
-        /* ctrl for mmc */
-        .fd_ctrl[MMC_TYPE_MMC] = {
-                .ctrl2 = 0xC0004100,                    /* ctrl2 for mmc */
-                .ctrl3[SPEED_NORMAL] = 0x80808080,      /* ctrl3 for low speed */
-                .ctrl3[SPEED_HIGH]   = 0x00008080,      /* ctrl3 for high speed */
-                .ctrl4 = 0x3,
-        },
-
-        /* ctrl for sd */
-        .fd_ctrl[MMC_TYPE_SD] = {
-                .ctrl2 = 0xC0004100,                    /* ctrl2 for sd */
-                .ctrl3[SPEED_NORMAL] = 0x80808080,      /* ctrl3 for low speed */
-                .ctrl3[SPEED_HIGH]   = 0x00008080,      /* ctrl3 for high speed */
-                .ctrl4 = 0x3,
-        },
-
-        .clocks[0] = {
-                .name = "hsmmc",
-                .src = 0x2,
-        },
-};
-
-struct s3c_hsmmc_cfg s3c_hsmmc2_platform = {
-        .hwport = 2,
-	.enabled = 0,
-        .host_caps = HOST_CAPS,
-        .bus_width = 4,
-        .highspeed = 0,
-
-        /* ctrl for mmc */
-        .fd_ctrl[MMC_TYPE_MMC] = {
-                .ctrl2 = 0xC0004100,                    /* ctrl2 for mmc */
-                .ctrl3[SPEED_NORMAL] = 0x80808080,      /* ctrl3 for low speed */
-                .ctrl3[SPEED_HIGH]   = 0x00008080,      /* ctrl3 for high speed */
-                .ctrl4 = 0x3,
-        },
-
-        /* ctrl for sd */
-        .fd_ctrl[MMC_TYPE_SD] = {
-                .ctrl2 = 0xC0004100,                    /* ctrl2 for sd */
-                .ctrl3[SPEED_NORMAL] = 0x80808080,      /* ctrl3 for low speed */
-                .ctrl3[SPEED_HIGH]   = 0x00008080,      /* ctrl3 for high speed */
-                .ctrl4 = 0x3,
-        },
-
-        .clocks[0] = {
-                .name = "hsmmc",
-                .src = 0x2,
-        },
-};
 
 #if defined(CONFIG_RTC_DRV_S3C)
 /* RTC common Function for samsung APs*/

@@ -1169,7 +1169,7 @@ int s3c2410_dma_devconfig(int channel,
 
 		hwcfg = S3C_DMACONTROL_DBSIZE(16)|S3C_DMACONTROL_SBSIZE(16);
 		chan->control_flags = S3C_DMACONTROL_DP_NON_SECURE|S3C_DMACONTROL_DEST_INC|
-				      S3C_DMACONTROL_SP_NON_SECURE|S3C_DMACONTROL_SRC_INC|
+				      S3C_DMACONTROL_SP_NON_SECURE|S3C_DMACONTROL_SRC_FIXED|
 				      hwcfg;
 		//chan->control_flags = hwcfg;
 		return 0;

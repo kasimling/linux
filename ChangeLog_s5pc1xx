@@ -495,3 +495,17 @@ v2.6.28-rc8-s5pc1xx-r1d6: Jongpill Lee
 	Modified Files:
 		M arch/arm/plat-s5pc1xx/pm.c
 
+v2.6.28-rc8-s5pc1xx-r1d7: PyoungJae Jung/Jiun Yu
+	- Support MFC driver
+	
+	Modified Files:
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+		M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s3c/include/plat/devs.h
+		M	arch/arm/plat-s5pc1xx/devs.c
+	 
+v2.6.28-rc8-s5pc1xx-r2: Kyoungil Kim
+	- Official Release(09.01.23)
+
+v2.6.28-rc8-s5pc1xx-r2d0: Kyoungil Kim
+
