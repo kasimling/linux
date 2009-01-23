@@ -509,7 +509,7 @@ v2.6.28-rc8-s5pc1xx-r2: Kyoungil Kim
 
 v2.6.28-rc8-s5pc1xx-r2d0: Kyoungil Kim
 
-v2.6.28-rc8-s5pc1xx-r2d1: Byungjae Kim
+v2.6.28-rc8-s5pc1xx-r2d1: Byungjae Lee
 	- Support CDC Ethernet and RNDIS
 	- for SMDKc100 UBS OTG Deive role on DMA mode
 	
