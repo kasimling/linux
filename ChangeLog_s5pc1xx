@@ -509,3 +509,20 @@ v2.6.28-rc8-s5pc1xx-r2: Kyoungil Kim
 
 v2.6.28-rc8-s5pc1xx-r2d0: Kyoungil Kim
 
+v2.6.28-rc8-s5pc1xx-r2d1: Byungjae Kim
+	- Support CDC Ethernet and RNDIS
+	- for SMDK6410 UBS OTG Deive role on DMA mode
+	
+	Modified Files:
+		M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s3c/include/plat/regs-otg.h
+		M	drivers/usb/gadget/Kconfig
+		M	drivers/usb/gadget/epautoconf.c
+		M	drivers/usb/gadget/s3c_udc.h
+		M	drivers/usb/gadget/s3c_udc_otg.c
+		M	drivers/usb/gadget/u_ether.c
+
+	Added Files:
+		A	drivers/usb/gadget/s3c_udc_otg_xfer_dma.c
+		A	drivers/usb/gadget/s3c_udc_otg_xfer_slave.c
+
