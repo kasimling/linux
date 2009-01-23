@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.28-rc8
-# Wed Jan 21 15:31:31 2009
+# Fri Jan 23 15:39:11 2009
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -279,9 +279,10 @@ CONFIG_CMDLINE="root=/dev/mtdblock2 rootfstype=cramfs init=/linuxrc console=ttyS
 #
 # At least one emulation must be selected
 #
-# CONFIG_FPE_NWFPE is not set
+CONFIG_FPE_NWFPE=y
+# CONFIG_FPE_NWFPE_XP is not set
 # CONFIG_FPE_FASTFPE is not set
-# CONFIG_VFP is not set
+CONFIG_VFP=y
 
 #
 # Userspace binary formats
