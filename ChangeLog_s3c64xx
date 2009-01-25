@@ -465,4 +465,30 @@ v2.6.28-rc8-s3c64xx-r0d11: Kyoungil Kim
 		A       arch/arm/plat-s3c64xx/include/plat/regs-keypad.h
 		A       drivers/input/keyboard/s3c-keypad.c
 		A       drivers/input/keyboard/s3c-keypad.h
-		
+	
+v2.6.28-rc8-s3c64xx-r0d12: Jongpill Lee
+	- Support HS-SPI on SMDK6410
+
+	Added Files:
+		A       arch/arm/plat-s3c64xx/include/plat/regs-spi.h
+		A       drivers/spi/hspi-s3c64xx.c
+		A       drivers/spi/hspi-s3c64xx.h
+		A       drivers/spi/spi-dev.c
+		A       drivers/spi/spi-dev.h
+	
+	Modified Files:
+		M       arch/arm/mach-s3c6400/include/mach/map.h
+		M       arch/arm/mach-s3c6410/mach-smdk6410.c
+		M       drivers/rtc/rtc-s3c.c
+		M       drivers/spi/Kconfig
+		M       drivers/spi/Makefile
+
+v2.6.28-rc8-s3c64xx-r0d13: Ilho Lee
+	- Support HS-MMC on SMDK6410
+
+v2.6.28-rc8-s3c64xx-r0d14: Jongpill Lee
+	- bug fiex on PM Driver
+
+	Modified Files:
+		M       arch/arm/configs/smdk6410mtd_defconfig
+		M       arch/arm/plat-s3c64xx/sleep.S

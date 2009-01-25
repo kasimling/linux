@@ -1,165 +1,144 @@
-/* linux/arch/arm/plat-s3c64xx/sleep.S
+/* linux/0arch/arm/plat-s3c64xx/sleep.S
  *
- * Copyright (c) 2004 Simtec Electronics
+ * Copyright 2008 Openmoko, Inc.
+ * Copyright 2008 Simtec Electronics
  *	Ben Dooks <ben@simtec.co.uk>
+ *	http://armlinux.simtec.co.uk/
  *
- * S3C6410 Power Manager (Suspend-To-RAM) support
- *
- * Based on PXA/SA1100 sleep code by:
- *	Nicolas Pitre, (c) 2002 Monta Vista Software Inc
- *	Cliff Brake, (c) 2001
+ * S3C64XX CPU sleep code
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
 */
 
 #include <linux/linkage.h>
 #include <asm/assembler.h>
-#include <mach/hardware.h>
 #include <mach/map.h>
 
-#include <plat/regs-gpio.h>
-#include <plat/regs-clock.h>
-#include <mach/regs-mem.h>
-#include <plat/regs-serial.h>
+#undef S3C64XX_VA_GPIO
+#define S3C64XX_VA_GPIO (0x0)
 
-/* CONFIG_DEBUG_RESUME is dangerous if your bootloader does not
- * reset the UART configuration, only enable if you really need this!
-*/
-//#define CONFIG_DEBUG_RESUME
+#include <plat/regs-gpio.h>
+#include <plat/gpio-bank-n.h>
+
+#define LL_UART (S3C_PA_UART + (0x400 * CONFIG_S3C_LOWLEVEL_UART_PORT))
 
 	.text
 
-	/* s3c6410_cpu_save
+	/* s3c_cpu_save
 	 *
-	 * save enough of the CPU state to allow us to re-start
-	 * pm.c code. as we store items like the sp/lr, we will
-	 * end up returning from this function when the cpu resumes
-	 * so the return value is set to mark this.
-	 *
-	 * This arangement means we avoid having to flush the cache
-	 * from this code.
+	 * Save enough processor state to allow the restart of the pm.c
+	 * code after resume.
 	 *
 	 * entry:
-	 *	r0 = pointer to save block
-	 *
+	 *	r0 = pointer to the save block
 	 * exit:
-	 *	r0 = 0 => we stored everything
-	 *	     1 => resumed from sleep
+	 *	r0 = exit code: 1 => stored data
+	 *			0 => resumed from sleep
 	*/
 
 ENTRY(s3c6410_cpu_save)
 	stmfd	sp!, { r4 - r12, lr }
 
-	@@ store co-processor registers
-
-	mrc	p15, 0, r4, c13, c0, 0	@ PID
+	mrc	p15, 0, r4, c13, c0, 0	@ FCSE/PID
 	mrc	p15, 0, r5, c3, c0, 0	@ Domain ID
-	mrc	p15, 0, r6, c2, c0, 0	@ translation table base address
-	mrc	p15, 0, r7, c1, c0, 0	@ control register
+	mrc	p15, 0, r6, c2, c0, 0	@ Translation Table BASE0
+	mrc	p15, 0, r7, c2, c0, 1	@ Translation Table BASE1
+	mrc	p15, 0, r8, c2, c0, 2	@ Translation Table Control
+	mrc	p15, 0, r9, c1, c0, 0	@ Control register
+	mrc	p15, 0, r10, c1, c0, 1	@ Auxiliary control register
+	mrc	p15, 0, r11, c1, c0, 2	@ Co-processor access controls
 
-	stmia	r0, { r4 - r13 }
-
+	stmia	r0, { r4 - r13 }	@ Save CP registers and SP
 	mov	r0, #0
-	ldmfd	sp, { r4 - r12, pc }
+	ldmfd	sp, { r4 - r12, pc }	@ return, not disturbing SP
 
-	@@ return to the caller, after having the MMU
-	@@ turned on, this restores the last bits from the
-	@@ stack
+	@@ return to the caller, after the MMU is turned on.
+	@@ restore the last bits of the stack and return.
 resume_with_mmu:
 	mov	r0, #1
-	ldmfd	sp!, { r4 - r12, pc }
-
-	.ltorg
-
-	@@ the next bits sit in the .data segment, even though they
-	@@ happen to be code... the s3c6410_sleep_save_phys needs to be
-	@@ accessed by the resume code before it can restore the MMU.
-	@@ This means that the variable has to be close enough for the
-	@@ code to read it... since the .text segment needs to be RO,
-	@@ the data segment can be the only place to put this code.
+	ldmfd	sp!, { r4 - r12, pc }	@ return, from sp from s3c_cpu_save
 
 	.data
+
+	/* the next bit is code, but it requires easy access to the
+	 * s3c_sleep_save_phys data before the MMU is switched on, so
+	 * we store the code that needs this variable in the .data where
+	 * the value can be written to (the .text segment is RO).
+	*/
 
 	.global	s3c6410_sleep_save_phys
 s3c6410_sleep_save_phys:
 	.word	0
 
-
-	/* sleep magic, to allow the bootloader to check for an valid
-	 * image to resume to. Must be the first word before the
-	 * s3c6410_cpu_resume entry.
-	*/
+	/* Sleep magic, the word before the resume entry point so that the
+	 * bootloader can check for a resumeable image. */
 
 	.word	0x2bedf00d
 
-	/* s3c6410_cpu_resume
+	/* s3c_cpu_reusme
 	 *
-	 * resume code entry for bootloader to call
-	 *
-	 * we must put this code here in the data segment as we have no
-	 * other way of restoring the stack pointer after sleep, and we
-	 * must not write to the code segment (code is read-only)
+	 * This is the entry point, stored by whatever method the bootloader
+	 * requires to get the kernel runnign again. This code expects to be
+	 * entered with no caches live and the MMU disabled. It will then
+	 * restore the MMU and other basic CP registers saved and restart
+	 * the kernel C code to finish the resume code.
 	*/
 
 ENTRY(s3c6410_cpu_resume)
-	mov	r0, #PSR_I_BIT | PSR_F_BIT | SVC_MODE
-	msr	cpsr_c, r0
+	msr	cpsr_c, #PSR_I_BIT | PSR_F_BIT | SVC_MODE
+	ldr	r2, =LL_UART		/* for debug */
 
-	@@ load UART to allow us to print the two characters for
-	@@ resume debug
+#ifdef CONFIG_S3C_PM_DEBUG_LED_SMDK
+	/* Initialise the GPIO state if we are debugging via the SMDK LEDs,
+	 * as the uboot version supplied resets these to inputs during the
+	 * resume checks.
+	*/
 
-	mov	r2, #S3C_PA_UART & 0xff000000
-	orr	r2, r2, #S3C_PA_UART & 0xff000
+	ldr	r3, =S3C64XX_PA_GPIO
+	ldr	r0, [ r3, #S3C64XX_GPNCON ]
+	bic	r0, r0, #(S3C64XX_GPN_CONMASK(12) | S3C64XX_GPN_CONMASK(13) | \
+			  S3C64XX_GPN_CONMASK(14) | S3C64XX_GPN_CONMASK(15))
+	orr	r0, r0, #(S3C64XX_GPN_OUTPUT(12) | S3C64XX_GPN_OUTPUT(13) | \
+			  S3C64XX_GPN_OUTPUT(14) | S3C64XX_GPN_OUTPUT(15))
+	str	r0, [ r3, #S3C64XX_GPNCON ]
 
-#if 0
-	/* SMDK6440 LED set */
-	mov	r14, #S3C64XX_PA_GPIO
-	ldr	r12, [ r14, #0x54 ]
-	bic	r12, r12, #3<<4
-	orr	r12, r12, #1<<7
-	str	r12, [ r14, #0x54 ]
+	ldr	r0, [ r3, #S3C64XX_GPNDAT ]
+	bic	r0, r0, #0xf << 12			@ GPN12..15
+	orr	r0, r0, #1 << 15			@ GPN15
+	str	r0, [ r3, #S3C64XX_GPNDAT ]
 #endif
 
-#ifdef CONFIG_DEBUG_RESUME
-	mov	r3, #'L'
-	strb	r3, [ r2, #S3C6410_UTXH ]
-1001:
-	ldrb	r14, [ r3, #S3C6410_UTRSTAT ]
-	tst	r14, #S3C6410_UTRSTAT_TXE
-	beq	1001b
-#endif /* CONFIG_DEBUG_RESUME */
+	/* __v6_setup from arch/arm/mm/proc-v6.S, ensure that the caches
+	 * are thoroughly cleaned just in case the bootloader didn't do it
+	 * for us. */
+	mov	r0, #0
+	mcr	p15, 0, r0, c7, c14, 0		@ clean+invalidate D cache
+	mcr	p15, 0, r0, c7, c5, 0		@ invalidate I cache
+	mcr	p15, 0, r0, c7, c15, 0		@ clean+invalidate cache
+	mcr	p15, 0, r0, c7, c10, 4		@ drain write buffer
+	@@mcr	p15, 0, r0, c8, c7, 0		@ invalidate I + D TLBs
+	@@mcr	p15, 0, r0, c7, c7, 0		@ Invalidate I + D caches
 
-	mov	r1, #0
-	mcr	p15, 0, r1, c8, c7, 0		@@ invalidate I & D TLBs
-	mcr	p15, 0, r1, c7, c7, 0		@@ invalidate I & D caches
-
-	ldr	r0, s3c6410_sleep_save_phys	@ address of restore block
+	ldr	r0, s3c6410_sleep_save_phys
 	ldmia	r0, { r4 - r13 }
 
-	mcr	p15, 0, r4, c13, c0, 0		@ PID
-	mcr	p15, 0, r5, c3, c0, 0		@ Domain ID
-	mcr	p15, 0, r6, c2, c0, 0		@ translation table base
+	mcr	p15, 0, r4, c13, c0, 0	@ FCSE/PID
+	mcr	p15, 0, r5, c3, c0, 0	@ Domain ID
+	mcr	p15, 0, r6, c2, c0, 0	@ Translation Table BASE0
+	mcr	p15, 0, r7, c2, c0, 1	@ Translation Table BASE1
+	mcr	p15, 0, r8, c2, c0, 2	@ Translation Table Control
+	mcr	p15, 0, r10, c1, c0, 1	@ Auxiliary control register
 
-#ifdef CONFIG_DEBUG_RESUME
-	mov	r3, #'R'
-	strb	r3, [ r2, #S3C6410_UTXH ]
-#endif
+	mov	r0, #0			@ restore copro access controls
+	mcr	p15, 0, r11, c1, c0, 2	@ Co-processor access controls
+	mcr 	p15, 0, r0, c7, c5, 4
 
 	ldr	r2, =resume_with_mmu
-	mcr	p15, 0, r7, c1, c0, 0		@ turn on MMU, etc
-	nop					@ second-to-last before mmu
-	mov	pc, r2				@ go back to virtual address
+	mcr	p15, 0, r9, c1, c0, 0		/* turn mmu back on */
+	nop
+	mov	pc, r2				/* jump back */
 
-	.ltorg
+	.end
+

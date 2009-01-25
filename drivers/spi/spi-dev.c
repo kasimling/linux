@@ -315,12 +315,12 @@ static struct file_operations spidev_fops = {
 static int spi_dev_init(void)
 {
 	int res;
-        
+
 	printk(KERN_INFO "spi /dev entries driver\n");
 
 #if(SPI_CHANNEL==0)
 	res = register_chrdev(SPI_MAJOR, "spi0", &spidev_fops);
-#elif(SPI_CHANNEL==1) 
+#elif(SPI_CHANNEL==1)
 	res = register_chrdev(SPI_MAJOR, "spi1", &spidev_fops);
 #else
 	res = register_chrdev(SPI_MAJOR, "spi2", &spidev_fops);
