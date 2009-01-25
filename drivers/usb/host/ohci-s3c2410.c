@@ -27,10 +27,7 @@
 
 #define valid_port(idx) ((idx) == 1 || (idx) == 2)
 
-/* clock device associated with the hcd */
-#define S3C_USB_CLKSRC_EPLL     0
-
-extern void usb_host_clk_en(int usb_host_clksrc);
+extern void usb_host_clk_en(void);
 
 static struct clk *clk;
 static struct clk *usb_clk;
@@ -52,7 +49,7 @@ static void s3c2410_start_hc(struct platform_device *dev, struct usb_hcd *hcd)
 
 	dev_dbg(&dev->dev, "s3c2410_start_hc:\n");
 
-#if !defined(CONFIG_PLAT_S5PC1XX)
+#if defined(CONFIG_ARCH_2410)
 	clk_enable(usb_clk);
 	mdelay(2);			/* let the bus clock stabilise */
 #endif
@@ -85,7 +82,7 @@ static void s3c2410_stop_hc(struct platform_device *dev)
 	}
 
 	clk_disable(clk);
-#if !defined(CONFIG_PLAT_S5PC1XX)
+#if defined(CONFIG_ARCH_2410)
 	clk_disable(usb_clk);
 #endif
 }
@@ -354,8 +351,8 @@ static int usb_hcd_s3c2410_probe (const struct hc_driver *driver,
 	struct usb_hcd *hcd = NULL;
 	int retval;
 
-#if defined(CONFIG_PLAT_S5PC1XX)
-        usb_host_clk_en(S3C_USB_CLKSRC_EPLL);
+#if !defined(CONFIG_ARCH_2410)
+        usb_host_clk_en();
 #endif
 
 	s3c2410_usb_set_power(dev->dev.platform_data, 1, 1);
@@ -381,7 +378,7 @@ static int usb_hcd_s3c2410_probe (const struct hc_driver *driver,
 		goto err_mem;
 	}
 
-#if !defined(CONFIG_PLAT_S5PC1XX)
+#if defined(CONFIG_ARCH_2410)
 	usb_clk = clk_get(&dev->dev, "usb-bus-host");
 	if (IS_ERR(usb_clk)) {
 		dev_err(&dev->dev, "cannot get usb-host clock\n");
@@ -410,9 +407,10 @@ static int usb_hcd_s3c2410_probe (const struct hc_driver *driver,
  err_ioremap:
 	s3c2410_stop_hc(dev);
 	iounmap(hcd->regs);
+
+#if defined(CONFIG_ARCH_2410)
 	clk_put(usb_clk);
 
-#if !defined(CONFIG_PLAT_S5PC1XX)
  err_clk:
 	clk_put(clk);
 #endif

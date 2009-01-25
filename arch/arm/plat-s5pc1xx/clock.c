@@ -22,7 +22,6 @@
 #include <mach/hardware.h>
 #include <mach/map.h>
 
-#include <plat/regs-sys.h>
 #include <plat/regs-clock.h>
 #include <plat/cpu.h>
 #include <plat/devs.h>
@@ -315,12 +314,6 @@ static struct clk init_clocks[] = {
 		.parent		= &clk_h,
 		.enable		= s5pc1xx_clk_d10_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D10_USBHOST,
-	}, {
-		.name		= "otg",
-		.id		= -1,
-		.parent		= &clk_h,
-		.enable		= s5pc1xx_clk_d10_ctrl,
-		.ctrlbit	= S5P_CLKGATE_D10_USBOTG,
 	}, {
 		.name		= "modem",
 		.id		= -1,

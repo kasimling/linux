@@ -24,6 +24,7 @@
 #include <linux/delay.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
+#include <linux/clk.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -54,9 +55,12 @@
 #include <plat/gpio-bank-k0.h>
 #if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
 #include <plat/regs-otg.h>
-#include <plat/regs-sys.h>
 #include <plat/regs-clock.h>
 #include <plat/pll.h>
+
+/* S3C_USB_CLKSRC 0: EPLL 1: CLK_48M */
+#define S3C_USB_CLKSRC	1
+#define OTGH_PHY_CLK_VALUE      (0x22)  /* UTMI Interface, otg_phy input clk 12Mhz Oscillator */
 #endif
 
 #if defined(CONFIG_PM)
@@ -192,12 +196,12 @@ MACHINE_START(SMDKC100, "SMDKC100")
 	.timer		= &s5pc1xx_timer,
 MACHINE_END
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD)
+#if defined(CONFIG_USB_GADGET_S3C_OTGD) | defined(CONFIG_USB_OHCI_HCD) 
 /* Initializes OTG Phy. */
-void otg_phy_init(u32 otg_phy_clk) {
-        writel(readl(S3C_OTHERS)|S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
+void otg_phy_init(void) {
+        writel(readl(S5P_OTHERS)|S5P_OTHERS_USB_SIG_MASK, S5P_OTHERS);
         writel(0x0, S3C_USBOTG_PHYPWR);         /* Power up */
-        writel(otg_phy_clk, S3C_USBOTG_PHYCLK);
+        writel(OTGH_PHY_CLK_VALUE, S3C_USBOTG_PHYCLK);
         writel(0x7, S3C_USBOTG_RSTCON);
 
         udelay(50);
@@ -208,17 +212,19 @@ void otg_phy_init(u32 otg_phy_clk) {
 /* OTG PHY Power Off */
 void otg_phy_off(void) {
         writel(readl(S3C_USBOTG_PHYCLK) | (0X1 << 4), S3C_USBOTG_PHYCLK);
-        writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
+        writel(readl(S5P_OTHERS)&~S5P_OTHERS_USB_SIG_MASK, S5P_OTHERS);
 }
 #endif
 
 #if defined (CONFIG_USB_OHCI_HCD)
-void usb_host_clk_en(int usb_host_clksrc) {
-        switch (usb_host_clksrc) {
+void usb_host_clk_en(void) {
+	struct clk *otg_clk;
+
+        switch (S3C_USB_CLKSRC) {
         case 0: /* epll clk */
                 /* Setting the epll clk to 48 MHz, P=3, M=96, S=3 */
-                writel(readl(S5P_EPLL_CON) & ~(S5P_EPLL_MASK) | (S5P_EPLL_EN |
-		S5P_EPLLVAL(96,3,3)), S5P_EPLL_CON);
+                writel((readl(S5P_EPLL_CON) & ~(S5P_EPLL_MASK)) | (S5P_EPLL_EN \
+						| S5P_EPLLVAL(96,3,3)), S5P_EPLL_CON);
                 writel((readl(S5P_CLK_SRC0) | S5P_CLKSRC0_EPLL_MASK), S5P_CLK_SRC0);
                 writel((readl(S5P_CLK_SRC1)& ~S5P_CLKSRC1_UHOST_MASK), S5P_CLK_SRC1);
 
@@ -226,6 +232,16 @@ void usb_host_clk_en(int usb_host_clksrc) {
                 writel((readl(S5P_CLK_DIV2)& ~S5P_CLKDIV2_UHOST_MASK), S5P_CLK_DIV2);
                 break;
 
+	case 1: /* oscillator 12M clk */
+		otg_clk = clk_get(NULL, "otg");
+		clk_enable(otg_clk);
+		otg_phy_init();
+		writel((readl(S5P_CLK_SRC1) | S5P_CLKSRC1_CLK48M_MASK) \
+						| S5P_CLKSRC1_UHOST_MASK, S5P_CLK_SRC1);
+
+		//USB host colock divider ratio is 1
+		writel(readl(S5P_CLK_DIV2)& ~S5P_CLKDIV2_UHOST_MASK, S5P_CLK_DIV2);
+		break;
 	/* Add other clock sources here */
 
         default:

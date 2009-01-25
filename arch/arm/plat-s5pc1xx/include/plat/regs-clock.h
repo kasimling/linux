@@ -56,6 +56,8 @@
 #define S5P_SCLKGATE0		S5P_CLKREG(0x560)
 #define S5P_SCLKGATE1		S5P_CLKREG(0x564)
 
+#define S5P_OTHERS              S5P_CLKREG(0x8200)
+
 #define S5P_EPLL_EN     (1<<31)
 #define S5P_EPLL_MASK   0xffffffff 
 #define S5P_EPLLVAL(_m,_p,_s)   ((_m) << 16 | ((_p) << 8) | ((_s)))
@@ -327,5 +329,8 @@
 #define	S5P_CLKGATE_SCLK1_AUDIO2	(1<<10)
 #define	S5P_CLKGATE_SCLK1_SPDIF		(1<<11)
 #define	S5P_CLKGATE_SCLK1_CAM		(1<<12)
+
+/*OTHERS Resgister */
+#define S5P_OTHERS_USB_SIG_MASK (1 << 16)
 
 #endif /* _PLAT_REGS_CLOCK_H */
