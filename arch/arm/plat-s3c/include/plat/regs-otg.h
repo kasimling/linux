@@ -102,6 +102,11 @@
 #define S3C_UDC_OTG_DIEPTSIZ0		S3C_USBOTGREG(0x910)		// Device IN Endpoint 0 Transfer Size
 #define S3C_UDC_OTG_DIEPDMA0		S3C_USBOTGREG(0x914)		// Device IN Endpoint 0 DMA Address
 
+#define S3C_UDC_OTG_DIEPCTL1		S3C_USBOTGREG(0x920)		// Device IN Endpoint 2 Control
+#define S3C_UDC_OTG_DIEPINT1		S3C_USBOTGREG(0x928)		// Device IN Endpoint 2 Interrupt
+#define S3C_UDC_OTG_DIEPTSIZ1		S3C_USBOTGREG(0x930)		// Device IN Endpoint 2 Transfer Size
+#define S3C_UDC_OTG_DIEPDMA1		S3C_USBOTGREG(0x934)		// Device IN Endpoint 2 DMA Address
+
 #define S3C_UDC_OTG_DIEPCTL2		S3C_USBOTGREG(0x940)		// Device IN Endpoint 2 Control
 #define S3C_UDC_OTG_DIEPINT2		S3C_USBOTGREG(0x948)		// Device IN Endpoint 2 Interrupt
 #define S3C_UDC_OTG_DIEPTSIZ2		S3C_USBOTGREG(0x950)		// Device IN Endpoint 2 Transfer Size
@@ -111,6 +116,21 @@
 #define S3C_UDC_OTG_DIEPINT3		S3C_USBOTGREG(0x968)		// Device IN Endpoint 3 Interrupt
 #define S3C_UDC_OTG_DIEPTSIZ3		S3C_USBOTGREG(0x970)		// Device IN Endpoint 3 Transfer Size
 #define S3C_UDC_OTG_DIEPDMA3		S3C_USBOTGREG(0x974)		// Device IN Endpoint 3 DMA Address
+
+#define S3C_UDC_OTG_DIEPCTL4		S3C_USBOTGREG(0x980)		// Device IN Endpoint 4 Control
+#define S3C_UDC_OTG_DIEPINT4		S3C_USBOTGREG(0x988)		// Device IN Endpoint 4 Interrupt
+#define S3C_UDC_OTG_DIEPTSIZ4		S3C_USBOTGREG(0x990)		// Device IN Endpoint 4 Transfer Size
+#define S3C_UDC_OTG_DIEPDMA4		S3C_USBOTGREG(0x994)		// Device IN Endpoint 4 DMA Address
+
+#define S3C_UDC_OTG_DIEPCTL5		S3C_USBOTGREG(0xa00)		// Device IN Endpoint 5 Control
+#define S3C_UDC_OTG_DIEPINT5		S3C_USBOTGREG(0xa08)		// Device IN Endpoint 5 Interrupt
+#define S3C_UDC_OTG_DIEPTSIZ5		S3C_USBOTGREG(0xa10)		// Device IN Endpoint 5 Transfer Size
+#define S3C_UDC_OTG_DIEPDMA5		S3C_USBOTGREG(0xa14)		// Device IN Endpoint 5 DMA Address
+
+#define S3C_UDC_OTG_DIEPCTL6		S3C_USBOTGREG(0xa20)		// Device IN Endpoint 6 Control
+#define S3C_UDC_OTG_DIEPINT6		S3C_USBOTGREG(0xa28)		// Device IN Endpoint 6 Interrupt
+#define S3C_UDC_OTG_DIEPTSIZ6		S3C_USBOTGREG(0xa30)		// Device IN Endpoint 6 Transfer Size
+#define S3C_UDC_OTG_DIEPDMA6		S3C_USBOTGREG(0xa34)		// Device IN Endpoint 6 DMA Address
 
 //------------------------------------------------
 // Device Logical OUT Endpoint-Specific Registers
@@ -123,6 +143,21 @@
 #define S3C_UDC_OTG_DOEPINT1		S3C_USBOTGREG(0xB28)		// Device OUT Endpoint 1 Interrupt
 #define S3C_UDC_OTG_DOEPTSIZ1		S3C_USBOTGREG(0xB30)		// Device OUT Endpoint 1 Transfer Size
 #define S3C_UDC_OTG_DOEPDMA1		S3C_USBOTGREG(0xB34)		// Device OUT Endpoint 1 DMA Address
+
+#define S3C_UDC_OTG_DOEPCTL2		S3C_USBOTGREG(0xB40)		// Device OUT Endpoint 2 Control
+#define S3C_UDC_OTG_DOEPINT2		S3C_USBOTGREG(0xB48)		// Device OUT Endpoint 2 Interrupt
+#define S3C_UDC_OTG_DOEPTSIZ2		S3C_USBOTGREG(0xB50)		// Device OUT Endpoint 2 Transfer Size
+#define S3C_UDC_OTG_DOEPDMA2		S3C_USBOTGREG(0xB54)		// Device OUT Endpoint 2 DMA Address
+
+#define S3C_UDC_OTG_DOEPCTL3		S3C_USBOTGREG(0xB60)		// Device OUT Endpoint 3 Control
+#define S3C_UDC_OTG_DOEPINT3		S3C_USBOTGREG(0xB68)		// Device OUT Endpoint 3 Interrupt
+#define S3C_UDC_OTG_DOEPTSIZ3		S3C_USBOTGREG(0xB70)		// Device OUT Endpoint 3 Transfer Size
+#define S3C_UDC_OTG_DOEPDMA3		S3C_USBOTGREG(0xB74)		// Device OUT Endpoint 3 DMA Address
+
+#define S3C_UDC_OTG_DOEPCTL4		S3C_USBOTGREG(0xB80)		// Device OUT Endpoint 4 Control
+#define S3C_UDC_OTG_DOEPINT4		S3C_USBOTGREG(0xB88)		// Device OUT Endpoint 4 Interrupt
+#define S3C_UDC_OTG_DOEPTSIZ4		S3C_USBOTGREG(0xB90)		// Device OUT Endpoint 4 Transfer Size
+#define S3C_UDC_OTG_DOEPDMA4		S3C_USBOTGREG(0xB94)		// Device OUT Endpoint 4 DMA Address
 
 //------------------------------------------------
 // Endpoint FIFO address
@@ -172,11 +207,13 @@
 #define INT_RESET				(0x1<<12)
 #define INT_SUSPEND				(0x1<<11)
 #define INT_EARLY_SUSPEND			(0x1<<10)
-#define INT_TX_FIFO_EMPTY			(0x1<<5)
+#define INT_NP_TX_FIFO_EMPTY			(0x1<<5)
 #define INT_RX_FIFO_NOT_EMPTY			(0x1<<4)
 #define INT_SOF					(0x1<<3)
 #define INT_DEV_MODE				(0x0<<0)
 #define INT_HOST_MODE				(0x1<<1)
+#define	INT_GOUTNakEff		(0x01<<7)
+#define	INT_GINNakEff		(0x01<<6)
 
 #define FULL_SPEED_CONTROL_PKT_SIZE		8
 #define FULL_SPEED_BULK_PKT_SIZE		64
@@ -188,6 +225,14 @@
 #define NPTX_FIFO_START_ADDR			RX_FIFO_SIZE
 #define NPTX_FIFO_SIZE				2048
 #define PTX_FIFO_SIZE				2048
+
+#define DEPCTL_TXFNUM_0			(0x0<<22)
+#define DEPCTL_TXFNUM_1			(0x1<<22)
+#define DEPCTL_TXFNUM_2			(0x2<<22)
+#define DEPCTL_TXFNUM_3			(0x3<<22)
+#define DEPCTL_TXFNUM_4			(0x4<<22)
+
+
 // Enumeration speed
 #define USB_HIGH_30_60MHZ			(0x0<<1)
 #define USB_FULL_30_60MHZ			(0x1<<1)
@@ -199,6 +244,7 @@
 #define OUT_TRANSFER_COMPLELTED			(0x3<<17)
 #define SETUP_TRANSACTION_COMPLETED		(0x4<<17)
 #define SETUP_PKT_RECEIVED			(0x6<<17)
+#define GLOBAL_OUT_NAK				(0x1<<17)
 
 
 // S3C_UDC_OTG_DCTL device control register
@@ -229,6 +275,10 @@
 #define DEPCTL0_MPS_32				(0x1<<0)
 #define DEPCTL0_MPS_16				(0x2<<0)
 #define DEPCTL0_MPS_8				(0x3<<0)
+#define DEPCTL_MPS_BULK_512			(512<<0)
+#define DEPCTL_MPS_INT_MPS_16		(16<<0)
+
+#define DIEPCTL0_NEXT_EP_BIT	(11)
 
 // S3C_UDC_OTG_DIEPCTLn/DOEPCTLn device control IN/OUT endpoint n control register
 
@@ -242,5 +292,16 @@
 #define AHB_ERROR				(0x1<<2)
 #define EPDISBLD				(0x1<<1)
 #define TRANSFER_DONE				(0x1<<0)
+
+//DIEPTSIZ0 / DOEPTSIZ0
+
+// DEPTSIZ common bit
+#define DEPTSIZ_PKT_CNT_BIT 	(19)
+#define DEPTSIZ_XFER_SIZE_BIT	(0)
+
+#define	DEPTSIZ_SETUP_PKCNT_1	(1<<29)
+#define	DEPTSIZ_SETUP_PKCNT_2	(2<<29)
+#define	DEPTSIZ_SETUP_PKCNT_3	(3<<29)
+
 
 #endif
