@@ -39,9 +39,10 @@ obj-$(CONFIG_SPI_TLE62X0)	+= tle62x0.o
 
 ifeq ($(CONFIG_MACH_SMDK6410),y)
 obj-$(CONFIG_SPI)			+= spi-dev.o hspi-s3c64xx.o
-else ifeq($(CONFIG_MACH_SMDKC100),y)
+else ifeq ($(CONFIG_MACH_SMDKC100),y)
 obj-$(CONFIG_SPI)                       += spi-dev.o hspi-s3c.o
 endif
+
 
 # SPI slave controller drivers (upstream link)
 # 	... add above this line ...
