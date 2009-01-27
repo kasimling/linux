@@ -526,3 +526,26 @@ v2.6.28-rc8-s5pc1xx-r2d1: Byungjae Lee
 		A	drivers/usb/gadget/s3c_udc_otg_xfer_dma.c
 		A	drivers/usb/gadget/s3c_udc_otg_xfer_slave.c
 
+
+v2.6.28-rc8-s5pc1xx-r2d2: Jinsung Yang
+	- S5PC100 FIMC Driver
+	- Compilable version
+
+	Modified files:
+		M       drivers/media/video/Kconfig
+		M       drivers/media/video/Makefile
+		M       include/linux/i2c-id.h
+	
+	Added files:
+		A       arch/arm/plat-s5pc1xx/include/plat/fimc.h
+		A       arch/arm/plat-s5pc1xx/include/plat/regs-fimc.h
+		A       drivers/media/video/samsung/Kconfig
+		A       drivers/media/video/samsung/Makefile
+		A       drivers/media/video/samsung/s3c_fimc.h
+		A       drivers/media/video/samsung/s3c_fimc4x_regs.c
+		A       drivers/media/video/samsung/s3c_fimc_cfg.c
+		A       drivers/media/video/samsung/s3c_fimc_core.c
+		A       drivers/media/video/samsung/s3c_fimc_v4l2.c
+		A       drivers/media/video/samsung/s5k4ba.c
+		A       drivers/media/video/samsung/s5k4ba.h
+
