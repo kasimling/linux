@@ -124,14 +124,7 @@ static u32 ep_fifo_size =  512;
 static u32 ep_fifo_size2 = 1024;
 static int reset_available = 1;
 
-/* extern declarations in arch/arm/mach-s3c64xx*/
-#if defined (CONFIG_CPU_S5PC100)
-#define OTGD_PHY_CLK_VALUE	(0x22)	/* 12 MHz UTMI Interface, Oscillator */
-#else
-#define OTGD_PHY_CLK_VALUE	(0x20)	/* UTMI Interface, Oscillator */
-#endif
-
-extern void otg_phy_init(u32 otg_phy_clk);
+extern void otg_phy_init(void);
 extern void otg_phy_off(void);
 extern struct usb_ctrlrequest usb_ctrl;
 
@@ -287,7 +280,7 @@ static int udc_enable(struct s3c_udc *dev)
 {
 	DEBUG_SETUP("%s: %p\n", __FUNCTION__, dev);
 
-	otg_phy_init(OTGD_PHY_CLK_VALUE);
+	otg_phy_init();
 	reconfig_usbd();
 
 	DEBUG_SETUP("S3C USB 2.0 OTG Controller Core Initialized : 0x%x\n",

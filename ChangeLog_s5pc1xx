@@ -567,3 +567,9 @@ v2.6.28-rc8-s5pc1xx-r2d3: Jinsung Yang
 		A       arch/arm/plat-s5pc1xx/setup-fimc1.c
 		A       arch/arm/plat-s5pc1xx/setup-fimc2.c
 
+v2.6.28-rc8-s5pc1xx-r2d4: Kyoungil Kim
+	- modified otg_phy_init proto type
+
+	Modified files:
+		M       drivers/usb/gadget/s3c_udc_otg.c
+
