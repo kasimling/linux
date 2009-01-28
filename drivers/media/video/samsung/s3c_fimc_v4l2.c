@@ -435,9 +435,12 @@ static int s3c_fimc_v4l2_querybuf(struct file *filp, void *fh,
 {
 	struct s3c_fimc_control *ctrl = (struct s3c_fimc_control *) fh;
 	
-	if (b->type != V4L2_BUF_TYPE_VIDEO_CAPTURE && \
-		b->memory != V4L2_MEMORY_MMAP)
-		return -1;
+	if (b->type != V4L2_BUF_TYPE_VIDEO_OVERLAY && \
+		b->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
+		return -EINVAL;
+
+	if (b->memory != V4L2_MEMORY_MMAP)
+		return -EINVAL;
 
 	b->length = ctrl->out_frame.buf_size;
 

@@ -41,6 +41,7 @@
 #include <plat/regs-serial.h>
 #include <plat/regs-rtc.h>
 #include <plat/iic.h>
+#include <plat/fimc.h>
 
 #include <plat/nand.h>
 #include <plat/partition.h>
@@ -111,6 +112,9 @@ static struct platform_device *smdkc100_devices[] __initdata = {
         &s3c_device_spi0,
         &s3c_device_spi1,
 	&s3c_device_mfc,
+	&s3c_device_fimc0,
+	&s3c_device_fimc1,
+	&s3c_device_fimc2,
 };
 
 
@@ -178,6 +182,11 @@ static void __init smdkc100_machine_init(void)
 	s3c_i2c1_set_platdata(NULL);
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
+
+	/* fimc */
+	s3c_fimc0_set_platdata(NULL);
+	s3c_fimc1_set_platdata(NULL);
+	s3c_fimc2_set_platdata(NULL);
 
 	platform_add_devices(smdkc100_devices, ARRAY_SIZE(smdkc100_devices));
 #if defined(CONFIG_PM)

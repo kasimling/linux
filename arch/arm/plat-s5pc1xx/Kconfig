@@ -65,6 +65,41 @@ config S5PC1XX_PWM
          help
            S5pc100 PWM support.
 
-endif
+# FIMC part
+config S5PC1XX_DEV_FIMC0
+	bool
+	default y
+	help
+	  Compile in platform device definitions for FIMC controller 0
 
+config S5PC1XX_DEV_FIMC1
+	bool
+	default y
+	help
+	  Compile in platform device definitions for FIMC controller 1
+
+config S5PC1XX_DEV_FIMC2
+	bool
+	default y
+	help
+	  Compile in platform device definitions for FIMC controller 2
+
+config S5PC1XX_SETUP_FIMC0
+	bool
+	default y
+	help
+	  Common setup code for FIMC controller 0.
+
+config S5PC1XX_SETUP_FIMC1
+	bool
+	default y
+	help
+	  Common setup code for FIMC controller 1.
+
+config S5PC1XX_SETUP_FIMC2
+	bool
+	default y
+	help
+	  Common setup code for FIMC controller 2.
+endif
 

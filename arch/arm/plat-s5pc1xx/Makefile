@@ -28,8 +28,15 @@ obj-$(CONFIG_PM)                += pm.o
 obj-$(CONFIG_PM)                += sleep.o
 
 # Device setup
-
 obj-$(CONFIG_S5PC1XX_SETUP_I2C0) += setup-i2c0.o
 obj-$(CONFIG_S5PC1XX_SETUP_I2C1) += setup-i2c1.o
 obj-$(CONFIG_S5PC1XX_ADC)        += adc.o
 obj-$(CONFIG_S5PC1XX_PWM)        += pwm-s5pc100.o
+
+# Device setup - FIMC
+obj-$(CONFIG_S5PC1XX_DEV_FIMC0)	  += dev-fimc0.o
+obj-$(CONFIG_S5PC1XX_DEV_FIMC1)	  += dev-fimc1.o
+obj-$(CONFIG_S5PC1XX_DEV_FIMC2)	  += dev-fimc2.o
+obj-$(CONFIG_S5PC1XX_SETUP_FIMC0) += setup-fimc0.o
+obj-$(CONFIG_S5PC1XX_SETUP_FIMC1) += setup-fimc1.o
+obj-$(CONFIG_S5PC1XX_SETUP_FIMC2) += setup-fimc2.o
