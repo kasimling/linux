@@ -549,3 +549,21 @@ v2.6.28-rc8-s5pc1xx-r2d2: Jinsung Yang
 		A       drivers/media/video/samsung/s5k4ba.c
 		A       drivers/media/video/samsung/s5k4ba.h
 
+v2.6.28-rc8-s5pc1xx-r2d3: Jinsung Yang
+	- S5PC100 FIMC device setup support
+
+	Modified files:
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+		M       arch/arm/mach-s5pc100/mach-smdkc100.c
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s5pc1xx/Kconfig
+		M       arch/arm/plat-s5pc1xx/Makefile
+
+	Added files:
+		A       arch/arm/plat-s5pc1xx/dev-fimc0.c
+		A       arch/arm/plat-s5pc1xx/dev-fimc1.c
+		A       arch/arm/plat-s5pc1xx/dev-fimc2.c
+		A       arch/arm/plat-s5pc1xx/setup-fimc0.c
+		A       arch/arm/plat-s5pc1xx/setup-fimc1.c
+		A       arch/arm/plat-s5pc1xx/setup-fimc2.c
+
