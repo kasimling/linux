@@ -86,6 +86,36 @@ struct platform_device s3c_device_onenand = {
 
 EXPORT_SYMBOL(s3c_device_onenand);
 
+/* USB Host Controller */
+
+static struct resource s3c_usb_resource[] = {
+        [0] = {
+                .start = S3C64XX_PA_USBHOST,
+                .end   = S3C64XX_PA_USBHOST + S3C64XX_SZ_USBHOST - 1,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_UHOST,
+                .end   = IRQ_UHOST,
+                .flags = IORESOURCE_IRQ,
+        }
+};
+
+static u64 s3c_device_usb_dmamask = 0xffffffffUL;
+
+struct platform_device s3c_device_usb = {
+        .name             = "s3c2410-ohci",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_usb_resource),
+        .resource         = s3c_usb_resource,
+        .dev              = {
+                .dma_mask = &s3c_device_usb_dmamask,
+                .coherent_dma_mask = 0xffffffffUL
+        }
+};
+
+EXPORT_SYMBOL(s3c_device_usb);
+
 /* USB Device (Gadget)*/
 
 static struct resource s3c_usbgadget_resource[] = {

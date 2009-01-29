@@ -158,9 +158,7 @@ static int udc_enable(struct s3c_udc *dev);
 static void udc_set_address(struct s3c_udc *dev, unsigned char address);
 static void reconfig_usbd(void);
 
-/* extern declarations in arch/arm/mach-s3c64xx*/
-#define OTGD_PHY_CLK_VALUE	(0x20)	/* UTMI Interface, Oscillator */
-extern void otg_phy_init(u32 otg_phy_clk);
+extern void otg_phy_init(void);
 extern void otg_phy_off(void);
 
 static struct usb_ep_ops s3c_ep_ops = {
@@ -282,7 +280,7 @@ static int udc_enable(struct s3c_udc *dev)
 {
 	DEBUG_SETUP("%s: %p\n", __FUNCTION__, dev);
 
-	otg_phy_init(OTGD_PHY_CLK_VALUE);
+	otg_phy_init();
 	reconfig_usbd();
 
 	DEBUG_SETUP("S3C USB 2.0 OTG Controller Core Initialized : 0x%x\n",

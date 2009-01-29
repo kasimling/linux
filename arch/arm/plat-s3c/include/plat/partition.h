@@ -48,3 +48,4 @@ struct flash_platform_data s3c_onenand_data = {
 	.parts		= s3c_partition_info,
 	.nr_parts	= ARRAY_SIZE(s3c_partition_info),
 };
+
