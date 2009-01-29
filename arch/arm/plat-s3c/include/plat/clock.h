@@ -57,6 +57,7 @@ extern struct clk clk_hpll;
 extern struct clk clk_hd0;
 extern struct clk clk_pd0;
 extern struct clk clk_54m;
+extern struct clk clk_dout_mpll2;
 #endif
 
 /* S3C64XX specific clocks */

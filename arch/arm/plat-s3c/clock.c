@@ -357,8 +357,8 @@ struct clk clk_f = {
 	.parent		= &clk_mpll,
 	.ctrlbit	= 0,
 #if defined(CONFIG_CPU_FREQ)
-	.set_rate	= &s3c_fclk_set_rate,
-	.round_rate	= &s3c_fclk_round_rate,
+	.set_rate	= s3c_fclk_set_rate,
+	.round_rate	= s3c_fclk_round_rate,
 #endif
 };
 

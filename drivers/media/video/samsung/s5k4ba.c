@@ -116,7 +116,8 @@ static int s5k4ba_attach_adapter(struct i2c_adapter *adap)
 	if (ret) {
 		err("failed to attach driver at slot A\n");
 		ret = -ENODEV;
-	}
+	} else
+		info("s5k4ba attached at slot A\n");
 #endif
 
 #ifdef CONFIG_VIDEO_SAMSUNG_S5K4BA_SLOT_B
@@ -127,7 +128,8 @@ static int s5k4ba_attach_adapter(struct i2c_adapter *adap)
 	if (ret) {
 		err("failed to attach driver at slot B\n");
 		ret = -ENODEV;
-	}
+	} else
+		info("s5k4ba attached at slot B\n");
 #endif
 
 	return ret;

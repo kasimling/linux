@@ -18,6 +18,7 @@
 #include <linux/ioport.h>
 #include <linux/delay.h>
 #include <linux/io.h>
+#include <linux/clk.h>
 
 #include <mach/hardware.h>
 #include <mach/map.h>
@@ -80,6 +81,27 @@ static int inline s5pc1xx_clk_gate(void __iomem *reg,
 		con &= ~ctrlbit;
 
 	__raw_writel(con, reg);
+	return 0;
+}
+
+static int s5pc1xx_setrate_sclk_cam(struct clk *clk, unsigned long rate)
+{
+	u32 shift = 24;
+	u32 cam_div, cfg;
+	unsigned long src_clk = clk_get_rate(clk->parent);
+
+	cam_div = src_clk / rate;
+
+	if (cam_div > 32)
+		cam_div = 32;
+
+	cfg = __raw_readl(S5P_CLK_DIV1);
+	cfg &= ~(0x1f << shift);
+	cfg |= ((cam_div - 1) << shift);
+	__raw_writel(cfg, S5P_CLK_DIV1);
+
+	printk("parent clock for camera: %ld, divisor: %d\n", src_clk, cam_div);
+
 	return 0;
 }
 
@@ -681,10 +703,11 @@ static struct clk init_clocks[] = {
 		.ctrlbit	= S5P_CLKGATE_SCLK1_SPDIF,
 	}, {
 		.name		= "sclk_cam",
-		.id		= -1,
-		.parent		= NULL,
+		.id		= 0,
+		.parent		= &clk_dout_mpll2,
 		.enable		= s5pc1xx_sclk1_ctrl,
 		.ctrlbit	= S5P_CLKGATE_SCLK1_CAM,
+		.set_rate	= s5pc1xx_setrate_sclk_cam,
 	},
 };
 

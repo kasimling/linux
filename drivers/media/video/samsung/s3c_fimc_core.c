@@ -88,11 +88,17 @@ void s3c_fimc_unregister_camera(struct s3c_fimc_camera *cam)
 
 void s3c_fimc_set_active_camera(struct s3c_fimc_control *ctrl, int id)
 {
+	struct s3c_fimc_camera *cam;
+	
 	ctrl->in_cam = s3c_fimc.camera[id];
+	cam = ctrl->in_cam;
 
-	s3c_fimc_select_camera(ctrl);
-	clk_set_rate(ctrl->clock, ctrl->in_cam->clockrate);
-	clk_enable(ctrl->clock);
+	if (cam) {
+		s3c_fimc_select_camera(ctrl);
+//		clk_disable(s3c_fimc.cam_clock);
+		clk_set_rate(s3c_fimc.cam_clock, cam->clockrate);
+		clk_enable(s3c_fimc.cam_clock);
+	}
 }
 
 void s3c_fimc_init_camera(struct s3c_fimc_control *ctrl)
@@ -172,19 +178,17 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 	/* irq */
 	ctrl->irq = platform_get_irq(pdev, 0);
 
-	if (!request_irq(ctrl->irq, s3c_fimc_irq, IRQF_DISABLED, ctrl->name, ctrl))
+	if (request_irq(ctrl->irq, s3c_fimc_irq, IRQF_DISABLED, ctrl->name, ctrl))
 		err("request_irq failed\n");
-
-	/* clock */
-	ctrl->clock = clk_get(&pdev->dev, pdata->clk_name);
-	if (IS_ERR(ctrl->clock)) {
-		err("failed to get clock source\n");
-		return NULL;
-	}
 
 	s3c_fimc_set_active_camera(ctrl, 0);
 
 	return ctrl;
+}
+
+static int s3c_fimc_unregister_controller(struct s3c_fimc_control *ctrl)
+{
+	return 0;
 }
 
 static int s3c_fimc_mmap(struct file* filp, struct vm_area_struct *vma)
@@ -348,25 +352,59 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 	ctrl = s3c_fimc_register_controller(pdev);
 	if (!ctrl) {
 		err("cannot register fimc controller\n");
-		return -ENODEV;
+		goto fimc_fail;
 	}
 
 	pdata = ctrl->pdata;
 	if (pdata->cfg_gpio)
 		pdata->cfg_gpio(pdev);
 
+	/* fimc clock */
+	ctrl->clock = clk_get(&pdev->dev, pdata->clk_name);
+	if (IS_ERR(ctrl->clock)) {
+		err("failed to get fimc clock source\n");
+		goto clk_fail1;
+	}
+
+	clk_enable(ctrl->clock);
+
+	/* camera clock */
+	if (ctrl->id == 0) {
+		s3c_fimc.cam_clock = clk_get(&pdev->dev, "sclk_cam");
+		if (IS_ERR(s3c_fimc.cam_clock)) {
+			err("failed to get camera clock source\n");
+			goto clk_fail2;
+		}
+	}
+
 	ret = video_register_device(ctrl->vd, VFL_TYPE_GRABBER, ctrl->id);
 	if (ret) {
 		err("cannot register video driver\n");
-		return -EINVAL;
+		goto video_fail;
 	}
 
 	s3c_fimc_reset(ctrl);
 
-	if (ctrl->id == 0)
+	if (ctrl->in_cam && ctrl->id == 0)
 		s3c_fimc_reset_camera(ctrl);
 
+	info("controller %d registered successfully\n", ctrl->id);
+
 	return 0;
+
+video_fail:
+	clk_put(s3c_fimc.cam_clock);
+
+clk_fail2:
+	clk_disable(ctrl->clock);
+	clk_put(ctrl->clock);
+
+clk_fail1:
+	s3c_fimc_unregister_controller(ctrl);
+
+fimc_fail:
+	return -EINVAL;
+	
 }
 
 static int s3c_fimc_remove(struct platform_device *pdev)

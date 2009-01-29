@@ -471,6 +471,7 @@ struct s3c_fimc_control {
 struct s3c_fimc_config {
 	struct s3c_fimc_control	ctrl[S3C_FIMC_MAX_CTRLS];
 	struct s3c_fimc_camera	*camera[S3C_FIMC_MAX_CAMS];
+	struct clk		*cam_clock;
 };
 
 
@@ -480,26 +481,23 @@ struct s3c_fimc_config {
 */
 #define V4L2_INPUT_TYPE_MEMORY	3
 
-/* Image Effect */
-#define V4L2_CID_ORIGINAL	(V4L2_CID_PRIVATE_BASE + 0)
-#define V4L2_CID_ARBITRARY	(V4L2_CID_PRIVATE_BASE + 1)
-#define V4L2_CID_NEGATIVE 	(V4L2_CID_PRIVATE_BASE + 2)
-#define V4L2_CID_ARTFREEZE	(V4L2_CID_PRIVATE_BASE + 3)
-#define V4L2_CID_EMBOSSING	(V4L2_CID_PRIVATE_BASE + 4)
-#define V4L2_CID_SILHOUETTE	(V4L2_CID_PRIVATE_BASE + 5)
+#define V4L2_CID_ORIGINAL		(V4L2_CID_PRIVATE_BASE + 0)
+#define V4L2_CID_ARBITRARY		(V4L2_CID_PRIVATE_BASE + 1)
+#define V4L2_CID_NEGATIVE 		(V4L2_CID_PRIVATE_BASE + 2)
+#define V4L2_CID_ARTFREEZE		(V4L2_CID_PRIVATE_BASE + 3)
+#define V4L2_CID_EMBOSSING		(V4L2_CID_PRIVATE_BASE + 4)
+#define V4L2_CID_SILHOUETTE		(V4L2_CID_PRIVATE_BASE + 5)
+#define V4L2_CID_ROTATE_90		(V4L2_CID_PRIVATE_BASE + 6)
+#define V4L2_CID_ROTATE_180		(V4L2_CID_PRIVATE_BASE + 7)
+#define V4L2_CID_ROTATE_270		(V4L2_CID_PRIVATE_BASE + 8)
+#define V4L2_CID_ROTATE_BYPASS		(V4L2_CID_PRIVATE_BASE + 9)
+#define	V4L2_CID_ZOOMIN			(V4L2_CID_PRIVATE_BASE + 10)
+#define V4L2_CID_ZOOMOUT		(V4L2_CID_PRIVATE_BASE + 11)
+#define V4L2_CID_ACTIVE_CAMERA		(V4L2_CID_PRIVATE_BASE + 12)
+#define V4L2_CID_NR_FRAMES		(V4L2_CID_PRIVATE_BASE + 13)
 
-/* Image Rotate */
-#define V4L2_CID_ROTATE_90	(V4L2_CID_PRIVATE_BASE + 6)
-#define V4L2_CID_ROTATE_180	(V4L2_CID_PRIVATE_BASE + 7)
-#define V4L2_CID_ROTATE_270	(V4L2_CID_PRIVATE_BASE + 8)
-#define V4L2_CID_ROTATE_BYPASS	(V4L2_CID_PRIVATE_BASE + 9)
-
-/* Zoom-in, Zoom-out */
-#define	V4L2_CID_ZOOMIN		(V4L2_CID_PRIVATE_BASE + 10)
-#define V4L2_CID_ZOOMOUT	(V4L2_CID_PRIVATE_BASE + 11)
-
-#define FORMAT_FLAGS_PACKED	0x01
-#define FORMAT_FLAGS_PLANAR	0x02
+#define FORMAT_FLAGS_PACKED		0x01
+#define FORMAT_FLAGS_PLANAR		0x02
 
 struct s3c_fimc_user_order {
 	u32				planes;
@@ -525,6 +523,7 @@ extern void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info);
 extern int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl, struct v4l2_pix_format *fmt);
 extern int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl);
 extern u8 *s3c_fimc_get_current_frame(struct s3c_fimc_control *ctrl);
+extern void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr);
 extern int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_stop_dma(struct s3c_fimc_control *ctrl);

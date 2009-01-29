@@ -241,9 +241,8 @@ static int s3c_fimc_v4l2_g_ctrl(struct file *filp, void *fh,
 }
 
 static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
-					struct v4l2_control *a)
+					struct v4l2_control *c)
 {
-	struct v4l2_control *c = (struct v4l2_control *) a;
 	struct s3c_fimc_control *ctrl = (struct s3c_fimc_control *) fh;
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
 	struct s3c_fimc_window_offset *offset = &ctrl->in_cam->offset;
@@ -304,6 +303,14 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 
 	case V4L2_CID_AUTO_WHITE_BALANCE:
 		s3c_fimc_i2c_command(ctrl, I2C_CAM_WB, c->value);
+		break;
+
+	case V4L2_CID_ACTIVE_CAMERA:
+		s3c_fimc_set_active_camera(ctrl, c->value);
+		break;
+
+	case V4L2_CID_NR_FRAMES:
+		s3c_fimc_set_nr_frames(ctrl, c->value);
 		break;
 
 	default:

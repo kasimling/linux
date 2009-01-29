@@ -114,7 +114,7 @@ void s3c_fimc_reset(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CIGCTRL);
 
 	/* in case of ITU656, CISRCFMT[31] should be 0 */
-	if (ctrl->in_cam->mode == ITU_656_YCBCR422_8BIT) {
+	if (ctrl->in_cam && ctrl->in_cam->mode == ITU_656_YCBCR422_8BIT) {
 		cfg = readl(ctrl->regs + S3C_CISRCFMT);
 		cfg &= ~S3C_CISRCFMT_ITU601_8BIT;
 		writel(cfg, ctrl->regs + S3C_CISRCFMT);

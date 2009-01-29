@@ -151,6 +151,11 @@ void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info)
 	}
 }
 
+void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr)
+{
+	ctrl->out_frame.nr_frames = nr;
+}
+
 int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
 					struct v4l2_pix_format *fmt)
 {
