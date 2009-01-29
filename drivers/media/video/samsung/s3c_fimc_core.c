@@ -352,7 +352,7 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 	ctrl = s3c_fimc_register_controller(pdev);
 	if (!ctrl) {
 		err("cannot register fimc controller\n");
-		goto fimc_fail;
+		goto err_fimc;
 	}
 
 	pdata = ctrl->pdata;
@@ -363,7 +363,7 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 	ctrl->clock = clk_get(&pdev->dev, pdata->clk_name);
 	if (IS_ERR(ctrl->clock)) {
 		err("failed to get fimc clock source\n");
-		goto clk_fail1;
+		goto err_clk_io;
 	}
 
 	clk_enable(ctrl->clock);
@@ -373,14 +373,14 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 		s3c_fimc.cam_clock = clk_get(&pdev->dev, "sclk_cam");
 		if (IS_ERR(s3c_fimc.cam_clock)) {
 			err("failed to get camera clock source\n");
-			goto clk_fail2;
+			goto err_clk_cam;
 		}
 	}
 
 	ret = video_register_device(ctrl->vd, VFL_TYPE_GRABBER, ctrl->id);
 	if (ret) {
 		err("cannot register video driver\n");
-		goto video_fail;
+		goto err_video;
 	}
 
 	s3c_fimc_reset(ctrl);
@@ -392,17 +392,17 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 
 	return 0;
 
-video_fail:
+err_video:
 	clk_put(s3c_fimc.cam_clock);
 
-clk_fail2:
+err_clk_cam:
 	clk_disable(ctrl->clock);
 	clk_put(ctrl->clock);
 
-clk_fail1:
+err_clk_io:
 	s3c_fimc_unregister_controller(ctrl);
 
-fimc_fail:
+err_fimc:
 	return -EINVAL;
 	
 }

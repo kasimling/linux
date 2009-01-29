@@ -231,7 +231,7 @@ static struct clk *clkset_uart_list[] = {
 	&clk_mout_epll.clk,
 	&clk_dout_mpll,
 	NULL,
-	NULL
+	NULL,
 };
 
 static struct clk_sources clkset_uart = {
@@ -1012,8 +1012,4 @@ void __init s5pc100_register_clocks(void)
 			       clkp->name, ret);
 		}
 	}
-
-	clk_mpll.parent = &clk_mout_mpll.clk;
-	clk_epll.parent = &clk_mout_epll.clk;
-	clk_hpll.parent = &clk_mout_hpll.clk;
 }
