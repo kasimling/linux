@@ -58,7 +58,8 @@
 #include <mach/gpio.h>
 #include <plat/gpio-cfg.h>
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+#if defined(CONFIG_USB_GADGET_S3C_OTGD) || \
+	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
 #include <plat/regs-otg.h>
 
 /* S3C_USB_CLKSRC 0: EPLL 1: CLK_48M */
