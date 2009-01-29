@@ -29,8 +29,13 @@
 
 extern void usb_host_clk_en(void);
 
+/* clock device associated with the hcd */
+
 static struct clk *clk;
+
+#if defined(CONFIG_ARCH_2410)
 static struct clk *usb_clk;
+#endif
 
 /* forward definitions */
 

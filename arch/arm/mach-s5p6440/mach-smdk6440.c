@@ -24,6 +24,9 @@
 #include <linux/i2c.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
+#include <linux/mtd/partitions.h>
+#include <linux/module.h>
+#include <linux/clk.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -49,10 +52,21 @@
 #include <plat/ts.h>
 #include <plat/adc.h>
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
-#include <plat/regs-otg.h>
-#endif
+#include <mach/gpio.h>
+#include <plat/gpio-cfg.h>
 
+#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+#include <plat/regs-otg.h>
+
+/* S3C_USB_CLKSRC 0: EPLL 1: CLK_48M */
+#define S3C_USB_CLKSRC	1
+
+#ifdef USB_HOST_PORT2_EN
+#define OTGH_PHY_CLK_VALUE      (0x60)  /* Serial Interface, otg_phy input clk 48Mhz Oscillator */
+#else
+#define OTGH_PHY_CLK_VALUE      (0x20)  /* UTMI Interface, otg_phy input clk 48Mhz Oscillator */
+#endif
+#endif
 
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
@@ -168,47 +182,52 @@ MACHINE_START(SMDK6440, "SMDK6440")
 	.timer		= &s3c64xx_timer,
 MACHINE_END
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD)
+#if defined(CONFIG_USB_GADGET_S3C_OTGD) || \
+	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
 /* Initializes OTG Phy. */
-void otg_phy_init(u32 otg_phy_clk) {
+void otg_phy_init(void) {
 
 	writel(readl(S3C_OTHERS)|S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
 	writel(0x0, S3C_USBOTG_PHYPWR);		/* Power up */
-	writel(otg_phy_clk, S3C_USBOTG_PHYCLK);
+        writel(OTGH_PHY_CLK_VALUE, S3C_USBOTG_PHYCLK);
 	writel(0x1, S3C_USBOTG_RSTCON);
 
 	udelay(50);
 	writel(0x0, S3C_USBOTG_RSTCON);
 	udelay(50);
 }
-#endif
+EXPORT_SYMBOL(otg_phy_init);
 
-#ifdef CONFIG_USB_GADGET_S3C_OTGD
 /* OTG PHY Power Off */
 void otg_phy_off(void) {
 	writel(readl(S3C_USBOTG_PHYPWR)|(0x1F<<1), S3C_USBOTG_PHYPWR);
 	writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
 }
+EXPORT_SYMBOL(otg_phy_off);
 #endif
 
-#ifdef CONFIG_USB_OHCI_HCD
-void usb_host_clk_en(int usb_host_clksrc, u32 otg_phy_clk) {
-	switch (usb_host_clksrc) {
+#if defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+void usb_host_clk_en(void) {
+	struct clk *otg_clk;
+
+        switch (S3C_USB_CLKSRC) {
 	case 0: /* epll clk */
-		writel((readl(S3C_CLK_SRC)& ~S3C_CLKSRC_UHOST_MASK)
+		writel((readl(S3C_CLK_SRC)& ~S3C6400_CLKSRC_UHOST_MASK)
 			|S3C_CLKSRC_EPLL_CLKSEL|S3C_CLKSRC_UHOST_EPLL,
 			S3C_CLK_SRC);
 
 		/* USB host colock divider ratio is 2 */
-		writel((readl(S3C_CLK_DIV1)& ~S3C_CLKDIVN_UHOST_MASK)
-			|S3C_CLKDIV1_USBDIV2, S3C_CLK_DIV1);
+		writel((readl(S3C_CLK_DIV1)& ~S3C6400_CLKDIV1_UHOST_MASK)
+			|(1<<20), S3C_CLK_DIV1);
 		break;
 	case 1: /* oscillator 48M clk */
-		writel(readl(S3C_CLK_SRC)& ~S3C_CLKSRC_UHOST_MASK, S3C_CLK_SRC);
-		otg_phy_init(otg_phy_clk);
+		otg_clk = clk_get(NULL, "otg");
+		clk_enable(otg_clk);
+		writel(readl(S3C_CLK_SRC)& ~S3C6400_CLKSRC_UHOST_MASK, S3C_CLK_SRC);
+		otg_phy_init();
 
 		/* USB host colock divider ratio is 1 */
-		writel(readl(S3C_CLK_DIV1)& ~S3C_CLKDIVN_UHOST_MASK, S3C_CLK_DIV1);
+		writel(readl(S3C_CLK_DIV1)& ~S3C6400_CLKDIV1_UHOST_MASK, S3C_CLK_DIV1);
 		break;
 	default:
 		printk(KERN_INFO "Unknown USB Host Clock Source\n");
@@ -221,4 +240,6 @@ void usb_host_clk_en(int usb_host_clksrc, u32 otg_phy_clk) {
 	writel(readl(S3C_SCLK_GATE)|S3C_CLKCON_SCLK_UHOST, S3C_SCLK_GATE);
 
 }
+
+EXPORT_SYMBOL(usb_host_clk_en);
 #endif

@@ -492,3 +492,24 @@ v2.6.28-rc8-s3c64xx-r0d14: Jongpill Lee
 	Modified Files:
 		M       arch/arm/configs/smdk6410mtd_defconfig
 		M       arch/arm/plat-s3c64xx/sleep.S
+
+v2.6.28-rc8-s3c64xx-r0d15: Kyoungil Kim
+	- Support USB host on SMDK6410
+
+	Modifiled Files:
+		M       arch/arm/configs/smdk6410mtd_defconfig
+		M       arch/arm/configs/smdk6410nfs_defconfig
+		M       arch/arm/configs/smdk6410onenand_defconfig
+		M       arch/arm/configs/smdk6410ramdisk_defconfig
+		M       arch/arm/mach-s3c6400/include/mach/map.h
+		M       arch/arm/mach-s3c6410/mach-smdk6410.c
+		M       arch/arm/mach-s5p6440/mach-smdk6440.c
+		M       arch/arm/plat-s3c/include/plat/partition.h
+		M       arch/arm/plat-s3c64xx/devs.c
+		M       drivers/usb/Kconfig
+		M       drivers/usb/gadget/s3c_udc_otg.c
+		M       drivers/usb/host/ohci-hcd.c
+		M       drivers/usb/host/ohci-s3c2410.c
+	Added Files:
+		A       arch/arm/mach-s3c6400/include/mach/usb-control.h
+
