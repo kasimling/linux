@@ -45,6 +45,7 @@ struct s3c_nand_mtd_info s3c_nand_mtd_part_info = {
 };
 
 struct flash_platform_data s3c_onenand_data = {
-        .parts          = s3c_partition_info,
-        .nr_parts       = ARRAY_SIZE(s3c_partition_info),
+	.parts		= s3c_partition_info,
+	.nr_parts	= ARRAY_SIZE(s3c_partition_info),
 };
+
