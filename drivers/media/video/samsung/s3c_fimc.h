@@ -223,7 +223,7 @@ struct s3c_fimc_frame_addr {
 
 	union {
 		u8		*virt_rgb;
-		u8		*virt_y;		
+		u8		*virt_y;
 	};
 
 	u8			*virt_cb;

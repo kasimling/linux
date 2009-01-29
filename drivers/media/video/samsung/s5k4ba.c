@@ -27,9 +27,9 @@
 #define S5K4BA_MAX		2
 #define S5K4BA_I2C_ADDR		0x5a
 
-const static u16 ignore[] = {I2C_CLIENT_END};
-const static u16 normal_addr[] = {(S5K4BA_I2C_ADDR >> 1), I2C_CLIENT_END};
-const static u16 *forces[] = {NULL};
+const static u16 ignore[] = { I2C_CLIENT_END };
+const static u16 normal_addr[] = { (S5K4BA_I2C_ADDR >> 1), I2C_CLIENT_END };
+const static u16 *forces[] = { NULL };
 
 static struct s3c_fimc_camera s5k4ba_data[S5K4BA_MAX];
 static struct i2c_driver s5k4ba_i2c_driver;

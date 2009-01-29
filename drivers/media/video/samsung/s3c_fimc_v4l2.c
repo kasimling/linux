@@ -214,6 +214,18 @@ static int s3c_fimc_v4l2_s_fmt_vid_cap(struct file *filp, void *fh,
 	return 0;
 }
 
+static int s3c_fimc_v4l2_try_fmt_vid_cap(struct file *filp, void *fh,
+					  struct v4l2_format *f)
+{
+	return 0;
+}
+
+static int s3c_fimc_v4l2_try_fmt_overlay(struct file *filp, void *fh,
+					  struct v4l2_format *f)
+{
+	return 0;
+}
+
 static int s3c_fimc_v4l2_overlay(struct file *filp, void *fh, unsigned int i)
 {
 	struct s3c_fimc_control *ctrl = (struct s3c_fimc_control *) fh;
@@ -581,6 +593,8 @@ const struct v4l2_ioctl_ops s3c_fimc_v4l2_ops = {
 	.vidioc_enum_fmt_vid_cap	= s3c_fimc_v4l2_enum_fmt_vid_cap,
 	.vidioc_g_fmt_vid_cap		= s3c_fimc_v4l2_g_fmt_vid_cap,
 	.vidioc_s_fmt_vid_cap		= s3c_fimc_v4l2_s_fmt_vid_cap,
+	.vidioc_try_fmt_vid_cap		= s3c_fimc_v4l2_try_fmt_vid_cap,
+	.vidioc_try_fmt_vid_overlay	= s3c_fimc_v4l2_try_fmt_overlay,
 	.vidioc_overlay			= s3c_fimc_v4l2_overlay,
 	.vidioc_g_ctrl			= s3c_fimc_v4l2_g_ctrl,
 	.vidioc_s_ctrl			= s3c_fimc_v4l2_s_ctrl,
