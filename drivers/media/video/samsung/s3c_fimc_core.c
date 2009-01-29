@@ -65,8 +65,11 @@ int s3c_fimc_i2c_write(struct i2c_client *client, u8 subaddr, u8 val)
 void s3c_fimc_i2c_command(struct s3c_fimc_control *ctrl, u32 cmd, int arg)
 {
 	struct i2c_client *client = ctrl->in_cam->client;
-	
-	client->driver->command(client, cmd, (void *) arg);
+
+	if (client)
+		client->driver->command(client, cmd, (void *) arg);
+	else
+		err("i2c client is not registered\n");
 }
 
 void s3c_fimc_register_camera(struct s3c_fimc_camera *cam)
@@ -95,7 +98,7 @@ void s3c_fimc_set_active_camera(struct s3c_fimc_control *ctrl, int id)
 
 	if (cam) {
 		s3c_fimc_select_camera(ctrl);
-//		clk_disable(s3c_fimc.cam_clock);
+		clk_disable(s3c_fimc.cam_clock);
 		clk_set_rate(s3c_fimc.cam_clock, cam->clockrate);
 		clk_enable(s3c_fimc.cam_clock);
 	}
@@ -200,7 +203,7 @@ static int s3c_fimc_mmap(struct file* filp, struct vm_area_struct *vma)
 	u32 pfn, total_size = frame->buf_size;
 
 	/* page frame number of the address for a source frame to be stored at. */
-	pfn = __phys_to_pfn(frame->addr[vma->vm_pgoff].phys_y);
+	pfn = __phys_to_pfn(frame->addr[vma->vm_pgoff / PAGE_SIZE].phys_y);
 
 	if (size > total_size) {
 		err("the size of mapping is too big\n");

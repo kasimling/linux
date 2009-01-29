@@ -469,7 +469,7 @@ static int s3c_fimc_v4l2_querybuf(struct file *filp, void *fh,
 	 * original purpose.
 	 * The index value used to find out which frame user wants to mmap.
 	 */
-	b->m.offset = b->index;
+	b->m.offset = b->index * PAGE_SIZE;
 
 	return 0;
 }
