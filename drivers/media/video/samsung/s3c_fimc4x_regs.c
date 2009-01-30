@@ -125,13 +125,13 @@ void s3c_fimc_reset(struct s3c_fimc_control *ctrl)
 	}
 }
 
-int s3c_fimc_reset_camera(void __iomem *regs, enum s3c_fimc_cam_ch_t ch,
+int s3c_fimc_reset_camera(void __iomem *regs, enum s3c_fimc_cam_slot_t ch,
 				enum s3c_fimc_cam_reset_t type, int delay)
 {
 	u32 cfg;
 	int ret = 0;
 
-	if (ch == CAM_CH_A) {
+	if (ch == CAM_SLOT_A) {
 		if (type == CAM_RESET_ACTIVE_HIGH) {
 			cfg = readl(regs + S3C_CIGCTRL);
 			cfg |= S3C_CIGCTRL_CAMRST_A;
@@ -155,7 +155,7 @@ int s3c_fimc_reset_camera(void __iomem *regs, enum s3c_fimc_cam_ch_t ch,
 		}
 	}
 
-	if (ch == CAM_CH_B) {
+	if (ch == CAM_SLOT_B) {
 		if (!gpio_is_valid(S5PC1XX_GPH3(6))) {
 			err("GPH3 is invalid\n");
 			ret = -EIO;

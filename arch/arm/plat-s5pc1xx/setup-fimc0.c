@@ -16,28 +16,12 @@
 
 struct platform_device; /* don't need the contents */
 
-#include <asm/io.h>
-#include <mach/map.h>
 #include <mach/gpio.h>
 #include <plat/gpio-bank-e0.h>
 #include <plat/gpio-bank-e1.h>
 #include <plat/gpio-bank-h2.h>
 #include <plat/gpio-bank-h3.h>
 #include <plat/gpio-cfg.h>
-
-/* FIXME: temp */
-#ifdef CONFIG_VIDEO_SAMSUNG_S5K4BA
-extern int s3c_fimc_reset_camera(void __iomem *regs, int ch, int type, int delay);
-
-void s3c_fimc_s5k4ba_init(void)
-{
-	void __iomem *regs;
-
-	regs = ioremap((unsigned long) S5PC1XX_PA_FIMC0, SZ_4K);
-	s3c_fimc_reset_camera(regs, 0, 0, 5000);
-	iounmap(regs);
-}
-#endif
 
 void s3c_fimc0_cfg_gpio(struct platform_device *dev)
 {
@@ -83,4 +67,3 @@ void s3c_fimc0_cfg_gpio(struct platform_device *dev)
 	for (i = 0; i < 4; i++)
 		s3c_gpio_setpull(S5PC1XX_GPH3(i), S3C_GPIO_PULL_UP);
 }
-

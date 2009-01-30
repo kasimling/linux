@@ -75,10 +75,10 @@
 #define s3c_fimc_set_iflag(x, fld) 	(x &= ~S3C_FIMC_IRQ_MASK); (x |= fld)
 
 /* E n u m e r a t i o n s */
-enum s3c_fimc_cam_ch_t {
-	CAM_CH_A	= 0,
-	CAM_CH_B	= 1,
-	CAM_CH_MIPI	= 2,
+enum s3c_fimc_cam_slot_t {
+	CAM_SLOT_A	= 0,
+	CAM_SLOT_B	= 1,
+	CAM_SLOT_MIPI	= 2,
 };
 
 enum s3c_fimc_cam_t {
@@ -542,7 +542,7 @@ extern void s3c_fimc_select_camera(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_source_format(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_window_offset(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_reset(struct s3c_fimc_control *ctrl);
-extern int s3c_fimc_reset_camera(void __iomem *regs, enum s3c_fimc_cam_ch_t ch, enum s3c_fimc_cam_reset_t type, int delay);
+extern int s3c_fimc_reset_camera(void __iomem *regs, enum s3c_fimc_cam_slot_t ch, enum s3c_fimc_cam_reset_t type, int delay);
 extern void s3c_fimc_set_polarity(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_output_dma(struct s3c_fimc_control *ctrl);

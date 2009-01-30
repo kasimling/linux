@@ -1,6 +1,6 @@
-obj-$(CONFIG_VIDEO_SAMSUNG)		+= s3c_fimc_core.o s3c_fimc_v4l2.o s3c_fimc_cfg.o
-obj-$(CONFIG_PLAT_S5PC1XX)		+= s3c_fimc4x_regs.o
-obj-$(CONFIG_VIDEO_SAMSUNG_S5K4BA)	+= s5k4ba.o
+obj-$(CONFIG_VIDEO_SAMSUNG)	+= s3c_fimc_core.o s3c_fimc_v4l2.o s3c_fimc_cfg.o
+obj-$(CONFIG_PLAT_S5PC1XX)	+= s3c_fimc4x_regs.o
+obj-$(CONFIG_S5K4BA)		+= s5k4ba.o
 
 EXTRA_CFLAGS += -Idrivers/media/video
 

@@ -18,6 +18,7 @@
 #include <linux/slab.h>
 #include <linux/string.h>
 #include <linux/init.h>
+#include <asm/io.h>
 
 #include "s3c_fimc.h"
 #include "s5k4ba.h"
@@ -62,8 +63,12 @@ static struct s3c_fimc_camera s5k4ba_template = {
 		.hsync	= 0,
 	},
 
+#ifdef CONFIG_S5K4BA_RESET_HIGH
+	.reset_type	= CAM_RESET_ACTIVE_HIGH,
+#else
 	.reset_type	= CAM_RESET_ACTIVE_LOW,
-	.reset_delay	= 5000,
+#endif
+	.reset_delay	= CONFIG_S5K4BA_RESET_DELAY,
 	.initialized	= 0,	
 };
 
@@ -108,7 +113,7 @@ static int s5k4ba_attach_adapter(struct i2c_adapter *adap)
 {
 	int ret = 0;
 
-#ifdef CONFIG_VIDEO_SAMSUNG_S5K4BA_SLOT_A
+#ifdef CONFIG_S5K4BA_SLOT_A
 	s3c_fimc_register_camera(&s5k4ba_data[S5K4BA_SLOT_A]);
 	adap->id = S5K4BA_SLOT_A;
 
@@ -120,7 +125,7 @@ static int s5k4ba_attach_adapter(struct i2c_adapter *adap)
 		info("s5k4ba attached at slot A\n");
 #endif
 
-#ifdef CONFIG_VIDEO_SAMSUNG_S5K4BA_SLOT_B
+#ifdef CONFIG_S5K4BA_SLOT_B
 	s3c_fimc_register_camera(&s5k4ba_data[S5K4BA_SLOT_B]);
 	adap->id = S5K4BA_SLOT_B;
 
@@ -248,12 +253,12 @@ static struct i2c_driver s5k4ba_i2c_driver = {
 
 static __init int s5k4ba_init(void)
 {
-#ifdef CONFIG_VIDEO_SAMSUNG_S5K4BA_SLOT_A
+#ifdef CONFIG_S5K4BA_SLOT_A
 	s5k4ba_data[S5K4BA_SLOT_A]= s5k4ba_template;
 	s5k4ba_data[S5K4BA_SLOT_A].id = S5K4BA_SLOT_A;
 #endif
 
-#ifdef CONFIG_VIDEO_SAMSUNG_S5K4BA_SLOT_B
+#ifdef CONFIG_S5K4BA_SLOT_B
 	s5k4ba_data[S5K4BA_SLOT_B]= s5k4ba_template;
 	s5k4ba_data[S5K4BA_SLOT_B].id = S5K4BA_SLOT_B;
 #endif
@@ -264,6 +269,36 @@ static __init int s5k4ba_init(void)
 static __init void s5k4ba_exit(void)
 {
 	i2c_del_driver(&s5k4ba_i2c_driver);
+}
+
+void s5k4ba_pre_init(unsigned long paddr)
+{
+	void __iomem *regs;
+	enum s3c_fimc_cam_slot_t slot;
+	enum s3c_fimc_cam_reset_t reset_type;
+	int reset_delay;
+
+#ifdef CONFIG_S5K4BA_SLOT_B
+	slot = CAM_SLOT_B;
+#else
+	slot = CAM_SLOT_A;
+#endif
+
+#ifdef CONFIG_S5K4BA_RESET_HIGH
+	reset_type = CAM_RESET_ACTIVE_HIGH;
+#else
+	reset_type = CAM_RESET_ACTIVE_LOW;
+#endif
+
+#if (CONFIG_S5K4BA_RESET_DELAY < 0)
+	reset_delay = 5000;
+#else
+	reset_delay = CONFIG_S5K4BA_RESET_DELAY;
+#endif
+
+	regs = ioremap(paddr, SZ_4K);
+	s3c_fimc_reset_camera(regs, slot, reset_type, reset_delay);
+	iounmap(regs);
 }
 
 module_init(s5k4ba_init)

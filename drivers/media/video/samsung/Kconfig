@@ -1,29 +1,17 @@
 config VIDEO_SAMSUNG
-	bool "Samsung Camera Interface (FIMC) Driver"
+	bool "Samsung Camera Interface (FIMC) driver"
 	depends on I2C && VIDEO_V4L2
 	default n
 	---help---
 	  This is a video4linux driver for Samsung FIMC device.
 
 config VIDEO_SAMSUNG_BOOTMEM
-	bool "Reserved Memory Allocation support"
+	bool "Reserved memory allocation support"
 	depends on VIDEO_SAMSUNG
 	default y
 	---help---
 	  Enabling this option makes kernel reserves some memory spaces
 	  for output frames at boot time with bootmem allocator.
 
-config VIDEO_SAMSUNG_S5K4BA
-	bool "Samsung S5K4BA Mobile Camera"
-	depends on VIDEO_SAMSUNG
-	---help---
-	  Samsung S5K4BA Mobile Camera support
-
-config VIDEO_SAMSUNG_S5K4BA_SLOT_A
-	bool "S5K4BA at Slot A"
-	depends on VIDEO_SAMSUNG_S5K4BA
-
-config VIDEO_SAMSUNG_S5K4BA_SLOT_B
-	bool "S5K4BA at Slot B"
-	depends on VIDEO_SAMSUNG_S5K4BA
+source "drivers/media/video/samsung/Kconfig-s5k4ba"
 
