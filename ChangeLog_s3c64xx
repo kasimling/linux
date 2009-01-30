@@ -513,3 +513,13 @@ v2.6.28-rc8-s3c64xx-r0d15: Kyoungil Kim
 	Added Files:
 		A       arch/arm/mach-s3c6400/include/mach/usb-control.h
 
+v2.6.28-rc8-s3c64xx-r0d15: Jongpill Lee
+	- Support DVS on CPUFREQ Driver
+
+	Added Files:
+		A       arch/arm/plat-s3c64xx/ltc3714.c
+	Modified Files:
+		M       arch/arm/plat-s3c/clock.c
+		M       arch/arm/plat-s3c64xx/Makefile
+		M       arch/arm/plat-s3c64xx/s3c64xx-cpufreq.c
+		
