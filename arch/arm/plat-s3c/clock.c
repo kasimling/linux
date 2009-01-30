@@ -304,7 +304,7 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 
 	clk->rate = s3c_cpu_clock_table[iter][0];
 
-	return ret;
+	return 0;
 }
 
 /* base clocks */
@@ -352,8 +352,8 @@ struct clk clk_f = {
 	.rate		= 0,
 	.parent		= &clk_mpll,
 	.ctrlbit	= 0,
-	.set_rate	= &s3c_fclk_set_rate,
-	.round_rate	= &s3c_fclk_round_rate,
+	.set_rate	= s3c_fclk_set_rate,
+	.round_rate	= s3c_fclk_round_rate,
 };
 
 struct clk clk_h = {
