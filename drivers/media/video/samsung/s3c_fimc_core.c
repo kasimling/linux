@@ -160,6 +160,7 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 	ctrl->scaler.line_length = pdata->line_length;
 
 	mutex_init(&ctrl->lock);
+	init_waitqueue_head(&ctrl->waitq);
 
 	/* get resource for io memory */
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -387,9 +388,6 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 	}
 
 	s3c_fimc_reset(ctrl);
-
-	if (ctrl->in_cam && ctrl->id == 0)
-		s3c_fimc_reset_camera(ctrl);
 
 	info("controller %d registered successfully\n", ctrl->id);
 

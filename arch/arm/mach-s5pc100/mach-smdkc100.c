@@ -167,7 +167,6 @@ static void __init smdkc100_smc911x_set(void)
 	__raw_writel((0x0<<28)|(0x4<<24)|(0xd<<16)|(0x1<<12)|(0x4<<8)|(0x6<<4)|(0x0<<0), S5PC1XX_SROM_BC3);
 }
 
-
 static void __init smdkc100_machine_init(void)
 {
         s3c_device_nand.dev.platform_data = &s3c_nand_mtd_part_info;
@@ -188,6 +187,11 @@ static void __init smdkc100_machine_init(void)
 	s3c_fimc0_set_platdata(NULL);
 	s3c_fimc1_set_platdata(NULL);
 	s3c_fimc2_set_platdata(NULL);
+
+/* FIXME: temp */
+#ifdef CONFIG_VIDEO_SAMSUNG_S5K4BA
+	s3c_fimc_s5k4ba_init();
+#endif
 
 	platform_add_devices(smdkc100_devices, ARRAY_SIZE(smdkc100_devices));
 #if defined(CONFIG_PM)

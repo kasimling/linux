@@ -49,9 +49,9 @@ static struct s3c_fimc_camera s5k4ba_template = {
 	.width		= 800,
 	.height		= 600,
 	.offset		= {
-		.h1 = 40,
+		.h1 = 0,
 		.h2 = 0,
-		.v1 = 40,
+		.v1 = 0,
 		.v2 = 0,
 	},
 
@@ -221,6 +221,7 @@ static int s5k4ba_command(struct i2c_client *client, u32 cmd, void *arg)
 
 	case I2C_CAM_RESOLUTION:
 		s5k4ba_change_resolution(client, (int) arg);
+		break;
 
 	case I2C_CAM_WB:
 		printk("[ *** S5K4BA White Balance, No mode ***]\n");

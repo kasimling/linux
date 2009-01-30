@@ -365,11 +365,13 @@ void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 	s3c_fimc_set_scaler_info(ctrl);
 	s3c_fimc_set_target_format(ctrl);
 	s3c_fimc_set_output_dma(ctrl);
+	s3c_fimc_enable_capture(ctrl);
 	s3c_fimc_start_scaler(ctrl);
 }
 
 void s3c_fimc_stop_dma(struct s3c_fimc_control *ctrl)
 {
+	s3c_fimc_disable_capture(ctrl);
 	s3c_fimc_stop_scaler(ctrl);
 }
 
