@@ -188,6 +188,10 @@ static void __init smdkc100_machine_init(void)
 	s3c_fimc1_set_platdata(NULL);
 	s3c_fimc2_set_platdata(NULL);
 
+#ifdef CONFIG_S5K3BA
+	s5k3ba_pre_init(S5PC1XX_PA_FIMC0);
+#endif
+
 #ifdef CONFIG_S5K4BA
 	s5k4ba_pre_init(S5PC1XX_PA_FIMC0);
 #endif

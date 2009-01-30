@@ -221,7 +221,7 @@ static int s5k4ba_command(struct i2c_client *client, u32 cmd, void *arg)
 	switch (cmd) {
 	case I2C_CAM_INIT:
 		s5k4ba_start(client);
-		info("External camera initialized\n");
+		info("external camera initialized\n");
 		break;
 
 	case I2C_CAM_RESOLUTION:
