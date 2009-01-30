@@ -513,3 +513,18 @@ v2.6.28-rc8-s3c64xx-r0d15: Kyoungil Kim
 	Added Files:
 		A       arch/arm/mach-s3c6400/include/mach/usb-control.h
 
+v2.6.28-rc8-s3c64xx-r0d16: Byungjae Lee
+	- Support Ethernet gadget and RNDIS for SMDK6410
+
+	Modifiled Files:
+		M	arch/arm/configs/smdk6410mtd_defconfig
+		M	arch/arm/mach-s3c6410/mach-smdk6410.c
+		M	drivers/usb/gadget/Kconfig
+		M	drivers/usb/gadget/epautoconf.c
+		M	drivers/usb/gadget/f_rndis.c
+		M	drivers/usb/gadget/s3c_udc.h
+		M	drivers/usb/gadget/s3c_udc_otg.c
+		M	drivers/usb/gadget/u_ether.c
+	Added Files:
+		A	drivers/usb/gadget/s3c_udc_otg_xfer_dma.c
+		A	drivers/usb/gadget/s3c_udc_otg_xfer_slave.c
