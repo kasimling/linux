@@ -6,6 +6,7 @@ config S5K4BA
 
 config S5K4BA_SLOT_A
 	bool "S5K4BA: Running at slot A"
+	default y
 	depends on S5K4BA
 
 config S5K4BA_SLOT_B

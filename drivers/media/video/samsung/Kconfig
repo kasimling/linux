@@ -13,6 +13,11 @@ config VIDEO_SAMSUNG_BOOTMEM
 	  Enabling this option makes kernel reserves some memory spaces
 	  for output frames at boot time with bootmem allocator.
 
+config VIDEO_SAMSUNG_BOOTMEM_SIZE
+	int "Memory size in KB for reserve"
+	depends on VIDEO_SAMSUNG_BOOTMEM
+	default "10240"
+
 source "drivers/media/video/samsung/Kconfig-s5k3ba"
 source "drivers/media/video/samsung/Kconfig-s5k4ba"
 

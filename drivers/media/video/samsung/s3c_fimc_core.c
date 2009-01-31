@@ -41,7 +41,7 @@ u8 s3c_fimc_i2c_read(struct i2c_client *client, u8 subaddr)
 
 	ret = i2c_transfer(client->adapter, &msg, 1) == 1 ? 0 : -EIO;
 	if (ret == -EIO) {
-		err("I2C write error\n");
+		err("i2c transfer error\n");
 		return -EIO;
 	}
 
@@ -190,8 +190,18 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 	return ctrl;
 }
 
-static int s3c_fimc_unregister_controller(struct s3c_fimc_control *ctrl)
+static int s3c_fimc_unregister_controller(struct platform_device *pdev)
 {
+	struct s3c_fimc_control *ctrl;
+	int id = pdev->id;
+
+	ctrl = &s3c_fimc.ctrl[id];
+
+	s3c_fimc_free_output_memory(&ctrl->out_frame);
+
+	iounmap(ctrl->regs);
+	memset(ctrl, 0, sizeof(*ctrl));
+	
 	return 0;
 }
 
@@ -273,24 +283,23 @@ static int s3c_fimc_open(struct inode *inode, struct file *filp)
 	id = MINOR(inode->i_rdev);
 	ctrl = &s3c_fimc.ctrl[id];
 
-	mutex_lock(&ctrl->lock);
+//	mutex_lock(&ctrl->lock);
 
-	if (ctrl->in_use) {
-		err("controller %d is busy\n", id);
-		ret = -EBUSY;
-		goto resource_busy;
-	} else {
-		ctrl->in_use = 1;
+//	if (ctrl->in_use) {
+//		ret = -EBUSY;
+//		goto resource_busy;
+//	} else {
+//		ctrl->in_use = 1;
 		filp->private_data = ctrl;
-	}
+//	}
 
-	mutex_unlock(&ctrl->lock);
+//	mutex_unlock(&ctrl->lock);
 
 	return 0;
 
-resource_busy:
-	mutex_unlock(&ctrl->lock);
-	return ret;
+//resource_busy:
+//	mutex_unlock(&ctrl->lock);
+//	return ret;
 }
 
 static int s3c_fimc_release(struct inode *inode, struct file *filp)
@@ -301,11 +310,12 @@ static int s3c_fimc_release(struct inode *inode, struct file *filp)
 	id = MINOR(inode->i_rdev);
 	ctrl = &s3c_fimc.ctrl[id];
 
-	mutex_lock(&ctrl->lock);
-	
-	ctrl->in_use = 0;
-	
-	mutex_unlock(&ctrl->lock);
+//	mutex_lock(&ctrl->lock);
+
+//	ctrl->in_use = 0;
+	filp->private_data = NULL;
+
+//	mutex_unlock(&ctrl->lock);
 
 	return 0;
 }
@@ -401,7 +411,7 @@ err_clk_cam:
 	clk_put(ctrl->clock);
 
 err_clk_io:
-	s3c_fimc_unregister_controller(ctrl);
+	s3c_fimc_unregister_controller(pdev);
 
 err_fimc:
 	return -EINVAL;
@@ -410,6 +420,8 @@ err_fimc:
 
 static int s3c_fimc_remove(struct platform_device *pdev)
 {
+	s3c_fimc_unregister_controller(pdev);
+
 	return 0;
 }
 

@@ -157,7 +157,7 @@ void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr)
 }
 
 int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
-					struct v4l2_pix_format *fmt)
+				struct v4l2_pix_format *fmt, int priv)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
 	struct s3c_fimc_user_order user;
@@ -166,15 +166,16 @@ int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
 	frame->width = fmt->width;
 	frame->height = fmt->height;
 
-	/* planes and order */
-	if (copy_from_user(&user, (struct s3c_fimc_user_order *) fmt->priv, \
-				sizeof(user))) {
-		return -EFAULT;
-	}
+	if (priv) {
+		if (copy_from_user(&user, (struct s3c_fimc_user_order *) fmt->priv, \
+					sizeof(user))) {
+			return -EFAULT;
+		}
 
-	frame->planes = user.planes;
-	frame->order_1p = user.order_1p;
-	frame->order_2p = user.order_2p;
+		frame->planes = user.planes;
+		frame->order_1p = user.order_1p;
+		frame->order_2p = user.order_2p;
+	}
 
 	switch (fmt->field) {
 	case V4L2_FIELD_INTERLACED:

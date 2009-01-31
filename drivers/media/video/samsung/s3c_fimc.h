@@ -526,7 +526,7 @@ extern void s3c_fimc_set_active_camera(struct s3c_fimc_control *ctrl, int id);
 extern void s3c_fimc_init_camera(struct s3c_fimc_control *ctrl);
 extern int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info);
 extern void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info);
-extern int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl, struct v4l2_pix_format *fmt);
+extern int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl, struct v4l2_pix_format *fmt, int priv);
 extern int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl);
 extern u8 *s3c_fimc_get_current_frame(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr);

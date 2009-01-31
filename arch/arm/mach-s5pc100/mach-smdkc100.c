@@ -25,6 +25,8 @@
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
 #include <linux/clk.h>
+#include <linux/bootmem.h>
+#include <linux/mm.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -75,6 +77,7 @@
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
 
 extern struct sys_timer s5pc1xx_timer;
+extern void s5pc1xx_reserve_bootmem(void);
 
 static struct s3c2410_uartcfg smdkc100_uartcfgs[] __initdata = {
 	[0] = {
@@ -187,6 +190,8 @@ static void __init smdkc100_machine_init(void)
 	s3c_fimc0_set_platdata(NULL);
 	s3c_fimc1_set_platdata(NULL);
 	s3c_fimc2_set_platdata(NULL);
+
+	s5pc1xx_reserve_bootmem();
 
 #ifdef CONFIG_S5K3BA
 	s5k3ba_pre_init(S5PC1XX_PA_FIMC0);

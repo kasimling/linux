@@ -161,7 +161,7 @@ static int s3c_fimc_v4l2_s_fbuf(struct file *filp, void *fh,
 	if (i == S3C_FIMC_MAX_OVERLAY_FORMATS)
 		return -EINVAL;
 
-	bpp = s3c_fimc_set_output_frame(ctrl, &fb->fmt);
+	bpp = s3c_fimc_set_output_frame(ctrl, &fb->fmt, 0);
 
 	frmbuf->base  = fb->base;
 	frmbuf->flags = fb->flags;
@@ -209,7 +209,7 @@ static int s3c_fimc_v4l2_s_fmt_vid_cap(struct file *filp, void *fh,
 	struct s3c_fimc_control *ctrl = (struct s3c_fimc_control *) fh;
 
 	ctrl->v4l2.frmbuf.fmt = f->fmt.pix;
-	s3c_fimc_set_output_frame(ctrl, &f->fmt.pix);
+	s3c_fimc_set_output_frame(ctrl, &f->fmt.pix, 1);
 
 	return 0;
 }
@@ -239,8 +239,11 @@ static int s3c_fimc_v4l2_overlay(struct file *filp, void *fh, unsigned int i)
 			s3c_fimc_start_dma(ctrl);
 		}
 	} else {
-		if (ctrl->in_type != PATH_IN_DMA)
+		if (ctrl->in_type != PATH_IN_DMA) {
+			s3c_fimc_free_output_memory(&ctrl->out_frame);
+			s3c_fimc_set_output_address(ctrl);
 			s3c_fimc_stop_dma(ctrl);
+		}
 	}
 	
 	return 0;
