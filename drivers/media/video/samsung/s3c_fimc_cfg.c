@@ -173,8 +173,11 @@ int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
 		}
 
 		frame->planes = user.planes;
-		frame->order_1p = user.order_1p;
-		frame->order_2p = user.order_2p;
+
+		if (frame->planes == 1)
+			frame->order_1p = user.order_1p;
+		else if (frame->planes == 2)
+			frame->order_2p = user.order_2p;
 	}
 
 	switch (fmt->field) {
@@ -235,12 +238,14 @@ int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl)
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
 	int ret;
 
+	frame->skip_frames++;
+
 	if ((ctrl->flag & S3C_FIMC_FLAG_IRQ_NORMAL) && \
 		frame->skip_frames > frame->nr_frames * 2) {
 		s3c_fimc_set_iflag(ctrl->flag, S3C_FIMC_FLAG_IRQ_X);
 	}
 
-	switch (ctrl->flag) {
+	switch (ctrl->flag & S3C_FIMC_IRQ_MASK) {
 	case S3C_FIMC_FLAG_IRQ_NORMAL:
 		s3c_fimc_set_sflag(ctrl->flag, S3C_FIMC_FLAG_RUNNING);
 		ret = S3C_FIMC_FRAME_SKIP;

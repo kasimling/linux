@@ -70,9 +70,13 @@
 #define S3C_FIMC_FLAG_IRQ_LAST		0x0800
 #define S3C_FIMC_IRQ_MASK		0x0f00
 
-#define s3c_fimc_set_sflag(x, fld) 	(x &= ~S3C_FIMC_STA_MASK); (x |= fld)
-#define s3c_fimc_set_uflag(x, fld) 	(x &= ~S3C_FIMC_USE_MASK); (x |= fld)
-#define s3c_fimc_set_iflag(x, fld) 	(x &= ~S3C_FIMC_IRQ_MASK); (x |= fld)
+#define s3c_fimc_unmask_sflag(x)	(x &= ~S3C_FIMC_STA_MASK)
+#define s3c_fimc_unmask_uflag(x)	(x &= ~S3C_FIMC_USE_MASK)
+#define s3c_fimc_unmask_iflag(x)	(x &= ~S3C_FIMC_IRQ_MASK)
+
+#define s3c_fimc_set_sflag(x, fld) 	s3c_fimc_unmask_sflag(x); (x |= fld)
+#define s3c_fimc_set_uflag(x, fld) 	s3c_fimc_unmask_uflag(x); (x |= fld)
+#define s3c_fimc_set_iflag(x, fld) 	s3c_fimc_unmask_iflag(x); (x |= fld)
 
 /* E n u m e r a t i o n s */
 enum s3c_fimc_cam_slot_t {
@@ -118,17 +122,17 @@ enum s3c_fimc_order422_in_t {
 };
 
 enum s3c_fimc_order422_out_t {
-	OUT_ORDER422_CRYCBY = (0 << 0),
-	OUT_ORDER422_CBYCRY = (1 << 0),
-	OUT_ORDER422_YCRYCB = (2 << 0),
-	OUT_ORDER422_YCBYCR = (3 << 0),
+	OUT_ORDER422_CRYCBY = (3 << 0),
+	OUT_ORDER422_CBYCRY = (2 << 0),
+	OUT_ORDER422_YCRYCB = (1 << 0),
+	OUT_ORDER422_YCBYCR = (0 << 0),
 };
 
 enum s3c_fimc_2plane_order_t {
-	FORWARD_CRCB = 0,
-	FORWARD_CBCR = 1,
-	BACKWARD_CRCB = 2,
-	BACKWARD_CBCR = 3,
+	LSB_CBCR = 0,
+	LSB_CRCB = 1,
+	MSB_CRCB = 2,
+	MSB_CBCR = 3,
 };
 
 enum s3c_fimc_itu_cam_ch_t {

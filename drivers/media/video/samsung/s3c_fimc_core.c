@@ -92,17 +92,10 @@ void s3c_fimc_unregister_camera(struct s3c_fimc_camera *cam)
 
 void s3c_fimc_set_active_camera(struct s3c_fimc_control *ctrl, int id)
 {
-	struct s3c_fimc_camera *cam;
-	
 	ctrl->in_cam = s3c_fimc.camera[id];
-	cam = ctrl->in_cam;
 
-	if (cam) {
+	if (ctrl->in_cam)
 		s3c_fimc_select_camera(ctrl);
-		clk_disable(s3c_fimc.cam_clock);
-		clk_set_rate(s3c_fimc.cam_clock, cam->clockrate);
-		clk_enable(s3c_fimc.cam_clock);
-	}
 }
 
 void s3c_fimc_init_camera(struct s3c_fimc_control *ctrl)
@@ -110,6 +103,9 @@ void s3c_fimc_init_camera(struct s3c_fimc_control *ctrl)
 	struct s3c_fimc_camera *cam = ctrl->in_cam;
 	
 	if (!cam->initialized) {
+		clk_disable(s3c_fimc.cam_clock);
+		clk_set_rate(s3c_fimc.cam_clock, cam->clockrate);
+		clk_enable(s3c_fimc.cam_clock);
 		s3c_fimc_i2c_command(ctrl, I2C_CAM_INIT, 0);
 		s3c_fimc_change_resolution(ctrl, CAM_RES_DEFAULT);
 		cam->initialized = 1;
@@ -227,8 +223,10 @@ static int s3c_fimc_mmap(struct file* filp, struct vm_area_struct *vma)
 		return -EINVAL;
 	}
 
-	if (remap_pfn_range(vma, vma->vm_start, pfn, size, vma->vm_page_prot))
+	if (remap_pfn_range(vma, vma->vm_start, pfn, size, vma->vm_page_prot)) {
+		err("mmap fail\n");
 		return -EINVAL;
+	}
 
 	return 0;
 }
@@ -284,23 +282,23 @@ static int s3c_fimc_open(struct inode *inode, struct file *filp)
 	id = MINOR(inode->i_rdev);
 	ctrl = &s3c_fimc.ctrl[id];
 
-//	mutex_lock(&ctrl->lock);
+	mutex_lock(&ctrl->lock);
 
-//	if (ctrl->in_use) {
-//		ret = -EBUSY;
-//		goto resource_busy;
-//	} else {
-//		ctrl->in_use = 1;
+	if (ctrl->in_use) {
+		ret = -EBUSY;
+		goto resource_busy;
+	} else {
+		ctrl->in_use = 1;
 		filp->private_data = ctrl;
-//	}
+	}
 
-//	mutex_unlock(&ctrl->lock);
+	mutex_unlock(&ctrl->lock);
 
 	return 0;
 
-//resource_busy:
-//	mutex_unlock(&ctrl->lock);
-//	return ret;
+resource_busy:
+	mutex_unlock(&ctrl->lock);
+	return ret;
 }
 
 static int s3c_fimc_release(struct inode *inode, struct file *filp)
@@ -311,12 +309,12 @@ static int s3c_fimc_release(struct inode *inode, struct file *filp)
 	id = MINOR(inode->i_rdev);
 	ctrl = &s3c_fimc.ctrl[id];
 
-//	mutex_lock(&ctrl->lock);
+	mutex_lock(&ctrl->lock);
 
-//	ctrl->in_use = 0;
+	ctrl->in_use = 0;
 	filp->private_data = NULL;
 
-//	mutex_unlock(&ctrl->lock);
+	mutex_unlock(&ctrl->lock);
 
 	return 0;
 }
