@@ -5,7 +5,7 @@ config VIDEO_SAMSUNG
 	---help---
 	  This is a video4linux driver for Samsung FIMC device.
 
-config VIDEO_SAMSUNG_BOOTMEM
+config VIDEO_SAMSUNG_STATIC_MEMORY
 	bool "Reserved memory allocation support"
 	depends on VIDEO_SAMSUNG
 	default y
@@ -13,9 +13,9 @@ config VIDEO_SAMSUNG_BOOTMEM
 	  Enabling this option makes kernel reserves some memory spaces
 	  for output frames at boot time with bootmem allocator.
 
-config VIDEO_SAMSUNG_BOOTMEM_SIZE
+config VIDEO_SAMSUNG_STATIC_MEMORY_SIZE
 	int "Memory size in KB for reserve"
-	depends on VIDEO_SAMSUNG_BOOTMEM
+	depends on VIDEO_SAMSUNG_STATIC_MEMORY
 	default "10240"
 
 source "drivers/media/video/samsung/Kconfig-s5k3ba"

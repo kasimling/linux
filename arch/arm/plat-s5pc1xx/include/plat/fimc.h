@@ -16,7 +16,9 @@
 struct platform_device;
 
 struct s3c_platform_fimc {
+	const char	srclk_name[16];
 	const char	clk_name[16];
+	u32		clockrate;
 	int		line_length;
 	int		nr_frames;
 

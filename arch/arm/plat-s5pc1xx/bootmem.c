@@ -13,6 +13,7 @@
 
 #include <linux/mm.h>
 #include <linux/bootmem.h>
+#include <linux/swap.h>
 #include <mach/memory.h>
 
 void s5pc1xx_reserve_bootmem(void)
@@ -23,8 +24,8 @@ void s5pc1xx_reserve_bootmem(void)
 	int bootmem_size;
 
 	/* add here for devices' bootmem size */
-#ifdef CONFIG_VIDEO_SAMSUNG_BOOTMEM
-	reserve_size += CONFIG_VIDEO_SAMSUNG_BOOTMEM_SIZE * SZ_1K;
+#ifdef CONFIG_VIDEO_SAMSUNG_STATIC_MEMORY
+	reserve_size += CONFIG_VIDEO_SAMSUNG_STATIC_MEMORY_SIZE * SZ_1K;
 #endif
 
 	/* bootmem_size means none-reserved memory size */

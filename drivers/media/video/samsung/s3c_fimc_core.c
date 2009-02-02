@@ -26,6 +26,7 @@
 
 #include <asm/io.h>
 #include <asm/memory.h>
+#include <plat/clock.h>
 
 #include "s3c_fimc.h"
 
@@ -361,6 +362,7 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 {
 	struct s3c_platform_fimc *pdata;
 	struct s3c_fimc_control *ctrl;
+	struct clk *srclk;
 	int ret;
 
 	ctrl = s3c_fimc_register_controller(pdev);
@@ -373,6 +375,13 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 	if (pdata->cfg_gpio)
 		pdata->cfg_gpio(pdev);
 
+	/* fimc source clock */
+	srclk = clk_get(&pdev->dev, pdata->srclk_name);
+	if (IS_ERR(srclk)) {
+		err("failed to get source clock of fimc\n");
+		goto err_clk_io;
+	}
+
 	/* fimc clock */
 	ctrl->clock = clk_get(&pdev->dev, pdata->clk_name);
 	if (IS_ERR(ctrl->clock)) {
@@ -380,6 +389,9 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 		goto err_clk_io;
 	}
 
+	/* set parent clock */
+	ctrl->clock->set_parent(ctrl->clock, srclk);
+	ctrl->clock->set_rate(ctrl->clock, pdata->clockrate);
 	clk_enable(ctrl->clock);
 
 	/* camera clock */

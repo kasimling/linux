@@ -42,9 +42,11 @@ struct platform_device s3c_device_fimc0 = {
 };
 
 static struct s3c_platform_fimc default_fimc_data0 __initdata = {
-	.clk_name = "fimc0",
-	.line_length = 1280,
-	.nr_frames = 4,
+	.srclk_name	= "dout_mpll",
+	.clk_name	= "sclk_fimc",
+	.clockrate	= 133000000,
+	.line_length	= 1280,
+	.nr_frames	= 4,
 };
 
 void __init s3c_fimc0_set_platdata(struct s3c_platform_fimc *pd)
