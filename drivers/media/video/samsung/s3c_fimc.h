@@ -27,7 +27,6 @@
  * C O M M O N   D E F I N I T I O N S
  *
 */
-
 #define info(args...) do { printk(KERN_INFO "s3c-fimc: " args); } while (0)
 #define err(args...)  do { printk(KERN_ERR  "s3c-fimc: " args); } while (0)
 
@@ -256,6 +255,12 @@ struct s3c_fimc_window_offset {
 
 /*
  * struct s3c_fimc_dma_offset
+ * @y_h:	y value horizontal offset
+ * @y_v:	y value vertical offset
+ * @cb_h:	cb value horizontal offset
+ * @cb_v:	cb value vertical offset
+ * @cr_h:	cr value horizontal offset
+ * @cr_v:	cr value vertical offset
  *
 */
 struct s3c_fimc_dma_offset {
@@ -283,6 +288,9 @@ struct s3c_fimc_polarity {
 
 /*
  * struct s3c_fimc_effect
+ * @type:	effect type
+ * @pat_cb:	cr value when type == arbitrary
+ * @pat_cR:	cr value when type == arbitrary
  *
 */
 struct s3c_fimc_effect {
@@ -304,6 +312,9 @@ struct s3c_fimc_effect {
  * @scaleup_v:		1 if we have to scale up for the vertical
  * @main_hratio:	horizontal ratio for main scaler
  * @main_vratio:	vertical ratio for main scaler
+ * @real_width:		src_width - offset
+ * @real_height:	src_height - offset
+ * @line_length:	line buffer length from platform_data
  * @zoom_depth:		current zoom depth (0 = original)
 */
 struct s3c_fimc_scaler {
@@ -326,6 +337,7 @@ struct s3c_fimc_scaler {
 
 /*
  * struct s3c_fimc_camera: abstraction for input camera
+ * @id:			cam id (0-2)
  * @type:		type of camera (ITU or MIPI)
  * @mode:		mode of input source
  * @order422:		YCBCR422 order
@@ -360,8 +372,7 @@ struct s3c_fimc_camera {
  * @addr:		address information of frame data
  * @width:		width
  * @height:		height
- * @real_width:		real width with offset
- * @real_height:	real height with offset
+ * @offset:		dma offset
  * @format:		pixel format
  * @planes:		YCBCR planes (1, 2 or 3)
  * @order_1p		1plane YCBCR order
@@ -386,6 +397,7 @@ struct s3c_fimc_in_frame {
  * @buf_size:		1 buffer size
  * @addr[]:		address information of frames
  * @nr_frams:		how many output frames used
+ * @skip_frames:	current streamed frames (for capture)
  * @width:		width
  * @height:		height
  * @offset:		offset for output dma
@@ -436,17 +448,19 @@ struct s3c_fimc_v4l2 {
  * @lock:	mutex lock
  * @waitq:	waitqueue
  * @pdata:	platform data
- * @vd:		video_device
- * @v4l2:	v4l2 info
+ * @clock:	fimc clock
  * @regs:	virtual address of SFR
  * @in_use:	1 when resource is occupied
  * @irq:	irq number
+ * @vd:		video_device
+ * @v4l2:	v4l2 info
  * @scaler:	scaler related information
  * @in_type:	type of input
  * @in_cam:	camera structure pointer if input is camera else null
  * @in_frame:	frame structure pointer if input is dma else null
  * @out_type:	type of output
  * @out_frame:	frame structure pointer if output is dma
+ * @rot90:	1 if clockwise 90 degree for output
 */
 struct s3c_fimc_control {
 	/* general */
@@ -489,7 +503,7 @@ struct s3c_fimc_config {
  * V 4 L 2   F I M C   E X T E N S I O N S
  *
 */
-#define V4L2_INPUT_TYPE_MEMORY	3
+#define V4L2_INPUT_TYPE_MEMORY		3
 
 #define V4L2_CID_ORIGINAL		(V4L2_CID_PRIVATE_BASE + 0)
 #define V4L2_CID_ARBITRARY		(V4L2_CID_PRIVATE_BASE + 1)
@@ -514,6 +528,7 @@ struct s3c_fimc_user_order {
 	enum s3c_fimc_order422_out_t	order_1p;
 	enum s3c_fimc_2plane_order_t	order_2p;
 };
+
 
 /*
  * E X T E R N S
