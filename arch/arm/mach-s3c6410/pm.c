@@ -1,7 +1,7 @@
 /* linux/arch/arm/mach-s3c6410/pm.c
  *
  * Copyright (c) 2006 Samsung Electronics
- *	
+ *
  *
  * S3C6410 (and compatible) Power Manager (Suspend-To-RAM) support
  *
@@ -83,21 +83,8 @@ static struct sleep_save s3c6410_sleep[] = {
 
 };
 
-static int s3c6410_pm_suspend(struct sys_device *dev, pm_message_t state)
-{
-	s3c6410_pm_do_save(s3c6410_sleep, ARRAY_SIZE(s3c6410_sleep));
-	return 0;
-}
-
 static int s3c6410_pm_resume(struct sys_device *dev)
 {
-	unsigned long tmp;
-#if 0
-	tmp = __raw_readl(S3C_PWR_CFG);
-	tmp &= ~(0x60<<0);
-	tmp |= (0x1<<5);
-	__raw_writel(tmp, S3C_PWR_CFG);
-#endif
 	s3c6410_pm_do_restore(s3c6410_sleep, ARRAY_SIZE(s3c6410_sleep));
 	return 0;
 }

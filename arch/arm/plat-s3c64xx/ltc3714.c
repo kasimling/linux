@@ -142,7 +142,7 @@ int set_power(unsigned int freq)
 
 EXPORT_SYMBOL(set_power);
 
-int ltc3714_init(void)
+void ltc3714_init(void)
 {
 	ltc3714_gpio_setting();
 	set_power(532000);

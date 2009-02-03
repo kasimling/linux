@@ -45,7 +45,7 @@ static unsigned int tick_count;
 /* common function function  */
 
 extern void s3c_rtc_set_pie(void __iomem *base, uint to);
-extern void s3c_rtc_set_freq_regs(void __iomem *base, uint freq, unchar *s3c_freq);
+extern void s3c_rtc_set_freq_regs(void __iomem *base, uint freq, uint s3c_freq);
 extern void s3c_rtc_enable_set(struct platform_device *dev,void __iomem *base, int en);
 extern unsigned int s3c_rtc_set_bit_byte(void __iomem *base, uint offset, uint val);
 extern unsigned int s3c_rtc_read_alarm_status(void __iomem *base);
@@ -91,8 +91,6 @@ static void s3c_rtc_setaie(int to)
 
 static int s3c_rtc_setpie(struct device *dev, int enabled)
 {
-	unsigned int tmp;
-
 	pr_debug("%s: pie=%d\n", __func__, enabled);
 
 	spin_lock_irq(&s3c_rtc_pie_lock);
@@ -106,11 +104,9 @@ static int s3c_rtc_setpie(struct device *dev, int enabled)
 
 static int s3c_rtc_setfreq(struct device *dev, int freq)
 {
-	unsigned int tmp;
-
 	spin_lock_irq(&s3c_rtc_pie_lock);
 
-	s3c_rtc_set_freq_regs(s3c_rtc_base,freq,&s3c_rtc_freq);
+	s3c_rtc_set_freq_regs(s3c_rtc_base,freq,s3c_rtc_freq);
 
 	spin_unlock_irq(&s3c_rtc_pie_lock);
 
@@ -396,7 +392,6 @@ static const struct rtc_class_ops s3c_rtcops = {
 static void s3c_rtc_enable(struct platform_device *pdev, int en)
 {
 	void __iomem *base = s3c_rtc_base;
-	unsigned int tmp;
 
 	if (s3c_rtc_base == NULL)
 		return;

@@ -29,11 +29,11 @@
 #define APLL_GEN_CLK	532*1000	//khz
 #define KHZ_T		1000
 
-#define MPU_CLK		"fclk"
+#define MPU_CLK		"clk_cpu"
 
 /* definition for power setting function */
 extern int set_power(unsigned int freq);
-extern int ltc3714_init(void);
+extern void ltc3714_init(void);
 
 #define ARM_LE	0
 #define INT_LE	1
@@ -50,12 +50,14 @@ static struct cpufreq_frequency_table s3c6410_freq_table[] = {
 
 int s3c6410_verify_speed(struct cpufreq_policy *policy)
 {
-	struct clk * mpu_clk;
+#ifndef USE_FREQ_TABLE
+	struct clk *mpu_clk;
+#endif
 
 	if (policy->cpu)
 		return -EINVAL;
 #ifdef USE_FREQ_TABLE
-	return cpufreq_frequency_table_verify(policy, &s3c6410_freq_table);
+	return cpufreq_frequency_table_verify(policy, s3c6410_freq_table);
 #else
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
@@ -101,7 +103,6 @@ static int s3c6410_target(struct cpufreq_policy *policy,
 	struct cpufreq_freqs freqs;
 	int ret = 0;
 	unsigned long arm_clk;
-	unsigned long flags;
 	unsigned int index;
 
 	mpu_clk = clk_get(NULL, MPU_CLK);
@@ -154,11 +155,11 @@ static int s3c6410_target(struct cpufreq_policy *policy,
 
 static int __init s3c6410_cpu_init(struct cpufreq_policy *policy)
 {
+	struct clk * mpu_clk;
+
 #ifdef USE_DVS
 	ltc3714_init();
 #endif
-	struct clk * mpu_clk;
-
 	mpu_clk = clk_get(NULL, MPU_CLK);
 	if (IS_ERR(mpu_clk))
 		return PTR_ERR(mpu_clk);

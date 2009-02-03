@@ -94,8 +94,6 @@ static void s3c_spi_free(struct s3c_spi *spi)
 static int s3c_spi_hw_init(struct s3c_spi *spi)
 {
 
-	unsigned int s3c_spcon;
-
 #ifdef CONFIG_SPICLK_PCLK
 	clk_enable(spi->clk);
 #elif defined (CONFIG_SPICLK_EPLL)
@@ -141,11 +139,6 @@ static int s3c_spi_hw_init(struct s3c_spi *spi)
 		s3c_gpio_setpull(S3C64XX_GPC(6), S3C_GPIO_PULL_UP);
 		s3c_gpio_setpull(S3C64XX_GPC(7), S3C_GPIO_PULL_UP);
 	}
-#if 0
-	/* SPI drive strength */
-	s3c_spcon = readl(S3C_SPCON);
-	writel((s3c_spcon & ~(3<<28)) | (1<<28), S3C_SPCON);
-#endif
 	return 0;
 }
 

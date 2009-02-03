@@ -232,15 +232,6 @@ static void __init s3c64xx_uart_irq(struct uart_irq *uirq)
 	set_irq_chained_handler(uirq->parent_irq, s3c_irq_demux_uart);
 }
 #ifdef CONFIG_PM
-static struct sleep_save irq_save[] = {
-	SAVE_ITEM(S3C64XX_VIC0INTSELECT),
-	SAVE_ITEM(S3C64XX_VIC1INTSELECT),
-	SAVE_ITEM(S3C64XX_VIC0INTENABLE),
-	SAVE_ITEM(S3C64XX_VIC1INTENABLE),
-	SAVE_ITEM(S3C64XX_VIC0SOFTINT),
-	SAVE_ITEM(S3C64XX_VIC1SOFTINT),
-};
-
 static struct sleep_save extirq_save[] = {
 	SAVE_ITEM(S3C64XX_EINT0CON0),
 	SAVE_ITEM(S3C64XX_EINT0CON1),
@@ -270,12 +261,9 @@ static struct sleep_save extirq_save[] = {
 	SAVE_ITEM(S3C64XX_EINT9FLTCON),
 };
 
-static unsigned long save_eintmask;
-
 int s3c64xx_irq_suspend(struct sys_device *dev, pm_message_t state)
 {
 	s3c6410_pm_do_save(extirq_save, ARRAY_SIZE(extirq_save));
-//	s3c6410_pm_do_save(irq_save, ARRAY_SIZE(irq_save));
 	return 0;
 }
 
@@ -285,7 +273,6 @@ int s3c64xx_irq_resume(struct sys_device *dev)
 	int irqindex = 0;
 	/* For writing the IRQ number into the VICVECTADDR */
 	s3c6410_pm_do_restore(extirq_save, ARRAY_SIZE(extirq_save));
-//	s3c6410_pm_do_restore(irq_save, ARRAY_SIZE(irq_save));
 
 	for (irqno = IRQ_EINT0_3; irqno <= IRQ_LCD_SYSTEM; irqno++) {
 		__raw_writel(irqno, S3C64XX_VIC0VECTADDR0 + irqindex);
