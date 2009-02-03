@@ -105,8 +105,11 @@
 #define s3c_fimc_set_uflag(x, fld) 	s3c_fimc_unmask_uflag(x); (x |= fld)
 #define s3c_fimc_set_iflag(x, fld) 	s3c_fimc_unmask_iflag(x); (x |= fld)
 
-/* E n u m e r a t i o n s */
-enum s3c_fimc_cam_slot_t {
+
+/*
+ * E N U M E R A T I O N S
+ *
+*/enum s3c_fimc_cam_slot_t {
 	CAM_SLOT_A	= 0,
 	CAM_SLOT_B	= 1,
 	CAM_SLOT_MIPI	= 2,
@@ -232,6 +235,7 @@ enum s3c_fimc_cam_res_t {
 	CAM_RES_UXGA,
 	CAM_RES_MAX,
 };
+
 
 /*
  * F I M C   S T R U C T U R E S
