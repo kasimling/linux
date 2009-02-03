@@ -156,29 +156,134 @@ void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr)
 	ctrl->out_frame.nr_frames = nr;
 }
 
+static int s3c_fimc_set_output_format(struct v4l2_pix_format *fmt,
+					struct s3c_fimc_out_frame *frame)
+{
+	int depth = 0;
+
+	switch (fmt->pixelformat) {
+	case V4L2_PIX_FMT_RGB565:
+		frame->format = FORMAT_RGB565;
+		frame->planes = 1;
+		depth = 16;
+		break;
+
+	case V4L2_PIX_FMT_RGB24:
+		frame->format = FORMAT_RGB888;
+		frame->planes = 1;
+		depth = 24;
+		break;
+
+	case V4L2_PIX_FMT_NV12:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 2;
+		frame->order_2p = LSB_CBCR;
+		depth = 12;
+		break;
+
+	case V4L2_PIX_FMT_NV21:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 2;
+		frame->order_2p = LSB_CRCB;
+		depth = 12;
+		break;
+
+	case V4L2_PIX_FMT_NV12X:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 2;
+		frame->order_2p = MSB_CBCR;
+		depth = 12;
+		break;
+
+	case V4L2_PIX_FMT_NV21X:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 2;
+		frame->order_2p = MSB_CRCB;
+		depth = 12;
+		break;
+
+	case V4L2_PIX_FMT_YUV420:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 3;
+		depth = 12;
+		break;
+
+	case V4L2_PIX_FMT_YUYV:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 1;
+		frame->order_1p = OUT_ORDER422_YCBYCR;
+		depth = 16;
+		break;
+
+	case V4L2_PIX_FMT_YVYU:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 1;
+		frame->order_1p = OUT_ORDER422_YCRYCB;
+		depth = 16;
+		break;
+
+	case V4L2_PIX_FMT_UYVY:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 1;
+		frame->order_1p = OUT_ORDER422_CBYCRY;
+		depth = 16;
+		break;
+
+	case V4L2_PIX_FMT_VYUY:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 1;
+		frame->order_1p = OUT_ORDER422_CRYCBY;
+		depth = 16;
+		break;
+
+	case V4L2_PIX_FMT_UV12:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 2;
+		frame->order_1p = LSB_CBCR;
+		depth = 16;
+		break;
+
+	case V4L2_PIX_FMT_UV21:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 2;
+		frame->order_1p = LSB_CRCB;
+		depth = 16;
+		break;
+
+	case V4L2_PIX_FMT_UV12X:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 2;
+		frame->order_1p = MSB_CBCR;
+		depth = 16;
+		break;
+
+	case V4L2_PIX_FMT_UV21X:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 2;
+		frame->order_1p = MSB_CRCB;
+		depth = 16;
+		break;
+
+	case V4L2_PIX_FMT_YUV422P:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 3;
+		depth = 16;
+		break;
+	}
+
+	return depth;
+}
+
 int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
 				struct v4l2_pix_format *fmt, int priv)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
-	struct s3c_fimc_user_order user;
-	int bpp = 0;
+	int depth = 0;
 
 	frame->width = fmt->width;
 	frame->height = fmt->height;
 
-	if (priv) {
-		if (copy_from_user(&user, (struct s3c_fimc_user_order *) fmt->priv, \
-					sizeof(user))) {
-			return -EFAULT;
-		}
-
-		frame->planes = user.planes;
-
-		if (frame->planes == 1)
-			frame->order_1p = user.order_1p;
-		else if (frame->planes == 2)
-			frame->order_2p = user.order_2p;
-	}
+	depth = s3c_fimc_set_output_format(fmt, frame);
 
 	switch (fmt->field) {
 	case V4L2_FIELD_INTERLACED:
@@ -191,37 +296,6 @@ int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
 		frame->scan = SCAN_TYPE_PROGRESSIVE;
 		break;
 	}
-		
-	switch (fmt->pixelformat) {
-	case V4L2_PIX_FMT_RGB565:
-		frame->format = FORMAT_RGB565;
-		bpp = 16;
-		break;
-
-	case V4L2_PIX_FMT_RGB24:
-		frame->format = FORMAT_RGB888;
-		bpp = 24;
-		break;
-
-	case V4L2_PIX_FMT_YUV420:
-		frame->format = FORMAT_YCBCR420;
-		bpp = 12;
-		break;
-
-	case V4L2_PIX_FMT_YUYV:
-		frame->format = FORMAT_YCBCR422;
-		bpp = 16;
-		break;
-
-	case V4L2_PIX_FMT_UYVY:
-		frame->format = FORMAT_YCBCR422;
-		bpp = 16;
-
-	case V4L2_PIX_FMT_YUV422P:
-		frame->format = FORMAT_YCBCR422;
-		bpp = 16;
-		break;
-	}
 
 	if (frame->addr[0].virt_y == NULL) {
 		if (s3c_fimc_alloc_output_memory(frame))
@@ -230,7 +304,7 @@ int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
 			s3c_fimc_set_output_address(ctrl);
 	}
 
-	return bpp;
+	return depth;
 }
 
 int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl)

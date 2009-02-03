@@ -145,17 +145,16 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 	ctrl->id = id;
 	ctrl->pdata = pdata;
 	ctrl->vd = &s3c_fimc_video_device[id];
-	ctrl->in_use = 0;
 	ctrl->rot90 = 0;
-	sprintf(ctrl->name, "%s%d", S3C_FIMC_NAME, id);
-
 	ctrl->vd->minor = id;
-	strcpy(ctrl->vd->name, ctrl->name);
-
 	ctrl->out_frame.nr_frames = pdata->nr_frames;
 	ctrl->out_frame.skip_frames = 0;
 	ctrl->scaler.line_length = pdata->line_length;
 
+	sprintf(ctrl->name, "%s%d", S3C_FIMC_NAME, id);
+	strcpy(ctrl->vd->name, ctrl->name);
+
+	atomic_set(&ctrl->in_use, 0);
 	mutex_init(&ctrl->lock);
 	init_waitqueue_head(&ctrl->waitq);
 
@@ -284,11 +283,11 @@ static int s3c_fimc_open(struct inode *inode, struct file *filp)
 
 	mutex_lock(&ctrl->lock);
 
-	if (ctrl->in_use) {
+	if (atomic_read(&ctrl->in_use)) {
 		ret = -EBUSY;
 		goto resource_busy;
 	} else {
-		ctrl->in_use = 1;
+		atomic_inc(&ctrl->in_use);
 		filp->private_data = ctrl;
 	}
 
@@ -311,7 +310,7 @@ static int s3c_fimc_release(struct inode *inode, struct file *filp)
 
 	mutex_lock(&ctrl->lock);
 
-	ctrl->in_use = 0;
+	atomic_dec(&ctrl->in_use);
 	filp->private_data = NULL;
 
 	mutex_unlock(&ctrl->lock);

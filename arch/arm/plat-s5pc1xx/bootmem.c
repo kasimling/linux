@@ -14,12 +14,13 @@
 #include <linux/mm.h>
 #include <linux/bootmem.h>
 #include <linux/swap.h>
+#include <asm/setup.h>
 #include <mach/memory.h>
+
+extern struct meminfo *s3c_mi;
 
 void s5pc1xx_reserve_bootmem(void)
 {
-	/* FIXME: how to get the system memory size? */
-	int mem_size = 128 * SZ_1M;
 	int reserve_size = 0;
 	int bootmem_size;
 
@@ -30,7 +31,7 @@ void s5pc1xx_reserve_bootmem(void)
 
 	/* bootmem_size means none-reserved memory size */
 	if (reserve_size > 0) {
-		bootmem_size = mem_size - reserve_size;
+		bootmem_size = s3c_mi->bank[0].size - reserve_size;
 		reserve_bootmem(PHYS_OFFSET, \
 				PAGE_ALIGN(bootmem_size), BOOTMEM_DEFAULT);
 

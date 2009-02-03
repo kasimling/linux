@@ -24,11 +24,41 @@
 #endif
 
 /*
+ * P I X E L   F O R M A T   G U I D E
+ *
+ * The 'x' means 'DO NOT CARE'
+ * The '*' means 'FIMC SPECIFIC
+ * For some fimc formats, we didn't find equivalent format in the V4L2 FOURCC.
+ *
+ * FIMC TYPE	PLANES	ORDER		V4L2_PIX_FMT
+ * ---------------------------------------------------------
+ * RGB565	x	x		V4L2_PIX_FMT_RGB565
+ * RGB888	x	x		V4L2_PIX_FMT_RGB24
+ * YUV420	2	LSB_CBCR	V4L2_PIX_FMT_NV12
+ * YUV420	2	LSB_CRCB	V4L2_PIX_FMT_NV21
+ * YUV420	2	MSB_CBCR	V4L2_PIX_FMT_NV21X*
+ * YUV420	2	MSB_CRCB	V4L2_PIX_FMT_NV12X*
+ * YUV420	3	x		V4L2_PIX_FMT_YUV420
+ * YUV422	1	YCBYCR		V4L2_PIX_FMT_YUYV
+ * YUV422	1	YCRYCB		V4L2_PIX_FMT_YVYU
+ * YUV422	1	CBYCRY		V4L2_PIX_FMT_UYVY
+ * YUV422	1	CRYCBY		V4L2_PIX_FMT_VYUY*
+ * YUV422	2	LSB_CBCR	V4L2_PIX_FMT_UV12*
+ * YUV422	2	LSB_CRCB	V4L2_PIX_FMT_UV21*
+ * YUV422	2	MSB_CBCR	V4L2_PIX_FMT_UV12X*
+ * YUV422	2	MSB_CRCB	V4L2_PIX_FMT_UV21X*
+ * YUV422	3	x		V4L2_PIX_FMT_YUV422P
+ *
+*/
+
+/*
  * C O M M O N   D E F I N I T I O N S
  *
 */
-#define info(args...) do { printk(KERN_INFO "s3c-fimc: " args); } while (0)
-#define err(args...)  do { printk(KERN_ERR  "s3c-fimc: " args); } while (0)
+#define S3C_FIMC_NAME	"s3c-fimc"
+
+#define info(args...)	do { printk(KERN_INFO S3C_FIMC_NAME ": " args); } while (0)
+#define err(args...)	do { printk(KERN_ERR  S3C_FIMC_NAME ": " args); } while (0)
 
 #if defined(CONFIG_VIDEO_SAMSUNG_DEBUG)
 #define dprintk(fmt, args...) 		printk(KERN_DEBUG "%s: " fmt, \
@@ -36,8 +66,6 @@
 #else
 #define dprintk(fmt, args...)
 #endif
-
-#define S3C_FIMC_NAME			"s3c-fimc"
 
 #define S3C_FIMC_FRAME_SKIP		0
 #define S3C_FIMC_FRAME_TAKE		1
@@ -121,10 +149,10 @@ enum s3c_fimc_order422_in_t {
 };
 
 enum s3c_fimc_order422_out_t {
-	OUT_ORDER422_CRYCBY = (3 << 0),
-	OUT_ORDER422_CBYCRY = (2 << 0),
-	OUT_ORDER422_YCRYCB = (1 << 0),
 	OUT_ORDER422_YCBYCR = (0 << 0),
+	OUT_ORDER422_YCRYCB = (1 << 0),
+	OUT_ORDER422_CBYCRY = (2 << 0),
+	OUT_ORDER422_CRYCBY = (3 << 0),
 };
 
 enum s3c_fimc_2plane_order_t {
@@ -472,7 +500,7 @@ struct s3c_fimc_control {
 	struct s3c_platform_fimc	*pdata;
 	struct clk			*clock;	
 	void __iomem			*regs;
-	int				in_use;
+	atomic_t			in_use;
 	int				irq;
 	struct video_device		*vd;
 	struct s3c_fimc_v4l2		v4l2;
@@ -505,6 +533,16 @@ struct s3c_fimc_config {
 */
 #define V4L2_INPUT_TYPE_MEMORY		3
 
+/* fourcc for fimc specific */
+#define V4L2_PIX_FMT_NV12X		v4l2_fourcc('N', 'V', '1', 'X')
+#define V4L2_PIX_FMT_NV21X		v4l2_fourcc('N', 'V', '2', 'X')
+#define V4L2_PIX_FMT_VYUY		v4l2_fourcc('V', 'Y', 'U', 'Y')
+#define V4L2_PIX_FMT_UV12		v4l2_fourcc('U', 'V', '1', '2')
+#define V4L2_PIX_FMT_UV21		v4l2_fourcc('U', 'V', '2', '1')
+#define V4L2_PIX_FMT_UV12X		v4l2_fourcc('U', 'V', '1', 'X')
+#define V4L2_PIX_FMT_UV21X		v4l2_fourcc('U', 'V', '2', 'X')
+
+/* CID extensions */
 #define V4L2_CID_ORIGINAL		(V4L2_CID_PRIVATE_BASE + 0)
 #define V4L2_CID_ARBITRARY		(V4L2_CID_PRIVATE_BASE + 1)
 #define V4L2_CID_NEGATIVE 		(V4L2_CID_PRIVATE_BASE + 2)
@@ -522,12 +560,6 @@ struct s3c_fimc_config {
 
 #define FORMAT_FLAGS_PACKED		0x01
 #define FORMAT_FLAGS_PLANAR		0x02
-
-struct s3c_fimc_user_order {
-	u32				planes;
-	enum s3c_fimc_order422_out_t	order_1p;
-	enum s3c_fimc_2plane_order_t	order_2p;
-};
 
 
 /*
