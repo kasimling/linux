@@ -228,17 +228,17 @@ static struct s3c_dma_map __initdata s5pc100_dma_mappings[] = {
 	},
 	[DMACH_AC97_PCM_OUT] = {
 		.name		= "ac97-pcm-out",
-		.channels	= MAP2(S3C_PDMA0_AC_PCMOUT),
+		.channels	= MAP1(S3C_PDMA0_AC_PCMOUT),
 		.hw_addr.to	= S3C_PDMA0_AC_PCMOUT,
 	},
 	[DMACH_AC97_PCM_IN] = {
 		.name		= "ac97-pcm-in",
-		.channels	= MAP2(S3C_PDMA0_AC_PCMIN),
+		.channels	= MAP1(S3C_PDMA0_AC_PCMIN),
 		.hw_addr.from	= S3C_PDMA0_AC_PCMIN,
 	},
 	[DMACH_AC97_MIC_IN] = {
 		.name		= "ac97-mic-in",
-		.channels	= MAP2(S3C_PDMA0_AC_MICIN),
+		.channels	= MAP1(S3C_PDMA0_AC_MICIN),
 		.hw_addr.from	= S3C_PDMA0_AC_MICIN,
 	},
 	[DMACH_I2S_V40_IN] = {                                                           
