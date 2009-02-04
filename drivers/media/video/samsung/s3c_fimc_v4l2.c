@@ -361,6 +361,7 @@ static int s3c_fimc_v4l2_streamoff(struct file *filp, void *fh,
 	if (i != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 		return -EINVAL;
 	else {
+		s3c_fimc_set_sflag(ctrl->flag, S3C_FIMC_FLAG_STOP);
 		s3c_fimc_unmask_uflag(ctrl->flag);
 		s3c_fimc_unmask_iflag(ctrl->flag);
 		s3c_fimc_free_output_memory(&ctrl->out_frame);

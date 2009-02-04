@@ -5,6 +5,10 @@ config VIDEO_SAMSUNG
 	---help---
 	  This is a video4linux driver for Samsung FIMC device.
 
+config VIDEO_SAMSUNG_DEBUG
+	bool "FIMC driver debug"
+	depends on VIDEO_SAMSUNG
+
 config VIDEO_SAMSUNG_STATIC_MEMORY
 	bool "Reserved memory allocation support"
 	depends on VIDEO_SAMSUNG

@@ -61,8 +61,8 @@
 #define err(args...)	do { printk(KERN_ERR  S3C_FIMC_NAME ": " args); } while (0)
 
 #if defined(CONFIG_VIDEO_SAMSUNG_DEBUG)
-#define dprintk(fmt, args...) 		printk(KERN_DEBUG "%s: " fmt, \
-						__FUNCTION__ , ## args)
+#define dprintk(fmt, args...) 		printk(KERN_DEBUG S3C_FIMC_NAME \
+						":%s: " fmt, __FUNCTION__ , ## args)
 #else
 #define dprintk(fmt, args...)
 #endif
