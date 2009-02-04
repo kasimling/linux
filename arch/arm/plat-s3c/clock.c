@@ -267,13 +267,10 @@ struct clk clk_f = {
 	.rate		= 0,
 	.parent		= &clk_mpll,
 	.ctrlbit	= 0,
-<<<<<<< HEAD:arch/arm/plat-s3c/clock.c
 #if defined(CONFIG_CPU_FREQ)
 	.set_rate	= s3c_fclk_set_rate,
 	.round_rate	= s3c_fclk_round_rate,
 #endif
-=======
->>>>>>> 689c1797e8ed939c850be0b090cbef55e9308d5b:arch/arm/plat-s3c/clock.c
 };
 
 struct clk clk_h = {
