@@ -431,8 +431,8 @@ int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 	sc->main_hratio = (sx << 8) / (tx << sc->hfactor);
 	sc->main_vratio = (sy << 8) / (ty << sc->vfactor);
 
-	sc->scaleup_h = (sx <= tx) ? 1 : 0;
-	sc->scaleup_v = (sy <= ty) ? 1 : 0;
+	sc->scaleup_h = (tx >= sx) ? 1 : 0;
+	sc->scaleup_v = (ty >= sy) ? 1 : 0;
 
 	s3c_fimc_set_prescaler(ctrl);
 	s3c_fimc_set_scaler(ctrl);
@@ -522,7 +522,7 @@ int s3c_fimc_check_zoom(struct s3c_fimc_control *ctrl, int type)
 	int zoom_size = sx - (offset->h1 + offset->h2 + zoom_pixels);
 	
 	switch (type) {
-	case V4L2_CID_ZOOMIN:
+	case V4L2_CID_ZOOM_IN:
 		if (zoom_size / sc->pre_hratio > sc->line_length) {
 			err("already reached to zoom-in boundary\n");
 			return -EINVAL;
@@ -531,7 +531,7 @@ int s3c_fimc_check_zoom(struct s3c_fimc_control *ctrl, int type)
 		sc->zoom_depth++;
 		break;
 
-	case V4L2_CID_ZOOMOUT:
+	case V4L2_CID_ZOOM_OUT:
 		if (sc->zoom_depth > 0)
 			sc->zoom_depth--;
 		else {

@@ -87,8 +87,7 @@ void s3c_fimc_set_window_offset(struct s3c_fimc_control *ctrl)
 	cfg |= S3C_CIWDOFST_WINOFSEN;
 	writel(cfg, ctrl->regs + S3C_CIWDOFST);
 
-	cfg = readl(ctrl->regs + S3C_CIWDOFST2);
-	cfg &= ~(S3C_CIWDOFST_WINHOROFST2_MASK | S3C_CIWDOFST_WINVEROFST2_MASK);
+	cfg = 0;
 	cfg |= S3C_CIWDOFST2_WINHOROFST2(offset->h2);
 	cfg |= S3C_CIWDOFST2_WINVEROFST2(offset->v2);
 	writel(cfg, ctrl->regs + S3C_CIWDOFST2);
@@ -539,8 +538,15 @@ void s3c_fimc_change_output_flip(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = readl(ctrl->regs + S3C_CITRGFMT);
 
-	cfg &= ~S3C_CITRGFMT_FLIP_MASK;
+	cfg &= ~(S3C_CITRGFMT_FLIP_MASK | S3C_CITRGFMT_OUTROT90_CLOCKWISE);
 	cfg |= (ctrl->out_frame.flip << S3C_CITRGFMT_FLIP_SHIFT);
+
+	if (ctrl->rot90) {
+		if (ctrl->out_type == PATH_OUT_DMA)
+			cfg |= S3C_CITRGFMT_OUTROT90_CLOCKWISE;
+		else if (ctrl->out_type == PATH_OUT_LCD_FIFO)
+			cfg |= S3C_CITRGFMT_INROT90_CLOCKWISE;
+	}
 
 	writel(cfg, ctrl->regs + S3C_CITRGFMT);
 }

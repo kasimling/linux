@@ -263,50 +263,88 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 	struct s3c_fimc_window_offset *offset = &ctrl->in_cam->offset;
 
 	switch (c->id) {
-	case V4L2_CID_ORIGINAL:
+	case V4L2_CID_EFFECT_ORIGINAL:
 		frame->effect.type = EFFECT_ORIGINAL;
 		s3c_fimc_change_effect(ctrl);
 		break;
 
-	case V4L2_CID_NEGATIVE:
+	case V4L2_CID_EFFECT_NEGATIVE:
 		frame->effect.type = EFFECT_NEGATIVE;
 		s3c_fimc_change_effect(ctrl);
 		break;
 
-	case V4L2_CID_EMBOSSING:
+	case V4L2_CID_EFFECT_EMBOSSING:
 		frame->effect.type = EFFECT_EMBOSSING;
 		s3c_fimc_change_effect(ctrl);
 		break;
 
-	case V4L2_CID_ARTFREEZE:
+	case V4L2_CID_EFFECT_ARTFREEZE:
 		frame->effect.type = EFFECT_ARTFREEZE;
 		s3c_fimc_change_effect(ctrl);
 		break;
 
-	case V4L2_CID_SILHOUETTE:
+	case V4L2_CID_EFFECT_SILHOUETTE:
 		frame->effect.type = EFFECT_SILHOUETTE;
 		s3c_fimc_change_effect(ctrl);
 		break;
 
-	case V4L2_CID_ARBITRARY:
+	case V4L2_CID_EFFECT_ARBITRARY:
 		frame->effect.type = EFFECT_ARBITRARY;
 		frame->effect.pat_cb = s3c_fimc_pat_cb(c->value);
 		frame->effect.pat_cr = s3c_fimc_pat_cr(c->value);
 		s3c_fimc_change_effect(ctrl);
 		break;
 
-	case V4L2_CID_ROTATE_BYPASS:
-	case V4L2_CID_HFLIP:
-	case V4L2_CID_VFLIP:
-	case V4L2_CID_ROTATE_180:
-	case V4L2_CID_ROTATE_90:
-	case V4L2_CID_ROTATE_270:
-		frame->flip = c->value;
+	case V4L2_CID_ROTATE_ORIGINAL:
+		frame->flip = FLIP_ORIGINAL;
+		ctrl->rot90 = 0;
 		s3c_fimc_change_output_flip(ctrl);
 		break;
 
-	case V4L2_CID_ZOOMIN:
-		if (s3c_fimc_check_zoom(ctrl, c->id)) {
+	case V4L2_CID_HFLIP:
+		frame->flip = FLIP_X_AXIS;
+		ctrl->rot90 = 0;
+		s3c_fimc_change_output_flip(ctrl);
+		break;
+
+	case V4L2_CID_VFLIP:
+		frame->flip = FLIP_Y_AXIS;
+		ctrl->rot90 = 0;
+		s3c_fimc_change_output_flip(ctrl);
+		break;
+
+	case V4L2_CID_ROTATE_180:
+		frame->flip = FLIP_XY_AXIS;
+		ctrl->rot90 = 0;
+		s3c_fimc_change_output_flip(ctrl);
+		break;
+
+	case V4L2_CID_ROTATE_90:
+		frame->flip = FLIP_ORIGINAL;
+		ctrl->rot90 = 1;
+		s3c_fimc_change_output_flip(ctrl);
+		break;
+
+	case V4L2_CID_ROTATE_270:
+		frame->flip = FLIP_XY_AXIS;
+		ctrl->rot90 = 0;
+		s3c_fimc_change_output_flip(ctrl);
+		break;
+
+	case V4L2_CID_ROTATE_90_HFLIP:
+		frame->flip = FLIP_X_AXIS;
+		ctrl->rot90 = 1;
+		s3c_fimc_change_output_flip(ctrl);
+		break;
+
+	case V4L2_CID_ROTATE_90_VFLIP:
+		frame->flip = FLIP_Y_AXIS;
+		ctrl->rot90 = 1;
+		s3c_fimc_change_output_flip(ctrl);
+		break;
+
+	case V4L2_CID_ZOOM_IN:
+		if (s3c_fimc_check_zoom(ctrl, c->id) == 0) {
 			offset->h1 += S3C_FIMC_ZOOM_PIXELS;
 			offset->h2 += S3C_FIMC_ZOOM_PIXELS;
 			offset->v1 += S3C_FIMC_ZOOM_PIXELS;
@@ -316,8 +354,8 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 
 		break;
 
-	case V4L2_CID_ZOOMOUT:
-		if (s3c_fimc_check_zoom(ctrl, c->id)) {
+	case V4L2_CID_ZOOM_OUT:
+		if (s3c_fimc_check_zoom(ctrl, c->id) == 0) {
 			offset->h1 -= S3C_FIMC_ZOOM_PIXELS;
 			offset->h2 -= S3C_FIMC_ZOOM_PIXELS;
 			offset->v1 -= S3C_FIMC_ZOOM_PIXELS;
