@@ -584,10 +584,13 @@ static int s3c_fimc_v4l2_s_parm(struct file *filp, void *fh,
 	if (a->type != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 		return -EINVAL;
 
-	if (a->parm.capture.capturemode == V4L2_MODE_HIGHQUALITY)
+	if (a->parm.capture.capturemode == V4L2_MODE_HIGHQUALITY) {
+		info("changing to max resolution\n");
 		s3c_fimc_change_resolution(ctrl, CAM_RES_MAX);
-	else
+	} else {
+		info("changing to default resolution\n");
 		s3c_fimc_change_resolution(ctrl, CAM_RES_DEFAULT);
+	}
 
 	s3c_fimc_restart_dma(ctrl);
 
