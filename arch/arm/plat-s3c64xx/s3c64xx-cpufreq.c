@@ -24,10 +24,19 @@
 #include <asm/system.h>
 
 #define USE_FREQ_TABLE
+#define USE_DVS
 #define VERY_HI_RATE	532*1000*1000
 #define APLL_GEN_CLK	532*1000	//khz
+#define KHZ_T		1000
 
-#define MPU_CLK		"fclk"
+#define MPU_CLK		"clk_cpu"
+
+/* definition for power setting function */
+extern int set_power(unsigned int freq);
+extern void ltc3714_init(void);
+
+#define ARM_LE	0
+#define INT_LE	1
 
 /* frequency */
 static struct cpufreq_frequency_table s3c6410_freq_table[] = {
@@ -41,12 +50,14 @@ static struct cpufreq_frequency_table s3c6410_freq_table[] = {
 
 int s3c6410_verify_speed(struct cpufreq_policy *policy)
 {
-	struct clk * mpu_clk;
+#ifndef USE_FREQ_TABLE
+	struct clk *mpu_clk;
+#endif
 
 	if (policy->cpu)
 		return -EINVAL;
 #ifdef USE_FREQ_TABLE
-	return cpufreq_frequency_table_verify(policy, &s3c6410_freq_table);
+	return cpufreq_frequency_table_verify(policy, s3c6410_freq_table);
 #else
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
@@ -54,8 +65,8 @@ int s3c6410_verify_speed(struct cpufreq_policy *policy)
 	if (IS_ERR(mpu_clk))
 		return PTR_ERR(mpu_clk);
 
-	policy->min = clk_round_rate(mpu_clk, policy->min * 1000) / 1000;
-	policy->max = clk_round_rate(mpu_clk, policy->max * 1000) / 1000;
+	policy->min = clk_round_rate(mpu_clk, policy->min * KHZ_T) / KHZ_T;
+	policy->max = clk_round_rate(mpu_clk, policy->max * KHZ_T) / KHZ_T;
 
 	cpufreq_verify_within_limits(policy, policy->cpuinfo.min_freq,
 				     policy->cpuinfo.max_freq);
@@ -77,7 +88,7 @@ unsigned int s3c6410_getspeed(unsigned int cpu)
 	mpu_clk = clk_get(NULL, MPU_CLK);
 	if (IS_ERR(mpu_clk))
 		return 0;
-	rate = clk_get_rate(mpu_clk) / 1000;
+	rate = clk_get_rate(mpu_clk) / KHZ_T;
 
 	clk_put(mpu_clk);
 
@@ -92,7 +103,6 @@ static int s3c6410_target(struct cpufreq_policy *policy,
 	struct cpufreq_freqs freqs;
 	int ret = 0;
 	unsigned long arm_clk;
-	unsigned long flags;
 	unsigned int index;
 
 	mpu_clk = clk_get(NULL, MPU_CLK);
@@ -108,12 +118,36 @@ static int s3c6410_target(struct cpufreq_policy *policy,
 
 	freqs.new = arm_clk;
 #else
-	freqs.new = clk_round_rate(mpu_clk, target_freq * 1000) / 1000;
+	freqs.new = clk_round_rate(mpu_clk, target_freq * KHZ_T) / KHZ_T;
 #endif
 	freqs.cpu = 0;
 
 	cpufreq_notify_transition(&freqs, CPUFREQ_PRECHANGE);
-	ret = clk_set_rate(mpu_clk, target_freq * 1000);
+#ifdef USE_DVS
+	if(freqs.new < freqs.old){
+		/* frequency scaling */
+		ret = clk_set_rate(mpu_clk, target_freq * KHZ_T);
+		if(ret != 0)
+			printk("frequency scaling error\n");
+		/* voltage scaling */
+		set_power(freqs.new);
+	}else{
+		/* voltage scaling */
+		set_power(freqs.new);
+
+		/* frequency scaling */
+		ret = clk_set_rate(mpu_clk, target_freq * KHZ_T);
+		if(ret != 0)
+			printk("frequency scaling error\n");
+	}
+
+
+#else
+	ret = clk_set_rate(mpu_clk, target_freq * KHZ_T);
+	if(ret != 0)
+		printk("frequency scaling error\n");
+
+#endif
 	cpufreq_notify_transition(&freqs, CPUFREQ_POSTCHANGE);
 	clk_put(mpu_clk);
 	return ret;
@@ -123,6 +157,9 @@ static int __init s3c6410_cpu_init(struct cpufreq_policy *policy)
 {
 	struct clk * mpu_clk;
 
+#ifdef USE_DVS
+	ltc3714_init();
+#endif
 	mpu_clk = clk_get(NULL, MPU_CLK);
 	if (IS_ERR(mpu_clk))
 		return PTR_ERR(mpu_clk);
@@ -133,8 +170,8 @@ static int __init s3c6410_cpu_init(struct cpufreq_policy *policy)
 #ifdef USE_FREQ_TABLE
 	cpufreq_frequency_table_get_attr(s3c6410_freq_table, policy->cpu);
 #else
-	policy->cpuinfo.min_freq = clk_round_rate(mpu_clk, 0) / 1000;
-	policy->cpuinfo.max_freq = clk_round_rate(mpu_clk, VERY_HI_RATE) / 1000;
+	policy->cpuinfo.min_freq = clk_round_rate(mpu_clk, 0) / KHZ_T;
+	policy->cpuinfo.max_freq = clk_round_rate(mpu_clk, VERY_HI_RATE) / KHZ_T;
 #endif
 	policy->cpuinfo.transition_latency = 40000;	//1us
 

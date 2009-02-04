@@ -61,6 +61,7 @@
 #if defined(CONFIG_USB_GADGET_S3C_OTGD) || \
 	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
 #include <plat/regs-otg.h>
+#include <linux/usb/ch9.h>
 
 /* S3C_USB_CLKSRC 0: EPLL 1: CLK_48M */
 #define S3C_USB_CLKSRC	1
@@ -223,6 +224,10 @@ void otg_phy_init(void) {
 }
 EXPORT_SYMBOL(otg_phy_init);
 
+/* USB Control request data struct must be located here for DMA transfer */
+struct usb_ctrlrequest usb_ctrl __attribute__((aligned(8)));
+EXPORT_SYMBOL(usb_ctrl);
+
 /* OTG PHY Power Off */
 void otg_phy_off(void) {
 	writel(readl(S3C_USBOTG_PHYPWR)|(0x1F<<1), S3C_USBOTG_PHYPWR);
@@ -295,13 +300,13 @@ void s3c_rtc_set_pie(void __iomem *base, uint to)
         writew(tmp, base + S3C2410_RTCCON);
 }
 
-void s3c_rtc_set_freq_regs(void __iomem *base, uint freq, uint *s3c_freq)
+void s3c_rtc_set_freq_regs(void __iomem *base, uint freq, uint s3c_freq)
 {
 	unsigned int tmp;
 
         tmp = readw(base + S3C2410_RTCCON) & (S3C_RTCCON_TICEN | S3C2410_RTCCON_RTCEN );
         writew(tmp, base + S3C2410_RTCCON);
-        *s3c_freq = freq;
+        s3c_freq = freq;
         tmp = (32768 / freq)-1;
         writel(tmp, base + S3C2410_TICNT);
 }

@@ -205,8 +205,6 @@ static void s3c2410_pm_debug_init(void)
 #define DBG(fmt...)
 
 #define s3c6410_pm_debug_init() do { } while(0)
-
-static struct sleep_save uart_save[] = {};
 #endif
 
 #if defined(CONFIG_S3C2410_PM_CHECK) && CONFIG_S3C2410_PM_CHECK_CHUNKSIZE != 0
@@ -493,30 +491,6 @@ static void s3c6410_pm_do_restore_core(struct sleep_save *ptr, int count)
 		__raw_writel(ptr->val, ptr->reg);
 	}
 }
-
-/* s3c6410_pm_show_resume_irqs
- *
- * print any IRQs asserted at resume time (ie, we woke from)
-*/
-
-static void s3c6410_pm_show_resume_irqs(int start, unsigned long which,
-					unsigned long mask)
-{
-	int i;
-
-	which &= ~mask;
-
-	for (i = 0; i <= 31; i++) {
-		if ((which) & (1L<<i)) {
-			DBG("IRQ %d asserted at resume\n", start+i);
-		}
-	}
-}
-
-#if 0
-extern int s3c_irqext_type(unsigned int irq, unsigned int type);
-extern void s3c_irqext_unmaskack(unsigned int irqno);
-#endif
 
 static void s3c6410_pm_configure_extint(void)
 {

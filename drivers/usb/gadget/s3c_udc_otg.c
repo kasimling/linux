@@ -38,7 +38,7 @@
 #define OTG_DMA_MODE		0
 
 #else
-#error " Unknown S3C OTG operation mode, Slect a correct operation mode"
+#error " Unknown S3C OTG operation mode, Select a correct operation mode"
 #endif
 
 #undef DEBUG_S3C_UDC_SETUP
@@ -109,8 +109,8 @@ static char *state_names[] = {
 #endif
 
 
-#define	DRIVER_DESC		"S3C HS USB OTG Device Driver, (c) 2008 Samsung Electronics"
-#define	DRIVER_VERSION		"Dec 5 2008"
+#define	DRIVER_DESC		"S3C HS USB OTG Device Driver, (c) 2009 Samsung Electronics"
+#define	DRIVER_VERSION		"30 January 2009"
 
 struct s3c_udc	*the_controller;
 
@@ -1055,7 +1055,7 @@ static struct platform_driver s3c_udc_driver = {
 	.resume		= s3c_udc_resume,
 	.driver		= {
 		.owner	= THIS_MODULE,
-		.name	= "s3c2410-usbgadget",
+		.name	= "s3c-usbgadget",
 	},
 };
 

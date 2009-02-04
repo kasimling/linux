@@ -513,3 +513,44 @@ v2.6.28-rc8-s3c64xx-r0d15: Kyoungil Kim
 	Added Files:
 		A       arch/arm/mach-s3c6400/include/mach/usb-control.h
 
+v2.6.28-rc8-s3c64xx-r0d16: Jongpill Lee
+	- Support DVS on CPUFREQ Driver
+
+	Added Files:
+		A       arch/arm/plat-s3c64xx/ltc3714.c
+	Modified Files:
+		M       arch/arm/plat-s3c/clock.c
+		M       arch/arm/plat-s3c64xx/Makefile
+		M       arch/arm/plat-s3c64xx/s3c64xx-cpufreq.c
+		
+v2.6.28-rc8-s3c64xx-r0d17: Byungjae Lee
+	- Support Ethernet gadget and RNDIS for SMDK6410
+
+	Modifiled Files:
+		M	arch/arm/configs/smdk6410mtd_defconfig
+		M	arch/arm/mach-s3c6410/mach-smdk6410.c
+		M	drivers/usb/gadget/Kconfig
+		M	drivers/usb/gadget/epautoconf.c
+		M	drivers/usb/gadget/f_rndis.c
+		M	drivers/usb/gadget/s3c_udc.h
+		M	drivers/usb/gadget/s3c_udc_otg.c
+		M	drivers/usb/gadget/u_ether.c
+	Added Files:
+		A	drivers/usb/gadget/s3c_udc_otg_xfer_dma.c
+		A	drivers/usb/gadget/s3c_udc_otg_xfer_slave.c
+
+v2.6.28-rc8-s3c64xx-r0d18: Jongpill Lee
+	- Remove warning message
+
+	Modified Files:
+		M       arch/arm/mach-s3c6410/mach-smdk6410.c
+		M       arch/arm/mach-s3c6410/pm.c
+		M       arch/arm/plat-s3c/clock.c
+		M       arch/arm/plat-s3c64xx/clock.c
+		M       arch/arm/plat-s3c64xx/include/plat/pm.h
+		M       arch/arm/plat-s3c64xx/irq.c
+		M       arch/arm/plat-s3c64xx/ltc3714.c
+		M       arch/arm/plat-s3c64xx/pm.c
+		M       arch/arm/plat-s3c64xx/s3c64xx-cpufreq.c
+		M       drivers/rtc/rtc-s3c.c
+		M       drivers/spi/hspi-s3c64xx.c
