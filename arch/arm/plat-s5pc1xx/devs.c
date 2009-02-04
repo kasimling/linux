@@ -139,6 +139,29 @@ void __init s3c_adc_set_platdata(struct s3c_adc_mach_info *pd)
 	}
 }
 
+/* WATCHDOG TIMER*/
+static struct resource s3c_wdt_resource[] = {
+        [0] = {
+                .start = S3C_PA_WDT,
+                .end   = S3C_PA_WDT + 0xff,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_WDT,
+                .end   = IRQ_WDT,
+                .flags = IORESOURCE_IRQ,
+        },
+};
+
+struct platform_device s3c_device_wdt = {
+        .name             = "s3c2410-wdt",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_wdt_resource),
+        .resource         = s3c_wdt_resource,
+};
+EXPORT_SYMBOL(s3c_device_wdt);
+
+
 /* NAND Controller */
 
 static struct resource s3c_nand_resource[] = {

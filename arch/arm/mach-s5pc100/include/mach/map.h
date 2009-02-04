@@ -145,6 +145,10 @@
 #define S3C_PA_KEYPAD           S5PC1XX_PA_KEYPAD
 #define S3C_SZ_KEYPAD           S5PC1XX_SZ_KEYPAD
 
+/* WATCHDOG TIMER*/
+#define S5PC1XX_PA_WDT          (0xEA200000)
+#define S3C_PA_WDT              S5PC1XX_PA_WDT
+
 /* MFC V4.0 */
 #define S5PC1XX_PA_MFC		(0xF1000000)
 #define S5PC1XX_SZ_MFC		SZ_4K
