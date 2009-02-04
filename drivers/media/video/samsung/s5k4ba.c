@@ -177,41 +177,8 @@ static int s5k4ba_change_resolution(struct i2c_client *client, int res)
 
 static int s5k4ba_change_whitebalance(struct i2c_client *client, enum s3c_fimc_wb_t type)
 {
-	printk("[ *** Page 0, S5K4BA White Balance Mode ***]\n");
-
 	s3c_fimc_i2c_write(client, 0xfc, 0x0);
 	s3c_fimc_i2c_write(client, 0x30, type);
-
-	switch (type) {
-	case WB_AUTO:
-	default:
-		printk(" -> AWB auto mode\n");
-		break;
-
-	case WB_INDOOR_3001:
-		printk(" -> Indoor 3100 mode\n");
-		break;
-
-	case WB_OUTDOOR_5100:
-		printk(" -> Outdoor 5100 mode\n");
-		break;
-
-	case WB_INDOOR_2000:
-		printk(" -> Indoor 2000 mode\n");
-		break;
-
-	case WB_HALT:
-		printk(" -> AE/AWB halt\n");
-		break;
-
-	case WB_CLOUDY:
-		printk(" -> Cloudy(6000) mode\n");
-		break;
-
-	case WB_SUNNY:
-		printk(" -> Sunny(8000) mode\n");
-		break;
-	}
 
 	return 0;
 }

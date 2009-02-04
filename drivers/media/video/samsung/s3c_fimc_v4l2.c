@@ -264,23 +264,34 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 
 	switch (c->id) {
 	case V4L2_CID_ORIGINAL:
+		frame->effect.type = EFFECT_ORIGINAL;
+		s3c_fimc_change_effect(ctrl);
+		break;
+
 	case V4L2_CID_NEGATIVE:
+		frame->effect.type = EFFECT_NEGATIVE;
+		s3c_fimc_change_effect(ctrl);
+		break;
+
 	case V4L2_CID_EMBOSSING:
+		frame->effect.type = EFFECT_EMBOSSING;
+		s3c_fimc_change_effect(ctrl);
+		break;
+
 	case V4L2_CID_ARTFREEZE:
+		frame->effect.type = EFFECT_ARTFREEZE;
+		s3c_fimc_change_effect(ctrl);
+		break;
+
 	case V4L2_CID_SILHOUETTE:
-		frame->effect.type = c->value;
+		frame->effect.type = EFFECT_SILHOUETTE;
 		s3c_fimc_change_effect(ctrl);
 		break;
 
 	case V4L2_CID_ARBITRARY:
-		frame->effect.type = c->value;
-
-		/*
-		 * temporary sepia default.
-		 * additional interface needed for other arbitrary effect
-		 */
-		frame->effect.pat_cb = 115;
-		frame->effect.pat_cr = 145;
+		frame->effect.type = EFFECT_ARBITRARY;
+		frame->effect.pat_cb = s3c_fimc_pat_cb(c->value);
+		frame->effect.pat_cr = s3c_fimc_pat_cr(c->value);
 		s3c_fimc_change_effect(ctrl);
 		break;
 
