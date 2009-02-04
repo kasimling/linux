@@ -140,6 +140,7 @@ void __init s3c_adc_set_platdata(struct s3c_adc_mach_info *pd)
 }
 
 /* WATCHDOG TIMER*/
+
 static struct resource s3c_wdt_resource[] = {
         [0] = {
                 .start = S3C_PA_WDT,
@@ -159,6 +160,7 @@ struct platform_device s3c_device_wdt = {
         .num_resources    = ARRAY_SIZE(s3c_wdt_resource),
         .resource         = s3c_wdt_resource,
 };
+
 EXPORT_SYMBOL(s3c_device_wdt);
 
 

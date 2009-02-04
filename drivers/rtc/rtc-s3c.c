@@ -106,7 +106,7 @@ static int s3c_rtc_setfreq(struct device *dev, int freq)
 {
 	spin_lock_irq(&s3c_rtc_pie_lock);
 
-	s3c_rtc_set_freq_regs(s3c_rtc_base,freq,s3c_rtc_freq);
+	s3c_rtc_set_freq_regs(s3c_rtc_base, freq, s3c_rtc_freq);
 
 	spin_unlock_irq(&s3c_rtc_pie_lock);
 
