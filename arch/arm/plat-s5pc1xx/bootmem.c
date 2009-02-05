@@ -19,6 +19,12 @@
 
 extern struct meminfo *s3c_mi;
 
+/* FIXME: temporary implementation to avoid compile error */
+int dma_needs_bounce(struct device *dev, dma_addr_t addr, size_t size)
+{
+	return 0;
+}
+
 void s5pc1xx_reserve_bootmem(void)
 {
 	int reserve_size = 0;

@@ -13,6 +13,8 @@
 #include <linux/fs.h>
 #include <linux/errno.h>
 #include <linux/string.h>
+#include <linux/platform_device.h>
+#include <linux/dma-mapping.h>
 #include <linux/videodev2.h>
 #include <media/v4l2-ioctl.h>
 
@@ -541,8 +543,13 @@ static int s3c_fimc_v4l2_dqbuf(struct file *filp, void *fh,
 				struct v4l2_buffer *b)
 {
 	struct s3c_fimc_control *ctrl = (struct s3c_fimc_control *) fh;
+	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
 
-	b->index = ctrl->out_frame.cfn % ctrl->out_frame.nr_frames;
+	b->index = frame->cfn % frame->nr_frames;
+
+	dma_sync_single_for_cpu(platform_get_drvdata(ctrl->pdev), \
+				frame->addr[b->index].phys_y, \
+				frame->buf_size, DMA_FROM_DEVICE);
 
 	return 0;
 }

@@ -504,7 +504,7 @@ struct s3c_fimc_control {
 	u32				flag;
 	struct mutex			lock;
 	wait_queue_head_t		waitq;
-	struct s3c_platform_fimc	*pdata;
+	struct platform_device		*pdev;
 	struct clk			*clock;	
 	void __iomem			*regs;
 	atomic_t			in_use;
@@ -578,6 +578,7 @@ struct s3c_fimc_config {
 extern const struct v4l2_ioctl_ops s3c_fimc_v4l2_ops;
 extern struct video_device s3c_fimc_video_device[];
 
+extern struct s3c_platform_fimc *to_fimc_plat(struct platform_device *pdev);
 extern u8 s3c_fimc_i2c_read(struct i2c_client *client, u8 subaddr);
 extern int s3c_fimc_i2c_write(struct i2c_client *client, u8 subaddr, u8 val);
 extern void s3c_fimc_i2c_command(struct s3c_fimc_control *ctrl, u32 cmd, int arg);

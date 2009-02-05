@@ -131,6 +131,11 @@ static irqreturn_t s3c_fimc_irq(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
+struct s3c_platform_fimc *to_fimc_plat(struct platform_device *pdev)
+{
+	return (struct s3c_platform_fimc *) pdev->dev.platform_data;
+}
+
 static
 struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pdev)
 {
@@ -139,11 +144,11 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 	struct resource *res;
 	int id = pdev->id;
 
-	pdata = (struct s3c_platform_fimc *) pdev->dev.platform_data;
+	pdata = to_fimc_plat(pdev);
 
 	ctrl = &s3c_fimc.ctrl[id];
 	ctrl->id = id;
-	ctrl->pdata = pdata;
+	ctrl->pdev = pdev;
 	ctrl->vd = &s3c_fimc_video_device[id];
 	ctrl->rot90 = 0;
 	ctrl->vd->minor = id;
@@ -368,7 +373,7 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 		goto err_fimc;
 	}
 
-	pdata = ctrl->pdata;
+	pdata = to_fimc_plat(pdev);
 	if (pdata->cfg_gpio)
 		pdata->cfg_gpio(pdev);
 
