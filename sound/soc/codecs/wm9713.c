@@ -1106,20 +1106,26 @@ EXPORT_SYMBOL_GPL(wm9713_reset);
 static int wm9713_set_bias_level(struct snd_soc_codec *codec,
 				 enum snd_soc_bias_level level)
 {
+#if !defined (CONFIG_CPU_S5PC100)
 	u16 reg;
+#endif
 
 	switch (level) {
 	case SND_SOC_BIAS_ON:
+#if !defined (CONFIG_CPU_S5PC100)
 		/* enable thermal shutdown */
 		reg = ac97_read(codec, AC97_EXTENDED_MID) & 0x1bff;
 		ac97_write(codec, AC97_EXTENDED_MID, reg);
+#endif
 		break;
 	case SND_SOC_BIAS_PREPARE:
 		break;
 	case SND_SOC_BIAS_STANDBY:
+#if !defined (CONFIG_CPU_S5PC100)
 		/* enable master bias and vmid */
 		reg = ac97_read(codec, AC97_EXTENDED_MID) & 0x3bff;
 		ac97_write(codec, AC97_EXTENDED_MID, reg);
+#endif
 		ac97_write(codec, AC97_POWERDOWN, 0x0000);
 		break;
 	case SND_SOC_BIAS_OFF:

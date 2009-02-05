@@ -573,3 +573,30 @@ v2.6.28-rc8-s5pc1xx-r2d4: Kyoungil Kim
 	Modified files:
 		M       drivers/usb/gadget/s3c_udc_otg.c
 
+v2.6.28-rc8-s5pc1xx-r2d5: Hatim Ali
+	- S5PC100 Watchdog Timer support
+
+	Modified files:
+		M	arch/arm/configs/smdkc100nfs_defconfig
+		M	arch/arm/mach-s5pc100/include/mach/map.h
+		M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s5pc1xx/devs.c
+		M	drivers/watchdog/Kconfig
+
+v2.6.28-rc8-s5pc1xx-r2d6: Abhilash Kesavan
+	- S5PC100 AC97 WM9713 support
+
+	Modified files:
+		M	arch/arm/mach-s5pc100/dma.c
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+		M       arch/arm/mach-s5pc100/mach-smdkc100.c
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s5pc1xx/devs.c
+		M       sound/soc/codecs/wm9713.c
+		M       sound/soc/s5pc1xx/Kconfig
+		M       sound/soc/s5pc1xx/Makefile
+
+	Added Files:
+		A	sound/soc/s5pc1xx/s5pc1xx-ac97.c
+		A	sound/soc/s5pc1xx/s5pc1xx-ac97.h
+		A	sound/soc/s5pc1xx/smdkc100_wm9713.c

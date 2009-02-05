@@ -121,6 +121,8 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_fimc0,
 	&s3c_device_fimc1,
 	&s3c_device_fimc2,
+	&s3c_device_ac97,
+	&s3c_device_wdt
 };
 
 
@@ -325,13 +327,13 @@ void s3c_rtc_set_pie(void __iomem *base, uint to)
         writew(tmp, base + S3C2410_RTCCON);
 }
 
-void s3c_rtc_set_freq_regs(void __iomem *base, uint freq, uint *s3c_freq)
+void s3c_rtc_set_freq_regs(void __iomem *base, uint freq, uint s3c_freq)
 {
         unsigned int tmp;
 
         tmp = readw(base + S3C2410_RTCCON) & (S3C_RTCCON_TICEN | S3C2410_RTCCON_RTCEN );
         writew(tmp, base + S3C2410_RTCCON);
-        *s3c_freq = freq;
+        s3c_freq = freq;
         tmp = (32768 / freq)-1;
         writel(tmp, base + S3C2410_TICNT);
 }

@@ -139,6 +139,31 @@ void __init s3c_adc_set_platdata(struct s3c_adc_mach_info *pd)
 	}
 }
 
+/* WATCHDOG TIMER*/
+
+static struct resource s3c_wdt_resource[] = {
+        [0] = {
+                .start = S3C_PA_WDT,
+                .end   = S3C_PA_WDT + 0xff,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_WDT,
+                .end   = IRQ_WDT,
+                .flags = IORESOURCE_IRQ,
+        },
+};
+
+struct platform_device s3c_device_wdt = {
+        .name             = "s3c2410-wdt",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_wdt_resource),
+        .resource         = s3c_wdt_resource,
+};
+
+EXPORT_SYMBOL(s3c_device_wdt);
+
+
 /* NAND Controller */
 
 static struct resource s3c_nand_resource[] = {
@@ -371,3 +396,29 @@ struct platform_device s3c_device_spi2 = {
 };
 
 EXPORT_SYMBOL(s3c_device_spi2);
+
+/* AC97 */
+
+static struct resource s3c_ac97_resource[] = {
+        [0] = {
+                .start = S5PC1XX_PA_AC97,
+                .end   = S5PC1XX_PA_AC97 + S5PC1XX_SZ_AC97 -1,
+                .flags = IORESOURCE_MEM,
+        }
+};
+
+static u64 s3c_device_ac97_dmamask = 0xffffffffUL;
+
+struct platform_device s3c_device_ac97 = {
+        .name             = "s3c-ac97",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_ac97_resource),
+        .resource         = s3c_ac97_resource,
+        .dev              = {
+                .dma_mask = &s3c_device_ac97_dmamask,
+                .coherent_dma_mask = 0xffffffffUL
+        }
+};
+
+EXPORT_SYMBOL(s3c_device_ac97);
+
