@@ -170,7 +170,7 @@ static int s3c_fimc_v4l2_s_fbuf(struct file *filp, void *fh,
 	frmbuf->capability = fb->capability;
 	frmbuf->fmt.width = fb->fmt.width;
 	frmbuf->fmt.height = fb->fmt.height;
-	frmbuf->fmt.field = V4L2_FIELD_NONE;
+	frmbuf->fmt.field = fb->fmt.field;
 	frmbuf->fmt.pixelformat = fb->fmt.pixelformat;
 	frmbuf->fmt.bytesperline = fb->fmt.width * bpp / 8;
 	frmbuf->fmt.sizeimage = fb->fmt.width * frmbuf->fmt.bytesperline;
