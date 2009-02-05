@@ -718,7 +718,21 @@ CONFIG_HWMON=y
 # CONFIG_HWMON_DEBUG_CHIP is not set
 # CONFIG_THERMAL is not set
 # CONFIG_THERMAL_HWMON is not set
-# CONFIG_WATCHDOG is not set
+CONFIG_WATCHDOG=y
+# CONFIG_WATCHDOG_NOWAYOUT is not set
+
+# #
+# # Watchdog Device Drivers
+# #
+# # CONFIG_SOFT_WATCHDOG is not set
+CONFIG_S3C2410_WATCHDOG=y
+
+# #
+# # ISA-based Watchdog Cards
+# #
+# # CONFIG_PCWATCHDOG is not set
+# # CONFIG_MIXCOMWD is not set
+# # CONFIG_WDT is not set
 
 #
 # Sonics Silicon Backplane
