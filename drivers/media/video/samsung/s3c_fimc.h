@@ -620,6 +620,6 @@ extern void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl);
 extern int s3c_fimc_get_frame_count(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_change_effect(struct s3c_fimc_control *ctrl);
-extern void s3c_fimc_change_output_flip(struct s3c_fimc_control *ctrl);
+extern void s3c_fimc_change_rotate(struct s3c_fimc_control *ctrl);
 
 #endif /* _S3C_CAMIF_H */

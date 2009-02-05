@@ -238,6 +238,9 @@ void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
 	cfg |= (frame->flip << S3C_CITRGFMT_FLIP_SHIFT);
 
 	if (ctrl->rot90) {
+		cfg &= ~(S3C_CITRGFMT_INROT90_CLOCKWISE | \
+			S3C_CITRGFMT_OUTROT90_CLOCKWISE);
+
 		if (ctrl->out_type == PATH_OUT_DMA)
 			cfg |= S3C_CITRGFMT_OUTROT90_CLOCKWISE;
 		else if (ctrl->out_type == PATH_OUT_LCD_FIFO)
@@ -248,6 +251,22 @@ void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
 
 	cfg = S3C_CITAREA_TARGET_AREA(frame->width * frame->height);
 	writel(cfg, ctrl->regs + S3C_CITAREA);
+}
+
+static void s3c_fimc_set_output_dma_size(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
+	u32 cfg = 0;
+
+	if (ctrl->rot90) {
+		cfg |= S3C_ORGISIZE_HORIZONTAL(frame->height);
+		cfg |= S3C_ORGISIZE_VERTICAL(frame->width);
+	} else {
+		cfg |= S3C_ORGISIZE_HORIZONTAL(frame->width);
+		cfg |= S3C_ORGISIZE_VERTICAL(frame->height);
+	}
+
+	writel(cfg, ctrl->regs + S3C_ORGOSIZE);
 }
 
 void s3c_fimc_set_output_dma(struct s3c_fimc_control *ctrl)
@@ -272,10 +291,7 @@ void s3c_fimc_set_output_dma(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CIOCROFF);
 
 	/* for original size */
-	cfg = 0;
-	cfg |= S3C_ORGISIZE_HORIZONTAL(frame->width);
-	cfg |= S3C_ORGISIZE_VERTICAL(frame->height);
-	writel(cfg, ctrl->regs + S3C_ORGOSIZE);
+	s3c_fimc_set_output_dma_size(ctrl);
 	
 	/* for output dma control */
 	cfg = readl(ctrl->regs + S3C_CIOCTRL);
@@ -534,14 +550,17 @@ void s3c_fimc_change_effect(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CIIMGEFF);
 }
 
-void s3c_fimc_change_output_flip(struct s3c_fimc_control *ctrl)
+void s3c_fimc_change_rotate(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_CITRGFMT);
+	u32 cfg;
 
+	cfg = readl(ctrl->regs + S3C_CITRGFMT);
 	cfg &= ~(S3C_CITRGFMT_FLIP_MASK | S3C_CITRGFMT_OUTROT90_CLOCKWISE);
 	cfg |= (ctrl->out_frame.flip << S3C_CITRGFMT_FLIP_SHIFT);
 
 	if (ctrl->rot90) {
+		cfg &= ~(S3C_CITRGFMT_INROT90_CLOCKWISE | \
+				S3C_CITRGFMT_OUTROT90_CLOCKWISE);
 		if (ctrl->out_type == PATH_OUT_DMA)
 			cfg |= S3C_CITRGFMT_OUTROT90_CLOCKWISE;
 		else if (ctrl->out_type == PATH_OUT_LCD_FIFO)
@@ -549,4 +568,6 @@ void s3c_fimc_change_output_flip(struct s3c_fimc_control *ctrl)
 	}
 
 	writel(cfg, ctrl->regs + S3C_CITRGFMT);
+
+	s3c_fimc_set_output_dma_size(ctrl);
 }

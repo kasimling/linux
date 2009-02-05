@@ -300,49 +300,49 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 	case V4L2_CID_ROTATE_ORIGINAL:
 		frame->flip = FLIP_ORIGINAL;
 		ctrl->rot90 = 0;
-		s3c_fimc_change_output_flip(ctrl);
+		s3c_fimc_change_rotate(ctrl);
 		break;
 
 	case V4L2_CID_HFLIP:
 		frame->flip = FLIP_X_AXIS;
 		ctrl->rot90 = 0;
-		s3c_fimc_change_output_flip(ctrl);
+		s3c_fimc_change_rotate(ctrl);
 		break;
 
 	case V4L2_CID_VFLIP:
 		frame->flip = FLIP_Y_AXIS;
 		ctrl->rot90 = 0;
-		s3c_fimc_change_output_flip(ctrl);
+		s3c_fimc_change_rotate(ctrl);
 		break;
 
 	case V4L2_CID_ROTATE_180:
 		frame->flip = FLIP_XY_AXIS;
 		ctrl->rot90 = 0;
-		s3c_fimc_change_output_flip(ctrl);
+		s3c_fimc_change_rotate(ctrl);
 		break;
 
 	case V4L2_CID_ROTATE_90:
 		frame->flip = FLIP_ORIGINAL;
 		ctrl->rot90 = 1;
-		s3c_fimc_change_output_flip(ctrl);
+		s3c_fimc_change_rotate(ctrl);
 		break;
 
 	case V4L2_CID_ROTATE_270:
 		frame->flip = FLIP_XY_AXIS;
-		ctrl->rot90 = 0;
-		s3c_fimc_change_output_flip(ctrl);
+		ctrl->rot90 = 1;
+		s3c_fimc_change_rotate(ctrl);
 		break;
 
 	case V4L2_CID_ROTATE_90_HFLIP:
 		frame->flip = FLIP_X_AXIS;
 		ctrl->rot90 = 1;
-		s3c_fimc_change_output_flip(ctrl);
+		s3c_fimc_change_rotate(ctrl);
 		break;
 
 	case V4L2_CID_ROTATE_90_VFLIP:
 		frame->flip = FLIP_Y_AXIS;
 		ctrl->rot90 = 1;
-		s3c_fimc_change_output_flip(ctrl);
+		s3c_fimc_change_rotate(ctrl);
 		break;
 
 	case V4L2_CID_ZOOM_IN:
