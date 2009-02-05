@@ -39,10 +39,10 @@ static struct s3c_fimc_camera s5k3ba_template = {
 	.id 		= 0,
 	.type		= CAM_TYPE_ITU,
 	.mode		= ITU_601_YCBCR422_8BIT,
-	.order422	= CAM_ORDER422_8BIT_YCBYCR,
-	.clockrate	= 19000000,
-	.width		= 640,
-	.height		= 480,
+	.order422	= CAM_ORDER422_8BIT_YCRYCB,
+	.clockrate	= 24000000,
+	.width		= 800,
+	.height		= 600,
 	.offset		= {
 		.h1 = 0,
 		.h2 = 0,
@@ -51,7 +51,7 @@ static struct s3c_fimc_camera s5k3ba_template = {
 	},
 
 	.polarity	= {
-		.pclk	= 1,
+		.pclk	= 0,
 		.vsync	= 1,
 		.href	= 0,
 		.hsync	= 0,
@@ -143,23 +143,28 @@ static int s5k3ba_detach(struct i2c_client *client)
 
 static int s5k3ba_change_resolution(struct i2c_client *client, int res)
 {
-	int i;
+//	int i;
 
 	switch (res) {
 	case CAM_RES_DEFAULT:	/* fall through */
+
+#if 0
 	case CAM_RES_VGA:
 		for (i = 0; i < S5K3BA_VGA_REGS; i++) {
 			s3c_fimc_i2c_write(client, s5k3ba_vga_reg[i].subaddr,
 						s5k3ba_vga_reg[i].value);
 		}
 		break;
+#endif
 
 	case CAM_RES_MAX:	/* fall through */
+#if 0
 	case CAM_RES_SXGA:
  		for (i = 0; i < S5K3BA_SXGA_REGS; i++) {
 			s3c_fimc_i2c_write(client, s5k3ba_sxga_reg[i].subaddr,
 						s5k3ba_sxga_reg[i].value);
 		}
+#endif
 		break;
 
 	default:
@@ -171,41 +176,8 @@ static int s5k3ba_change_resolution(struct i2c_client *client, int res)
 
 static int s5k3ba_change_whitebalance(struct i2c_client *client, enum s3c_fimc_wb_t type)
 {
-	printk("[ *** Page 0, S5K3BA White Balance Mode ***]\n");
-
 	s3c_fimc_i2c_write(client, 0xfc, 0x0);
 	s3c_fimc_i2c_write(client, 0x30, type);
-
-	switch (type) {
-	case WB_AUTO:
-	default:
-		printk(" -> AWB auto mode\n");
-		break;
-
-	case WB_INDOOR_3001:
-		printk(" -> Indoor 3100 mode\n");
-		break;
-
-	case WB_OUTDOOR_5100:
-		printk(" -> Outdoor 5100 mode\n");
-		break;
-
-	case WB_INDOOR_2000:
-		printk(" -> Indoor 2000 mode\n");
-		break;
-
-	case WB_HALT:
-		printk(" -> AE/AWB halt\n");
-		break;
-
-	case WB_CLOUDY:
-		printk(" -> Cloudy(6000) mode\n");
-		break;
-
-	case WB_SUNNY:
-		printk(" -> Sunny(8000) mode\n");
-		break;
-	}
 
 	return 0;
 }
