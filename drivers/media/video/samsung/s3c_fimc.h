@@ -112,10 +112,10 @@
 /*
  * E N U M E R A T I O N S
  *
-*/enum s3c_fimc_cam_slot_t {
-	CAM_SLOT_A	= 0,
-	CAM_SLOT_B	= 1,
-	CAM_SLOT_MIPI	= 2,
+*/enum s3c_fimc_cam_ch_t {
+	CAM_CH_A	= 0,
+	CAM_CH_B	= 1,
+	CAM_CH_MIPI	= 2,
 };
 
 enum s3c_fimc_cam_t {
@@ -131,11 +131,6 @@ enum s3c_fimc_cam_mode_t {
 	MIPI_CSI_RAW8 = 0x2a,
 	MIPI_CSI_RAW10 = 0x2b,
 	MIPI_CSI_RAW12 = 0x2c,
-};
-
-enum s3c_fimc_cam_reset_t {
-	CAM_RESET_ACTIVE_LOW = 0,
-	CAM_RESET_ACTIVE_HIGH = 1,
 };
 
 enum s3c_fimc_order422_cam_t {
@@ -396,8 +391,6 @@ struct s3c_fimc_camera {
 	int				height;
 	struct s3c_fimc_window_offset	offset;
 	struct s3c_fimc_polarity	polarity;
-	enum s3c_fimc_cam_reset_t	reset_type;
-	int				reset_delay;
 	struct i2c_client		*client;
 	int				initialized;
 };
@@ -603,7 +596,6 @@ extern void s3c_fimc_select_camera(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_source_format(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_window_offset(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_reset(struct s3c_fimc_control *ctrl);
-extern int s3c_fimc_reset_camera(void __iomem *regs, enum s3c_fimc_cam_slot_t ch, enum s3c_fimc_cam_reset_t type, int delay);
 extern void s3c_fimc_set_polarity(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_output_dma(struct s3c_fimc_control *ctrl);

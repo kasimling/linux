@@ -1,32 +1,17 @@
+choice
+	prompt "External Camera"
+	depends on VIDEO_FIMC
+
 config S5K4BA
-	bool "Samsung S5K4BA mobile camera support"
-	depends on VIDEO_SAMSUNG
+	bool "Samsung S5K4BA"
+	depends on VIDEO_FIMC
 	---help---
 	  Samsung S5K4BA mobile camera support
 
-config S5K4BA_SLOT_A
-	bool "S5K4BA: Running at slot A"
-	default y
-	depends on S5K4BA
+config S5K3BA
+	bool "Samsung S5K3BA"
+	depends on VIDEO_FIMC
+	---help---
+	  Samsung S5K3BA mobile camera support
 
-config S5K4BA_SLOT_B
-	bool "S5K4BA: Running at slot B"
-	depends on S5K4BA
-
-choice
-	prompt "S5K4BA: Reset type"
-	depends on S5K4BA
-	default S5K4BA_RESET_LOW
-
-	config S5K4BA_RESET_LOW
-		bool "Active LOW"
-
-	config S5K4BA_RESET_HIGH
-		bool "Active HIGH"
 endchoice
-
-config S5K4BA_RESET_DELAY
-	int "S5K4BA: Reset delay in microseconds"
-	depends on S5K4BA
-	default "5000"
-

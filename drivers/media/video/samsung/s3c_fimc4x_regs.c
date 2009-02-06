@@ -13,8 +13,10 @@
 #include <linux/delay.h>
 #include <linux/gpio.h>
 #include <asm/io.h>
+#include <mach/map.h>
 #include <plat/gpio-cfg.h>
 #include <plat/regs-gpio.h>
+#include <plat/gpio-bank-h3.h>
 #include <plat/regs-fimc.h>
 #include <plat/fimc.h>
 
@@ -124,63 +126,50 @@ void s3c_fimc_reset(struct s3c_fimc_control *ctrl)
 	}
 }
 
-int s3c_fimc_reset_camera(void __iomem *regs, enum s3c_fimc_cam_slot_t ch,
-				enum s3c_fimc_cam_reset_t type, int delay)
+void s3c_fimc_reset_camera(void)
 {
+	void __iomem *regs = ioremap(S5PC1XX_PA_FIMC0, SZ_4K);
 	u32 cfg;
-	int ret = 0;
 
-	if (ch == CAM_SLOT_A) {
-		if (type == CAM_RESET_ACTIVE_HIGH) {
-			cfg = readl(regs + S3C_CIGCTRL);
-			cfg |= S3C_CIGCTRL_CAMRST_A;
-			writel(cfg, regs + S3C_CIGCTRL);
-			udelay(200);
+#if (CONFIG_VIDEO_FIMC_CAM_RESET == 1)
+	cfg = readl(regs + S3C_CIGCTRL);
+	cfg |= S3C_CIGCTRL_CAMRST_A;
+	writel(cfg, regs + S3C_CIGCTRL);
+	udelay(200);
 
-			cfg = readl(regs + S3C_CIGCTRL);
-			cfg &= ~S3C_CIGCTRL_CAMRST_A;
-			writel(cfg, regs + S3C_CIGCTRL);
-			udelay(delay);
-		} else {
-			cfg = readl(regs + S3C_CIGCTRL);
-			cfg &= ~S3C_CIGCTRL_CAMRST_A;
-			writel(cfg, regs + S3C_CIGCTRL);
-			udelay(200);
+	cfg = readl(regs + S3C_CIGCTRL);
+	cfg &= ~S3C_CIGCTRL_CAMRST_A;
+	writel(cfg, regs + S3C_CIGCTRL);
+	udelay(2000);
+#else
+	cfg = readl(regs + S3C_CIGCTRL);
+	cfg &= ~S3C_CIGCTRL_CAMRST_A;
+	writel(cfg, regs + S3C_CIGCTRL);
+	udelay(200);
 
-			cfg = readl(regs + S3C_CIGCTRL);
-			cfg |= S3C_CIGCTRL_CAMRST_A;
-			writel(cfg, regs + S3C_CIGCTRL);
-			udelay(delay);
-		}
-	}
+	cfg = readl(regs + S3C_CIGCTRL);
+	cfg |= S3C_CIGCTRL_CAMRST_A;
+	writel(cfg, regs + S3C_CIGCTRL);
+	udelay(2000);
+#endif
 
-	if (ch == CAM_SLOT_B) {
-		if (!gpio_is_valid(S5PC1XX_GPH3(6))) {
-			err("GPH3 is invalid\n");
-			ret = -EIO;
-		} else {
-			ret = gpio_request(S5PC1XX_GPH3(6), "GPH3");
-			if (ret) {
-				err("failed to request GPH3 for "
-					"camera B reset control\n");
-				ret = -EIO;
-			}
+#if (CONFIG_VIDEO_FIMC_CH == 1)
+	cfg = readl(S5PC1XX_GPH3CON);
+	cfg &= ~S5PC1XX_GPH3_CONMASK(6);
+	cfg |= S5PC1XX_GPH3_OUTPUT(6);
+	writel(cfg, S5PC1XX_GPH3CON);
 
-			if (type == CAM_RESET_ACTIVE_HIGH) {
-				gpio_direction_output(S5PC1XX_GPH3(6), 1);
-				udelay(200);
-				gpio_set_value(S5PC1XX_GPH3(6), 0);
-				udelay(delay);
-			} else {
-				gpio_direction_output(S5PC1XX_GPH3(6), 0);
-				udelay(200);
-				gpio_set_value(S5PC1XX_GPH3(6), 1);
-				udelay(delay);
-			}
-		}
-	}
+	cfg = readl(S5PC1XX_GPH3DAT);
+	cfg &= ~(0x1 << 6);
+	writel(cfg, S5PC1XX_GPH3DAT);
+	udelay(200);
 
-	return ret;
+	cfg |= (0x1 << 6);
+	writel(cfg, S5PC1XX_GPH3DAT);
+	udelay(2000);
+#endif
+
+	iounmap(regs);
 }
 
 void s3c_fimc_set_polarity(struct s3c_fimc_control *ctrl)

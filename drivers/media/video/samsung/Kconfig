@@ -1,27 +1,36 @@
-config VIDEO_SAMSUNG
+config VIDEO_FIMC
 	bool "Samsung Camera Interface (FIMC) driver"
 	depends on I2C && VIDEO_V4L2
 	default n
 	---help---
 	  This is a video4linux driver for Samsung FIMC device.
 
-config VIDEO_SAMSUNG_DEBUG
+config VIDEO_FIMC_DEBUG
 	bool "FIMC driver debug"
-	depends on VIDEO_SAMSUNG
+	depends on VIDEO_FIMC
 
-config VIDEO_SAMSUNG_STATIC_MEMORY
+config VIDEO_FIMC_STATIC_MEMORY
 	bool "Reserved memory allocation support"
-	depends on VIDEO_SAMSUNG
+	depends on VIDEO_FIMC
 	default y
 	---help---
 	  Enabling this option makes kernel reserves some memory spaces
 	  for output frames at boot time with bootmem allocator.
 
-config VIDEO_SAMSUNG_STATIC_MEMORY_SIZE
+config VIDEO_FIMC_STATIC_MEMORY_SIZE
 	int "Memory size in KB for reserve"
-	depends on VIDEO_SAMSUNG_STATIC_MEMORY
+	depends on VIDEO_FIMC_STATIC_MEMORY
 	default "10240"
 
-source "drivers/media/video/samsung/Kconfig-s5k3ba"
-source "drivers/media/video/samsung/Kconfig-s5k4ba"
+source "drivers/media/video/samsung/Kconfig-camera"
+
+config VIDEO_FIMC_CAM_CH
+	int "External Camera channel (0=A, 1=B)"
+	depends on VIDEO_FIMC
+	default "0"
+
+config VIDEO_FIMC_CAM_RESET
+	int "Reset Type (0=low, 1=high)"
+	depends on VIDEO_FIMC
+	default "0"
 

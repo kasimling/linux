@@ -201,17 +201,13 @@ static void __init smdkc100_machine_init(void)
 	s3c_fimc1_set_platdata(NULL);
 	s3c_fimc2_set_platdata(NULL);
 
+#ifdef CONFIG_VIDEO_SAMSUNG
+	s3c_fimc_reset_camera();
+#endif
+
 	s5pc1xx_reserve_bootmem();
-
-#ifdef CONFIG_S5K3BA
-	s5k3ba_pre_init(S5PC1XX_PA_FIMC0);
-#endif
-
-#ifdef CONFIG_S5K4BA
-	s5k4ba_pre_init(S5PC1XX_PA_FIMC0);
-#endif
-
 	platform_add_devices(smdkc100_devices, ARRAY_SIZE(smdkc100_devices));
+
 #if defined(CONFIG_PM)
 	s5pc1xx_pm_init();
 #endif

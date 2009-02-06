@@ -23,20 +23,15 @@
 #include "s3c_fimc.h"
 #include "s5k4ba.h"
 
-#define S5K4BA_SLOT_A		0
-#define S5K4BA_SLOT_B		1
-#define S5K4BA_MAX		2
 #define S5K4BA_I2C_ADDR		0x5a
 
 const static u16 ignore[] = { I2C_CLIENT_END };
 const static u16 normal_addr[] = { (S5K4BA_I2C_ADDR >> 1), I2C_CLIENT_END };
 const static u16 *forces[] = { NULL };
-
-static struct s3c_fimc_camera s5k4ba_data[S5K4BA_MAX];
 static struct i2c_driver s5k4ba_i2c_driver;
 
-static struct s3c_fimc_camera s5k4ba_template = {
-	.id 		= 0,
+static struct s3c_fimc_camera s5k4ba_data = {
+	.id 		= CONFIG_VIDEO_FIMC_CAM_CH,
 	.type		= CAM_TYPE_ITU,
 	.mode		= ITU_601_YCBCR422_8BIT,
 	.order422	= CAM_ORDER422_8BIT_YCBYCR,
@@ -63,12 +58,6 @@ static struct s3c_fimc_camera s5k4ba_template = {
 		.hsync	= 0,
 	},
 
-#ifdef CONFIG_S5K4BA_RESET_HIGH
-	.reset_type	= CAM_RESET_ACTIVE_HIGH,
-#else
-	.reset_type	= CAM_RESET_ACTIVE_LOW,
-#endif
-	.reset_delay	= CONFIG_S5K4BA_RESET_DELAY,
 	.initialized	= 0,	
 };
 
@@ -104,7 +93,7 @@ static int s5k4ba_attach(struct i2c_adapter *adap, int addr, int kind)
 	c->adapter = adap;
 	c->driver = &s5k4ba_i2c_driver;
 
-	s5k4ba_data[adap->id].client = c;
+	s5k4ba_data.client = c;
 
 	return i2c_attach_client(c);
 }
@@ -113,29 +102,14 @@ static int s5k4ba_attach_adapter(struct i2c_adapter *adap)
 {
 	int ret = 0;
 
-#ifdef CONFIG_S5K4BA_SLOT_A
-	s3c_fimc_register_camera(&s5k4ba_data[S5K4BA_SLOT_A]);
-	adap->id = S5K4BA_SLOT_A;
+	s3c_fimc_register_camera(&s5k4ba_data);
 
 	ret = i2c_probe(adap, &addr_data, s5k4ba_attach);
 	if (ret) {
-		err("failed to attach driver at slot A\n");
+		err("failed to attach s5k4ba driver\n");
 		ret = -ENODEV;
 	} else
-		info("s5k4ba attached at slot A\n");
-#endif
-
-#ifdef CONFIG_S5K4BA_SLOT_B
-	s3c_fimc_register_camera(&s5k4ba_data[S5K4BA_SLOT_B]);
-	adap->id = S5K4BA_SLOT_B;
-
-	ret = i2c_probe(adap, &addr_data, s5k4ba_attach);
-	if (ret) {
-		err("failed to attach driver at slot B\n");
-		ret = -ENODEV;
-	} else
-		info("s5k4ba attached at slot B\n");
-#endif
+		info("s5k4ba attached successfully\n");
 
 	return ret;
 }
@@ -220,52 +194,12 @@ static struct i2c_driver s5k4ba_i2c_driver = {
 
 static __init int s5k4ba_init(void)
 {
-#ifdef CONFIG_S5K4BA_SLOT_A
-	s5k4ba_data[S5K4BA_SLOT_A]= s5k4ba_template;
-	s5k4ba_data[S5K4BA_SLOT_A].id = S5K4BA_SLOT_A;
-#endif
-
-#ifdef CONFIG_S5K4BA_SLOT_B
-	s5k4ba_data[S5K4BA_SLOT_B]= s5k4ba_template;
-	s5k4ba_data[S5K4BA_SLOT_B].id = S5K4BA_SLOT_B;
-#endif
-
 	return i2c_add_driver(&s5k4ba_i2c_driver);
 }
 
 static __init void s5k4ba_exit(void)
 {
 	i2c_del_driver(&s5k4ba_i2c_driver);
-}
-
-void s5k4ba_pre_init(unsigned long paddr)
-{
-	void __iomem *regs;
-	enum s3c_fimc_cam_slot_t slot;
-	enum s3c_fimc_cam_reset_t reset_type;
-	int reset_delay;
-
-#ifdef CONFIG_S5K4BA_SLOT_B
-	slot = CAM_SLOT_B;
-#else
-	slot = CAM_SLOT_A;
-#endif
-
-#ifdef CONFIG_S5K4BA_RESET_HIGH
-	reset_type = CAM_RESET_ACTIVE_HIGH;
-#else
-	reset_type = CAM_RESET_ACTIVE_LOW;
-#endif
-
-#if (CONFIG_S5K4BA_RESET_DELAY < 0)
-	reset_delay = 5000;
-#else
-	reset_delay = CONFIG_S5K4BA_RESET_DELAY;
-#endif
-
-	regs = ioremap(paddr, SZ_4K);
-	s3c_fimc_reset_camera(regs, slot, reset_type, reset_delay);
-	iounmap(regs);
 }
 
 module_init(s5k4ba_init)

@@ -42,7 +42,7 @@ void s5pc1xx_reserve_bootmem(void)
 				PAGE_ALIGN(bootmem_size), BOOTMEM_DEFAULT);
 
 		printk(KERN_INFO \
-			"S5PC1XX: %dMB system memory reserved from 0x%08x\n", \
+			"S5PC1XX: %dMB system memory reserved at 0x%08x\n", \
 			reserve_size / SZ_1M, \
 			(unsigned int) PHYS_OFFSET + bootmem_size);
 	}

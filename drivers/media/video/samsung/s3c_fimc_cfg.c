@@ -18,7 +18,7 @@
 
 #include "s3c_fimc.h"
 
-#ifdef CONFIG_VIDEO_SAMSUNG_STATIC_MEMORY
+#ifdef CONFIG_VIDEO_FIMC_STATIC_MEMORY
 #define s3c_fimc_malloc(__size)		alloc_bootmem(__size)
 #define s3c_fimc_free(__buff, __size)	free_bootmem((u32) __buff, (u32) __size)
 #else
