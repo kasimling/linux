@@ -153,7 +153,7 @@ void s3c_fimc_reset_camera(void)
 	udelay(2000);
 #endif
 
-#if (CONFIG_VIDEO_FIMC_CH == 1)
+#if (CONFIG_VIDEO_FIMC_CAM_CH == 1)
 	cfg = readl(S5PC1XX_GPH3CON);
 	cfg &= ~S5PC1XX_GPH3_CONMASK(6);
 	cfg |= S5PC1XX_GPH3_OUTPUT(6);

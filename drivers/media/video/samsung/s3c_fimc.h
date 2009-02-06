@@ -60,7 +60,7 @@
 #define info(args...)	do { printk(KERN_INFO S3C_FIMC_NAME ": " args); } while (0)
 #define err(args...)	do { printk(KERN_ERR  S3C_FIMC_NAME ": " args); } while (0)
 
-#if defined(CONFIG_VIDEO_SAMSUNG_DEBUG)
+#if defined(CONFIG_VIDEO_FIMC_DEBUG)
 #define dprintk(fmt, args...) 		printk(KERN_DEBUG S3C_FIMC_NAME \
 						":%s: " fmt, __FUNCTION__ , ## args)
 #else

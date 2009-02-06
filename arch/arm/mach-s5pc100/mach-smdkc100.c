@@ -201,7 +201,7 @@ static void __init smdkc100_machine_init(void)
 	s3c_fimc1_set_platdata(NULL);
 	s3c_fimc2_set_platdata(NULL);
 
-#ifdef CONFIG_VIDEO_SAMSUNG
+#ifdef CONFIG_VIDEO_FIMC
 	s3c_fimc_reset_camera();
 #endif
 
