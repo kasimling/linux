@@ -112,12 +112,7 @@
 /*
  * E N U M E R A T I O N S
  *
-*/enum s3c_fimc_cam_ch_t {
-	CAM_CH_A	= 0,
-	CAM_CH_B	= 1,
-	CAM_CH_MIPI	= 2,
-};
-
+*/
 enum s3c_fimc_cam_t {
 	CAM_TYPE_ITU	= 0,
 	CAM_TYPE_MIPI	= 1,
