@@ -1,32 +1,11 @@
 config S5K3BA
 	bool "Samsung S5K3BA mobile camera support"
-	depends on VIDEO_SAMSUNG
+	depends on VIDEO_FIMC
 	---help---
 	  Samsung S5K3BA mobile camera support
 
-config S5K3BA_SLOT_A
-	bool "S5K3BA: Running at slot A"
-	default y
+config S5K3BA_CH
+	int "Channel(0/1)"
 	depends on S5K3BA
-
-config S5K3BA_SLOT_B
-	bool "S5K3BA: Running at slot B"
-	depends on S5K3BA
-
-choice
-	prompt "S5K3BA: Reset type"
-	depends on S5K3BA
-	default S5K3BA_RESET_LOW
-
-	config S5K3BA_RESET_LOW
-		bool "Active LOW"
-
-	config S5K3BA_RESET_HIGH
-		bool "Active HIGH"
-endchoice
-
-config S5K3BA_RESET_DELAY
-	int "S5K3BA: Reset delay in microseconds"
-	depends on S5K3BA
-	default "5000"
+	default "0"
 
