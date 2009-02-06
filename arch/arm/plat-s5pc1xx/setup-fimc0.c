@@ -13,15 +13,14 @@
 
 #include <linux/kernel.h>
 #include <linux/types.h>
-
-struct platform_device; /* don't need the contents */
-
-#include <mach/gpio.h>
+#include <linux/gpio.h>
+#include <plat/gpio-cfg.h>
 #include <plat/gpio-bank-e0.h>
 #include <plat/gpio-bank-e1.h>
 #include <plat/gpio-bank-h2.h>
 #include <plat/gpio-bank-h3.h>
-#include <plat/gpio-cfg.h>
+
+struct platform_device; /* don't need the contents */
 
 void s3c_fimc0_cfg_gpio(struct platform_device *dev)
 {
@@ -60,6 +59,7 @@ void s3c_fimc0_cfg_gpio(struct platform_device *dev)
 	s3c_gpio_cfgpin(S5PC1XX_GPH3(1), S5PC1XX_GPH3_1_CAM_B_VSYNC);
 	s3c_gpio_cfgpin(S5PC1XX_GPH3(2), S5PC1XX_GPH3_2_CAM_B_HREF);
 	s3c_gpio_cfgpin(S5PC1XX_GPH3(3), S5PC1XX_GPH3_3_CAM_B_FIELD);
+	s3c_gpio_cfgpin(S5PC1XX_GPE1(3), S5PC1XX_GPE1_3_CAM_A_CLKOUT);
 
 	for (i = 0; i < 8; i++)
 		s3c_gpio_setpull(S5PC1XX_GPH2(i), S3C_GPIO_PULL_UP);

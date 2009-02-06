@@ -105,6 +105,7 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 #ifdef CONFIG_SMDK6410_SD_CH1
 	&s3c_device_hsmmc1,
 #endif
+	&s3c_device_wdt,
 	&s3c_device_rtc,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,

@@ -115,6 +115,10 @@
 #define S3C64XX_PA_SPI	   	(0x7F00B000)
 #define S3C64XX_SZ_SPI		SZ_8K
 
+/* Watchdog */
+#define S3C64XX_PA_WATCHDOG 	(0x7E004000)
+#define S3C64XX_SZ_WATCHDOG 	SZ_4K
+
 /* compatibiltiy defines. */
 #define S3C_PA_TIMER		S3C64XX_PA_TIMER
 #define S3C_PA_HSMMC0		S3C64XX_PA_HSMMC0
