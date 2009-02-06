@@ -600,3 +600,11 @@ v2.6.28-rc8-s5pc1xx-r2d6: Abhilash Kesavan
 		A	sound/soc/s5pc1xx/s5pc1xx-ac97.c
 		A	sound/soc/s5pc1xx/s5pc1xx-ac97.h
 		A	sound/soc/s5pc1xx/smdkc100_wm9713.c
+
+v2.6.28-rc8-s5pc1xx-r2d7: Jinsung Yang
+	- S5PC100 FIMC driver
+	- Camera input and memory output support
+	- Both camera channels (A and B) support
+	- Preview and capture related functionalities support
+	- S5K3BA and S5K4BA module support
+
