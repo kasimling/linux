@@ -608,3 +608,16 @@ v2.6.28-rc8-s5pc1xx-r2d7: Jinsung Yang
 	- Preview and capture related functionalities support
 	- S5K3BA and S5K4BA module support
 
+v2.6.28-rc8-s5pc1xx-r2d8: Hatim Ali
+	- S5PC100 Notification LED support
+
+	Modified files:
+		M   	arch/arm/Kconfig
+		M   	arch/arm/mach-s5pc100/Makefile
+
+	Added Files:
+		A	arch/arm/mach-s5pc100/leds-s5pc100.c
+		A	arch/arm/mach-s5pc100/leds.c
+		A	arch/arm/mach-s5pc100/leds.h
+
+

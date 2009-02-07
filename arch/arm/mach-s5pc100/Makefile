@@ -6,6 +6,7 @@
 # Licensed under GPLv2
 
 obj-y				:=
+led-y                           := leds.o
 obj-m				:=
 obj-n				:=
 obj-				:=
@@ -22,3 +23,7 @@ obj-$(CONFIG_S5PC1XX_SETUP_SDHCI)       += setup-sdhci.o
 # machine support
 
 obj-$(CONFIG_MACH_SMDKC100)	+= mach-smdkc100.o
+
+# LEDs support
+led-$(CONFIG_MACH_SMDKC100)     += leds-s5pc100.o
+obj-$(CONFIG_LEDS)              += $(led-y)

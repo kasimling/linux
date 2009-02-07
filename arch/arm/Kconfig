@@ -913,7 +913,8 @@ config LEDS
 		   ARCH_OMAP || ARCH_P720T || ARCH_PXA_IDP || \
 		   ARCH_SA1100 || ARCH_SHARK || ARCH_VERSATILE || \
 		   ARCH_AT91 || ARCH_DAVINCI || \
-		   ARCH_KS8695 || MACH_RD88F5182
+		   ARCH_KS8695 || MACH_RD88F5182 || \
+                   MACH_SMDKC100
 	help
 	  If you say Y here, the LEDs on your machine will be used
 	  to provide useful information about your current system status.
@@ -928,7 +929,8 @@ config LEDS
 config LEDS_TIMER
 	bool "Timer LED" if (!ARCH_CDB89712 && !ARCH_OMAP) || \
 			    OMAP_OSK_MISTRAL || MACH_OMAP_H2 \
-			    || MACH_OMAP_PERSEUS2
+			    || MACH_OMAP_PERSEUS2 || \
+		            MACH_SMDKC100
 	depends on LEDS
 	depends on !GENERIC_CLOCKEVENTS
 	default y if ARCH_EBSA110
@@ -947,7 +949,7 @@ config LEDS_CPU
 	bool "CPU usage LED" if (!ARCH_CDB89712 && !ARCH_EBSA110 && \
 			!ARCH_OMAP) \
 			|| OMAP_OSK_MISTRAL || MACH_OMAP_H2 \
-			|| MACH_OMAP_PERSEUS2
+			|| MACH_OMAP_PERSEUS2 || MACH_SMDKC100
 	depends on LEDS
 	help
 	  If you say Y here, the red LED will be used to give a good real
