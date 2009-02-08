@@ -620,7 +620,7 @@ v2.6.28-rc8-s5pc1xx-r2d8: Hatim Ali
 		A	arch/arm/mach-s5pc100/leds.c
 		A	arch/arm/mach-s5pc100/leds.h
 
-v2.6.28-rc8-s5pc1xx-r2d8: Abhilash Kesavan
+v2.6.28-rc8-s5pc1xx-r2d9: Abhilash Kesavan
 	- Enabled LCD/OSD Support for S5PC100
 
 	Modified files:
