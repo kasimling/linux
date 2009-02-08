@@ -28,7 +28,7 @@
  *
  * The 'x' means 'DO NOT CARE'
  * The '*' means 'FIMC SPECIFIC
- * For some fimc formats, we didn't find equivalent format in the V4L2 FOURCC.
+ * For some fimc formats, we couldn't find equivalent format in the V4L2 FOURCC.
  *
  * FIMC TYPE	PLANES	ORDER		V4L2_PIX_FMT
  * ---------------------------------------------------------
