@@ -620,4 +620,10 @@ v2.6.28-rc8-s5pc1xx-r2d8: Hatim Ali
 		A	arch/arm/mach-s5pc100/leds.c
 		A	arch/arm/mach-s5pc100/leds.h
 
+v2.6.28-rc8-s5pc1xx-r2d8: Abhilash Kesavan
+	- Enabled LCD/OSD Support for S5PC100
 
+	Modified files:
+		M	arch/arm/plat-s5pc1xx/devs.c
+		M	drivers/video/samsung/s3cfb.h
+		M	drivers/video/samsung/s3cfb_spi.c	

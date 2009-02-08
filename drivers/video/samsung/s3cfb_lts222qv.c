@@ -322,7 +322,7 @@ static void s3cfb_set_gpio_lts222qv(void)
 	s3c_gpio_setpull(S5P64XX_GPN(1), S3C_GPIO_PULL_NONE);
 	s3c_gpio_setpull(S5P64XX_GPN(2), S3C_GPIO_PULL_NONE);
 	s3c_gpio_setpull(S5P64XX_GPN(3), S3C_GPIO_PULL_NONE);
-#else
+#elif defined(CONFIG_PLAT_S3C64XX)
 	gpio_direction_output(S3C64XX_GPC(1), 1);
 	gpio_direction_output(S3C64XX_GPC(2), 1);
 	gpio_direction_output(S3C64XX_GPC(3), 1);
@@ -330,6 +330,17 @@ static void s3cfb_set_gpio_lts222qv(void)
 	s3c_gpio_setpull(S3C64XX_GPC(1), S3C_GPIO_PULL_NONE);
 	s3c_gpio_setpull(S3C64XX_GPC(2), S3C_GPIO_PULL_NONE);
 	s3c_gpio_setpull(S3C64XX_GPC(3), S3C_GPIO_PULL_NONE);
+#elif defined(CONFIG_CPU_S5PC100)
+	gpio_request(S5PC1XX_GPB(1), "GPB");
+	gpio_direction_output(S5PC1XX_GPB(1), 1);
+	gpio_request(S5PC1XX_GPB(2), "GPB");
+	gpio_direction_output(S5PC1XX_GPB(2), 1);
+	gpio_request(S5PC1XX_GPB(3), "GPB");
+	gpio_direction_output(S5PC1XX_GPB(3), 1);
+
+	s3c_gpio_setpull(S5PC1XX_GPB(1), S3C_GPIO_PULL_NONE);
+	s3c_gpio_setpull(S5PC1XX_GPB(2), S3C_GPIO_PULL_NONE);
+	s3c_gpio_setpull(S5PC1XX_GPB(3), S3C_GPIO_PULL_NONE);
 #endif
 }
 

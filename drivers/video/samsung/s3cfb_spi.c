@@ -189,12 +189,56 @@ void s3cfb_spi_gpio_free(int ch)
 	gpio_free(S3CFB_SPI_CS(ch));
 }
 
-#elif 0 //defined(CONFIG_PLAT_S5PC1XX)
+#elif defined(CONFIG_PLAT_S5PC1XX)
 
-#define S5P_FB_SPI_MISO(x)	(S5P_GPB0 + (x * 4))
-#define S5P_FB_SPI_CLK(x)	(S5P_GPB1 + (x * 4))
-#define S5P_FB_SPI_MOSI(x)	(S5P_GPB2 + (x * 4))
-#define S5P_FB_SPI_nSS(x)	(S5P_GPB3 + (x * 4))
+#define S5P_FB_SPI_CLK(x)	(S5PC1XX_GPB(1 + (x * 4)))
+#define S5P_FB_SPI_MOSI(x)	(S5PC1XX_GPB(2 + (x * 4)))
+#define S5P_FB_SPI_CS(x)	(S5PC1XX_GPB(3 + (x * 4)))
+
+int s3cfb_spi_gpio_request(int ch)
+{
+        int err = 0;
+
+        if (gpio_is_valid(S5P_FB_SPI_CLK(ch))) {
+                err = gpio_request(S5P_FB_SPI_CLK(ch), "GPB");
+
+                if (err)
+                        goto err_clk;
+        } else {
+                err = 1;
+                goto err_clk;
+        }
+
+        if (gpio_is_valid(S5P_FB_SPI_MOSI(ch))) {
+                err = gpio_request(S5P_FB_SPI_MOSI(ch), "GPB");
+
+                if (err)
+                        goto err_mosi;
+        } else {
+                err = 1;
+                goto err_mosi;
+        }
+
+        if (gpio_is_valid(S5P_FB_SPI_CS(ch))) {
+                err = gpio_request(S5P_FB_SPI_CS(ch), "GPB");
+
+                if (err)
+                        goto err_cs;
+        } else {
+                err = 1;
+                goto err_cs;
+        }
+
+err_cs:
+        gpio_free(S5P_FB_SPI_MOSI(ch));
+
+err_mosi:
+        gpio_free(S5P_FB_SPI_CLK(ch));
+
+err_clk:
+        return err;
+
+}
 
 inline void s3cfb_spi_lcd_dclk(int ch, int value)
 {
@@ -208,18 +252,25 @@ inline void s3cfb_spi_lcd_dseri(int ch, int value)
 
 inline void s3cfb_spi_lcd_den(int ch, int value)
 {
-	gpio_set_value(S5P_FB_SPI_nSS(ch), value);
+	gpio_set_value(S5P_FB_SPI_CS(ch), value);
 }
 
 inline void s3cfb_spi_set_lcd_data(int ch)
 {
 	gpio_direction_output(S5P_FB_SPI_CLK(ch), 1);
 	gpio_direction_output(S5P_FB_SPI_MOSI(ch), 1);
-	gpio_direction_output(S5P_FB_SPI_nSS(ch), 1);
+	gpio_direction_output(S5P_FB_SPI_CS(ch), 1);
 
-	gpio_pullup(S5P_FB_SPI_CLK(ch), S5P_GPIO_PUD_DISABLE);
-	gpio_pullup(S5P_FB_SPI_MOSI(ch), S5P_GPIO_PUD_DISABLE);
-	gpio_pullup(S5P_FB_SPI_nSS(ch), S5P_GPIO_PUD_DISABLE);
+	s3c_gpio_setpull(S5P_FB_SPI_CLK(ch), S3C_GPIO_PULL_NONE);
+	s3c_gpio_setpull(S5P_FB_SPI_MOSI(ch), S3C_GPIO_PULL_NONE);
+	s3c_gpio_setpull(S5P_FB_SPI_CS(ch), S3C_GPIO_PULL_NONE);
+}
+
+void s3cfb_spi_gpio_free(int ch)
+{
+        gpio_free(S5P_FB_SPI_CLK(ch));
+        gpio_free(S5P_FB_SPI_MOSI(ch));
+        gpio_free(S5P_FB_SPI_CS(ch));
 }
 
 #endif

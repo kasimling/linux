@@ -80,7 +80,7 @@ static struct resource s3c_lcd_resource[] = {
 		.flags = IORESOURCE_MEM,
 	},
 	[1] = {
-		.start = IRQ_LCD0,
+		.start = IRQ_LCD1,
 		.end   = IRQ_LCD3,
 		.flags = IORESOURCE_IRQ,
 	}
