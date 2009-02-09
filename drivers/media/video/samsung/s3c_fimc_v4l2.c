@@ -80,14 +80,14 @@ const static struct v4l2_fmtdesc s3c_fimc_capture_formats[] = {
 		.index		= 2,
 		.type		= V4L2_BUF_TYPE_VIDEO_CAPTURE,
 		.flags		= FORMAT_FLAGS_PACKED,
-		.description	= "4:2:2, packed, Y-Cb-Cr",
+		.description	= "4:2:2, packed, YCBYCR",
 		.pixelformat	= V4L2_PIX_FMT_YUYV,
 	},
 	{
 		.index		= 3,
 		.type		= V4L2_BUF_TYPE_VIDEO_CAPTURE,
 		.flags		= FORMAT_FLAGS_PACKED,
-		.description	= "4:2:2, packedd, Y-Cb-Cr",
+		.description	= "4:2:2, packed, CBYCRY",
 		.pixelformat	= V4L2_PIX_FMT_UYVY,
 	}
 };
@@ -163,7 +163,7 @@ static int s3c_fimc_v4l2_s_fbuf(struct file *filp, void *fh,
 	if (i == S3C_FIMC_MAX_OVERLAY_FORMATS)
 		return -EINVAL;
 
-	bpp = s3c_fimc_set_output_frame(ctrl, &fb->fmt, 0);
+	bpp = s3c_fimc_set_output_frame(ctrl, &fb->fmt);
 
 	frmbuf->base  = fb->base;
 	frmbuf->flags = fb->flags;
@@ -211,7 +211,11 @@ static int s3c_fimc_v4l2_s_fmt_vid_cap(struct file *filp, void *fh,
 	struct s3c_fimc_control *ctrl = (struct s3c_fimc_control *) fh;
 
 	ctrl->v4l2.frmbuf.fmt = f->fmt.pix;
-	s3c_fimc_set_output_frame(ctrl, &f->fmt.pix, 1);
+
+	if (f->fmt.pix.priv == V4L2_FMT_IN)
+		s3c_fimc_set_input_frame(ctrl, &f->fmt.pix);
+	else
+		s3c_fimc_set_output_frame(ctrl, &f->fmt.pix);
 
 	return 0;
 }
@@ -236,15 +240,16 @@ static int s3c_fimc_v4l2_overlay(struct file *filp, void *fh, unsigned int i)
 		if (ctrl->in_type != PATH_IN_DMA) {
 			if (ctrl->in_cam && !(ctrl->in_cam->initialized))
 				s3c_fimc_init_camera(ctrl);
-
-			s3c_fimc_set_uflag(ctrl->flag, S3C_FIMC_FLAG_PREVIEW);
-			s3c_fimc_start_dma(ctrl);
 		}
+
+		s3c_fimc_set_uflag(ctrl->flag, S3C_FIMC_FLAG_PREVIEW);
+		s3c_fimc_start_dma(ctrl);
 	} else {
+		s3c_fimc_stop_dma(ctrl);
+
 		if (ctrl->in_type != PATH_IN_DMA) {
 			s3c_fimc_free_output_memory(&ctrl->out_frame);
 			s3c_fimc_set_output_address(ctrl);
-			s3c_fimc_stop_dma(ctrl);
 		}
 	}
 	
@@ -252,8 +257,21 @@ static int s3c_fimc_v4l2_overlay(struct file *filp, void *fh, unsigned int i)
 }
 
 static int s3c_fimc_v4l2_g_ctrl(struct file *filp, void *fh,
-					struct v4l2_control *a)
+					struct v4l2_control *c)
 {
+	struct s3c_fimc_control *ctrl = (struct s3c_fimc_control *) fh;
+	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
+
+	switch (c->id) {
+	case V4L2_CID_OUTPUT_ADDR:
+		c->value = frame->addr[c->value].phys_y;
+		break;
+
+	default:
+		err("invalid control id: %d\n", c->id);
+		return -EINVAL;
+	}
+	
 	return 0;
 }
 
@@ -379,6 +397,11 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 		s3c_fimc_set_nr_frames(ctrl, c->value);
 		break;
 
+	case V4L2_CID_INPUT_ADDR:
+		s3c_fimc_alloc_input_memory(&ctrl->in_frame, \
+						(dma_addr_t) c->value);
+		break;
+
 	default:
 		err("invalid control id: %d\n", c->id);
 		return -EINVAL;
@@ -415,9 +438,9 @@ static int s3c_fimc_v4l2_streamoff(struct file *filp, void *fh,
 		s3c_fimc_set_sflag(ctrl->flag, S3C_FIMC_FLAG_STOP);
 		s3c_fimc_unmask_uflag(ctrl->flag);
 		s3c_fimc_unmask_iflag(ctrl->flag);
+		s3c_fimc_stop_dma(ctrl);
 		s3c_fimc_free_output_memory(&ctrl->out_frame);
 		s3c_fimc_set_output_address(ctrl);
-		s3c_fimc_stop_dma(ctrl);
 	}
 
 	return 0;
@@ -440,10 +463,15 @@ static int s3c_fimc_v4l2_s_input(struct file *filp, void *fh,
 
 	if (i >= S3C_FIMC_MAX_INPUT_TYPES)
 		return -EINVAL;
-	else {
-		ctrl->v4l2.input = &s3c_fimc_input_types[i];
-		return 0;
-	}
+
+	ctrl->v4l2.input = &s3c_fimc_input_types[i];
+
+	if (s3c_fimc_input_types[i].type == V4L2_INPUT_TYPE_CAMERA)
+		ctrl->in_type = PATH_IN_ITU_CAMERA;
+	else
+		ctrl->in_type = PATH_IN_DMA;
+
+	return 0;
 }
 
 static int s3c_fimc_v4l2_g_output(struct file *filp, void *fh,

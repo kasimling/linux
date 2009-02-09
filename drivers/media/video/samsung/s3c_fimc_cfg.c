@@ -72,7 +72,6 @@ int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info)
 
 			frame->virt_rgb = s3c_fimc_malloc(info->buf_size);
 			if (frame->virt_rgb == NULL) {
-				err("cannot allocate memory\n");
 				ret = -ENOMEM;
 				goto alloc_fail;
 			}
@@ -95,7 +94,6 @@ int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info)
 
 			frame->virt_y = s3c_fimc_malloc(info->buf_size);
 			if (frame->virt_y == NULL) {
-				err("cannot allocate memory\n");
 				ret = -ENOMEM;
 				goto alloc_fail;
 			}
@@ -151,15 +149,184 @@ void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info)
 	}
 }
 
+int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
+{
+	struct s3c_fimc_frame_addr *frame;
+	u32 size = info->width * info->height;
+	u32 cbcr_size = 0, *buf_size = NULL, one_p_size;
+
+	switch (info->format) {
+	case FORMAT_RGB565:
+		size *= 2;
+		buf_size = &size;
+		break;
+
+	case FORMAT_RGB666:	/* fall through */
+	case FORMAT_RGB888:
+		size *= 4;
+		buf_size = &size;
+		break;
+
+	case FORMAT_YCBCR420:
+		cbcr_size = size / 4;
+		one_p_size = size + (2 * cbcr_size);
+		buf_size = &one_p_size;
+		break;
+
+	case FORMAT_YCBCR422:
+		cbcr_size = size / 2;
+		one_p_size = size + (2 * cbcr_size);
+		buf_size = &one_p_size;
+		break;
+	}
+
+	info->buf_size = *buf_size;
+
+	switch (info->format) {
+	case FORMAT_RGB565:	/* fall through */
+	case FORMAT_RGB666:	/* fall through */
+	case FORMAT_RGB888:
+		info->addr.phys_rgb = addr;
+		break;
+
+	case FORMAT_YCBCR420:	/* fall through */
+	case FORMAT_YCBCR422:
+		frame = &info->addr;
+		frame->phys_y = addr;
+		frame->phys_cb = frame->phys_y + size;
+		frame->phys_cr = frame->phys_cb + cbcr_size;
+
+		break;
+	}
+
+	return 0;
+}
+
 void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr)
 {
 	ctrl->out_frame.nr_frames = nr;
 }
 
-static int s3c_fimc_set_output_format(struct v4l2_pix_format *fmt,
-					struct s3c_fimc_out_frame *frame)
+static void s3c_fimc_set_input_format(struct s3c_fimc_control *ctrl,
+					struct v4l2_pix_format *fmt)
 {
+	struct s3c_fimc_in_frame *frame = &ctrl->in_frame;
+
+	frame->width = fmt->width;
+	frame->height = fmt->height;
+
+	switch (fmt->pixelformat) {
+	case V4L2_PIX_FMT_RGB565:
+		frame->format = FORMAT_RGB565;
+		frame->planes = 1;
+		break;
+
+	case V4L2_PIX_FMT_RGB24:
+		frame->format = FORMAT_RGB888;
+		frame->planes = 1;
+		break;
+
+	case V4L2_PIX_FMT_NV12:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 2;
+		frame->order_2p = LSB_CBCR;
+		break;
+
+	case V4L2_PIX_FMT_NV21:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 2;
+		frame->order_2p = LSB_CRCB;
+		break;
+
+	case V4L2_PIX_FMT_NV12X:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 2;
+		frame->order_2p = MSB_CBCR;
+		break;
+
+	case V4L2_PIX_FMT_NV21X:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 2;
+		frame->order_2p = MSB_CRCB;
+		break;
+
+	case V4L2_PIX_FMT_YUV420:
+		frame->format = FORMAT_YCBCR420;
+		frame->planes = 3;
+		break;
+
+	case V4L2_PIX_FMT_YUYV:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 1;
+		frame->order_1p = IN_ORDER422_YCBYCR;
+		break;
+
+	case V4L2_PIX_FMT_YVYU:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 1;
+		frame->order_1p = IN_ORDER422_YCRYCB;
+		break;
+
+	case V4L2_PIX_FMT_UYVY:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 1;
+		frame->order_1p = IN_ORDER422_CBYCRY;
+		break;
+
+	case V4L2_PIX_FMT_VYUY:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 1;
+		frame->order_1p = IN_ORDER422_CRYCBY;
+		break;
+
+	case V4L2_PIX_FMT_NV16:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 2;
+		frame->order_1p = LSB_CBCR;
+		break;
+
+	case V4L2_PIX_FMT_NV61:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 2;
+		frame->order_1p = LSB_CRCB;
+		break;
+
+	case V4L2_PIX_FMT_NV16X:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 2;
+		frame->order_1p = MSB_CBCR;
+		break;
+
+	case V4L2_PIX_FMT_NV61X:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 2;
+		frame->order_1p = MSB_CRCB;
+		break;
+
+	case V4L2_PIX_FMT_YUV422P:
+		frame->format = FORMAT_YCBCR422;
+		frame->planes = 3;
+		break;
+	}
+}
+
+int s3c_fimc_set_input_frame(struct s3c_fimc_control *ctrl,
+				struct v4l2_pix_format *fmt)
+{
+	s3c_fimc_set_input_format(ctrl, fmt);
+	s3c_fimc_set_input_address(ctrl);
+
+	return 0;
+}
+
+static int s3c_fimc_set_output_format(struct s3c_fimc_control *ctrl,
+					struct v4l2_pix_format *fmt)
+{
+	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
 	int depth = 0;
+
+	frame->width = fmt->width;
+	frame->height = fmt->height;
 
 	switch (fmt->pixelformat) {
 	case V4L2_PIX_FMT_RGB565:
@@ -236,28 +403,28 @@ static int s3c_fimc_set_output_format(struct v4l2_pix_format *fmt,
 		depth = 16;
 		break;
 
-	case V4L2_PIX_FMT_UV12:
+	case V4L2_PIX_FMT_NV16:
 		frame->format = FORMAT_YCBCR422;
 		frame->planes = 2;
 		frame->order_1p = LSB_CBCR;
 		depth = 16;
 		break;
 
-	case V4L2_PIX_FMT_UV21:
+	case V4L2_PIX_FMT_NV61:
 		frame->format = FORMAT_YCBCR422;
 		frame->planes = 2;
 		frame->order_1p = LSB_CRCB;
 		depth = 16;
 		break;
 
-	case V4L2_PIX_FMT_UV12X:
+	case V4L2_PIX_FMT_NV16X:
 		frame->format = FORMAT_YCBCR422;
 		frame->planes = 2;
 		frame->order_1p = MSB_CBCR;
 		depth = 16;
 		break;
 
-	case V4L2_PIX_FMT_UV21X:
+	case V4L2_PIX_FMT_NV61X:
 		frame->format = FORMAT_YCBCR422;
 		frame->planes = 2;
 		frame->order_1p = MSB_CRCB;
@@ -271,20 +438,6 @@ static int s3c_fimc_set_output_format(struct v4l2_pix_format *fmt,
 		break;
 	}
 
-	return depth;
-}
-
-int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
-				struct v4l2_pix_format *fmt, int priv)
-{
-	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
-	int depth = 0;
-
-	frame->width = fmt->width;
-	frame->height = fmt->height;
-
-	depth = s3c_fimc_set_output_format(fmt, frame);
-
 	switch (fmt->field) {
 	case V4L2_FIELD_INTERLACED:
 	case V4L2_FIELD_INTERLACED_TB:
@@ -297,11 +450,20 @@ int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
 		break;
 	}
 
+	return depth;
+}
+
+int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
+				struct v4l2_pix_format *fmt)
+{
+	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
+	int depth = 0;
+
+	depth = s3c_fimc_set_output_format(ctrl, fmt);
+
 	if (frame->addr[0].virt_y == NULL) {
 		if (s3c_fimc_alloc_output_memory(frame))
 			err("cannot allocate memory\n");
-		else
-			s3c_fimc_set_output_address(ctrl);
 	}
 
 	return depth;
@@ -394,10 +556,24 @@ static int s3c_fimc_get_scaler_factor(u32 src, u32 tar, u32 *ratio, u32 *shift)
 
 int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 {
-	struct s3c_fimc_window_offset *ofs = &ctrl->in_cam->offset;
 	struct s3c_fimc_scaler *sc = &ctrl->scaler;
 	struct s3c_platform_fimc *pdata = to_fimc_plat(ctrl->pdev);
+	struct s3c_fimc_window_offset *ofs;
 	int ret, tx, ty, sx, sy;
+	int width, height, h_ofs, v_ofs;
+
+	if (ctrl->in_type == PATH_IN_DMA) {
+		width = ctrl->in_frame.width;
+		height = ctrl->in_frame.height;
+		h_ofs = 0;
+		v_ofs = 0;
+	} else {
+		ofs = &ctrl->in_cam->offset;
+		width = ctrl->in_cam->width;
+		height = ctrl->in_cam->height;
+		h_ofs = ofs->h1 + ofs->h2;
+		v_ofs = ofs->v1 + ofs->v2;
+	}
 
 	tx = ctrl->out_frame.width;
 	ty = ctrl->out_frame.height;
@@ -408,8 +584,8 @@ int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 		goto err_size;
 	}
 
-	sx = ctrl->in_cam->width - (ofs->h1 + ofs->h2);
-	sy = ctrl->in_cam->height - (ofs->v1 + ofs->v2);
+	sx = width - h_ofs;
+	sy = height - v_ofs;
 
 	sc->real_width = sx;
 	sc->real_height = sy;
@@ -446,11 +622,17 @@ err_size:
 
 void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 {
-	s3c_fimc_set_source_format(ctrl);
-	s3c_fimc_set_window_offset(ctrl);
-	s3c_fimc_set_polarity(ctrl);
+	if (ctrl->in_type == PATH_IN_DMA)
+		s3c_fimc_set_input_address(ctrl);
+	else {
+		s3c_fimc_set_source_format(ctrl);
+		s3c_fimc_set_window_offset(ctrl);
+		s3c_fimc_set_polarity(ctrl);
+	}
+
 	s3c_fimc_set_scaler_info(ctrl);
 	s3c_fimc_set_target_format(ctrl);
+	s3c_fimc_set_output_address(ctrl);
 	s3c_fimc_set_output_dma(ctrl);
 	s3c_fimc_enable_capture(ctrl);
 	s3c_fimc_start_scaler(ctrl);

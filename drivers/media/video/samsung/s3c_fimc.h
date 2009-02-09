@@ -43,10 +43,10 @@
  * YUV422	1	YCRYCB		V4L2_PIX_FMT_YVYU
  * YUV422	1	CBYCRY		V4L2_PIX_FMT_UYVY
  * YUV422	1	CRYCBY		V4L2_PIX_FMT_VYUY*
- * YUV422	2	LSB_CBCR	V4L2_PIX_FMT_UV12*
- * YUV422	2	LSB_CRCB	V4L2_PIX_FMT_UV21*
- * YUV422	2	MSB_CBCR	V4L2_PIX_FMT_UV12X*
- * YUV422	2	MSB_CRCB	V4L2_PIX_FMT_UV21X*
+ * YUV422	2	LSB_CBCR	V4L2_PIX_FMT_NV16*
+ * YUV422	2	LSB_CRCB	V4L2_PIX_FMT_NV61*
+ * YUV422	2	MSB_CBCR	V4L2_PIX_FMT_NV16X*
+ * YUV422	2	MSB_CRCB	V4L2_PIX_FMT_NV61X*
  * YUV422	3	x		V4L2_PIX_FMT_YUV422P
  *
 */
@@ -403,6 +403,7 @@ struct s3c_fimc_camera {
  * @flip:		flip mode
 */
 struct s3c_fimc_in_frame {
+	u32				buf_size;
 	struct s3c_fimc_frame_addr	addr;
 	int				width;
 	int				height;
@@ -504,7 +505,7 @@ struct s3c_fimc_control {
 	/* input */
 	enum s3c_fimc_path_in_t		in_type;
 	struct s3c_fimc_camera		*in_cam;
-	struct s3c_fimc_in_frame	*in_frame;
+	struct s3c_fimc_in_frame	in_frame;
 
 	/* output */
 	enum s3c_fimc_path_out_t	out_type;
@@ -526,20 +527,26 @@ struct s3c_fimc_config {
  * V 4 L 2   F I M C   E X T E N S I O N S
  *
 */
-#define V4L2_INPUT_TYPE_MEMORY		3
+#define V4L2_INPUT_TYPE_MEMORY		4
+#define FORMAT_FLAGS_PACKED		1
+#define FORMAT_FLAGS_PLANAR		2
+#define V4L2_FMT_IN			0
+#define V4L2_FMT_OUT			1
 
-/* fourcc for fimc specific */
-#define V4L2_PIX_FMT_NV12X		v4l2_fourcc('N', 'V', '1', 'X')
-#define V4L2_PIX_FMT_NV21X		v4l2_fourcc('N', 'V', '2', 'X')
+/* FOURCC for fimc specific */
+#define V4L2_PIX_FMT_NV12X		v4l2_fourcc('N', '1', '2', 'X')
+#define V4L2_PIX_FMT_NV21X		v4l2_fourcc('N', '2', '1', 'X')
 #define V4L2_PIX_FMT_VYUY		v4l2_fourcc('V', 'Y', 'U', 'Y')
-#define V4L2_PIX_FMT_UV12		v4l2_fourcc('U', 'V', '1', '2')
-#define V4L2_PIX_FMT_UV21		v4l2_fourcc('U', 'V', '2', '1')
-#define V4L2_PIX_FMT_UV12X		v4l2_fourcc('U', 'V', '1', 'X')
-#define V4L2_PIX_FMT_UV21X		v4l2_fourcc('U', 'V', '2', 'X')
+#define V4L2_PIX_FMT_NV16		v4l2_fourcc('N', 'V', '1', '6')
+#define V4L2_PIX_FMT_NV61		v4l2_fourcc('N', 'V', '6', '1')
+#define V4L2_PIX_FMT_NV16X		v4l2_fourcc('N', '1', '6', 'X')
+#define V4L2_PIX_FMT_NV61X		v4l2_fourcc('N', '6', '1', 'X')
 
 /* CID extensions */
 #define V4L2_CID_ACTIVE_CAMERA		(V4L2_CID_PRIVATE_BASE + 0)
 #define V4L2_CID_NR_FRAMES		(V4L2_CID_PRIVATE_BASE + 1)
+#define V4L2_CID_INPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 2)
+#define V4L2_CID_OUTPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 3)
 #define V4L2_CID_EFFECT_ORIGINAL	(V4L2_CID_PRIVATE_BASE + 10)
 #define V4L2_CID_EFFECT_ARBITRARY	(V4L2_CID_PRIVATE_BASE + 11)
 #define V4L2_CID_EFFECT_NEGATIVE 	(V4L2_CID_PRIVATE_BASE + 13)
@@ -554,9 +561,6 @@ struct s3c_fimc_config {
 #define V4L2_CID_ROTATE_90_VFLIP	(V4L2_CID_PRIVATE_BASE + 25)
 #define	V4L2_CID_ZOOM_IN		(V4L2_CID_PRIVATE_BASE + 31)
 #define V4L2_CID_ZOOM_OUT		(V4L2_CID_PRIVATE_BASE + 32)
-
-#define FORMAT_FLAGS_PACKED		0x01
-#define FORMAT_FLAGS_PLANAR		0x02
 
 
 /*
@@ -573,9 +577,11 @@ extern void s3c_fimc_i2c_command(struct s3c_fimc_control *ctrl, u32 cmd, int arg
 extern void s3c_fimc_register_camera(struct s3c_fimc_camera *cam);
 extern void s3c_fimc_set_active_camera(struct s3c_fimc_control *ctrl, int id);
 extern void s3c_fimc_init_camera(struct s3c_fimc_control *ctrl);
+extern int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr);
 extern int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info);
 extern void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info);
-extern int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl, struct v4l2_pix_format *fmt, int priv);
+extern int s3c_fimc_set_input_frame(struct s3c_fimc_control *ctrl, struct v4l2_pix_format *fmt);
+extern int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl, struct v4l2_pix_format *fmt);
 extern int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl);
 extern u8 *s3c_fimc_get_current_frame(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr);
@@ -604,6 +610,7 @@ extern void s3c_fimc_enable_capture(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_disable_capture(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_effect(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl);
+extern void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl);
 extern int s3c_fimc_get_frame_count(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_change_effect(struct s3c_fimc_control *ctrl);

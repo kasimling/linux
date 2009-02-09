@@ -248,11 +248,15 @@ static void s3c_fimc_set_output_dma_size(struct s3c_fimc_control *ctrl)
 	u32 cfg = 0;
 
 	if (ctrl->rot90) {
-		cfg |= S3C_ORGISIZE_HORIZONTAL(frame->height);
-		cfg |= S3C_ORGISIZE_VERTICAL(frame->width);
+		cfg |= S3C_ORGISIZE_HORIZONTAL(frame->height - \
+			(frame->offset.y_v * 2));
+		cfg |= S3C_ORGISIZE_VERTICAL(frame->width - \
+			(frame->offset.y_h * 2));
 	} else {
-		cfg |= S3C_ORGISIZE_HORIZONTAL(frame->width);
-		cfg |= S3C_ORGISIZE_VERTICAL(frame->height);
+		cfg |= S3C_ORGISIZE_HORIZONTAL(frame->width - \
+			(frame->offset.y_h * 2));
+		cfg |= S3C_ORGISIZE_VERTICAL(frame->height - \
+			(frame->offset.y_v * 2));
 	}
 
 	writel(cfg, ctrl->regs + S3C_ORGOSIZE);
@@ -350,11 +354,11 @@ void s3c_fimc_set_scaler(struct s3c_fimc_control *ctrl)
 		cfg |= S3C_CISCCTRL_SCALEUP_V;
 
 	if (ctrl->in_type == PATH_IN_DMA) {
-		if (ctrl->in_frame->format == FORMAT_RGB565)
+		if (ctrl->in_frame.format == FORMAT_RGB565)
 			cfg |= S3C_CISCCTRL_INRGB_FMT_RGB565;
-		else if (ctrl->in_frame->format == FORMAT_RGB666)
+		else if (ctrl->in_frame.format == FORMAT_RGB666)
 			cfg |= S3C_CISCCTRL_INRGB_FMT_RGB666;
-		else if (ctrl->in_frame->format == FORMAT_RGB888)
+		else if (ctrl->in_frame.format == FORMAT_RGB888)
 			cfg |= S3C_CISCCTRL_INRGB_FMT_RGB888;
 	}
 
@@ -430,7 +434,7 @@ void s3c_fimc_set_effect(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl)
 {
-	struct s3c_fimc_in_frame *frame = ctrl->in_frame;
+	struct s3c_fimc_in_frame *frame = &ctrl->in_frame;
 	u32 cfg;
 
 	/* for offsets */
@@ -501,6 +505,15 @@ void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl)
 	}
 
 	writel(cfg, ctrl->regs + S3C_MSCTRL);
+}
+
+void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_frame_addr *addr = &ctrl->in_frame.addr;
+
+	writel(addr->phys_y, ctrl->regs + S3C_CIIYSA0);
+	writel(addr->phys_cb, ctrl->regs + S3C_CIICBSA0);
+	writel(addr->phys_cr, ctrl->regs + S3C_CIICRSA0);
 }
 
 void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl)

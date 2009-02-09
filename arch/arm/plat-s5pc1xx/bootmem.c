@@ -27,7 +27,7 @@ int dma_needs_bounce(struct device *dev, dma_addr_t addr, size_t size)
 
 void s5pc1xx_reserve_bootmem(void)
 {
-	int reserve_size = 0;
+	int reserve_size = SZ_16M;
 	int bootmem_size;
 
 	/* add here for devices' bootmem size */
