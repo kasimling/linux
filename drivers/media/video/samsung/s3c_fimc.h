@@ -610,6 +610,7 @@ extern void s3c_fimc_enable_capture(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_disable_capture(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_effect(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl);
+extern void s3c_fimc_start_input_dma(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl);
 extern int s3c_fimc_get_frame_count(struct s3c_fimc_control *ctrl);

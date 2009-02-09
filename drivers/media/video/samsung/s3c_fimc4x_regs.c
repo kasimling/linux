@@ -459,15 +459,15 @@ void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl)
 	cfg |= S3C_ORGISIZE_VERTICAL(frame->height);
 	writel(cfg, ctrl->regs + S3C_ORGISIZE);
 	
-	/* FIXME: for real size */
+	/* for real size */
 	cfg = 0;
+	cfg |= S3C_CIREAL_ISIZE_AUTOLOAD_ENABLE;
 	cfg |= S3C_CIREAL_ISIZE_WIDTH(frame->width - (frame->offset.y_h * 2));
 	cfg |= S3C_CIREAL_ISIZE_HEIGHT(frame->height - (frame->offset.y_v * 2));
 	writel(cfg, ctrl->regs + S3C_CIREAL_ISIZE);
 
 	/* for input dma control */
-	cfg = (S3C_MSCTRL_SUCCESSIVE_COUNT(4) | \
-		S3C_MSCTRL_INPUT_MEMORY | S3C_MSCTRL_ENVID);
+	cfg = (S3C_MSCTRL_SUCCESSIVE_COUNT(4) | S3C_MSCTRL_INPUT_MEMORY);
 
 	switch (frame->format) {
 	case FORMAT_RGB565: /* fall through */
@@ -504,6 +504,14 @@ void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl)
 		break;
 	}
 
+	writel(cfg, ctrl->regs + S3C_MSCTRL);
+}
+
+void s3c_fimc_start_input_dma(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_MSCTRL);
+
+	cfg |= S3C_MSCTRL_ENVID;
 	writel(cfg, ctrl->regs + S3C_MSCTRL);
 }
 

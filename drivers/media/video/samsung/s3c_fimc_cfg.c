@@ -180,6 +180,9 @@ int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 		break;
 	}
 
+	if (*buf_size % PAGE_SIZE != 0)
+		*buf_size = (*buf_size / PAGE_SIZE + 1) * PAGE_SIZE;
+
 	info->buf_size = *buf_size;
 
 	switch (info->format) {
@@ -622,9 +625,10 @@ err_size:
 
 void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 {
-	if (ctrl->in_type == PATH_IN_DMA)
+	if (ctrl->in_type == PATH_IN_DMA) {
 		s3c_fimc_set_input_address(ctrl);
-	else {
+		s3c_fimc_set_input_dma(ctrl);
+	} else {
 		s3c_fimc_set_source_format(ctrl);
 		s3c_fimc_set_window_offset(ctrl);
 		s3c_fimc_set_polarity(ctrl);
@@ -636,6 +640,9 @@ void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 	s3c_fimc_set_output_dma(ctrl);
 	s3c_fimc_enable_capture(ctrl);
 	s3c_fimc_start_scaler(ctrl);
+
+	if (ctrl->in_type == PATH_IN_DMA)
+		s3c_fimc_start_input_dma(ctrl);
 }
 
 void s3c_fimc_stop_dma(struct s3c_fimc_control *ctrl)
