@@ -36,7 +36,7 @@ void s5pc1xx_reserve_bootmem(void)
 #endif
 
 	/* bootmem_size means none-reserved memory size */
-	if (reserve_size > 0) {
+	if (reserve_size > SZ_16M) {
 		bootmem_size = s3c_mi->bank[0].size - reserve_size;
 		reserve_bootmem(PHYS_OFFSET, \
 				PAGE_ALIGN(bootmem_size), BOOTMEM_DEFAULT);

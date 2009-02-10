@@ -12,7 +12,6 @@ config VIDEO_FIMC_DEBUG
 config VIDEO_FIMC_STATIC_MEMORY
 	bool "Reserved memory allocation support"
 	depends on VIDEO_FIMC
-	default y
 	---help---
 	  Enabling this option makes kernel reserves some memory spaces
 	  for output frames at boot time with bootmem allocator.
