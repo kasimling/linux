@@ -138,10 +138,10 @@ enum s3c_fimc_order422_cam_t {
 };
 
 enum s3c_fimc_order422_in_t {
-	IN_ORDER422_YCBYCR = (0 << 4),
-	IN_ORDER422_CBYCRY = (1 << 4),
-	IN_ORDER422_YCRYCB = (2 << 4),
-	IN_ORDER422_CRYCBY = (3 << 4),
+	IN_ORDER422_CRYCBY = (0 << 4),
+	IN_ORDER422_YCRYCB = (1 << 4),
+	IN_ORDER422_CBYCRY = (2 << 4),
+	IN_ORDER422_YCBYCR = (3 << 4),
 };
 
 enum s3c_fimc_order422_out_t {
