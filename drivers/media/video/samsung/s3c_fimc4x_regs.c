@@ -197,6 +197,25 @@ void s3c_fimc_set_polarity(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CIGCTRL);
 }
 
+static void s3c_fimc_set_rot90(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CITRGFMT);
+
+	cfg &= ~(S3C_CITRGFMT_INROT90_CLOCKWISE | \
+		S3C_CITRGFMT_OUTROT90_CLOCKWISE);
+
+	/*
+	 * We use Input Rotator when output is LCD FIFO only.
+	 * When LCD FIFO is enabled, input should be DMA.
+	*/
+	if (ctrl->out_type == PATH_OUT_LCDFIFO)
+		cfg |= S3C_CITRGFMT_INROT90_CLOCKWISE;
+	else
+		cfg |= S3C_CITRGFMT_OUTROT90_CLOCKWISE;
+
+	writel(cfg, ctrl->regs + S3C_CITRGFMT);
+}
+
 void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
@@ -226,17 +245,10 @@ void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
 	cfg |= S3C_CITRGFMT_TARGETVSIZE(frame->height);
 	cfg |= (frame->flip << S3C_CITRGFMT_FLIP_SHIFT);
 
-	if (ctrl->rot90) {
-		cfg &= ~(S3C_CITRGFMT_INROT90_CLOCKWISE | \
-			S3C_CITRGFMT_OUTROT90_CLOCKWISE);
-
-		if (ctrl->out_type == PATH_OUT_DMA)
-			cfg |= S3C_CITRGFMT_OUTROT90_CLOCKWISE;
-		else if (ctrl->out_type == PATH_OUT_LCDFIFO)
-			cfg |= S3C_CITRGFMT_INROT90_CLOCKWISE;
-	}
-
 	writel(cfg, ctrl->regs + S3C_CITRGFMT);
+
+	if (ctrl->rot90)
+		s3c_fimc_set_rot90(ctrl);
 
 	cfg = S3C_CITAREA_TARGET_AREA(frame->width * frame->height);
 	writel(cfg, ctrl->regs + S3C_CITAREA);
@@ -571,20 +583,15 @@ void s3c_fimc_change_rotate(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg;
 
-	cfg = readl(ctrl->regs + S3C_CITRGFMT);
-	cfg &= ~S3C_CITRGFMT_FLIP_MASK;
-	cfg |= (ctrl->out_frame.flip << S3C_CITRGFMT_FLIP_SHIFT);
+	if (ctrl->rot90)
+		s3c_fimc_set_rot90(ctrl);
 
-	if (ctrl->rot90) {
-		cfg &= ~(S3C_CITRGFMT_INROT90_CLOCKWISE | \
-				S3C_CITRGFMT_OUTROT90_CLOCKWISE);
-		if (ctrl->out_type == PATH_OUT_DMA)
-			cfg |= S3C_CITRGFMT_OUTROT90_CLOCKWISE;
-		else if (ctrl->out_type == PATH_OUT_LCDFIFO)
-			cfg |= S3C_CITRGFMT_INROT90_CLOCKWISE;
+	if (ctrl->out_type == PATH_OUT_DMA) {
+		cfg = readl(ctrl->regs + S3C_CITRGFMT);
+		cfg &= ~S3C_CITRGFMT_FLIP_MASK;
+		cfg |= (ctrl->out_frame.flip << S3C_CITRGFMT_FLIP_SHIFT);
+
+		writel(cfg, ctrl->regs + S3C_CITRGFMT);
+		s3c_fimc_set_output_dma_size(ctrl);
 	}
-
-	writel(cfg, ctrl->regs + S3C_CITRGFMT);
-
-	s3c_fimc_set_output_dma_size(ctrl);
 }
