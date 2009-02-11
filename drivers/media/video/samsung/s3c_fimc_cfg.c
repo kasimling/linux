@@ -464,7 +464,7 @@ int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl,
 
 	depth = s3c_fimc_set_output_format(ctrl, fmt);
 
-	if (frame->addr[0].virt_y == NULL) {
+	if (ctrl->out_type == PATH_OUT_DMA && frame->addr[0].virt_y == NULL) {
 		if (s3c_fimc_alloc_output_memory(frame))
 			err("cannot allocate memory\n");
 	}
@@ -625,6 +625,10 @@ err_size:
 
 void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 {
+	/*
+	 * IMPORTANT: many sequence dependencies
+	*/
+
 	if (ctrl->in_type == PATH_IN_DMA) {
 		s3c_fimc_set_input_address(ctrl);
 		s3c_fimc_set_input_dma(ctrl);
@@ -636,8 +640,12 @@ void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 
 	s3c_fimc_set_scaler_info(ctrl);
 	s3c_fimc_set_target_format(ctrl);
-	s3c_fimc_set_output_address(ctrl);
-	s3c_fimc_set_output_dma(ctrl);
+
+	if (ctrl->out_type == PATH_OUT_DMA) {
+		s3c_fimc_set_output_address(ctrl);
+		s3c_fimc_set_output_dma(ctrl);
+	}
+
 	s3c_fimc_enable_capture(ctrl);
 	s3c_fimc_start_scaler(ctrl);
 

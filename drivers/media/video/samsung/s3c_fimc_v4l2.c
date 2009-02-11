@@ -45,7 +45,7 @@ static struct v4l2_output s3c_fimc_output_types[] = {
 	{
 		.index		= 0,
 		.name		= "Memory Output",
-		.type		= 0,
+		.type		= V4L2_OUTPUT_TYPE_MEMORY,
 		.audioset	= 0,
 		.modulator	= 0, 
 		.std		= 0,
@@ -53,7 +53,7 @@ static struct v4l2_output s3c_fimc_output_types[] = {
 	{
 		.index		= 1,
 		.name		= "LCD FIFO Output",
-		.type		= 0,
+		.type		= V4L2_OUTPUT_TYPE_LCDFIFO,
 		.audioset	= 0,
 		.modulator	= 0,
 		.std		= 0,
@@ -491,10 +491,15 @@ static int s3c_fimc_v4l2_s_output(struct file *filp, void *fh,
 
 	if (i >= S3C_FIMC_MAX_OUTPUT_TYPES)
 		return -EINVAL;
-	else {
-		ctrl->v4l2.output = &s3c_fimc_output_types[i];
-		return 0;
-	}
+
+	ctrl->v4l2.output = &s3c_fimc_output_types[i];
+
+	if (s3c_fimc_output_types[i].type == V4L2_OUTPUT_TYPE_MEMORY)
+		ctrl->out_type = PATH_OUT_DMA;
+	else
+		ctrl->out_type = PATH_OUT_LCDFIFO;
+
+	return 0;
 }
 
 static int s3c_fimc_v4l2_enum_input(struct file *filp, void *fh,
@@ -509,12 +514,12 @@ static int s3c_fimc_v4l2_enum_input(struct file *filp, void *fh,
 }
 
 static int s3c_fimc_v4l2_enum_output(struct file *filp, void *fh,
-					struct v4l2_output *a)
+					struct v4l2_output *o)
 {
-	if ((a->index) >= S3C_FIMC_MAX_OUTPUT_TYPES)
+	if ((o->index) >= S3C_FIMC_MAX_OUTPUT_TYPES)
 		return -EINVAL;
 
-	memcpy(a, &s3c_fimc_output_types[a->index], sizeof(struct v4l2_output));
+	memcpy(o, &s3c_fimc_output_types[o->index], sizeof(struct v4l2_output));
 
 	return 0;
 }

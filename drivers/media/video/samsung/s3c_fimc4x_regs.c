@@ -232,7 +232,7 @@ void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
 
 		if (ctrl->out_type == PATH_OUT_DMA)
 			cfg |= S3C_CITRGFMT_OUTROT90_CLOCKWISE;
-		else if (ctrl->out_type == PATH_OUT_LCD_FIFO)
+		else if (ctrl->out_type == PATH_OUT_LCDFIFO)
 			cfg |= S3C_CITRGFMT_INROT90_CLOCKWISE;
 	}
 
@@ -370,7 +370,8 @@ void s3c_fimc_set_scaler(struct s3c_fimc_control *ctrl)
 		else if (ctrl->out_frame.format == FORMAT_RGB888)
 			cfg |= S3C_CISCCTRL_OUTRGB_FMT_RGB888;
 	} else {
-		cfg |= S3C_CISCCTRL_LCDPATHEN_FIFO;
+		cfg |= (S3C_CISCCTRL_LCDPATHEN_FIFO | \
+			S3C_CISCCTRL_OUTRGB_FMT_RGB888);
 
 		if (ctrl->out_frame.scan == SCAN_TYPE_INTERLACE)
 			cfg |= S3C_CISCCTRL_INTERLACE;
@@ -390,6 +391,9 @@ void s3c_fimc_start_scaler(struct s3c_fimc_control *ctrl)
 
 	cfg |= S3C_CISCCTRL_SCALERSTART;
 	writel(cfg, ctrl->regs + S3C_CISCCTRL);
+
+	if (ctrl->out_type == PATH_OUT_LCDFIFO)
+		s3cfb_enable_local(ctrl->id, 0, 0);
 }
 
 void s3c_fimc_stop_scaler(struct s3c_fimc_control *ctrl)
@@ -565,7 +569,7 @@ void s3c_fimc_change_rotate(struct s3c_fimc_control *ctrl)
 	u32 cfg;
 
 	cfg = readl(ctrl->regs + S3C_CITRGFMT);
-	cfg &= ~(S3C_CITRGFMT_FLIP_MASK | S3C_CITRGFMT_OUTROT90_CLOCKWISE);
+	cfg &= ~S3C_CITRGFMT_FLIP_MASK;
 	cfg |= (ctrl->out_frame.flip << S3C_CITRGFMT_FLIP_SHIFT);
 
 	if (ctrl->rot90) {
@@ -573,7 +577,7 @@ void s3c_fimc_change_rotate(struct s3c_fimc_control *ctrl)
 				S3C_CITRGFMT_OUTROT90_CLOCKWISE);
 		if (ctrl->out_type == PATH_OUT_DMA)
 			cfg |= S3C_CITRGFMT_OUTROT90_CLOCKWISE;
-		else if (ctrl->out_type == PATH_OUT_LCD_FIFO)
+		else if (ctrl->out_type == PATH_OUT_LCDFIFO)
 			cfg |= S3C_CITRGFMT_INROT90_CLOCKWISE;
 	}
 

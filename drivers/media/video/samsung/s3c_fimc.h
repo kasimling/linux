@@ -191,7 +191,7 @@ enum s3c_fimc_path_in_t {
 
 enum s3c_fimc_path_out_t {
 	PATH_OUT_DMA,
-	PATH_OUT_LCD_FIFO,
+	PATH_OUT_LCDFIFO,
 };
 
 enum s3c_fimc_effect_t {
@@ -527,9 +527,13 @@ struct s3c_fimc_config {
  * V 4 L 2   F I M C   E X T E N S I O N S
  *
 */
-#define V4L2_INPUT_TYPE_MEMORY		4
+#define V4L2_INPUT_TYPE_MEMORY		10
+#define V4L2_OUTPUT_TYPE_MEMORY		20
+#define V4L2_OUTPUT_TYPE_LCDFIFO	21
+
 #define FORMAT_FLAGS_PACKED		1
 #define FORMAT_FLAGS_PLANAR		2
+
 #define V4L2_FMT_IN			0
 #define V4L2_FMT_OUT			1
 
@@ -616,5 +620,9 @@ extern void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl);
 extern int s3c_fimc_get_frame_count(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_change_effect(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_change_rotate(struct s3c_fimc_control *ctrl);
+
+/* FIMD externs */
+extern void s3cfb_enable_local(int win, int in_yuv, int sel);
+extern void s3cfb_enable_dma(int win);
 
 #endif /* _S3C_CAMIF_H */
