@@ -159,6 +159,9 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 	sprintf(ctrl->name, "%s%d", S3C_FIMC_NAME, id);
 	strcpy(ctrl->vd->name, ctrl->name);
 
+	ctrl->open_lcdfifo = s3cfb_enable_local;
+	ctrl->close_lcdfifo = s3cfb_enable_dma;
+
 	atomic_set(&ctrl->in_use, 0);
 	mutex_init(&ctrl->lock);
 	init_waitqueue_head(&ctrl->waitq);

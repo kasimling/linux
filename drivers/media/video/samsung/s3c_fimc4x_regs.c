@@ -393,12 +393,15 @@ void s3c_fimc_start_scaler(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CISCCTRL);
 
 	if (ctrl->out_type == PATH_OUT_LCDFIFO)
-		s3cfb_enable_local(ctrl->id, 0, 0);
+		ctrl->open_lcdfifo(ctrl->id, 0, 0);
 }
 
 void s3c_fimc_stop_scaler(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = readl(ctrl->regs + S3C_CISCCTRL);
+
+	if (ctrl->out_type == PATH_OUT_LCDFIFO)
+		ctrl->close_lcdfifo(ctrl->id);
 
 	cfg &= ~S3C_CISCCTRL_SCALERSTART;
 	writel(cfg, ctrl->regs + S3C_CISCCTRL);

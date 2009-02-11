@@ -511,6 +511,10 @@ struct s3c_fimc_control {
 	enum s3c_fimc_path_out_t	out_type;
 	struct s3c_fimc_out_frame	out_frame;
 	int				rot90;
+
+	/* functions */
+	void (*open_lcdfifo)(int win, int in_yuv, int sel);
+	void (*close_lcdfifo)(int win);
 };
 
 /*
