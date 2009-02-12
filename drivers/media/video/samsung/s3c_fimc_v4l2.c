@@ -237,10 +237,8 @@ static int s3c_fimc_v4l2_overlay(struct file *filp, void *fh, unsigned int i)
 	struct s3c_fimc_control *ctrl = (struct s3c_fimc_control *) fh;
 
 	if (i) {
-		if (ctrl->in_type != PATH_IN_DMA) {
-			if (ctrl->in_cam && !(ctrl->in_cam->initialized))
-				s3c_fimc_init_camera(ctrl);
-		}
+		if (ctrl->in_type != PATH_IN_DMA)
+			s3c_fimc_init_camera(ctrl);
 
 		s3c_fimc_set_uflag(ctrl->flag, S3C_FIMC_FLAG_PREVIEW);
 		s3c_fimc_start_dma(ctrl);
@@ -418,10 +416,8 @@ static int s3c_fimc_v4l2_streamon(struct file *filp, void *fh,
 	if (i != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 		return -EINVAL;
 
-	if (ctrl->in_type != PATH_IN_DMA) {
-		if (ctrl->in_cam && !(ctrl->in_cam->initialized))
-			s3c_fimc_init_camera(ctrl);
-	}
+	if (ctrl->in_type != PATH_IN_DMA)
+		s3c_fimc_init_camera(ctrl);
 
 	ctrl->out_frame.skip_frames = 0;
 	s3c_fimc_set_uflag(ctrl->flag, S3C_FIMC_FLAG_CAPTURE);

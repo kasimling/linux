@@ -382,8 +382,7 @@ void s3c_fimc_set_scaler(struct s3c_fimc_control *ctrl)
 		else if (ctrl->out_frame.format == FORMAT_RGB888)
 			cfg |= S3C_CISCCTRL_OUTRGB_FMT_RGB888;
 	} else {
-		cfg |= (S3C_CISCCTRL_LCDPATHEN_FIFO | \
-			S3C_CISCCTRL_OUTRGB_FMT_RGB888);
+		cfg |= S3C_CISCCTRL_OUTRGB_FMT_RGB888;
 
 		if (ctrl->out_frame.scan == SCAN_TYPE_INTERLACE)
 			cfg |= S3C_CISCCTRL_INTERLACE;
@@ -532,6 +531,40 @@ void s3c_fimc_start_input_dma(struct s3c_fimc_control *ctrl)
 
 	cfg |= S3C_MSCTRL_ENVID;
 	writel(cfg, ctrl->regs + S3C_MSCTRL);
+}
+
+void s3c_fimc_stop_input_dma(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_MSCTRL);
+
+	cfg &= ~S3C_MSCTRL_ENVID;
+	writel(cfg, ctrl->regs + S3C_MSCTRL);
+}
+
+void s3c_fimc_set_input_path(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_MSCTRL);
+
+	cfg &= ~S3C_MSCTRL_INPUT_MASK;
+
+	if (ctrl->in_type == PATH_IN_DMA)
+		cfg |= S3C_MSCTRL_INPUT_MEMORY;
+	else
+		cfg |= S3C_MSCTRL_INPUT_EXTCAM;
+
+	writel(cfg, ctrl->regs + S3C_MSCTRL);
+}
+
+void s3c_fimc_set_output_path(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CISCCTRL);
+
+	cfg &= ~S3C_CISCCTRL_LCDPATHEN_FIFO;
+
+	if (ctrl->out_type == PATH_OUT_LCDFIFO)
+		cfg |= S3C_CISCCTRL_LCDPATHEN_FIFO;
+
+	writel(cfg, ctrl->regs + S3C_CISCCTRL);
 }
 
 void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl)

@@ -390,9 +390,35 @@ irqreturn_t s3cfb_irq(int irqno, void *param)
 	return IRQ_HANDLED;
 }
 
+static void s3cfb_check_line_count(void)
+{
+	int timeout = 30 * 5300;
+	unsigned int cfg;
+	int i;
+
+	i = 0;
+	do {
+		if (!(readl(S3C_VIDCON1) & 0x7ff0000))
+			break;
+		i++;
+	} while (i < timeout);
+
+	if (i == timeout) {
+		printk(KERN_WARNING "line count mismatch\n");
+
+		cfg = readl(S3C_VIDCON0);
+		cfg |= (S3C_VIDCON0_ENVID_F_ENABLE | S3C_VIDCON0_ENVID_ENABLE);
+		writel(cfg, S3C_VIDCON0);
+	}	
+}
+
 static void s3cfb_enable_local0(int in_yuv)
 {
 	unsigned int value;
+
+	s3cfb_fimd.wincon0 = readl(S3C_WINCON0);
+	s3cfb_fimd.wincon0 &= ~S3C_WINCONx_ENWIN_F_ENABLE;
+	writel(s3cfb_fimd.wincon0, S3C_WINCON0);	
 
 	s3cfb_fimd.wincon0 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
 	value = S3C_WINCONx_ENLOCAL | S3C_WINCONx_ENWIN_F_ENABLE;
@@ -407,6 +433,10 @@ static void s3cfb_enable_local1(int in_yuv, int sel)
 {
 	unsigned int value;
 
+	s3cfb_fimd.wincon1 = readl(S3C_WINCON1);
+	s3cfb_fimd.wincon1 &= ~S3C_WINCONx_ENWIN_F_ENABLE;
+	writel(s3cfb_fimd.wincon1, S3C_WINCON1);
+
 	s3cfb_fimd.wincon1 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
 	s3cfb_fimd.wincon1 &= ~(S3C_WINCON1_LOCALSEL_MASK);
 	value = sel | S3C_WINCONx_ENLOCAL | S3C_WINCONx_ENWIN_F_ENABLE;
@@ -420,6 +450,10 @@ static void s3cfb_enable_local1(int in_yuv, int sel)
 static void s3cfb_enable_local2(int in_yuv)
 {
 	unsigned int value;
+
+	s3cfb_fimd.wincon2 = readl(S3C_WINCON2);
+	s3cfb_fimd.wincon2 &= ~S3C_WINCONx_ENWIN_F_ENABLE;
+	writel(s3cfb_fimd.wincon2, S3C_WINCON2);
 
 	s3cfb_fimd.wincon2 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
 	value = S3C_WINCONx_ENLOCAL | S3C_WINCONx_ENWIN_F_ENABLE;
@@ -437,7 +471,7 @@ static void s3cfb_enable_dma0(void)
 	s3cfb_fimd.wincon0 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
 	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_ENWIN_F_ENABLE;
 
-	__raw_writel(s3cfb_fimd.wincon0 | value, S3C_WINCON0);
+	writel(s3cfb_fimd.wincon0 | value, S3C_WINCON0);
 }
 
 static void s3cfb_enable_dma1(void)
@@ -447,7 +481,7 @@ static void s3cfb_enable_dma1(void)
 	s3cfb_fimd.wincon1 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
 	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_ENWIN_F_ENABLE;
 
-	__raw_writel(s3cfb_fimd.wincon1 | value, S3C_WINCON1);
+	writel(s3cfb_fimd.wincon1 | value, S3C_WINCON1);
 }
 
 static void s3cfb_enable_dma2(void)
@@ -457,11 +491,13 @@ static void s3cfb_enable_dma2(void)
 	s3cfb_fimd.wincon2 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
 	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_ENWIN_F_ENABLE;
 
-	__raw_writel(s3cfb_fimd.wincon2 | value, S3C_WINCON2);
+	writel(s3cfb_fimd.wincon2 | value, S3C_WINCON2);
 }
 
 void s3cfb_enable_local(int win, int in_yuv, int sel)
 {
+	s3cfb_check_line_count();
+
 	switch (win) {
 	case 0:
 		s3cfb_enable_local0(in_yuv);
@@ -482,6 +518,8 @@ void s3cfb_enable_local(int win, int in_yuv, int sel)
 
 void s3cfb_enable_dma(int win)
 {
+	s3cfb_stop_lcd();
+	
 	switch (win) {
 	case 0:
 		s3cfb_enable_dma0();
@@ -498,6 +536,8 @@ void s3cfb_enable_dma(int win)
 	default:
 		break;
 	}
+
+	s3cfb_start_lcd();
 }
 
 EXPORT_SYMBOL(s3cfb_enable_local);

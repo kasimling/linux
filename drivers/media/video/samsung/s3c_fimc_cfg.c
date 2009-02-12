@@ -623,11 +623,10 @@ err_size:
 	return ret;
 }
 
+/* CAUTION: many sequence dependencies */
 void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 {
-	/*
-	 * IMPORTANT: many sequence dependencies
-	*/
+	s3c_fimc_set_input_path(ctrl);
 
 	if (ctrl->in_type == PATH_IN_DMA) {
 		s3c_fimc_set_input_address(ctrl);
@@ -640,6 +639,7 @@ void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 
 	s3c_fimc_set_scaler_info(ctrl);
 	s3c_fimc_set_target_format(ctrl);
+	s3c_fimc_set_output_path(ctrl);
 
 	if (ctrl->out_type == PATH_OUT_DMA) {
 		s3c_fimc_set_output_address(ctrl);
@@ -655,8 +655,11 @@ void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_stop_dma(struct s3c_fimc_control *ctrl)
 {
-	s3c_fimc_disable_capture(ctrl);
+	if (ctrl->in_type == PATH_IN_DMA)
+		s3c_fimc_stop_input_dma(ctrl);
+
 	s3c_fimc_stop_scaler(ctrl);
+	s3c_fimc_disable_capture(ctrl);
 }
 
 void s3c_fimc_restart_dma(struct s3c_fimc_control *ctrl)
