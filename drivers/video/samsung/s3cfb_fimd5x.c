@@ -855,7 +855,10 @@ int s3cfb_set_win_size(s3cfb_info_t *fbi, int width, int height)
 	struct fb_var_screeninfo *var= &fbi->fb.var;
 	int win_num = fbi->win_id;
 
-	if (win_num == 1)
+	if (win_num == 0)
+		writel(S3C_VIDOSD0C_OSDSIZE(width * height), S3C_VIDOSD0C);
+
+	else if (win_num == 1)
 		writel(S3C_VIDOSD0C_OSDSIZE(width * height), S3C_VIDOSD1D);
 
 	else if (win_num == 2)
