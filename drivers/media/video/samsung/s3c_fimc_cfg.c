@@ -561,25 +561,36 @@ int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_scaler *sc = &ctrl->scaler;
 	struct s3c_platform_fimc *pdata = to_fimc_plat(ctrl->pdev);
-	struct s3c_fimc_window_offset *ofs;
+	struct s3c_fimc_window_offset *w_ofs = &ctrl->in_cam->offset;
+	struct s3c_fimc_dma_offset *d_ofs = &ctrl->in_frame.offset;
 	int ret, tx, ty, sx, sy;
 	int width, height, h_ofs, v_ofs;
 
 	if (ctrl->in_type == PATH_IN_DMA) {
-		width = ctrl->in_frame.width;
-		height = ctrl->in_frame.height;
-		h_ofs = 0;
-		v_ofs = 0;
+		/* input rotator case */
+		if (ctrl->rot90 && ctrl->out_type == PATH_OUT_LCDFIFO) {
+			width = ctrl->in_frame.height;
+			height = ctrl->in_frame.width;
+			tx = ctrl->out_frame.height;
+			ty = ctrl->out_frame.width;
+			h_ofs = d_ofs->y_v * 2;
+			v_ofs = d_ofs->y_h * 2;
+		} else {
+			width = ctrl->in_frame.width;
+			height = ctrl->in_frame.height;
+			tx = ctrl->out_frame.width;
+			ty = ctrl->out_frame.height;
+			h_ofs = d_ofs->y_h * 2;
+			v_ofs = d_ofs->y_v * 2;
+		}
 	} else {
-		ofs = &ctrl->in_cam->offset;
 		width = ctrl->in_cam->width;
 		height = ctrl->in_cam->height;
-		h_ofs = ofs->h1 + ofs->h2;
-		v_ofs = ofs->v1 + ofs->v2;
+		tx = ctrl->out_frame.width;
+		ty = ctrl->out_frame.height;
+		h_ofs = w_ofs->h1 + w_ofs->h2;
+		v_ofs = w_ofs->v1 + w_ofs->v2;
 	}
-
-	tx = ctrl->out_frame.width;
-	ty = ctrl->out_frame.height;
 
 	if (tx <= 0 || ty <= 0) {
 		err("invalid target size\n");

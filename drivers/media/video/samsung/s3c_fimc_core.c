@@ -296,6 +296,7 @@ static int s3c_fimc_open(struct inode *inode, struct file *filp)
 		goto resource_busy;
 	} else {
 		atomic_inc(&ctrl->in_use);
+		s3c_fimc_reset(ctrl);
 		filp->private_data = ctrl;
 	}
 
@@ -413,8 +414,6 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 		err("cannot register video driver\n");
 		goto err_video;
 	}
-
-	s3c_fimc_reset(ctrl);
 
 	info("controller %d registered successfully\n", ctrl->id);
 

@@ -605,6 +605,7 @@ extern void s3c_fimc_select_camera(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_source_format(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_window_offset(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_reset(struct s3c_fimc_control *ctrl);
+extern void s3c_fimc_reset_cfg(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_polarity(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_output_dma(struct s3c_fimc_control *ctrl);

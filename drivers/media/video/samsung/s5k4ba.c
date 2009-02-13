@@ -170,7 +170,6 @@ static int s5k4ba_command(struct i2c_client *client, u32 cmd, void *arg)
 		break;
 
 	case I2C_CAM_WB:
-		printk("[ *** S5K4BA White Balance, No mode ***]\n");
 		s5k4ba_change_whitebalance(client, (enum s3c_fimc_wb_t) arg);
         	break;
 

@@ -95,6 +95,34 @@ void s3c_fimc_set_window_offset(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CIWDOFST2);
 }
 
+void s3c_fimc_reset_cfg(struct s3c_fimc_control *ctrl)
+{
+	int i;
+	u32 cfg[][2] = {
+		{ 0x018, 0x00000000 }, { 0x01c, 0x00000000 }, 
+		{ 0x020, 0x00000000 }, { 0x024, 0x00000000 },
+		{ 0x028, 0x00000000 }, { 0x02c, 0x00000000 }, 
+		{ 0x030, 0x00000000 }, { 0x034, 0x00000000 },
+		{ 0x038, 0x00000000 }, { 0x03c, 0x00000000 }, 
+		{ 0x040, 0x00000000 }, { 0x044, 0x00000000 },
+		{ 0x048, 0x00000000 }, { 0x04c, 0x00000000 }, 
+		{ 0x050, 0x00000000 }, { 0x054, 0x00000000 },
+		{ 0x058, 0x18000000 }, { 0x05c, 0x00000000 }, 
+		{ 0x0c0, 0x00000000 }, { 0x0c4, 0xffffffff },
+		{ 0x0d0, 0x00100080 }, { 0x0d4, 0x00000000 },
+		{ 0x0d8, 0x00000000 }, { 0x0f8, 0x00000000 },
+		{ 0x0fc, 0x04000000 }, { 0x168, 0x00000000 },
+		{ 0x16c, 0x00000000 }, { 0x170, 0x00000000 },
+		{ 0x174, 0x00000000 }, { 0x178, 0x00000000 },
+		{ 0x17c, 0x00000000 }, { 0x180, 0x00000000 },
+		{ 0x184, 0x00000000 }, { 0x188, 0x00000000 },
+		{ 0x18c, 0x00000000 }, { 0x194, 0x0000001e },
+	};
+
+	for (i = 0; i < sizeof(cfg) / 8; i++)
+		writel(cfg[i][1], ctrl->regs + cfg[i][0]);
+}
+
 void s3c_fimc_reset(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg;
@@ -124,6 +152,8 @@ void s3c_fimc_reset(struct s3c_fimc_control *ctrl)
 		cfg &= ~S3C_CISRCFMT_ITU601_8BIT;
 		writel(cfg, ctrl->regs + S3C_CISRCFMT);
 	}
+
+	s3c_fimc_reset_cfg(ctrl);
 }
 
 void s3c_fimc_reset_camera(void)
@@ -257,18 +287,16 @@ void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
 static void s3c_fimc_set_output_dma_size(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
+	int ofs_h = frame->offset.y_h * 2;
+	int ofs_v = frame->offset.y_v * 2;
 	u32 cfg = 0;
 
 	if (ctrl->rot90) {
-		cfg |= S3C_ORGISIZE_HORIZONTAL(frame->height - \
-			(frame->offset.y_v * 2));
-		cfg |= S3C_ORGISIZE_VERTICAL(frame->width - \
-			(frame->offset.y_h * 2));
+		cfg |= S3C_ORGOSIZE_HORIZONTAL(frame->height - ofs_v);
+		cfg |= S3C_ORGOSIZE_VERTICAL(frame->width - ofs_h);
 	} else {
-		cfg |= S3C_ORGISIZE_HORIZONTAL(frame->width - \
-			(frame->offset.y_h * 2));
-		cfg |= S3C_ORGISIZE_VERTICAL(frame->height - \
-			(frame->offset.y_v * 2));
+		cfg |= S3C_ORGOSIZE_HORIZONTAL(frame->width - ofs_h);
+		cfg |= S3C_ORGOSIZE_VERTICAL(frame->height - ofs_v);
 	}
 
 	writel(cfg, ctrl->regs + S3C_ORGOSIZE);
@@ -450,6 +478,22 @@ void s3c_fimc_set_effect(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CIIMGEFF);
 }
 
+static void s3c_fimc_set_input_dma_size(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_in_frame *frame = &ctrl->in_frame;
+	int ofs_h = frame->offset.y_h * 2;
+	int ofs_v = frame->offset.y_v * 2;
+	u32 cfg_o = 0, cfg_r = S3C_CIREAL_ISIZE_AUTOLOAD_ENABLE;
+
+	cfg_o |= S3C_ORGISIZE_HORIZONTAL(frame->width - ofs_h);
+	cfg_o |= S3C_ORGISIZE_VERTICAL(frame->height - ofs_v);
+	cfg_r |= S3C_CIREAL_ISIZE_WIDTH(frame->width - ofs_h);
+	cfg_r |= S3C_CIREAL_ISIZE_HEIGHT(frame->height - ofs_v);
+
+	writel(cfg_o, ctrl->regs + S3C_ORGISIZE);
+	writel(cfg_r, ctrl->regs + S3C_CIREAL_ISIZE);
+}
+
 void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_in_frame *frame = &ctrl->in_frame;
@@ -471,18 +515,8 @@ void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl)
 	cfg |= S3C_CIICROFF_VERTICAL(frame->offset.cr_v);
 	writel(cfg, ctrl->regs + S3C_CIICROFF);
 
-	/* for original size */
-	cfg = 0;
-	cfg |= S3C_ORGISIZE_HORIZONTAL(frame->width);
-	cfg |= S3C_ORGISIZE_VERTICAL(frame->height);
-	writel(cfg, ctrl->regs + S3C_ORGISIZE);
-	
-	/* for real size */
-	cfg = 0;
-	cfg |= S3C_CIREAL_ISIZE_AUTOLOAD_ENABLE;
-	cfg |= S3C_CIREAL_ISIZE_WIDTH(frame->width - (frame->offset.y_h * 2));
-	cfg |= S3C_CIREAL_ISIZE_HEIGHT(frame->height - (frame->offset.y_v * 2));
-	writel(cfg, ctrl->regs + S3C_CIREAL_ISIZE);
+	/* for original & real size */
+	s3c_fimc_set_input_dma_size(ctrl);
 
 	/* for input dma control */
 	cfg = (S3C_MSCTRL_SUCCESSIVE_COUNT(4) | S3C_MSCTRL_INPUT_MEMORY);
