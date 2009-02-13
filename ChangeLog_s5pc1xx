@@ -626,4 +626,16 @@ v2.6.28-rc8-s5pc1xx-r2d9: Abhilash Kesavan
 	Modified files:
 		M	arch/arm/plat-s5pc1xx/devs.c
 		M	drivers/video/samsung/s3cfb.h
-		M	drivers/video/samsung/s3cfb_spi.c	
+		M	drivers/video/samsung/s3cfb_spi.c
+
+v2.6.28-rc8-s5pc1xx-r2d10: Jinsung Yang
+	- S5PC100 FIMC driver
+	- Alpha Release
+	- Camera input support
+	- Memory input support
+	- Memory output support
+	- LCD FIFO output support
+	- Both camera channels (A and B) support
+	- Preview and capture related functionalities support
+	- S5K3BA and S5K4BA module support
+
