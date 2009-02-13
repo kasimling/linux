@@ -27,7 +27,8 @@ int dma_needs_bounce(struct device *dev, dma_addr_t addr, size_t size)
 
 void s5pc1xx_reserve_bootmem(void)
 {
-	int reserve_size = SZ_16M;
+	int dma_size = SZ_8M + SZ_4M + SZ_2M;
+	int reserve_size = 0;
 	int bootmem_size;
 
 	/* add here for devices' bootmem size */
@@ -35,9 +36,10 @@ void s5pc1xx_reserve_bootmem(void)
 	reserve_size += CONFIG_VIDEO_FIMC_STATIC_MEMORY_SIZE * SZ_1K;
 #endif
 
-	/* bootmem_size means none-reserved memory size */
-	if (reserve_size > SZ_16M) {
-		bootmem_size = s3c_mi->bank[0].size - reserve_size;
+	/* bootmem_size means non-reserved memory size */
+	if (reserve_size > 0) {
+		bootmem_size = s3c_mi->bank[0].size - (dma_size + reserve_size);
+
 		reserve_bootmem(PHYS_OFFSET, \
 				PAGE_ALIGN(bootmem_size), BOOTMEM_DEFAULT);
 
