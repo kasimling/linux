@@ -95,7 +95,7 @@ void s3c_fimc_set_window_offset(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CIWDOFST2);
 }
 
-void s3c_fimc_reset_cfg(struct s3c_fimc_control *ctrl)
+static void s3c_fimc_reset_cfg(struct s3c_fimc_control *ctrl)
 {
 	int i;
 	u32 cfg[][2] = {

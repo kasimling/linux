@@ -555,6 +555,7 @@ struct s3c_fimc_config {
 #define V4L2_CID_NR_FRAMES		(V4L2_CID_PRIVATE_BASE + 1)
 #define V4L2_CID_INPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 2)
 #define V4L2_CID_OUTPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 3)
+#define V4L2_CID_RESET			(V4L2_CID_PRIVATE_BASE + 4)
 #define V4L2_CID_EFFECT_ORIGINAL	(V4L2_CID_PRIVATE_BASE + 10)
 #define V4L2_CID_EFFECT_ARBITRARY	(V4L2_CID_PRIVATE_BASE + 11)
 #define V4L2_CID_EFFECT_NEGATIVE 	(V4L2_CID_PRIVATE_BASE + 13)
@@ -605,7 +606,6 @@ extern void s3c_fimc_select_camera(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_source_format(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_window_offset(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_reset(struct s3c_fimc_control *ctrl);
-extern void s3c_fimc_reset_cfg(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_polarity(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_output_dma(struct s3c_fimc_control *ctrl);

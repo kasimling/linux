@@ -389,6 +389,7 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 
 	case V4L2_CID_ACTIVE_CAMERA:
 		s3c_fimc_set_active_camera(ctrl, c->value);
+		s3c_fimc_i2c_command(ctrl, I2C_CAM_WB, WB_AUTO);
 		break;
 
 	case V4L2_CID_NR_FRAMES:
@@ -398,6 +399,14 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 	case V4L2_CID_INPUT_ADDR:
 		s3c_fimc_alloc_input_memory(&ctrl->in_frame, \
 						(dma_addr_t) c->value);
+		break;
+
+	case V4L2_CID_RESET:
+		ctrl->rot90 = 0;
+		ctrl->in_frame.flip = FLIP_ORIGINAL;
+		ctrl->out_frame.flip = FLIP_ORIGINAL;
+		ctrl->out_frame.effect.type = EFFECT_ORIGINAL;
+		s3c_fimc_reset(ctrl);
 		break;
 
 	default:
