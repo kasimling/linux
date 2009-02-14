@@ -541,7 +541,7 @@ struct s3c_fimc_config {
 #define V4L2_FMT_IN			0
 #define V4L2_FMT_OUT			1
 
-/* FOURCC for fimc specific */
+/* FOURCC for FIMC specific */
 #define V4L2_PIX_FMT_NV12X		v4l2_fourcc('N', '1', '2', 'X')
 #define V4L2_PIX_FMT_NV21X		v4l2_fourcc('N', '2', '1', 'X')
 #define V4L2_PIX_FMT_VYUY		v4l2_fourcc('V', 'Y', 'U', 'Y')
