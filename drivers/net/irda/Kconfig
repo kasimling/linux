@@ -3,6 +3,12 @@ menu "Infrared-port device drivers"
 
 comment "SIR device drivers"
 
+config S3C_SIR
+        tristate "S3C Irda SIR device"
+        depends on IRDA
+        help
+          Say Y here if you want to have S3C IRDA support.
+
 config IRTTY_SIR
 	tristate "IrTTY (uses Linux serial driver)"
 	depends on IRDA

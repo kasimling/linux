@@ -20,6 +20,7 @@ obj-$(CONFIG_PXA_FICP)	        += pxaficp_ir.o
 obj-$(CONFIG_MCS_FIR)	        += mcs7780.o
 obj-$(CONFIG_AU1000_FIR)	+= au1k_ir.o
 # SIR drivers
+obj-$(CONFIG_S3C_SIR)           += s3c-sir.o
 obj-$(CONFIG_IRTTY_SIR)		+= irtty-sir.o	sir-dev.o
 # dongle drivers for SIR drivers
 obj-$(CONFIG_ESI_DONGLE)	+= esi-sir.o

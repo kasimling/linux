@@ -192,13 +192,13 @@ choice
         prompt "High Speed SPI Clock Implementations"
         depends on HS_SPI_S5PC100
 
-config SPICLK_PCLK
+config HSPICLK_PCLK
         bool "PCLK"
         depends on HS_SPI_S5PC100
         help
           Say Y here to include support for pclk source.
 
-config SPICLK_SCLK_48M
+config HSPICLK_SCLK_48M
         bool "SCLK_48M"
         depends on  HS_SPI_S5PC100
         help

@@ -262,9 +262,9 @@ static void s3c_spi_message_start(struct s3c_spi *spi)
 	/* 2. Set clock configuration register */
 	spi_clkcfg = SPI_ENCLK_ENABLE;
 
-#if defined(CONFIG_SPICLK_PCLK)
+#if defined(CONFIG_HSPICLK_PCLK)
 	spi_clkcfg |= SPI_CLKSEL_PCLK;
-#elif defined(CONFIG_SPICLK_SCLK_48M)
+#elif defined(CONFIG_HSPICLK_SCLK_48M)
 	spi_clkcfg |= SPI_CLKSEL_SCLK_48;
 #endif
 	writel(spi_clkcfg, spi->regs + S3C_CLK_CFG);
@@ -579,16 +579,15 @@ static int s3c_spi_probe(struct platform_device *pdev)
 	struct s3c_spi *spi = &s3c_spi[pdev->id];
 	struct resource *res;
 	int ret;
-	unsigned long int spiclk;
 
 	/* find the clock and enable it */
 	sema_init(&spi->sem, 0);
 	spi->nr = pdev->id;
 	spi->dev = &pdev->dev;
 
-#if defined(CONFIG_SPICLK_PCLK)
+#if defined(CONFIG_HSPICLK_PCLK)
 	spi->clk = clk_get(&pdev->dev, "spi");
-#elif defined(CONFIG_SPICLK_SCLK_48M)
+#elif defined(CONFIG_HSPICLK_SCLK_48M)
 	spi->clk = clk_get(&pdev->dev, "sclk_spi_48");
 #endif
 	if (IS_ERR(spi->clk)) {
