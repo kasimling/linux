@@ -93,8 +93,6 @@ static void s3c24xx_pcm_enqueue(struct snd_pcm_substream *substream)
 	struct s3c24xx_runtime_data *prtd = substream->runtime->private_data;
 	dma_addr_t pos = prtd->dma_pos;
 	int ret;
-	int i;
-	u32 *temp;
 
 	s3cdbg("Entered %s\n", __FUNCTION__);
 
