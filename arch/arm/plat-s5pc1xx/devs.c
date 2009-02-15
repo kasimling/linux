@@ -229,7 +229,7 @@ static struct resource s3c_usbgadget_resource[] = {
 };
 
 struct platform_device s3c_device_usbgadget = {
-        .name             = "s3c2410-usbgadget",
+        .name             = "s3c-usbgadget",
         .id               = -1,
         .num_resources    = ARRAY_SIZE(s3c_usbgadget_resource),
         .resource         = s3c_usbgadget_resource,
