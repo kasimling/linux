@@ -485,6 +485,9 @@ struct s3c_fimc_v4l2 {
  * @out_type:	type of output
  * @out_frame:	frame structure pointer if output is dma
  * @rot90:	1 if clockwise 90 degree for output
+ *
+ * @open_lcdfifo:	function pointer to open lcd fifo path (display driver)
+ * @close_lcdfifo:	function pointer to close fifo path (display driver)
 */
 struct s3c_fimc_control {
 	/* general */
