@@ -341,16 +341,92 @@ void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
 		s3c_fimc_set_target_format_co(ctrl);
 }
 
+static void s3c_fimc_get_burst_422i(u32 width, u32 *mburst, u32 *rburst)
+{
+	unsigned int tmp, wanted;
+
+	tmp = (width / 2) & 0xf;
+
+	switch (tmp) {
+	case 0:
+		wanted = 16;
+		break;
+
+	case 4:
+		wanted = 4;
+		break;
+
+	case 8:
+		wanted = 8;
+		break;
+
+	default:
+		wanted = 4;
+		break;
+	}
+
+	*mburst = wanted / 2;
+	*rburst = wanted / 2;
+}
+
+static void s3c_fimc_get_burst(u32 width, u32 *mburst, u32 *rburst)
+{
+	unsigned int tmp;
+
+	tmp = (width / 4) & 0xf;
+
+	switch (tmp) {
+	case 0:
+		*mburst = 16;
+		*rburst = 16;
+		break;
+
+	case 4:
+		*mburst = 16;
+		*rburst = 4;
+		break;
+
+	case 8:
+		*mburst = 16;
+		*rburst = 8;
+		break;
+
+	default:
+		tmp = (width / 4) % 8;
+
+		if (tmp == 0) {
+			*mburst = 8;
+			*rburst = 8;
+		} else if (tmp == 4) {
+			*mburst = 8;
+			*rburst = 4;
+		} else {
+			tmp = (width / 4) % 4;
+			*mburst = 4;
+			*rburst = (tmp) ? tmp : 4;
+		}
+
+		break;
+	}
+}
+
 static void s3c_fimc_set_output_dma_pr(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
-	u32 cfg;
+	u32 cfg, yburst_m, yburst_r;
 
 	/* for output dma control */
 	cfg = readl(ctrl->regs + S3C_CIPRCTRL);
 
-	cfg &= ~S3C_CIPRCTRL_ORDER422_MASK;
+	cfg &= ~(S3C_CIPRCTRL_BURST_MASK | S3C_CIPRCTRL_ORDER422_MASK);
 	cfg |= frame->order_1p;
+
+	if (frame->format == FORMAT_RGB888)
+		s3c_fimc_get_burst(frame->width * 4, &yburst_m, &yburst_r);
+	else
+		s3c_fimc_get_burst(frame->width * 2, &yburst_m, &yburst_r);
+
+	cfg |= (S3C_CIPRCTRL_YBURST1(yburst_m) | S3C_CIPRCTRL_YBURST2(yburst_r));
 
 	writel(cfg, ctrl->regs + S3C_CIPRCTRL);
 }
@@ -358,13 +434,25 @@ static void s3c_fimc_set_output_dma_pr(struct s3c_fimc_control *ctrl)
 static void s3c_fimc_set_output_dma_co(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
-	u32 cfg;
+	u32 cfg, yburst_m, yburst_r, cburst_m, cburst_r;
 
 	/* for output dma control */
 	cfg = readl(ctrl->regs + S3C_CICOCTRL);
 
-	cfg &= ~S3C_CICOCTRL_ORDER422_MASK;
+	cfg &= ~(S3C_CICOCTRL_BURST_MASK | S3C_CICOCTRL_ORDER422_MASK);
 	cfg |= frame->order_1p;
+
+	if (frame->format == FORMAT_YCBCR422 && frame->planes == 1) {
+		s3c_fimc_get_burst_422i(frame->width, &yburst_m, &yburst_r);
+		cburst_m = yburst_m / 2;
+		cburst_r = yburst_r / 2;
+	} else {
+		s3c_fimc_get_burst(frame->width, &yburst_m, &yburst_r);
+		s3c_fimc_get_burst(frame->width / 2, &cburst_m, &cburst_r);
+	}
+
+	cfg |= (S3C_CICOCTRL_YBURST1(yburst_m) | S3C_CICOCTRL_YBURST2(yburst_r));
+	cfg |= (S3C_CICOCTRL_CBURST1(cburst_m) | S3C_CICOCTRL_CBURST2(cburst_r));
 
 	writel(cfg, ctrl->regs + S3C_CICOCTRL);
 }
