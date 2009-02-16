@@ -97,19 +97,35 @@
 #define S3C_FIMC_FLAG_IRQ_LAST		0x0800
 #define S3C_FIMC_IRQ_MASK		0x0f00
 
-#define s3c_fimc_unmask_sflag(x)	(x->flag &= ~S3C_FIMC_STA_MASK)
-#define s3c_fimc_unmask_uflag(x)	(x->flag &= ~S3C_FIMC_USE_MASK)
-#define s3c_fimc_unmask_iflag(x)	(x->flag &= ~S3C_FIMC_IRQ_MASK)
+#define UNMASK_STATUS(x)		(x->flag &= ~S3C_FIMC_STA_MASK)
+#define UNMASK_USAGE(x)			(x->flag &= ~S3C_FIMC_USE_MASK)
+#define UNMASK_IRQ(x)			(x->flag &= ~S3C_FIMC_IRQ_MASK)
 
-#define s3c_fimc_set_sflag(x, f) 	s3c_fimc_unmask_sflag(x); (x->flag |= f)
-#define s3c_fimc_set_uflag(x, f) 	s3c_fimc_unmask_uflag(x); (x->flag |= f)
-#define s3c_fimc_set_iflag(x, f) 	s3c_fimc_unmask_iflag(x); (x->flag |= f)
+#define FSET_RUNNING(x)			UNMASK_STATUS(x); (x->flag |= S3C_FIMC_FLAG_RUNNING)
+#define FSET_STOP(x)			UNMASK_STATUS(x); (x->flag |= S3C_FIMC_FLAG_STOP)
+#define FSET_HANDLE_IRQ(x)		UNMASK_STATUS(x); (x->flag |= S3C_FIMC_FLAG_HANDLE_IRQ)
+
+#define FSET_PREVIEW(x)			UNMASK_USAGE(x); (x->flag |= S3C_FIMC_FLAG_PREVIEW)
+#define FSET_CAPTURE(x)			UNMASK_USAGE(x); (x->flag |= S3C_FIMC_FLAG_CAPTURE)
+
+#define FSET_IRQ_NORMAL(x)		UNMASK_IRQ(x); (x->flag |= S3C_FIMC_FLAG_IRQ_NORMAL)
+#define FSET_IRQ_X(x)			UNMASK_IRQ(x); (x->flag |= S3C_FIMC_FLAG_IRQ_X)
+#define FSET_IRQ_Y(x)			UNMASK_IRQ(x); (x->flag |= S3C_FIMC_FLAG_IRQ_Y)
+#define FSET_IRQ_LAST(x)		UNMASK_IRQ(x); (x->flag |= S3C_FIMC_FLAG_IRQ_LAST)
+
+#define IS_RUNNING(x)			(x->flag & S3C_FIMC_FLAG_RUNNING)
+#define IS_IRQ_HANDLING(x)		(x->flag & S3C_FIMC_FLAG_HANDLE_IRQ)
 
 #define IS_PREVIEW(x)			(x->flag & S3C_FIMC_FLAG_PREVIEW)
 #define IS_CAPTURE(x)			(x->flag & S3C_FIMC_FLAG_CAPTURE)
 
-#define s3c_fimc_pat_cb(x)		((x >> 8) & 0xff)
-#define s3c_fimc_pat_cr(x)		(x & 0xff)
+#define IS_IRQ_NORMAL(x)		(x->flag & S3C_FIMC_FLAG_IRQ_NORMAL)
+#define IS_IRQ_X(x)			(x->flag & S3C_FIMC_FLAG_IRQ_X)
+#define IS_IRQ_Y(x)			(x->flag & S3C_FIMC_FLAG_IRQ_Y)
+#define IS_IRQ_LAST(x)			(x->flag & S3C_FIMC_FLAG_IRQ_LAST)
+
+#define PAT_CB(x)			((x >> 8) & 0xff)
+#define PAT_CR(x)			(x & 0xff)
 
 
 /*
