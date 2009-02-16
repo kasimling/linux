@@ -121,7 +121,7 @@ static irqreturn_t s3c_fimc_irq(int irq, void *dev_id)
 
 	ctrl->out_frame.cfn = s3c_fimc_get_frame_count(ctrl);
 
-	if (ctrl->flag & S3C_FIMC_FLAG_CAPTURE) {
+	if (IS_CAPTURE(ctrl)) {
 		if (s3c_fimc_frame_handler(ctrl) == S3C_FIMC_FRAME_SKIP)
 			return IRQ_HANDLED;
 	}
@@ -248,7 +248,7 @@ static u32 s3c_fimc_poll(struct file *filp, poll_table *wait)
 	if (ctrl->flag & S3C_FIMC_FLAG_HANDLE_IRQ)
 		mask = POLLIN | POLLRDNORM;
 
-	s3c_fimc_set_sflag(ctrl->flag, S3C_FIMC_FLAG_STOP);
+	s3c_fimc_set_sflag(ctrl, S3C_FIMC_FLAG_STOP);
 
 	return mask;
 }
@@ -259,12 +259,12 @@ ssize_t s3c_fimc_read(struct file *filp, char *buf, size_t count, loff_t *pos)
 	struct s3c_fimc_control *ctrl = filp->private_data;
 	size_t end;
 
-	if (ctrl->flag & S3C_FIMC_FLAG_CAPTURE) {
+	if (IS_CAPTURE(ctrl)) {
 		if (wait_event_interruptible(ctrl->waitq, \
 				ctrl->flag & S3C_FIMC_FLAG_HANDLE_IRQ))
 				return -ERESTARTSYS;
 
-		s3c_fimc_set_sflag(ctrl->flag, S3C_FIMC_FLAG_STOP);
+		s3c_fimc_set_sflag(ctrl, S3C_FIMC_FLAG_STOP);
 	}
 
 	end = min_t(size_t, ctrl->out_frame.buf_size, count);
