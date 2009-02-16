@@ -157,4 +157,7 @@
 #define S5PC1XX_PA_AC97         (0xF2300000)
 #define S5PC1XX_SZ_AC97         SZ_1M
 
+/* re-define */
+#define S3C_SZ_HSMMC		S5PC1XX_SZ_HSMMC
+
 #endif /* __ASM_ARCH_6400_MAP_H */

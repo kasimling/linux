@@ -618,9 +618,9 @@ void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl)
 
 	for (i = 0; i < frame->nr_frames; i++) {
 		addr = &frame->addr[i];
-		writel(addr->phys_y, ctrl->regs + S3C_CIOYSA1 + (i * 4));
-		writel(addr->phys_cb, ctrl->regs + S3C_CIOCBSA1 + (i * 4));
-		writel(addr->phys_cr, ctrl->regs + S3C_CIOCRSA1 + (i * 4));
+		writel(addr->phys_y, ctrl->regs + S3C_CIOYSA(i));
+		writel(addr->phys_cb, ctrl->regs + S3C_CIOCBSA(i));
+		writel(addr->phys_cr, ctrl->regs + S3C_CIOCRSA(i));
 	}
 }
 
