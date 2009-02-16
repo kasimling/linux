@@ -387,7 +387,7 @@ void s3cfb_enable_local_post(int in_yuv)
 	unsigned int value;
 
 	s3cfb_fimd.wincon0 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
-	value = S3C_WINCONx_ENLOCAL_POST | S3C_WINCONx_ENWIN_F_ENABLE;
+	value = S3C_WINCONx_ENLOCAL | S3C_WINCONx_ENWIN_F_ENABLE;
 
 	if (in_yuv)
 		value |= S3C_WINCONx_INRGB_YUV;
