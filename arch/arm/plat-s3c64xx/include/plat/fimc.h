@@ -21,14 +21,17 @@ struct s3c_platform_fimc {
 	u32		clockrate;
 	int		line_length;
 	int		nr_frames;
+	int		shared_io;
 
 	void		(*cfg_gpio)(struct platform_device *dev);
 };
 
-extern void s3c_fimc_set_platdata(struct s3c_platform_fimc *fimc);
+extern void s3c_fimc0_set_platdata(struct s3c_platform_fimc *fimc);
+extern void s3c_fimc1_set_platdata(struct s3c_platform_fimc *fimc);
 
 /* defined by architecture to configure gpio */
-extern void s3c_fimc_cfg_gpio(struct platform_device *dev);
+extern void s3c_fimc0_cfg_gpio(struct platform_device *dev);
+extern void s3c_fimc1_cfg_gpio(struct platform_device *dev);
 
 extern void s3c_fimc_reset_camera(void);
 
