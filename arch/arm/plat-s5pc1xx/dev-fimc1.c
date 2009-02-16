@@ -41,7 +41,7 @@ struct platform_device s3c_device_fimc1 = {
 	.resource	  = s3c_fimc_resource,
 };
 
-static struct s3c_platform_fimc default_fimc_data1 __initdata = {
+static struct s3c_platform_fimc default_fimc1_data __initdata = {
 	.srclk_name	= "dout_mpll",
 	.clk_name	= "sclk_fimc",
 	.clockrate	= 133000000,
@@ -54,7 +54,7 @@ void __init s3c_fimc1_set_platdata(struct s3c_platform_fimc *pd)
 	struct s3c_platform_fimc *npd;
 
 	if (!pd)
-		pd = &default_fimc_data1;
+		pd = &default_fimc1_data;
 
 	npd = kmemdup(pd, sizeof(struct s3c_platform_fimc), GFP_KERNEL);
 	if (!npd)

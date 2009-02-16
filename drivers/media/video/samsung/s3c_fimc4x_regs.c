@@ -99,15 +99,15 @@ static void s3c_fimc_reset_cfg(struct s3c_fimc_control *ctrl)
 {
 	int i;
 	u32 cfg[][2] = {
-		{ 0x018, 0x00000000 }, { 0x01c, 0x00000000 }, 
+		{ 0x018, 0x00000000 }, { 0x01c, 0x00000000 },
 		{ 0x020, 0x00000000 }, { 0x024, 0x00000000 },
-		{ 0x028, 0x00000000 }, { 0x02c, 0x00000000 }, 
+		{ 0x028, 0x00000000 }, { 0x02c, 0x00000000 },
 		{ 0x030, 0x00000000 }, { 0x034, 0x00000000 },
-		{ 0x038, 0x00000000 }, { 0x03c, 0x00000000 }, 
+		{ 0x038, 0x00000000 }, { 0x03c, 0x00000000 },
 		{ 0x040, 0x00000000 }, { 0x044, 0x00000000 },
-		{ 0x048, 0x00000000 }, { 0x04c, 0x00000000 }, 
+		{ 0x048, 0x00000000 }, { 0x04c, 0x00000000 },
 		{ 0x050, 0x00000000 }, { 0x054, 0x00000000 },
-		{ 0x058, 0x18000000 }, { 0x05c, 0x00000000 }, 
+		{ 0x058, 0x18000000 }, { 0x05c, 0x00000000 },
 		{ 0x0c0, 0x00000000 }, { 0x0c4, 0xffffffff },
 		{ 0x0d0, 0x00100080 }, { 0x0d4, 0x00000000 },
 		{ 0x0d8, 0x00000000 }, { 0x0f8, 0x00000000 },
@@ -421,7 +421,7 @@ void s3c_fimc_set_scaler(struct s3c_fimc_control *ctrl)
 	cfg |= S3C_CISCCTRL_MAINHORRATIO(sc->main_hratio);
 	cfg |= S3C_CISCCTRL_MAINVERRATIO(sc->main_vratio);
 
-	writel(cfg, ctrl->regs + S3C_CISCCTRL);	
+	writel(cfg, ctrl->regs + S3C_CISCCTRL);
 }
 
 void s3c_fimc_start_scaler(struct s3c_fimc_control *ctrl)
@@ -432,7 +432,7 @@ void s3c_fimc_start_scaler(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CISCCTRL);
 
 	if (ctrl->out_type == PATH_OUT_LCDFIFO)
-		ctrl->open_lcdfifo(ctrl->id, 0, 0);
+		ctrl->open_lcdfifo(ctrl->id, 1, 0);
 }
 
 void s3c_fimc_stop_scaler(struct s3c_fimc_control *ctrl)
