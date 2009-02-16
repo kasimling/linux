@@ -142,6 +142,7 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 	struct s3c_platform_fimc *pdata;
 	struct s3c_fimc_control *ctrl;
 	struct resource *res;
+	int i = S3C_FIMC_MAX_CTRLS - 1;
 	int id = pdev->id;
 
 	pdata = to_fimc_plat(pdev);
@@ -173,15 +174,20 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 		return NULL;
 	}
 
-	/* request mem region */
-	res = request_mem_region(res->start, res->end - res->start + 1, pdev->name);
-	if (!res) {
-		err("failed to request io memory region\n");
-		return NULL;
-	}
+	if (!pdata->shared_io) {
+		/* request mem region */
+		res = request_mem_region(res->start, res->end - res->start + 1, pdev->name);
+		if (!res) {
+			err("failed to request io memory region\n");
+			return NULL;
+		}
 
-	/* ioremap for register block */
-	ctrl->regs = ioremap(res->start, res->end - res->start + 1);
+		/* ioremap for register block */
+		ctrl->regs = ioremap(res->start, res->end - res->start + 1);
+	} else {
+		while (i && (ctrl->regs = s3c_fimc.ctrl[i].regs))
+			i--;
+	}
 
 	/* irq */
 	ctrl->irq = platform_get_irq(pdev, 0);
@@ -197,13 +203,18 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 static int s3c_fimc_unregister_controller(struct platform_device *pdev)
 {
 	struct s3c_fimc_control *ctrl;
+	struct s3c_platform_fimc *pdata;
 	int id = pdev->id;
 
 	ctrl = &s3c_fimc.ctrl[id];
 
 	s3c_fimc_free_output_memory(&ctrl->out_frame);
 
-	iounmap(ctrl->regs);
+	pdata = to_fimc_plat(ctrl->pdev);
+
+	if (!pdata->shared_io)
+		iounmap(ctrl->regs);
+
 	memset(ctrl, 0, sizeof(*ctrl));
 	
 	return 0;
@@ -395,8 +406,13 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 	}
 
 	/* set parent clock */
-	ctrl->clock->set_parent(ctrl->clock, srclk);
-	ctrl->clock->set_rate(ctrl->clock, pdata->clockrate);
+	if (ctrl->clock->set_parent)
+		ctrl->clock->set_parent(ctrl->clock, srclk);
+
+	/* set clockrate for FIMC interface block */
+	if (ctrl->clock->set_rate)
+		ctrl->clock->set_rate(ctrl->clock, pdata->clockrate);
+
 	clk_enable(ctrl->clock);
 
 	/* camera clock */

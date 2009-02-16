@@ -20,7 +20,7 @@
 
 struct platform_device; /* don't need the contents */
 
-void s3c_fimc_cfg_gpio(struct platform_device *dev)
+void s3c_fimc0_cfg_gpio(struct platform_device *dev)
 {
 	int i;
 
