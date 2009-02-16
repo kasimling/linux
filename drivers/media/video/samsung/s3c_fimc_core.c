@@ -185,8 +185,10 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 		/* ioremap for register block */
 		ctrl->regs = ioremap(res->start, res->end - res->start + 1);
 	} else {
-		while (i >= 0 && (ctrl->regs = s3c_fimc.ctrl[i].regs))
+		while (i >= 0 && ctrl->regs == NULL) {
+			ctrl->regs = s3c_fimc.ctrl[i].regs;
 			i--;
+		}
 	}
 
 	/* irq */
