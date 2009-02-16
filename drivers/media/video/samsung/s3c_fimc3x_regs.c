@@ -16,6 +16,7 @@
 #include <mach/map.h>
 #include <plat/gpio-cfg.h>
 #include <plat/regs-gpio.h>
+#include <plat/regs-lcd.h>
 #include <plat/regs-fimc.h>
 #include <plat/fimc.h>
 
@@ -25,43 +26,69 @@ void s3c_fimc_clear_irq(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = readl(ctrl->regs + S3C_CIGCTRL);
 
-	cfg |= S3C_CIGCTRL_IRQ_CLR;
+	if (IS_PREVIEW(ctrl))
+		cfg |= S3C_CIGCTRL_IRQ_CLR_P;
+	else
+		cfg |= S3C_CIGCTRL_IRQ_CLR_C;
 
 	writel(cfg, ctrl->regs + S3C_CIGCTRL);
 }
 
-int s3c_fimc_check_fifo(struct s3c_fimc_control *ctrl)
+static int s3c_fimc_check_fifo_co(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg, status, flag;
 
-	status = readl(ctrl->regs + S3C_CISTATUS);
-	flag = S3C_CISTATUS_OVFIY | S3C_CISTATUS_OVFICB | S3C_CISTATUS_OVFICR;
+	status = readl(ctrl->regs + S3C_CICOSTATUS);
+	flag = S3C_CICOSTATUS_OVFIY | S3C_CICOSTATUS_OVFICB | S3C_CICOSTATUS_OVFICR;
 
 	if (status & flag) {
 		cfg = readl(ctrl->regs + S3C_CIWDOFST);
-		cfg |= (S3C_CIWDOFST_CLROVFIY | S3C_CIWDOFST_CLROVFICB | S3C_CIWDOFST_CLROVFICR);
+		cfg |= (S3C_CIWDOFST_CLROVCOFIY | S3C_CIWDOFST_CLROVCOFICB | \
+			S3C_CIWDOFST_CLROVCOFICR);
 		writel(cfg, ctrl->regs + S3C_CIWDOFST);
 
 		cfg = readl(ctrl->regs + S3C_CIWDOFST);
-		cfg &= ~(S3C_CIWDOFST_CLROVFIY | S3C_CIWDOFST_CLROVFICB | S3C_CIWDOFST_CLROVFICR);
+		cfg &= ~(S3C_CIWDOFST_CLROVCOFIY | S3C_CIWDOFST_CLROVCOFICB | \
+			S3C_CIWDOFST_CLROVCOFICR);
 		writel(cfg, ctrl->regs + S3C_CIWDOFST);
 	}
 
 	return 0;
 }
 
+static int s3c_fimc_check_fifo_pr(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg, status, flag;
+
+	status = readl(ctrl->regs + S3C_CIPRSTATUS);
+	flag = S3C_CIPRSTATUS_OVFIY | S3C_CIPRSTATUS_OVFICB | S3C_CIPRSTATUS_OVFICR;
+
+	if (status & flag) {
+		cfg = readl(ctrl->regs + S3C_CIWDOFST);
+		cfg |= (S3C_CIWDOFST_CLROVPRFIY | S3C_CIWDOFST_CLROVPRFICB | \
+			S3C_CIWDOFST_CLROVPRFICR);
+		writel(cfg, ctrl->regs + S3C_CIWDOFST);
+
+		cfg = readl(ctrl->regs + S3C_CIWDOFST);
+		cfg &= ~(S3C_CIWDOFST_CLROVPRFIY | S3C_CIWDOFST_CLROVPRFICB | \
+			S3C_CIWDOFST_CLROVPRFICR);
+		writel(cfg, ctrl->regs + S3C_CIWDOFST);
+	}
+
+	return 0;
+}
+
+int s3c_fimc_check_fifo(struct s3c_fimc_control *ctrl)
+{
+	if (IS_PREVIEW(ctrl))
+		return s3c_fimc_check_fifo_pr(ctrl);
+	else
+		return s3c_fimc_check_fifo_co(ctrl);
+}
+
 void s3c_fimc_select_camera(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_CIGCTRL);
-
-	cfg &= ~S3C_CIGCTRL_SELCAM_ITU_MASK;
-
-	if (ctrl->in_cam->id == 0)
-		cfg |= S3C_CIGCTRL_SELCAM_ITU_A;
-	else
-		cfg |= S3C_CIGCTRL_SELCAM_ITU_B;
-
-	writel(cfg, ctrl->regs + S3C_CIGCTRL);
+	/* nothing to do */
 }
 
 void s3c_fimc_set_source_format(struct s3c_fimc_control *ctrl)
@@ -98,24 +125,39 @@ static void s3c_fimc_reset_cfg(struct s3c_fimc_control *ctrl)
 {
 	int i;
 	u32 cfg[][2] = {
-		{ 0x018, 0x00000000 }, { 0x01c, 0x00000000 }, 
+		{ 0x018, 0x00000000 }, { 0x01c, 0x00000000 },
 		{ 0x020, 0x00000000 }, { 0x024, 0x00000000 },
-		{ 0x028, 0x00000000 }, { 0x02c, 0x00000000 }, 
+		{ 0x028, 0x00000000 }, { 0x02c, 0x00000000 },
 		{ 0x030, 0x00000000 }, { 0x034, 0x00000000 },
-		{ 0x038, 0x00000000 }, { 0x03c, 0x00000000 }, 
+		{ 0x038, 0x00000000 }, { 0x03c, 0x00000000 },
 		{ 0x040, 0x00000000 }, { 0x044, 0x00000000 },
-		{ 0x048, 0x00000000 }, { 0x04c, 0x00000000 }, 
+		{ 0x048, 0x00000000 }, { 0x04c, 0x00000000 },
 		{ 0x050, 0x00000000 }, { 0x054, 0x00000000 },
-		{ 0x058, 0x18000000 }, { 0x05c, 0x00000000 }, 
+		{ 0x058, 0x18000000 }, { 0x05c, 0x00000000 },
+		{ 0x068, 0x00000000 }, { 0x06c, 0x00000000 },
+		{ 0x070, 0x00000000 }, { 0x074, 0x00000000 },
+		{ 0x078, 0x18000000 }, { 0x07c, 0x00000000 },
+		{ 0x080, 0x00000000 }, { 0x084, 0x00000000 },
+		{ 0x088, 0x00000000 }, { 0x08c, 0x00000000 },
+		{ 0x090, 0x00000000 }, { 0x094, 0x00000000 },
+		{ 0x098, 0x18000000 }, { 0x0a0, 0x00000000 },
+		{ 0x0a4, 0x00000000 }, { 0x0a8, 0x00000000 },
+		{ 0x0ac, 0x18000000 }, { 0x0b0, 0x00000000 },			
 		{ 0x0c0, 0x00000000 }, { 0x0c4, 0xffffffff },
 		{ 0x0d0, 0x00100080 }, { 0x0d4, 0x00000000 },
-		{ 0x0d8, 0x00000000 }, { 0x0f8, 0x00000000 },
-		{ 0x0fc, 0x04000000 }, { 0x168, 0x00000000 },
-		{ 0x16c, 0x00000000 }, { 0x170, 0x00000000 },
-		{ 0x174, 0x00000000 }, { 0x178, 0x00000000 },
-		{ 0x17c, 0x00000000 }, { 0x180, 0x00000000 },
-		{ 0x184, 0x00000000 }, { 0x188, 0x00000000 },
-		{ 0x18c, 0x00000000 }, { 0x194, 0x0000001e },
+		{ 0x0d8, 0x00000000 }, { 0x0e0, 0x00000000 },
+		{ 0x0e4, 0x00000000 }, { 0x0e8, 0x00000000 },
+		{ 0x0ec, 0x00000000 }, { 0x0f0, 0x00000000 },
+		{ 0x0f4, 0x00000000 }, { 0x0f8, 0x00000000 },
+		{ 0x0fc, 0x00000000 }, { 0x100, 0x00000000 },
+		{ 0x104, 0x00000000 }, { 0x108, 0x00000000 },
+		{ 0x10c, 0x00000000 }, { 0x110, 0x00000000 },
+		{ 0x114, 0x00000000 }, { 0x118, 0x00000000 },
+		{ 0x11c, 0x00000000 }, { 0x120, 0x00000000 },
+		{ 0x124, 0x00000000 }, { 0x128, 0x00000000 },
+		{ 0x12c, 0x00000000 }, { 0x130, 0x00000000 },
+		{ 0x134, 0x00000000 }, { 0x138, 0x00000000 },
+		{ 0x13c, 0x00000000 }, { 0x140, 0x00000000 },
 	};
 
 	for (i = 0; i < sizeof(cfg) / 8; i++)
@@ -162,22 +204,22 @@ void s3c_fimc_reset_camera(void)
 
 #if (CONFIG_VIDEO_FIMC_CAM_RESET == 1)
 	cfg = readl(regs + S3C_CIGCTRL);
-	cfg |= S3C_CIGCTRL_CAMRST_A;
+	cfg |= S3C_CIGCTRL_CAMRST;
 	writel(cfg, regs + S3C_CIGCTRL);
 	udelay(200);
 
 	cfg = readl(regs + S3C_CIGCTRL);
-	cfg &= ~S3C_CIGCTRL_CAMRST_A;
+	cfg &= ~S3C_CIGCTRL_CAMRST;
 	writel(cfg, regs + S3C_CIGCTRL);
 	udelay(2000);
 #else
 	cfg = readl(regs + S3C_CIGCTRL);
-	cfg &= ~S3C_CIGCTRL_CAMRST_A;
+	cfg &= ~S3C_CIGCTRL_CAMRST;
 	writel(cfg, regs + S3C_CIGCTRL);
 	udelay(200);
 
 	cfg = readl(regs + S3C_CIGCTRL);
-	cfg |= S3C_CIGCTRL_CAMRST_A;
+	cfg |= S3C_CIGCTRL_CAMRST;
 	writel(cfg, regs + S3C_CIGCTRL);
 	udelay(2000);
 #endif
@@ -193,7 +235,7 @@ void s3c_fimc_set_polarity(struct s3c_fimc_control *ctrl)
 	cfg = readl(ctrl->regs + S3C_CIGCTRL);
 
 	cfg &= ~(S3C_CIGCTRL_INVPOLPCLK | S3C_CIGCTRL_INVPOLVSYNC | \
-		 S3C_CIGCTRL_INVPOLHREF | S3C_CIGCTRL_INVPOLHSYNC);
+		 S3C_CIGCTRL_INVPOLHREF);
 
 	if (cam->polarity.pclk)
 		cfg |= S3C_CIGCTRL_INVPOLPCLK;
@@ -204,32 +246,21 @@ void s3c_fimc_set_polarity(struct s3c_fimc_control *ctrl)
 	if (cam->polarity.href)
 		cfg |= S3C_CIGCTRL_INVPOLHREF;
 
-	if (cam->polarity.hsync)
-		cfg |= S3C_CIGCTRL_INVPOLHSYNC;
-
 	writel(cfg, ctrl->regs + S3C_CIGCTRL);
 }
 
 static void s3c_fimc_set_rot90(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_CITRGFMT);
+	u32 cfg = 0;
 
-	cfg &= ~(S3C_CITRGFMT_INROT90_CLOCKWISE | \
-		S3C_CITRGFMT_OUTROT90_CLOCKWISE);
-
-	/*
-	 * We use Input Rotator when output is LCD FIFO only.
-	 * When LCD FIFO is enabled, input should be DMA.
-	*/
-	if (ctrl->out_type == PATH_OUT_LCDFIFO)
-		cfg |= S3C_CITRGFMT_INROT90_CLOCKWISE;
-	else
-		cfg |= S3C_CITRGFMT_OUTROT90_CLOCKWISE;
-
-	writel(cfg, ctrl->regs + S3C_CITRGFMT);
+	if (IS_PREVIEW(ctrl)) {
+		cfg = readl(ctrl->regs + S3C_CIPRTRGFMT);
+		cfg |= S3C_CIPRTRGFMT_ROT90_CLOCKWISE;
+		writel(cfg, ctrl->regs + S3C_CIPRTRGFMT);
+	}
 }
 
-void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
+static void s3c_fimc_set_target_format_pr(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
 	u32 cfg = 0;
@@ -238,203 +269,380 @@ void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
 	case FORMAT_RGB565: /* fall through */
 	case FORMAT_RGB666: /* fall through */
 	case FORMAT_RGB888:
-		cfg |= S3C_CITRGFMT_OUTFORMAT_RGB;
+		cfg |= S3C_CIPRTRGFMT_OUTFORMAT_RGB;
 		break;
 
 	case FORMAT_YCBCR420:
-		cfg |= S3C_CITRGFMT_OUTFORMAT_YCBCR420;
+		cfg |= S3C_CIPRTRGFMT_OUTFORMAT_YCBCR420;
 		break;
 
 	case FORMAT_YCBCR422:
 		if (frame->planes == 1)
-			cfg |= S3C_CITRGFMT_OUTFORMAT_YCBCR422_1PLANE;
+			cfg |= S3C_CIPRTRGFMT_OUTFORMAT_YCBCR422I;
 		else
-			cfg |= S3C_CITRGFMT_OUTFORMAT_YCBCR422;
+			cfg |= S3C_CIPRTRGFMT_OUTFORMAT_YCBCR422;
 
 		break;
 	}
 
-	cfg |= S3C_CITRGFMT_TARGETHSIZE(frame->width);
-	cfg |= S3C_CITRGFMT_TARGETVSIZE(frame->height);
-	cfg |= (frame->flip << S3C_CITRGFMT_FLIP_SHIFT);
+	cfg |= S3C_CIPRTRGFMT_TARGETHSIZE(frame->width);
+	cfg |= S3C_CIPRTRGFMT_TARGETVSIZE(frame->height);
+	cfg |= (frame->flip << S3C_CIPRTRGFMT_FLIP_SHIFT);
 
-	writel(cfg, ctrl->regs + S3C_CITRGFMT);
+	writel(cfg, ctrl->regs + S3C_CIPRTRGFMT);
 
 	if (ctrl->rot90)
 		s3c_fimc_set_rot90(ctrl);
 
-	cfg = S3C_CITAREA_TARGET_AREA(frame->width * frame->height);
-	writel(cfg, ctrl->regs + S3C_CITAREA);
+	cfg = S3C_CIPRTAREA_TARGET_AREA(frame->width * frame->height);
+	writel(cfg, ctrl->regs + S3C_CIPRTAREA);
 }
 
-static void s3c_fimc_set_output_dma_size(struct s3c_fimc_control *ctrl)
+static void s3c_fimc_set_target_format_co(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
-	int ofs_h = frame->offset.y_h * 2;
-	int ofs_v = frame->offset.y_v * 2;
 	u32 cfg = 0;
 
-	if (ctrl->rot90) {
-		cfg |= S3C_ORGOSIZE_HORIZONTAL(frame->height - ofs_v);
-		cfg |= S3C_ORGOSIZE_VERTICAL(frame->width - ofs_h);
-	} else {
-		cfg |= S3C_ORGOSIZE_HORIZONTAL(frame->width - ofs_h);
-		cfg |= S3C_ORGOSIZE_VERTICAL(frame->height - ofs_v);
+	switch (frame->format) {
+	case FORMAT_RGB565: /* fall through */
+	case FORMAT_RGB666: /* fall through */
+	case FORMAT_RGB888:
+		cfg |= S3C_CICOTRGFMT_OUTFORMAT_RGB;
+		break;
+
+	case FORMAT_YCBCR420:
+		cfg |= S3C_CICOTRGFMT_OUTFORMAT_YCBCR420;
+		break;
+
+	case FORMAT_YCBCR422:
+		if (frame->planes == 1)
+			cfg |= S3C_CICOTRGFMT_OUTFORMAT_YCBCR422I;
+		else
+			cfg |= S3C_CICOTRGFMT_OUTFORMAT_YCBCR422;
+
+		break;
 	}
 
-	writel(cfg, ctrl->regs + S3C_ORGOSIZE);
+	cfg |= S3C_CICOTRGFMT_TARGETHSIZE(frame->width);
+	cfg |= S3C_CICOTRGFMT_TARGETVSIZE(frame->height);
+	cfg |= (frame->flip << S3C_CICOTRGFMT_FLIP_SHIFT);
+
+	writel(cfg, ctrl->regs + S3C_CICOTRGFMT);
+
+	cfg = S3C_CICOTAREA_TARGET_AREA(frame->width * frame->height);
+	writel(cfg, ctrl->regs + S3C_CICOTAREA);
 }
 
-void s3c_fimc_set_output_dma(struct s3c_fimc_control *ctrl)
+void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
+{
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_set_target_format_pr(ctrl);
+	else
+		s3c_fimc_set_target_format_co(ctrl);
+}
+
+static void s3c_fimc_set_output_dma_pr(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
 	u32 cfg;
 
-	/* for offsets */
-	cfg = 0;
-	cfg |= S3C_CIOYOFF_HORIZONTAL(frame->offset.y_h);
-	cfg |= S3C_CIOYOFF_VERTICAL(frame->offset.y_v);
-	writel(cfg, ctrl->regs + S3C_CIOYOFF);
-
-	cfg = 0;
-	cfg |= S3C_CIOCBOFF_HORIZONTAL(frame->offset.cb_h);
-	cfg |= S3C_CIOCBOFF_VERTICAL(frame->offset.cb_v);
-	writel(cfg, ctrl->regs + S3C_CIOCBOFF);
-
-	cfg = 0;
-	cfg |= S3C_CIOCROFF_HORIZONTAL(frame->offset.cr_h);
-	cfg |= S3C_CIOCROFF_VERTICAL(frame->offset.cr_v);
-	writel(cfg, ctrl->regs + S3C_CIOCROFF);
-
-	/* for original size */
-	s3c_fimc_set_output_dma_size(ctrl);
-	
 	/* for output dma control */
-	cfg = readl(ctrl->regs + S3C_CIOCTRL);
+	cfg = readl(ctrl->regs + S3C_CIPRCTRL);
 
-	cfg &= ~(S3C_CIOCTRL_ORDER2P_MASK | S3C_CIOCTRL_ORDER422_MASK | \
-		 S3C_CIOCTRL_YCBCR_PLANE_MASK);
+	cfg &= ~S3C_CIPRCTRL_ORDER422_MASK;
+	cfg |= frame->order_1p;
 
-	if (frame->planes == 1)
-		cfg |= frame->order_1p;
-	else if (frame->planes == 2)
-		cfg |= (S3C_CIOCTRL_YCBCR_2PLANE | \
-			(frame->order_2p << S3C_CIOCTRL_ORDER2P_SHIFT));
-	else if (frame->planes == 3)
-		cfg |= S3C_CIOCTRL_YCBCR_3PLANE;
+	writel(cfg, ctrl->regs + S3C_CIPRCTRL);
+}
 
-	writel(cfg, ctrl->regs + S3C_CIOCTRL);
+static void s3c_fimc_set_output_dma_co(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
+	u32 cfg;
+
+	/* for output dma control */
+	cfg = readl(ctrl->regs + S3C_CICOCTRL);
+
+	cfg &= ~S3C_CICOCTRL_ORDER422_MASK;
+	cfg |= frame->order_1p;
+
+	writel(cfg, ctrl->regs + S3C_CICOCTRL);
+}
+
+void s3c_fimc_set_output_dma(struct s3c_fimc_control *ctrl)
+{
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_set_output_dma_pr(ctrl);
+	else
+		s3c_fimc_set_output_dma_co(ctrl);
+}
+
+static void s3c_fimc_enable_lastirq_pr(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CIPRCTRL);
+
+	cfg |= S3C_CIPRCTRL_LASTIRQ_ENABLE;
+	writel(cfg, ctrl->regs + S3C_CIPRCTRL);
+}
+
+static void s3c_fimc_enable_lastirq_co(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CICOCTRL);
+
+	cfg |= S3C_CICOCTRL_LASTIRQ_ENABLE;
+	writel(cfg, ctrl->regs + S3C_CICOCTRL);
 }
 
 void s3c_fimc_enable_lastirq(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_CIOCTRL);
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_enable_lastirq_pr(ctrl);
+	else
+		s3c_fimc_enable_lastirq_co(ctrl);
+}
 
-	cfg |= S3C_CIOCTRL_LASTIRQ_ENABLE;
-	writel(cfg, ctrl->regs + S3C_CIOCTRL);
+static void s3c_fimc_disable_lastirq_pr(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CIPRCTRL);
+
+	cfg &= ~S3C_CIPRCTRL_LASTIRQ_ENABLE;
+	writel(cfg, ctrl->regs + S3C_CIPRCTRL);
+}
+
+static void s3c_fimc_disable_lastirq_co(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CICOCTRL);
+
+	cfg &= ~S3C_CICOCTRL_LASTIRQ_ENABLE;
+	writel(cfg, ctrl->regs + S3C_CICOCTRL);
 }
 
 void s3c_fimc_disable_lastirq(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_CIOCTRL);
-
-	cfg &= ~S3C_CIOCTRL_LASTIRQ_ENABLE;
-	writel(cfg, ctrl->regs + S3C_CIOCTRL);
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_disable_lastirq_pr(ctrl);
+	else
+		s3c_fimc_disable_lastirq_co(ctrl);
 }
 
-void s3c_fimc_set_prescaler(struct s3c_fimc_control *ctrl)
+static void s3c_fimc_set_prescaler_pr(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_scaler *sc = &ctrl->scaler;
 	u32 cfg = 0, shfactor;
 
 	shfactor = 10 - (sc->hfactor + sc->vfactor);
 
-	cfg |= S3C_CISCPRERATIO_SHFACTOR(shfactor);
-	cfg |= S3C_CISCPRERATIO_PREHORRATIO(sc->pre_hratio);
-	cfg |= S3C_CISCPRERATIO_PREVERRATIO(sc->pre_vratio);
+	cfg |= S3C_CIPRSCPRERATIO_SHFACTOR(shfactor);
+	cfg |= S3C_CIPRSCPRERATIO_PREHORRATIO(sc->pre_hratio);
+	cfg |= S3C_CIPRSCPRERATIO_PREVERRATIO(sc->pre_vratio);
 
-	writel(cfg, ctrl->regs + S3C_CISCPRERATIO);
+	writel(cfg, ctrl->regs + S3C_CIPRSCPRERATIO);
 
 	cfg = 0;
-	cfg |= S3C_CISCPREDST_PREDSTWIDTH(sc->pre_dst_width);
-	cfg |= S3C_CISCPREDST_PREDSTHEIGHT(sc->pre_dst_height);
+	cfg |= S3C_CIPRSCPREDST_PREDSTWIDTH(sc->pre_dst_width);
+	cfg |= S3C_CIPRSCPREDST_PREDSTHEIGHT(sc->pre_dst_height);
 
-	writel(cfg, ctrl->regs + S3C_CISCPREDST);
+	writel(cfg, ctrl->regs + S3C_CIPRSCPREDST);
 }
 
-void s3c_fimc_set_scaler(struct s3c_fimc_control *ctrl)
+static void s3c_fimc_set_prescaler_co(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_scaler *sc = &ctrl->scaler;
-	u32 cfg = (S3C_CISCCTRL_CSCR2Y_WIDE | S3C_CISCCTRL_CSCY2R_WIDE);
+	u32 cfg = 0, shfactor;
+
+	shfactor = 10 - (sc->hfactor + sc->vfactor);
+
+	cfg |= S3C_CICOSCPRERATIO_SHFACTOR(shfactor);
+	cfg |= S3C_CICOSCPRERATIO_PREHORRATIO(sc->pre_hratio);
+	cfg |= S3C_CICOSCPRERATIO_PREVERRATIO(sc->pre_vratio);
+
+	writel(cfg, ctrl->regs + S3C_CICOSCPRERATIO);
+
+	cfg = 0;
+	cfg |= S3C_CICOSCPREDST_PREDSTWIDTH(sc->pre_dst_width);
+	cfg |= S3C_CICOSCPREDST_PREDSTHEIGHT(sc->pre_dst_height);
+
+	writel(cfg, ctrl->regs + S3C_CICOSCPREDST);
+}
+
+void s3c_fimc_set_prescaler(struct s3c_fimc_control *ctrl)
+{
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_set_prescaler_pr(ctrl);
+	else
+		s3c_fimc_set_prescaler_co(ctrl);
+}
+
+static void s3c_fimc_set_scaler_pr(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_scaler *sc = &ctrl->scaler;
+	u32 cfg = (S3C_CIPRSCCTRL_CSCR2Y_WIDE | S3C_CIPRSCCTRL_CSCY2R_WIDE);
 
 	if (sc->bypass)
-		cfg |= S3C_CISCCTRL_SCALERBYPASS;
+		cfg |= S3C_CIPRSCCTRL_SCALERBYPASS;
 
 	if (sc->scaleup_h)
-		cfg |= S3C_CISCCTRL_SCALEUP_H;
+		cfg |= S3C_CIPRSCCTRL_SCALEUP_H;
 
 	if (sc->scaleup_v)
-		cfg |= S3C_CISCCTRL_SCALEUP_V;
+		cfg |= S3C_CIPRSCCTRL_SCALEUP_V;
 
 	if (ctrl->in_type == PATH_IN_DMA) {
 		if (ctrl->in_frame.format == FORMAT_RGB565)
-			cfg |= S3C_CISCCTRL_INRGB_FMT_RGB565;
+			cfg |= S3C_CIPRSCCTRL_INRGB_FMT_RGB565;
 		else if (ctrl->in_frame.format == FORMAT_RGB666)
-			cfg |= S3C_CISCCTRL_INRGB_FMT_RGB666;
+			cfg |= S3C_CIPRSCCTRL_INRGB_FMT_RGB666;
 		else if (ctrl->in_frame.format == FORMAT_RGB888)
-			cfg |= S3C_CISCCTRL_INRGB_FMT_RGB888;
+			cfg |= S3C_CIPRSCCTRL_INRGB_FMT_RGB888;
 	}
 
 	if (ctrl->out_type == PATH_OUT_DMA) {
 		if (ctrl->out_frame.format == FORMAT_RGB565)
-			cfg |= S3C_CISCCTRL_OUTRGB_FMT_RGB565;
+			cfg |= S3C_CIPRSCCTRL_OUTRGB_FMT_RGB565;
 		else if (ctrl->out_frame.format == FORMAT_RGB666)
-			cfg |= S3C_CISCCTRL_OUTRGB_FMT_RGB666;
+			cfg |= S3C_CIPRSCCTRL_OUTRGB_FMT_RGB666;
 		else if (ctrl->out_frame.format == FORMAT_RGB888)
-			cfg |= S3C_CISCCTRL_OUTRGB_FMT_RGB888;
+			cfg |= S3C_CIPRSCCTRL_OUTRGB_FMT_RGB888;
 	} else {
-		cfg |= S3C_CISCCTRL_OUTRGB_FMT_RGB888;
+		cfg |= S3C_CIPRSCCTRL_OUTRGB_FMT_RGB888;
 
 		if (ctrl->out_frame.scan == SCAN_TYPE_INTERLACE)
-			cfg |= S3C_CISCCTRL_INTERLACE;
+			cfg |= S3C_CIPRSCCTRL_INTERLACE;
 		else
-			cfg |= S3C_CISCCTRL_PROGRESSIVE;
+			cfg |= S3C_CIPRSCCTRL_PROGRESSIVE;
 	}
 
-	cfg |= S3C_CISCCTRL_MAINHORRATIO(sc->main_hratio);
-	cfg |= S3C_CISCCTRL_MAINVERRATIO(sc->main_vratio);
+	cfg |= S3C_CIPRSCCTRL_MAINHORRATIO(sc->main_hratio);
+	cfg |= S3C_CIPRSCCTRL_MAINVERRATIO(sc->main_vratio);
 
-	writel(cfg, ctrl->regs + S3C_CISCCTRL);	
+	writel(cfg, ctrl->regs + S3C_CIPRSCCTRL);
+}
+
+static void s3c_fimc_set_scaler_co(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_scaler *sc = &ctrl->scaler;
+	u32 cfg = (S3C_CICOSCCTRL_CSCR2Y_WIDE | S3C_CICOSCCTRL_CSCY2R_WIDE);
+
+	if (sc->bypass)
+		cfg |= S3C_CICOSCCTRL_SCALERBYPASS;
+
+	if (sc->scaleup_h)
+		cfg |= S3C_CICOSCCTRL_SCALEUP_H;
+
+	if (sc->scaleup_v)
+		cfg |= S3C_CICOSCCTRL_SCALEUP_V;
+
+	if (ctrl->in_type == PATH_IN_DMA) {
+		if (ctrl->in_frame.format == FORMAT_RGB565)
+			cfg |= S3C_CICOSCCTRL_INRGB_FMT_RGB565;
+		else if (ctrl->in_frame.format == FORMAT_RGB666)
+			cfg |= S3C_CICOSCCTRL_INRGB_FMT_RGB666;
+		else if (ctrl->in_frame.format == FORMAT_RGB888)
+			cfg |= S3C_CICOSCCTRL_INRGB_FMT_RGB888;
+	}
+
+	if (ctrl->out_type == PATH_OUT_DMA) {
+		if (ctrl->out_frame.format == FORMAT_RGB565)
+			cfg |= S3C_CICOSCCTRL_OUTRGB_FMT_RGB565;
+		else if (ctrl->out_frame.format == FORMAT_RGB666)
+			cfg |= S3C_CICOSCCTRL_OUTRGB_FMT_RGB666;
+		else if (ctrl->out_frame.format == FORMAT_RGB888)
+			cfg |= S3C_CICOSCCTRL_OUTRGB_FMT_RGB888;
+	} else {
+		cfg |= S3C_CICOSCCTRL_OUTRGB_FMT_RGB888;
+
+		if (ctrl->out_frame.scan == SCAN_TYPE_INTERLACE)
+			cfg |= S3C_CICOSCCTRL_INTERLACE;
+		else
+			cfg |= S3C_CICOSCCTRL_PROGRESSIVE;
+	}
+
+	cfg |= S3C_CICOSCCTRL_MAINHORRATIO(sc->main_hratio);
+	cfg |= S3C_CICOSCCTRL_MAINVERRATIO(sc->main_vratio);
+
+	writel(cfg, ctrl->regs + S3C_CICOSCCTRL);
+}
+
+void s3c_fimc_set_scaler(struct s3c_fimc_control *ctrl)
+{
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_set_scaler_pr(ctrl);
+	else
+		s3c_fimc_set_scaler_co(ctrl);
+}
+
+static void s3c_fimc_start_scaler_pr(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CIPRSCCTRL);
+
+	cfg |= S3C_CIPRSCCTRL_SCALERSTART;
+	writel(cfg, ctrl->regs + S3C_CIPRSCCTRL);
+
+	if (ctrl->out_type == PATH_OUT_LCDFIFO)
+		ctrl->open_lcdfifo(1, 0, S3C_WINCON1_LOCALSEL_CAMERA);
+}
+
+static void s3c_fimc_start_scaler_co(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CICOSCCTRL);
+
+	cfg |= S3C_CICOSCCTRL_SCALERSTART;
+	writel(cfg, ctrl->regs + S3C_CICOSCCTRL);
+
+	if (ctrl->out_type == PATH_OUT_LCDFIFO)
+		ctrl->open_lcdfifo(2, 1, S3C_WINCON2_LOCALSEL_CAMERA);
 }
 
 void s3c_fimc_start_scaler(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_CISCCTRL);
-
-	cfg |= S3C_CISCCTRL_SCALERSTART;
-	writel(cfg, ctrl->regs + S3C_CISCCTRL);
-
-	if (ctrl->out_type == PATH_OUT_LCDFIFO)
-		ctrl->open_lcdfifo(ctrl->id, 0, 0);
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_start_scaler_pr(ctrl);
+	else
+		s3c_fimc_start_scaler_co(ctrl);
 }
 
-void s3c_fimc_stop_scaler(struct s3c_fimc_control *ctrl)
+static void s3c_fimc_stop_scaler_pr(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_CISCCTRL);
+	u32 cfg = readl(ctrl->regs + S3C_CIPRSCCTRL);
 
 	if (ctrl->out_type == PATH_OUT_LCDFIFO)
 		ctrl->close_lcdfifo(ctrl->id);
 
-	cfg &= ~S3C_CISCCTRL_SCALERSTART;
-	writel(cfg, ctrl->regs + S3C_CISCCTRL);
+	cfg &= ~S3C_CIPRSCCTRL_SCALERSTART;
+	writel(cfg, ctrl->regs + S3C_CIPRSCCTRL);
+}
+
+static void s3c_fimc_stop_scaler_co(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CICOSCCTRL);
+
+	if (ctrl->out_type == PATH_OUT_LCDFIFO)
+		ctrl->close_lcdfifo(ctrl->id);
+
+	cfg &= ~S3C_CICOSCCTRL_SCALERSTART;
+	writel(cfg, ctrl->regs + S3C_CICOSCCTRL);
+}
+
+void s3c_fimc_stop_scaler(struct s3c_fimc_control *ctrl)
+{
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_stop_scaler_pr(ctrl);
+	else
+		s3c_fimc_stop_scaler_co(ctrl);
 }
 
 void s3c_fimc_enable_capture(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = readl(ctrl->regs + S3C_CIIMGCPT);
 
-	cfg &= ~S3C_CIIMGCPT_CPT_FREN_ENABLE;
-	cfg |= (S3C_CIIMGCPT_IMGCPTEN | S3C_CIIMGCPT_IMGCPTEN_SC);
+	if (IS_PREVIEW(ctrl)) {
+		cfg &= ~S3C_CIIMGCPT_CPT_FREN_ENABLE_PR;
+		cfg |= (S3C_CIIMGCPT_IMGCPTEN | S3C_CIIMGCPT_IMGCPTEN_PRSC);
+	} else {
+		cfg &= ~S3C_CIIMGCPT_CPT_FREN_ENABLE_CO;
+		cfg |= (S3C_CIIMGCPT_IMGCPTEN | S3C_CIIMGCPT_IMGCPTEN_COSC);
+	}
+
 	writel(cfg, ctrl->regs + S3C_CIIMGCPT);
 }
 
@@ -442,14 +650,25 @@ void s3c_fimc_disable_capture(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = readl(ctrl->regs + S3C_CIIMGCPT);
 
-	cfg &= ~(S3C_CIIMGCPT_IMGCPTEN | S3C_CIIMGCPT_IMGCPTEN_SC);
+	cfg &= ~S3C_CIIMGCPT_IMGCPTEN;
+
+	if (IS_PREVIEW(ctrl))
+		cfg &= ~S3C_CIIMGCPT_IMGCPTEN_PRSC;
+	else
+		cfg &= ~S3C_CIIMGCPT_IMGCPTEN_COSC;
+
 	writel(cfg, ctrl->regs + S3C_CIIMGCPT);
 }
 
 void s3c_fimc_set_effect(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_effect *effect = &ctrl->out_frame.effect;
-	u32 cfg = (S3C_CIIMGEFF_IE_ENABLE | S3C_CIIMGEFF_IE_SC_AFTER);
+	u32 cfg = S3C_CIIMGEFF_IE_SC_AFTER;
+
+	if (IS_PREVIEW(ctrl))
+		cfg |= S3C_CIIMGEFF_IE_ENABLE_PR;
+	else
+		cfg |= S3C_CIIMGEFF_IE_ENABLE_CO;
 
 	cfg |= effect->type;
 
@@ -461,139 +680,255 @@ void s3c_fimc_set_effect(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CIIMGEFF);
 }
 
-static void s3c_fimc_set_input_dma_size(struct s3c_fimc_control *ctrl)
+static void s3c_fimc_set_input_dma_size_pr(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_in_frame *frame = &ctrl->in_frame;
 	int ofs_h = frame->offset.y_h * 2;
 	int ofs_v = frame->offset.y_v * 2;
-	u32 cfg_o = 0, cfg_r = S3C_CIREAL_ISIZE_AUTOLOAD_ENABLE;
+	u32 cfg = S3C_MSPRWIDTH_AUTOLOAD_ENABLE;
 
-	cfg_o |= S3C_ORGISIZE_HORIZONTAL(frame->width - ofs_h);
-	cfg_o |= S3C_ORGISIZE_VERTICAL(frame->height - ofs_v);
-	cfg_r |= S3C_CIREAL_ISIZE_WIDTH(frame->width - ofs_h);
-	cfg_r |= S3C_CIREAL_ISIZE_HEIGHT(frame->height - ofs_v);
+	cfg |= S3C_MSPR_WIDTH(frame->width - ofs_h);
+	cfg |= S3C_MSPR_HEIGHT(frame->height - ofs_v);
 
-	writel(cfg_o, ctrl->regs + S3C_ORGISIZE);
-	writel(cfg_r, ctrl->regs + S3C_CIREAL_ISIZE);
+	writel(cfg, ctrl->regs + S3C_MSPRWIDTH);
 }
 
-void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl)
+static void s3c_fimc_set_input_dma_pr(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_in_frame *frame = &ctrl->in_frame;
 	u32 cfg;
 
-	/* for offsets */
-	cfg = 0;
-	cfg |= S3C_CIIYOFF_HORIZONTAL(frame->offset.y_h);
-	cfg |= S3C_CIIYOFF_VERTICAL(frame->offset.y_v);
-	writel(cfg, ctrl->regs + S3C_CIIYOFF);
-
-	cfg = 0;
-	cfg |= S3C_CIICBOFF_HORIZONTAL(frame->offset.cb_h);
-	cfg |= S3C_CIICBOFF_VERTICAL(frame->offset.cb_v);
-	writel(cfg, ctrl->regs + S3C_CIICBOFF);
-
-	cfg = 0;
-	cfg |= S3C_CIICROFF_HORIZONTAL(frame->offset.cr_h);
-	cfg |= S3C_CIICROFF_VERTICAL(frame->offset.cr_v);
-	writel(cfg, ctrl->regs + S3C_CIICROFF);
-
 	/* for original & real size */
-	s3c_fimc_set_input_dma_size(ctrl);
+	s3c_fimc_set_input_dma_size_pr(ctrl);
 
 	/* for input dma control */
-	cfg = (S3C_MSCTRL_SUCCESSIVE_COUNT(4) | S3C_MSCTRL_INPUT_MEMORY);
+	cfg = S3C_MSPRCTRL_INPUT_MEMORY;
 
 	switch (frame->format) {
 	case FORMAT_RGB565: /* fall through */
 	case FORMAT_RGB666: /* fall through */
 	case FORMAT_RGB888:
-		cfg |= S3C_MSCTRL_INFORMAT_RGB;
+		cfg |= S3C_MSPRCTRL_INFORMAT_RGB;
 		break;
 
 	case FORMAT_YCBCR420:
-		cfg |= S3C_MSCTRL_INFORMAT_YCBCR420;
-
-		if (frame->planes == 2)
-			cfg |= (S3C_MSCTRL_C_INT_IN_2PLANE | \
-				(frame->order_2p << S3C_MSCTRL_2PLANE_SHIFT));
-		else
-			cfg |= S3C_MSCTRL_C_INT_IN_3PLANE;
-
+		cfg |= S3C_MSPRCTRL_INFORMAT_YCBCR420;
 		break;
 
 	case FORMAT_YCBCR422:
 		if (frame->planes == 1)
-			cfg |= (frame->order_1p | \
-				S3C_MSCTRL_INFORMAT_YCBCR422_1PLANE);
-		else {
-			cfg |= S3C_MSCTRL_INFORMAT_YCBCR422;
-
-			if (frame->planes == 2)
-				cfg |= (S3C_MSCTRL_C_INT_IN_2PLANE | \
-					(frame->order_2p << S3C_MSCTRL_2PLANE_SHIFT));
-			else
-				cfg |= S3C_MSCTRL_C_INT_IN_3PLANE;
-		}
+			cfg |= S3C_MSPRCTRL_INFORMAT_YCBCR422I;
+		else
+			cfg |= S3C_MSPRCTRL_INFORMAT_YCBCR422;
 
 		break;
 	}
 
-	writel(cfg, ctrl->regs + S3C_MSCTRL);
+	writel(cfg, ctrl->regs + S3C_MSPRCTRL);
+}
+
+static void s3c_fimc_set_input_dma_size_co(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_in_frame *frame = &ctrl->in_frame;
+	int ofs_h = frame->offset.y_h * 2;
+	int ofs_v = frame->offset.y_v * 2;
+	u32 cfg = S3C_MSCOWIDTH_AUTOLOAD_ENABLE;
+
+	cfg |= S3C_MSCO_WIDTH(frame->width - ofs_h);
+	cfg |= S3C_MSCO_HEIGHT(frame->height - ofs_v);
+
+	writel(cfg, ctrl->regs + S3C_MSCOWIDTH);
+}
+
+static void s3c_fimc_set_input_dma_co(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_in_frame *frame = &ctrl->in_frame;
+	u32 cfg;
+
+	/* for original & real size */
+	s3c_fimc_set_input_dma_size_co(ctrl);
+
+	/* for input dma control */
+	cfg = S3C_MSCOCTRL_INPUT_MEMORY;
+
+	switch (frame->format) {
+	case FORMAT_RGB565: /* fall through */
+	case FORMAT_RGB666: /* fall through */
+	case FORMAT_RGB888:
+		cfg |= S3C_MSCOCTRL_INFORMAT_RGB;
+		break;
+
+	case FORMAT_YCBCR420:
+		cfg |= S3C_MSCOCTRL_INFORMAT_YCBCR420;
+		break;
+
+	case FORMAT_YCBCR422:
+		if (frame->planes == 1)
+			cfg |= S3C_MSCOCTRL_INFORMAT_YCBCR422I;
+		else
+			cfg |= S3C_MSCOCTRL_INFORMAT_YCBCR422;
+
+		break;
+	}
+
+	writel(cfg, ctrl->regs + S3C_MSCOCTRL);
+}
+
+void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl)
+{
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_set_input_dma_pr(ctrl);
+	else
+		s3c_fimc_set_input_dma_co(ctrl);
+}
+
+static void s3c_fimc_start_input_dma_pr(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_MSPRCTRL);
+
+	cfg |= S3C_MSPRCTRL_ENVID;
+	writel(cfg, ctrl->regs + S3C_MSPRCTRL);
+}
+
+static void s3c_fimc_start_input_dma_co(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_MSCOCTRL);
+
+	cfg |= S3C_MSCOCTRL_ENVID;
+	writel(cfg, ctrl->regs + S3C_MSCOCTRL);
 }
 
 void s3c_fimc_start_input_dma(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_MSCTRL);
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_start_input_dma_pr(ctrl);
+	else
+		s3c_fimc_start_input_dma_co(ctrl);
+}
 
-	cfg |= S3C_MSCTRL_ENVID;
-	writel(cfg, ctrl->regs + S3C_MSCTRL);
+static void s3c_fimc_stop_input_dma_pr(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_MSPRCTRL);
+
+	cfg &= ~S3C_MSPRCTRL_ENVID;
+	writel(cfg, ctrl->regs + S3C_MSPRCTRL);
+}
+
+static void s3c_fimc_stop_input_dma_co(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_MSCOCTRL);
+
+	cfg &= ~S3C_MSCOCTRL_ENVID;
+	writel(cfg, ctrl->regs + S3C_MSCOCTRL);
 }
 
 void s3c_fimc_stop_input_dma(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_MSCTRL);
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_stop_input_dma_pr(ctrl);
+	else
+		s3c_fimc_stop_input_dma_co(ctrl);
+}
 
-	cfg &= ~S3C_MSCTRL_ENVID;
-	writel(cfg, ctrl->regs + S3C_MSCTRL);
+static void s3c_fimc_set_input_path_pr(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_MSPRCTRL);
+
+	cfg &= ~S3C_MSPRCTRL_INPUT_MASK;
+
+	if (ctrl->in_type == PATH_IN_DMA)
+		cfg |= S3C_MSPRCTRL_INPUT_MEMORY;
+	else
+		cfg |= S3C_MSPRCTRL_INPUT_EXTCAM;
+
+	writel(cfg, ctrl->regs + S3C_MSPRCTRL);
+}
+
+static void s3c_fimc_set_input_path_co(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_MSCOCTRL);
+
+	cfg &= ~S3C_MSCOCTRL_INPUT_MASK;
+
+	if (ctrl->in_type == PATH_IN_DMA)
+		cfg |= S3C_MSCOCTRL_INPUT_MEMORY;
+	else
+		cfg |= S3C_MSCOCTRL_INPUT_EXTCAM;
+
+	writel(cfg, ctrl->regs + S3C_MSCOCTRL);
 }
 
 void s3c_fimc_set_input_path(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_MSCTRL);
-
-	cfg &= ~S3C_MSCTRL_INPUT_MASK;
-
-	if (ctrl->in_type == PATH_IN_DMA)
-		cfg |= S3C_MSCTRL_INPUT_MEMORY;
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_set_input_path_pr(ctrl);
 	else
-		cfg |= S3C_MSCTRL_INPUT_EXTCAM;
+		s3c_fimc_set_input_path_co(ctrl);
+}
 
-	writel(cfg, ctrl->regs + S3C_MSCTRL);
+static void s3c_fimc_set_output_path_pr(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CIPRSCCTRL);
+
+	cfg &= ~S3C_CIPRSCCTRL_LCDPATHEN_FIFO;
+
+	if (ctrl->out_type == PATH_OUT_LCDFIFO)
+		cfg |= S3C_CIPRSCCTRL_LCDPATHEN_FIFO;
+
+	writel(cfg, ctrl->regs + S3C_CIPRSCCTRL);
+}
+
+static void s3c_fimc_set_output_path_co(struct s3c_fimc_control *ctrl)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CICOSCCTRL);
+
+	cfg &= ~S3C_CICOSCCTRL_LCDPATHEN_FIFO;
+
+	if (ctrl->out_type == PATH_OUT_LCDFIFO)
+		cfg |= S3C_CICOSCCTRL_LCDPATHEN_FIFO;
+
+	writel(cfg, ctrl->regs + S3C_CICOSCCTRL);
 }
 
 void s3c_fimc_set_output_path(struct s3c_fimc_control *ctrl)
 {
-	u32 cfg = readl(ctrl->regs + S3C_CISCCTRL);
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_set_output_path_pr(ctrl);
+	else
+		s3c_fimc_set_output_path_co(ctrl);
+}
 
-	cfg &= ~S3C_CISCCTRL_LCDPATHEN_FIFO;
+static void s3c_fimc_set_input_address_pr(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_frame_addr *addr = &ctrl->in_frame.addr;
 
-	if (ctrl->out_type == PATH_OUT_LCDFIFO)
-		cfg |= S3C_CISCCTRL_LCDPATHEN_FIFO;
+	writel(addr->phys_y, ctrl->regs + S3C_MSPRY0SA);
+	writel(addr->phys_cb, ctrl->regs + S3C_MSPRCB0SA);
+	writel(addr->phys_cr, ctrl->regs + S3C_MSPRCR0SA);
 
-	writel(cfg, ctrl->regs + S3C_CISCCTRL);
+	/* FIXME: end address needed? */
+}
+
+static void s3c_fimc_set_input_address_co(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_frame_addr *addr = &ctrl->in_frame.addr;
+
+	writel(addr->phys_y, ctrl->regs + S3C_MSCOY0SA);
+	writel(addr->phys_cb, ctrl->regs + S3C_MSCOCB0SA);
+	writel(addr->phys_cr, ctrl->regs + S3C_MSCOCR0SA);
+
+	/* FIXME: end address needed? */
 }
 
 void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl)
 {
-	struct s3c_fimc_frame_addr *addr = &ctrl->in_frame.addr;
-
-	writel(addr->phys_y, ctrl->regs + S3C_CIIYSA0);
-	writel(addr->phys_cb, ctrl->regs + S3C_CIICBSA0);
-	writel(addr->phys_cr, ctrl->regs + S3C_CIICRSA0);
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_set_input_address_pr(ctrl);
+	else
+		s3c_fimc_set_input_address_co(ctrl);
 }
 
-void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl)
+static void s3c_fimc_set_output_address_pr(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
 	struct s3c_fimc_frame_addr *addr;
@@ -601,15 +936,43 @@ void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl)
 
 	for (i = 0; i < frame->nr_frames; i++) {
 		addr = &frame->addr[i];
-		writel(addr->phys_y, ctrl->regs + S3C_CIOYSA1 + (i * 4));
-		writel(addr->phys_cb, ctrl->regs + S3C_CIOCBSA1 + (i * 4));
-		writel(addr->phys_cr, ctrl->regs + S3C_CIOCRSA1 + (i * 4));
+		writel(addr->phys_y, ctrl->regs + S3C_CIPRYSA(i));
+		writel(addr->phys_cb, ctrl->regs + S3C_CIPRCBSA(i));
+		writel(addr->phys_cr, ctrl->regs + S3C_CIPRCRSA(i));
 	}
+}
+
+static void s3c_fimc_set_output_address_co(struct s3c_fimc_control *ctrl)
+{
+	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
+	struct s3c_fimc_frame_addr *addr;
+	int i;
+
+	for (i = 0; i < frame->nr_frames; i++) {
+		addr = &frame->addr[i];
+		writel(addr->phys_y, ctrl->regs + S3C_CICOYSA(i));
+		writel(addr->phys_cb, ctrl->regs + S3C_CICOCBSA(i));
+		writel(addr->phys_cr, ctrl->regs + S3C_CICOCRSA(i));
+	}
+}
+
+void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl)
+{
+	if (IS_PREVIEW(ctrl))
+		s3c_fimc_set_output_address_pr(ctrl);
+	else
+		s3c_fimc_set_output_address_co(ctrl);
 }
 
 int s3c_fimc_get_frame_count(struct s3c_fimc_control *ctrl)
 {
-	return S3C_CISTATUS_GET_FRAME_COUNT(readl(ctrl->regs + S3C_CISTATUS));
+	if (IS_PREVIEW(ctrl)) {
+		return S3C_CIPRSTATUS_GET_FRAME_COUNT( \
+			readl(ctrl->regs + S3C_CIPRSTATUS));
+	} else {
+		return S3C_CICOSTATUS_GET_FRAME_COUNT( \
+			readl(ctrl->regs + S3C_CICOSTATUS));
+	}
 }
 
 void s3c_fimc_change_effect(struct s3c_fimc_control *ctrl)
@@ -618,7 +981,12 @@ void s3c_fimc_change_effect(struct s3c_fimc_control *ctrl)
 	u32 cfg = readl(ctrl->regs + S3C_CIIMGEFF);
 
 	cfg &= ~S3C_CIIMGEFF_FIN_MASK;
-	cfg |= (effect->type | S3C_CIIMGEFF_IE_ENABLE);
+	cfg |= effect->type;
+
+	if (IS_PREVIEW(ctrl))
+		cfg |= S3C_CIIMGEFF_IE_ENABLE_PR;
+	else
+		cfg |= S3C_CIIMGEFF_IE_ENABLE_CO;
 
 	if (effect->type == EFFECT_ARBITRARY) {
 		cfg &= ~S3C_CIIMGEFF_PAT_CBCR_MASK;
@@ -637,11 +1005,10 @@ void s3c_fimc_change_rotate(struct s3c_fimc_control *ctrl)
 		s3c_fimc_set_rot90(ctrl);
 
 	if (ctrl->out_type == PATH_OUT_DMA) {
-		cfg = readl(ctrl->regs + S3C_CITRGFMT);
-		cfg &= ~S3C_CITRGFMT_FLIP_MASK;
-		cfg |= (ctrl->out_frame.flip << S3C_CITRGFMT_FLIP_SHIFT);
+		cfg = readl(ctrl->regs + S3C_CIPRTRGFMT);
+		cfg &= ~S3C_CIPRTRGFMT_FLIP_MASK;
+		cfg |= (ctrl->out_frame.flip << S3C_CIPRTRGFMT_FLIP_SHIFT);
 
-		writel(cfg, ctrl->regs + S3C_CITRGFMT);
-		s3c_fimc_set_output_dma_size(ctrl);
+		writel(cfg, ctrl->regs + S3C_CIPRTRGFMT);
 	}
 }
