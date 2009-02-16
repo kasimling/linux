@@ -191,6 +191,11 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 		}
 	}
 
+	if (!ctrl->regs) {
+		err("failed to remap io region\n");
+		return NULL;
+	}
+
 	/* irq */
 	ctrl->irq = platform_get_irq(pdev, 0);
 
