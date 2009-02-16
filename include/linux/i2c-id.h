@@ -81,6 +81,8 @@
 #define I2C_DRIVERID_CS4270	94	/* Cirrus Logic 4270 audio codec */
 #define I2C_DRIVERID_M52790 	95      /* Mitsubishi M52790SP/FP AV switch */
 #define I2C_DRIVERID_CS5345	96	/* cs5345 audio processor	*/
+#define I2C_DRIVERID_S5K3BA	501	/* Samsung S5K4BA CMOS Image Sensor */
+#define I2C_DRIVERID_S5K4BA	502	/* Samsung S5K4BA CMOS Image Sensor */
 
 #define I2C_DRIVERID_OV7670 1048	/* Omnivision 7670 camera */
 

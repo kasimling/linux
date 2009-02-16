@@ -50,6 +50,7 @@ extern struct platform_device s3c_device_keypad;
 extern struct platform_device s3c_device_ts;
 
 extern struct platform_device s3c_device_smc911x;
+extern struct platform_device s3c_device_fimc;
 
 /* s3c2440 specific devices */
 

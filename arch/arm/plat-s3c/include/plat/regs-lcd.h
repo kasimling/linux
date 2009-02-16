@@ -280,7 +280,7 @@
 /* Window 0~4 Control register - WINCONx */
 #define S3C_WINCONx_WIDE_NARROW(x)			(((x)&0x3)<<26)
 #define S3C_WINCONx_ENLOCAL_DMA				(0<<22)
-#define S3C_WINCONx_ENLOCAL_POST			(1<<22)
+#define S3C_WINCONx_ENLOCAL				(1<<22)
 #define S3C_WINCONx_ENLOCAL_MASK			(1<<22)
 #define S3C_WINCONx_BUFSEL_0				(0<<20)
 #define S3C_WINCONx_BUFSEL_1				(1<<20)
@@ -325,8 +325,10 @@
 /* Window 1-2 Control register - WINCON1 */
 #define S3C_WINCON1_LOCALSEL_TV				(0<<23)
 #define S3C_WINCON1_LOCALSEL_CAMERA			(1<<23)
+#define S3C_WINCON1_LOCALSEL_MASK			(1<<23)
 #define S3C_WINCON2_LOCALSEL_TV				(0<<23)
 #define S3C_WINCON2_LOCALSEL_CAMERA			(1<<23)
+#define S3C_WINCON2_LOCALSEL_MASK			(1<<23)
 
 /* Window 0~4 Position Control A register - VIDOSDxA */
 #define S3C_VIDOSDxA_OSD_LTX_F(x)			(((x)&0x7FF)<<11)
