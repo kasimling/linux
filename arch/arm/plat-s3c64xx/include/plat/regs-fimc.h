@@ -223,6 +223,7 @@
 #define S3C_CICOTRGFMT_FLIP_MASK		(3 << 14)
 
 /* Output DMA control register */
+#define S3C_CICOCTRL_BURST_MASK			(0xfffff << 4)
 #define S3C_CICOCTRL_LASTIRQ_ENABLE		(1 << 2)
 #define S3C_CICOCTRL_ORDER422_MASK		(3 << 0)
 
@@ -273,6 +274,7 @@
 #define S3C_CIPRTRGFMT_ROT90_CLOCKWISE		(1 << 13)
 
 /* Output DMA control register */
+#define S3C_CIPRCTRL_BURST_MASK			(0xfffff << 4)
 #define S3C_CIPRCTRL_LASTIRQ_ENABLE		(1 << 2)
 #define S3C_CIPRCTRL_ORDER422_MASK		(3 << 0)
 
