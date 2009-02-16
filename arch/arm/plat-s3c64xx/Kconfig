@@ -18,6 +18,7 @@ config PLAT_S3C64XX
 	select S3C_GPIO_PULL_UPDOWN
 	select S3C_GPIO_CFG_S3C24XX
 	select S3C_GPIO_CFG_S3C64XX
+	select DMABOUNCE
 	help
 	  Base platform code for any Samsung S3C64XX device
 
@@ -57,5 +58,29 @@ config S3C64XX_ADC
 	bool "S3C64XX ADC D/D support"
 	help
 	 Analog to Digital conversion(ADC) D/D for S3C64XX support   
+
+config S3C64XX_DEV_FIMC0
+	bool
+	default y
+	help
+	  Compile in platform device definitions for FIMC controller 0
+
+config S3C64XX_DEV_FIMC1
+	bool
+	default y
+	help
+	  Compile in platform device definitions for FIMC controller 1
+
+config S3C64XX_SETUP_FIMC0
+	bool
+	default y
+	help
+	  Common setup code for FIMC controller 0
+
+config S3C64XX_SETUP_FIMC1
+	bool
+	default y
+	help
+	  Common setup code for FIMC controller 1
 
 endif

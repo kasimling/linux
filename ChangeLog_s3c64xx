@@ -568,3 +568,18 @@ v2.6.28-rc8-s3c64xx-r0d19: Kyoungil Kim
 		M       arch/arm/plat-s3c64xx/devs.c
 		M       drivers/watchdog/Kconfig
 
+v2.6.28-rc8-s3c64xx-r0d20: Ryu Euiyoul
+	- Support S5M8751 on SMDK6410
+
+	Modified Files:
+		M       sound/soc/codecs/Kconfig
+		M       sound/soc/codecs/Makefile
+		M       sound/soc/s3c64xx/Kconfig
+		M       sound/soc/s3c64xx/Makefile
+
+	Added Files:
+		A       sound/soc/codecs/s5m8751.c
+		A       sound/soc/codecs/s5m8751.h
+		A       sound/soc/s3c64xx/smdk6410_s5m8751.c
+		A       arch/arm/configs/smdk6410rf_defconfig
+

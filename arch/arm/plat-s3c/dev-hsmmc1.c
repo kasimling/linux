@@ -20,8 +20,6 @@
 #include <plat/devs.h>
 #include <plat/cpu.h>
 
-#define S3C_SZ_HSMMC	(0x1000)
-
 static struct resource s3c_hsmmc1_resource[] = {
 	[0] = {
 		.start = S3C_PA_HSMMC1,
