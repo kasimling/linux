@@ -49,10 +49,16 @@ extern struct clk clk_epll;
 extern struct clk clk_xtal;
 extern struct clk clk_ext;
 
-#if defined(CONFIG_CPU_S5P6440)
+#ifdef CONFIG_CPU_S3C6410
+extern struct clk clk_hx2;
+#endif
+
+#ifdef CONFIG_CPU_S5P6440
 extern struct clk clk_h_low;
 extern struct clk clk_p_low;
-#elif defined(CONFIG_CPU_S5PC100)
+#endif
+
+#ifdef CONFIG_CPU_S5PC100
 extern struct clk clk_hpll;
 extern struct clk clk_hd0;
 extern struct clk clk_pd0;

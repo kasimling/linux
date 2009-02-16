@@ -41,6 +41,7 @@
 
 #include <plat/regs-serial.h>
 #include <plat/iic.h>
+#include <plat/fimc.h>
 
 #include <plat/regs-rtc.h>
 
@@ -119,6 +120,7 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 	&s3c_device_onenand,
 	&s3c_device_usb,
 	&s3c_device_usbgadget,
+	&s3c_device_fimc,
 #ifdef CONFIG_S3C64XX_ADC
 	&s3c_device_adc,
 #endif
@@ -191,6 +193,12 @@ static void __init smdk6410_machine_init(void)
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
+
+	s3c_fimc_set_platdata(NULL);
+
+#ifdef CONFIG_VIDEO_FIMC
+	s3c_fimc_reset_camera();
+#endif
 
 	platform_add_devices(smdk6410_devices, ARRAY_SIZE(smdk6410_devices));
 	s3c6410_pm_init();

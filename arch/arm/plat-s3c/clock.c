@@ -282,6 +282,17 @@ struct clk clk_h = {
 	.set_rate	= clk_default_setrate,
 };
 
+#ifdef CONFIG_CPU_S3C6410
+struct clk clk_hx2 = {
+	.name		= "hclkx2",
+	.id		= -1,
+	.rate		= 0,
+	.parent		= NULL,
+	.ctrlbit	= 0,
+	.set_rate	= clk_default_setrate,
+};
+#endif
+
 struct clk clk_p = {
 	.name		= "pclk",
 	.id		= -1,
@@ -303,7 +314,7 @@ struct clk s3c24xx_uclk = {
 	.id		= -1,
 };
 
-#if defined(CONFIG_CPU_S5P6440)
+#ifdef CONFIG_CPU_S5P6440
 struct clk clk_h_low = {
 	.name		= "hclk_low",
 	.id		= -1,
@@ -321,8 +332,9 @@ struct clk clk_p_low = {
 	.ctrlbit	= 0,
 	.set_rate	= clk_default_setrate,
 };
+#endif
 
-#elif defined(CONFIG_CPU_S5PC100)
+#ifdef CONFIG_CPU_S5PC100
 struct clk clk_hpll = {
 	.name		= "hpll",
 	.id		= -1,
@@ -403,13 +415,15 @@ int __init s3c24xx_register_baseclocks(unsigned long xtal)
 	if (s3c24xx_register_clock(&clk_f) < 0)
 		printk(KERN_ERR "failed to register cpu fclk\n");
 
-#if defined(CONFIG_CPU_S5P6440)
+#ifdef CONFIG_CPU_S5P6440
 	if (s3c24xx_register_clock(&clk_h_low) < 0)
 		printk(KERN_ERR "failed to register cpu hclk_low\n");
 
 	if (s3c24xx_register_clock(&clk_p_low) < 0)
 		printk(KERN_ERR "failed to register cpu pclk_low\n");
-#elif defined(CONFIG_CPU_S5PC100)
+#endif
+
+#ifdef CONFIG_CPU_S5PC100
 	if (s3c24xx_register_clock(&clk_hd0) < 0)
 		printk(KERN_ERR "failed to register cpu hclkd0\n");
 
@@ -419,6 +433,11 @@ int __init s3c24xx_register_baseclocks(unsigned long xtal)
 
 	if (s3c24xx_register_clock(&clk_h) < 0)
 		printk(KERN_ERR "failed to register cpu hclk\n");
+
+#ifdef CONFIG_CPU_S3C6410
+	if (s3c24xx_register_clock(&clk_hx2) < 0)
+		printk(KERN_ERR "failed to register cpu hclkx2\n");
+#endif
 
 	if (s3c24xx_register_clock(&clk_p) < 0)
 		printk(KERN_ERR "failed to register cpu pclk\n");
