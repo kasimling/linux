@@ -1,5 +1,5 @@
 menu "SoC Audio for the Samsung S3C"
-	depends on ARCH_S3C64XX 
+	depends on ARCH_S3C64XX || ARCH_S5P64XX
 
 config SND_S3C64XX_SOC
 	tristate "SoC Audio for the Samsung S3C chips"
@@ -10,10 +10,23 @@ config SND_S3C64XX_SOC
 	  the S3C AC97, I2S or SSP interface. You will also need
 	  to select the audio interfaces to support below.
 
+config SND_S5P64XX_SOC
+	tristate "SoC Audio for the Samsung S3C chips"
+	depends on ARCH_S5P64XX
+	select SND_PCM
+	help
+	  Say Y or M if you want to add support for codecs attached to
+	  the S3C AC97, I2S or SSP interface. You will also need
+	  to select the audio interfaces to support below.
+
+
 config SND_S3C6410_SOC_I2S_V32
 	tristate
 
 config SND_S3C6410_SOC_I2S
+	tristate
+
+config SND_S5P6440_SOC_I2S
 	tristate
 
 config SND_SOC_I2S_V40
@@ -73,6 +86,32 @@ config SOUND_WM8580_INPUT_STREAM_LINE
 config SOUND_WM8580_INPUT_STREAM_MIC
 	bool "Input Stream is MIC"
 	depends on SND_S3C6410_SOC_SMDK6410_WM8580 || SND_S3C24XX_SOC_SMDK2450_WM8580
+	help
+	  Say Y here to make input stream as MIC.
+endchoice
+
+config SND_S5P64XX_SOC_SMDK6440_WM8580
+	tristate "SoC I2S Audio support for SMDK6440 - WM8580"
+	depends on SND_S5P64XX_SOC && MACH_SMDK6440
+	select SND_S5P6440_SOC_I2S
+	select SND_SOC_WM8580
+	help
+	  Say Y if you want to add support for SoC audio on smdk6440
+	  with the WM8580.
+	
+choice
+        prompt "SMDK Record Path Select"
+	depends on SND_S5P64XX_SOC_SMDK6440_WM8580 
+
+config SOUND_WM8580_INPUT_STREAM_LINE
+	bool "Input Stream is LINE-IN"
+	depends on SND_S5P64XX_SOC_SMDK6440_WM8580
+	help
+	  Say Y here to make input stream as LINE-IN.
+
+config SOUND_WM8580_INPUT_STREAM_MIC
+	bool "Input Stream is MIC"
+	depends on SND_S5P64XX_SOC_SMDK6440_WM8580 
 	help
 	  Say Y here to make input stream as MIC.
 endchoice

@@ -98,6 +98,18 @@ static struct s3c_dma_map __initdata s5p6440_dma_mappings[] = {
 		.channels	= MAP0(S3C_DMA_M2M),
 		.hw_addr.from	= 0,
 	},
+        [DMACH_I2S_V40_IN] = {           
+		.name           = "i2s-v40-in", 
+		.channels       = MAP0(S3C_DMA0_I2S0_RX),
+		.hw_addr.from   = S3C_DMA0_I2S0_RX,     
+		.sdma_sel       = 1 << S3C_DMA0_I2S0_RX,
+	},                                                                               
+	[DMACH_I2S_V40_OUT] = {            
+		.name           = "i2s-v40-out", 
+		.channels       = MAP0(S3C_DMA0_I2S0_TX), 
+		.hw_addr.to     = S3C_DMA0_I2S0_TX,      
+		.sdma_sel       = 1 << S3C_DMA0_I2S0_TX,
+	}, 
 };
 
 static void s5p6440_dma_select(struct s3c2410_dma_chan *chan,
