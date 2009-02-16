@@ -97,13 +97,13 @@
 #define S3C_FIMC_FLAG_IRQ_LAST		0x0800
 #define S3C_FIMC_IRQ_MASK		0x0f00
 
-#define s3c_fimc_unmask_sflag(x)	(x &= ~S3C_FIMC_STA_MASK)
-#define s3c_fimc_unmask_uflag(x)	(x &= ~S3C_FIMC_USE_MASK)
-#define s3c_fimc_unmask_iflag(x)	(x &= ~S3C_FIMC_IRQ_MASK)
+#define s3c_fimc_unmask_sflag(x)	(x->flag &= ~S3C_FIMC_STA_MASK)
+#define s3c_fimc_unmask_uflag(x)	(x->flag &= ~S3C_FIMC_USE_MASK)
+#define s3c_fimc_unmask_iflag(x)	(x->flag &= ~S3C_FIMC_IRQ_MASK)
 
-#define s3c_fimc_set_sflag(x, fld) 	s3c_fimc_unmask_sflag(x); (x |= fld)
-#define s3c_fimc_set_uflag(x, fld) 	s3c_fimc_unmask_uflag(x); (x |= fld)
-#define s3c_fimc_set_iflag(x, fld) 	s3c_fimc_unmask_iflag(x); (x |= fld)
+#define s3c_fimc_set_sflag(x, f) 	s3c_fimc_unmask_sflag(x); (x->flag |= f)
+#define s3c_fimc_set_uflag(x, f) 	s3c_fimc_unmask_uflag(x); (x->flag |= f)
+#define s3c_fimc_set_iflag(x, f) 	s3c_fimc_unmask_iflag(x); (x->flag |= f)
 
 #define IS_PREVIEW(x)			(x->flag & S3C_FIMC_FLAG_PREVIEW)
 #define IS_CAPTURE(x)			(x->flag & S3C_FIMC_FLAG_CAPTURE)

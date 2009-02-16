@@ -481,13 +481,13 @@ int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl)
 
 	if ((ctrl->flag & S3C_FIMC_FLAG_IRQ_NORMAL) && \
 		frame->skip_frames > frame->nr_frames * 2) {
-		s3c_fimc_set_iflag(ctrl->flag, S3C_FIMC_FLAG_IRQ_X);
+		s3c_fimc_set_iflag(ctrl, S3C_FIMC_FLAG_IRQ_X);
 	}
 
 	switch (ctrl->flag & S3C_FIMC_IRQ_MASK) {
 	case S3C_FIMC_FLAG_IRQ_NORMAL:
 		dprintk("irq normal\n");
-		s3c_fimc_set_sflag(ctrl->flag, S3C_FIMC_FLAG_RUNNING);
+		s3c_fimc_set_sflag(ctrl, S3C_FIMC_FLAG_RUNNING);
 		ret = S3C_FIMC_FRAME_SKIP;
 		break;
 
@@ -495,21 +495,21 @@ int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl)
 		dprintk("irq x\n");
 		s3c_fimc_enable_lastirq(ctrl);
 		s3c_fimc_disable_lastirq(ctrl);
-		s3c_fimc_set_sflag(ctrl->flag, S3C_FIMC_FLAG_HANDLE_IRQ);
-		s3c_fimc_set_iflag(ctrl->flag, S3C_FIMC_FLAG_IRQ_Y);
+		s3c_fimc_set_sflag(ctrl, S3C_FIMC_FLAG_HANDLE_IRQ);
+		s3c_fimc_set_iflag(ctrl, S3C_FIMC_FLAG_IRQ_Y);
 		ret = S3C_FIMC_FRAME_SKIP;
 		break;
 
 	case S3C_FIMC_FLAG_IRQ_Y:
 		dprintk("irq y\n");
-		s3c_fimc_set_iflag(ctrl->flag, S3C_FIMC_FLAG_IRQ_LAST);
+		s3c_fimc_set_iflag(ctrl, S3C_FIMC_FLAG_IRQ_LAST);
 		ret = S3C_FIMC_FRAME_SKIP;
 		break;
 
 	case S3C_FIMC_FLAG_IRQ_LAST:
 		dprintk("irq last\n");
-		s3c_fimc_set_sflag(ctrl->flag, S3C_FIMC_FLAG_HANDLE_IRQ);
-		s3c_fimc_set_iflag(ctrl->flag, S3C_FIMC_FLAG_IRQ_X);
+		s3c_fimc_set_sflag(ctrl, S3C_FIMC_FLAG_HANDLE_IRQ);
+		s3c_fimc_set_iflag(ctrl, S3C_FIMC_FLAG_IRQ_X);
 		ret = S3C_FIMC_FRAME_TAKE;
 		break;
 
