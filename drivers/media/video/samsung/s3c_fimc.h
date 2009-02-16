@@ -105,6 +105,9 @@
 #define s3c_fimc_set_uflag(x, fld) 	s3c_fimc_unmask_uflag(x); (x |= fld)
 #define s3c_fimc_set_iflag(x, fld) 	s3c_fimc_unmask_iflag(x); (x |= fld)
 
+#define IS_PREVIEW(x)			(x->flag & S3C_FIMC_FLAG_PREVIEW)
+#define IS_CAPTURE(x)			(x->flag & S3C_FIMC_FLAG_CAPTURE)
+
 #define s3c_fimc_pat_cb(x)		((x >> 8) & 0xff)
 #define s3c_fimc_pat_cr(x)		(x & 0xff)
 
