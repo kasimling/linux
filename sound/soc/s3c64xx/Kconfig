@@ -103,4 +103,13 @@ config SOUND_WM8990_INPUT_STREAM_MIC_IN
 	  Say Y here to make input stream as MIC.
 endchoice
 
+config SND_S3C64XX_SOC_SMDK6410_S5M8751
+	tristate "SoC I2S Audio support for SMDK6410 - S5M8751"
+	depends on SND_S3C64XX_SOC && (MACH_SMDK6410)
+	select SND_S3C6410_SOC_I2S_V32
+	select SND_SOC_S5M8751
+	help
+	  Say Y if you want to add support for SoC audio on smdk6410
+	  with the S5M8751.
+
 endmenu

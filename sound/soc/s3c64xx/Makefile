@@ -14,7 +14,9 @@ snd-soc-neo1973-wm8753-objs := neo1973_wm8753.o
 snd-soc-smdk64xx-wm9713-objs := smdk64xx_wm9713.o
 snd-soc-smdk6410-wm8580-objs := smdk6410_wm8580.o
 snd-soc-smdk6410-wm8990-objs := smdk6410_wm8990.o
+snd-soc-smdk6410-s5m8751-objs := smdk6410_s5m8751.o
 
 obj-$(CONFIG_SND_S3C64XX_SOC_SMDK6410_WM9713) += snd-soc-smdk64xx-wm9713.o
 obj-$(CONFIG_SND_S3C6410_SOC_SMDK6410_WM8580) += snd-soc-smdk6410-wm8580.o
 obj-$(CONFIG_SND_S3C64XX_SOC_SMDK6410_WM8990) += snd-soc-smdk6410-wm8990.o
+obj-$(CONFIG_SND_S3C64XX_SOC_SMDK6410_S5M8751) += snd-soc-smdk6410-s5m8751.o
