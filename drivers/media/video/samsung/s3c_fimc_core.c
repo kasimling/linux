@@ -245,10 +245,10 @@ static u32 s3c_fimc_poll(struct file *filp, poll_table *wait)
 
 	poll_wait(filp, &ctrl->waitq, wait);
 
-	if (ctrl->flag & S3C_FIMC_FLAG_HANDLE_IRQ)
+	if (IS_IRQ_HANDLING(ctrl))
 		mask = POLLIN | POLLRDNORM;
 
-	s3c_fimc_set_sflag(ctrl, S3C_FIMC_FLAG_STOP);
+	FSET_STOP(ctrl);
 
 	return mask;
 }
@@ -260,11 +260,10 @@ ssize_t s3c_fimc_read(struct file *filp, char *buf, size_t count, loff_t *pos)
 	size_t end;
 
 	if (IS_CAPTURE(ctrl)) {
-		if (wait_event_interruptible(ctrl->waitq, \
-				ctrl->flag & S3C_FIMC_FLAG_HANDLE_IRQ))
+		if (wait_event_interruptible(ctrl->waitq, IS_IRQ_HANDLING(ctrl)))
 				return -ERESTARTSYS;
 
-		s3c_fimc_set_sflag(ctrl, S3C_FIMC_FLAG_STOP);
+		FSET_STOP(ctrl);
 	}
 
 	end = min_t(size_t, ctrl->out_frame.buf_size, count);

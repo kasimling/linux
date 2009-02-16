@@ -240,7 +240,7 @@ static int s3c_fimc_v4l2_overlay(struct file *filp, void *fh, unsigned int i)
 		if (ctrl->in_type != PATH_IN_DMA)
 			s3c_fimc_init_camera(ctrl);
 
-		s3c_fimc_set_uflag(ctrl, S3C_FIMC_FLAG_PREVIEW);
+		FSET_PREVIEW(ctrl);
 		s3c_fimc_start_dma(ctrl);
 	} else {
 		s3c_fimc_stop_dma(ctrl);
@@ -308,8 +308,8 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 
 	case V4L2_CID_EFFECT_ARBITRARY:
 		frame->effect.type = EFFECT_ARBITRARY;
-		frame->effect.pat_cb = s3c_fimc_pat_cb(c->value);
-		frame->effect.pat_cr = s3c_fimc_pat_cr(c->value);
+		frame->effect.pat_cb = PAT_CB(c->value);
+		frame->effect.pat_cr = PAT_CR(c->value);
 		s3c_fimc_change_effect(ctrl);
 		break;
 
@@ -429,8 +429,8 @@ static int s3c_fimc_v4l2_streamon(struct file *filp, void *fh,
 		s3c_fimc_init_camera(ctrl);
 
 	ctrl->out_frame.skip_frames = 0;
-	s3c_fimc_set_uflag(ctrl, S3C_FIMC_FLAG_CAPTURE);
-	s3c_fimc_set_iflag(ctrl, S3C_FIMC_FLAG_IRQ_NORMAL);
+	FSET_CAPTURE(ctrl);
+	FSET_IRQ_NORMAL(ctrl);
 	s3c_fimc_start_dma(ctrl);
 
 	return 0;
@@ -444,9 +444,10 @@ static int s3c_fimc_v4l2_streamoff(struct file *filp, void *fh,
 	if (i != V4L2_BUF_TYPE_VIDEO_CAPTURE)
 		return -EINVAL;
 
-	s3c_fimc_set_sflag(ctrl, S3C_FIMC_FLAG_STOP);
-	s3c_fimc_unmask_uflag(ctrl);
-	s3c_fimc_unmask_iflag(ctrl);
+	FSET_STOP(ctrl);
+	UNMASK_USAGE(ctrl);
+	UNMASK_IRQ(ctrl);
+
 	s3c_fimc_stop_dma(ctrl);
 	s3c_fimc_free_output_memory(&ctrl->out_frame);
 	s3c_fimc_set_output_address(ctrl);
