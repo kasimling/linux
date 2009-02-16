@@ -25,7 +25,6 @@
 #include <linux/mtd/nand.h>
 #include <linux/mtd/partitions.h>
 #include <linux/clk.h>
-#include <linux/bootmem.h>
 #include <linux/mm.h>
 
 #include <asm/mach/arch.h>
