@@ -280,13 +280,7 @@
 /* Window 0~4 Control register - WINCONx */
 #define S3C_WINCONx_WIDE_NARROW(x)			(((x)&0x3)<<26)
 #define S3C_WINCONx_ENLOCAL_DMA				(0<<22)
-
-#ifdef CONFIG_ARCH_S5PC1XX
 #define S3C_WINCONx_ENLOCAL				(1<<22)
-#else
-#define S3C_WINCONx_ENLOCAL_POST			(1<<22)
-#endif
-
 #define S3C_WINCONx_ENLOCAL_MASK			(1<<22)
 #define S3C_WINCONx_BUFSEL_0				(0<<20)
 #define S3C_WINCONx_BUFSEL_1				(1<<20)
