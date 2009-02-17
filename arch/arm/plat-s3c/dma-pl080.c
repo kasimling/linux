@@ -359,46 +359,9 @@ static int s3c_dma_start(struct s3c2410_dma_chan *chan)
 
 	dbg_showchan(chan);
 
-	/* if we've only loaded one buffer onto the channel, then chec
-	 * to see if we have another, and if so, try and load it so when
-	 * the first buffer is finished, the new one will be loaded onto
-	 * the channel */
-#if 0
-	if (chan->next != NULL) {
-		if (chan->load_state == S3C2410_DMALOAD_1LOADED) {
-
-			if (s3c2410_dma_waitforload(chan, __LINE__) == 0) {
-				pr_debug("%s: buff not yet loaded, no more todo\n",
-					 __FUNCTION__);
-			} else {
-				chan->load_state = S3C2410_DMALOAD_1RUNNING;
-				s3c2410_dma_loadbuffer(chan, chan->next);
-			}
-
-		} else if (chan->load_state == S3C2410_DMALOAD_1RUNNING) {
-			s3c2410_dma_loadbuffer(chan, chan->next);
-		}
-	}
-#endif
 	local_irq_restore(flags);
 	return 0;
 }
-
-
-/* s3c_dma_canload
- *
- * work out if we can queue another buffer into the DMA engine
- */
-
-#if 0
-static int s3c_dma_canload(struct s3c2410_dma_chan * chan)
-{
-	if (chan->load_state == S3C_DMALOAD_NONE || chan->load_state == S3C2410_DMALOAD_1RUNNING)
-		return 1;
-
-	return 0;
-}
-#endif
 
 
 /* s3c2410_dma_enqueue
@@ -479,11 +442,6 @@ int s3c2410_dma_enqueue(unsigned int channel, void *id,
 				return -EINVAL;
 			}
 		}
-#if 0
-		while (s3c_dma_canload(chan) && chan->next != NULL) {
-			s3c_dma_loadbuffer(chan, chan->next);
-		}
-#endif
 	} else if (chan->state == S3C_DMA_IDLE) {
 		if (chan->flags & S3C2410_DMAF_AUTOSTART) {
 			s3c2410_dma_ctrl(channel, S3C2410_DMAOP_START);
@@ -576,11 +534,6 @@ int s3c2410_dma_enqueue_sg(unsigned int channel, void *id,
 				return -EINVAL;
 			}
 		}
-#if 0
-		while (s3c_dma_canload(chan) && chan->next != NULL) {
-			s3c_dma_loadbuffer(chan, chan->next);
-		}
-#endif
 	} else if (chan->state == S3C_DMA_IDLE) {
 		dma_wrreg(chan, S3C_DMAC_CxLLI, virt_to_phys(&sg_list));
 		
