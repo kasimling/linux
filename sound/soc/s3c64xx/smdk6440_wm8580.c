@@ -96,8 +96,7 @@ static int smdk6440_hifi_hw_params(struct snd_pcm_substream *substream,
 	case 48000:
 	case 96000:
 		/* K=9961, M=49, P=1, S=3 -- Fin=12, Fout=73.728; r=1536 */
-		writel(50332, S3C_EPLL_CON);
-		//writel(9961, S3C_EPLL_CON);
+		writel(9961, S3C_EPLL_CON);
 		writel((1<<31)|(49<<16)|(1<<8)|(3<<0) ,S3C_EPLL_CON);
 		break;
 	default:
