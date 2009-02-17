@@ -95,6 +95,8 @@ static int s5k4ba_attach(struct i2c_adapter *adap, int addr, int kind)
 
 	s5k4ba_data.client = c;
 
+	info("s5k4ba attached successfully\n");
+
 	return i2c_attach_client(c);
 }
 
@@ -108,8 +110,7 @@ static int s5k4ba_attach_adapter(struct i2c_adapter *adap)
 	if (ret) {
 		err("failed to attach s5k4ba driver\n");
 		ret = -ENODEV;
-	} else
-		info("s5k4ba attached successfully\n");
+	}
 
 	return ret;
 }
