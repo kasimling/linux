@@ -109,12 +109,13 @@ static struct platform_device *smdk6440_devices[] __initdata = {
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
 	{ I2C_BOARD_INFO("24c08", 0x50), },
-//	{ I2C_BOARD_INFO("WM8580", 0x1b), },
+	//{ I2C_BOARD_INFO("WM8580", 0x10), },
 };
 
 static struct i2c_board_info i2c_devs1[] __initdata = {
 	{ I2C_BOARD_INFO("24c128", 0x57), },	/* Samsung S524AD0XD1 */
-	{ I2C_BOARD_INFO("WM8580", 0x1b), },
+	{ I2C_BOARD_INFO("WM8580", 0x1a), },
+	//{ I2C_BOARD_INFO("WM8580", 0x1b), },
 };
 
 
@@ -131,7 +132,10 @@ static void __init smdk6440_map_io(void)
 	s3c_device_nand.name = "s5p6440-nand";
 
 	s5p64xx_init_io(smdk6440_iodesc, ARRAY_SIZE(smdk6440_iodesc));
-	s3c24xx_init_clocks(12000000);
+	//s3c24xx_init_clocks(12000000);
+	//s3c24xx_init_clocks(33000000);
+	//s3c24xx_init_clocks(20000000);
+	s3c24xx_init_clocks(16000000);
 	s3c24xx_init_uarts(smdk6440_uartcfgs, ARRAY_SIZE(smdk6440_uartcfgs));
 }
 

@@ -39,5 +39,6 @@ u32 s3c24xx_i2s_get_clockrate(void);
 
 extern struct snd_soc_dai s3c_i2s_dai;
 extern struct snd_soc_dai	s3c_i2s_v40_dai;
+extern struct snd_soc_dai	s5p_i2s_v40_dai;
 
 #endif /*S3C24XXI2S_H_*/

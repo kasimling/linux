@@ -222,7 +222,7 @@ static int s3c24xx_pcm_hw_params(struct snd_pcm_substream *substream,
 
 	/* channel needs configuring for mem=>device, increment memory addr,
 	 * sync to pclk, half-word transfers to the IIS-FIFO. */
-#if !defined (CONFIG_CPU_S3C6400) && !defined (CONFIG_CPU_S3C6410)  && !defined(CONFIG_CPU_S5PC100)
+#if !defined (CONFIG_CPU_S3C6400) && !defined (CONFIG_CPU_S3C6410)  && !defined(CONFIG_CPU_S5PC100) && !defined (CONFIG_CPU_S5P6440)
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		s3c2410_dma_devconfig(prtd->params->channel,
 				S3C2410_DMASRC_MEM, S3C2410_DISRCC_INC |
