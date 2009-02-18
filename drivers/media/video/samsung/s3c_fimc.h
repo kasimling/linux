@@ -60,13 +60,6 @@
 #define info(args...)	do { printk(KERN_INFO S3C_FIMC_NAME ": " args); } while (0)
 #define err(args...)	do { printk(KERN_ERR  S3C_FIMC_NAME ": " args); } while (0)
 
-#if defined(CONFIG_VIDEO_FIMC_DEBUG)
-#define dprintk(fmt, args...) 		printk(KERN_DEBUG S3C_FIMC_NAME \
-						":%s: " fmt, __FUNCTION__ , ## args)
-#else
-#define dprintk(fmt, args...)
-#endif
-
 #define S3C_FIMC_FRAME_SKIP		0
 #define S3C_FIMC_FRAME_TAKE		1
 
@@ -515,7 +508,7 @@ struct s3c_fimc_control {
 	u32				flag;
 	struct mutex			lock;
 	wait_queue_head_t		waitq;
-	struct platform_device		*pdev;
+	struct device			*dev;
 	struct clk			*clock;	
 	void __iomem			*regs;
 	atomic_t			in_use;
@@ -601,7 +594,7 @@ struct s3c_fimc_config {
 extern const struct v4l2_ioctl_ops s3c_fimc_v4l2_ops;
 extern struct video_device s3c_fimc_video_device[];
 
-extern struct s3c_platform_fimc *to_fimc_plat(struct platform_device *pdev);
+extern struct s3c_platform_fimc *to_fimc_plat(struct device *dev);
 extern u8 s3c_fimc_i2c_read(struct i2c_client *client, u8 subaddr);
 extern int s3c_fimc_i2c_write(struct i2c_client *client, u8 subaddr, u8 val);
 extern void s3c_fimc_i2c_command(struct s3c_fimc_control *ctrl, u32 cmd, int arg);
