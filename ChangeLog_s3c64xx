@@ -583,3 +583,21 @@ v2.6.28-rc8-s3c64xx-r0d20: Ryu Euiyoul
 		A       sound/soc/s3c64xx/smdk6410_s5m8751.c
 		A       arch/arm/configs/smdk6410rf_defconfig
 
+v2.6.28-rc8-s3c64xx-r0d21: SungJun Bae
+	- Support wm8580 on VEGA-L FPGA (Draft)
+
+	Modified Files:
+		M	arch/arm/configs/smdk6440ramdisk_defconfig
+		M	arch/arm/mach-s5p6440/dma.c
+		M	arch/arm/mach-s5p6440/mach-smdk6440.c
+		M	arch/arm/plat-s3c/dma-pl080.c
+		M	sound/soc/s3c64xx/Kconfig
+		M	sound/soc/s3c64xx/Makefile
+		M	sound/soc/s3c64xx/s3c-i2s.h
+		M	sound/soc/s3c64xx/s3c-pcm.c
+		M	sound/soc/s3c64xx/s3c6410-i2s-v40.c
+
+	Added Files:
+		A	sound/soc/s3c64xx/s5p6440-i2s-v40.c
+		A	sound/soc/s3c64xx/smdk6440_wm8580.c
+

@@ -96,8 +96,7 @@ static int smdk6440_hifi_hw_params(struct snd_pcm_substream *substream,
 	case 48000:
 	case 96000:
 		/* K=9961, M=49, P=1, S=3 -- Fin=12, Fout=73.728; r=1536 */
-		writel(50332, S3C_EPLL_CON);
-		//writel(9961, S3C_EPLL_CON);
+		writel(9961, S3C_EPLL_CON);
 		writel((1<<31)|(49<<16)|(1<<8)|(3<<0) ,S3C_EPLL_CON);
 		break;
 	default:
@@ -112,7 +111,8 @@ static int smdk6440_hifi_hw_params(struct snd_pcm_substream *substream,
 	writel(readl(S3C_CLK_SRC0)|S3C_CLKSRC_MPLL_MOUT, S3C_CLK_SRC0);
 
 	/* AUDIO2 sel : FOUTepll */
-	writel((readl(S3C_CLK_SRC1)&~(0x7<<0))|(0<<0), S3C_CLK_SRC1);
+	//writel((readl(S3C_CLK_SRC1)&~(0x7<<0))|(0<<0), S3C_CLK_SRC1);
+	writel((readl(S3C_CLK_SRC1)&~(0x7<<0))|(3<<0), S3C_CLK_SRC1);
 
 	/* CLK_DIV2 setting */
 	//writel(0x0,S3C_CLK_DIV2);
