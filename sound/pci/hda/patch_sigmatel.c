@@ -69,6 +69,7 @@ enum {
 };
 
 enum {
+	STAC_92HD73XX_NO_JD, /* no jack-detection */
 	STAC_92HD73XX_REF,
 	STAC_DELL_M6_AMIC,
 	STAC_DELL_M6_DMIC,
@@ -88,6 +89,7 @@ enum {
 	STAC_DELL_M4_2,
 	STAC_DELL_M4_3,
 	STAC_HP_M4,
+	STAC_HP_DV5,
 	STAC_92HD71BXX_MODELS
 };
 
@@ -127,6 +129,7 @@ enum {
 };
 
 enum {
+	STAC_D965_REF_NO_JD, /* no jack-detection */
 	STAC_D965_REF,
 	STAC_D965_3ST,
 	STAC_D965_5ST,
@@ -857,6 +860,7 @@ static struct hda_verb stac92hd83xxx_core_init[] = {
 
 	/* power state controls amps */
 	{ 0x01, AC_VERB_SET_EAPD, 1 << 2},
+	{}
 };
 
 static struct hda_verb stac92hd71bxx_core_init[] = {
@@ -868,6 +872,7 @@ static struct hda_verb stac92hd71bxx_core_init[] = {
 	{ 0x0a, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{ 0x0d, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
 	{ 0x0f, AC_VERB_SET_AMP_GAIN_MUTE, AMP_IN_UNMUTE(0)},
+	{}
 };
 
 #define HD_DISABLE_PORTF 2
@@ -1611,6 +1616,7 @@ static unsigned int *stac92hd73xx_brd_tbl[STAC_92HD73XX_MODELS] = {
 };
 
 static const char *stac92hd73xx_models[STAC_92HD73XX_MODELS] = {
+	[STAC_92HD73XX_NO_JD] = "no-jd",
 	[STAC_92HD73XX_REF] = "ref",
 	[STAC_DELL_M6_AMIC] = "dell-m6-amic",
 	[STAC_DELL_M6_DMIC] = "dell-m6-dmic",
@@ -1640,6 +1646,8 @@ static struct snd_pci_quirk stac92hd73xx_cfg_tbl[] = {
 				"unknown Dell", STAC_DELL_M6_DMIC),
 	SND_PCI_QUIRK(PCI_VENDOR_ID_DELL, 0x029f,
 				"Dell Studio 1537", STAC_DELL_M6_DMIC),
+	SND_PCI_QUIRK(PCI_VENDOR_ID_DELL, 0x02a0,
+				"Dell Studio 17", STAC_DELL_M6_DMIC),
 	{} /* terminator */
 };
 
@@ -1662,6 +1670,7 @@ static struct snd_pci_quirk stac92hd83xxx_cfg_tbl[] = {
 	/* SigmaTel reference board */
 	SND_PCI_QUIRK(PCI_VENDOR_ID_INTEL, 0x2668,
 		      "DFI LanParty", STAC_92HD71BXX_REF),
+	{} /* terminator */
 };
 
 static unsigned int ref92hd71bxx_pin_configs[11] = {
@@ -1694,6 +1703,7 @@ static unsigned int *stac92hd71bxx_brd_tbl[STAC_92HD71BXX_MODELS] = {
 	[STAC_DELL_M4_2]	= dell_m4_2_pin_configs,
 	[STAC_DELL_M4_3]	= dell_m4_3_pin_configs,
 	[STAC_HP_M4]		= NULL,
+	[STAC_HP_DV5]		= NULL,
 };
 
 static const char *stac92hd71bxx_models[STAC_92HD71BXX_MODELS] = {
@@ -1702,6 +1712,7 @@ static const char *stac92hd71bxx_models[STAC_92HD71BXX_MODELS] = {
 	[STAC_DELL_M4_2] = "dell-m4-2",
 	[STAC_DELL_M4_3] = "dell-m4-3",
 	[STAC_HP_M4] = "hp-m4",
+	[STAC_HP_DV5] = "hp-dv5",
 };
 
 static struct snd_pci_quirk stac92hd71bxx_cfg_tbl[] = {
@@ -1712,6 +1723,10 @@ static struct snd_pci_quirk stac92hd71bxx_cfg_tbl[] = {
 		      "HP dv5", STAC_HP_M4),
 	SND_PCI_QUIRK(PCI_VENDOR_ID_HP, 0x30f4,
 		      "HP dv7", STAC_HP_M4),
+	SND_PCI_QUIRK(PCI_VENDOR_ID_HP, 0x30fc,
+		      "HP dv7", STAC_HP_M4),
+	SND_PCI_QUIRK(PCI_VENDOR_ID_HP, 0x3603,
+		      "HP dv5", STAC_HP_DV5),
 	SND_PCI_QUIRK(PCI_VENDOR_ID_HP, 0x361a,
 				"unknown HP", STAC_HP_M4),
 	SND_PCI_QUIRK(PCI_VENDOR_ID_DELL, 0x0233,
@@ -2027,6 +2042,7 @@ static unsigned int dell_3st_pin_configs[14] = {
 };
 
 static unsigned int *stac927x_brd_tbl[STAC_927X_MODELS] = {
+	[STAC_D965_REF_NO_JD] = ref927x_pin_configs,
 	[STAC_D965_REF]  = ref927x_pin_configs,
 	[STAC_D965_3ST]  = d965_3st_pin_configs,
 	[STAC_D965_5ST]  = d965_5st_pin_configs,
@@ -2035,6 +2051,7 @@ static unsigned int *stac927x_brd_tbl[STAC_927X_MODELS] = {
 };
 
 static const char *stac927x_models[STAC_927X_MODELS] = {
+	[STAC_D965_REF_NO_JD]	= "ref-no-jd",
 	[STAC_D965_REF]		= "ref",
 	[STAC_D965_3ST]		= "3stack",
 	[STAC_D965_5ST]		= "5stack",
@@ -2411,6 +2428,8 @@ static int stac92xx_build_pcms(struct hda_codec *codec)
 
 	info->name = "STAC92xx Analog";
 	info->stream[SNDRV_PCM_STREAM_PLAYBACK] = stac92xx_pcm_analog_playback;
+	info->stream[SNDRV_PCM_STREAM_PLAYBACK].nid =
+		spec->multiout.dac_nids[0];
 	info->stream[SNDRV_PCM_STREAM_CAPTURE] = stac92xx_pcm_analog_capture;
 	info->stream[SNDRV_PCM_STREAM_CAPTURE].nid = spec->adc_nids[0];
 	info->stream[SNDRV_PCM_STREAM_CAPTURE].substreams = spec->num_adcs;
@@ -2896,7 +2915,7 @@ static int stac92xx_auto_create_multi_out_ctls(struct hda_codec *codec,
 	}
 
 	if ((spec->multiout.num_dacs - cfg->line_outs) > 0 &&
-			cfg->hp_outs && !spec->multiout.hp_nid)
+	    cfg->hp_outs == 1 && !spec->multiout.hp_nid)
 		spec->multiout.hp_nid = nid;
 
 	if (cfg->hp_outs > 1 && cfg->line_out_type == AUTO_PIN_LINE_OUT) {
@@ -3968,8 +3987,19 @@ static void stac92xx_hp_detect(struct hda_codec *codec, unsigned int res)
 			continue;
 		if (presence)
 			stac92xx_set_pinctl(codec, cfg->hp_pins[i], val);
+#if 0 /* FIXME */
+/* Resetting the pinctl like below may lead to (a sort of) regressions
+ * on some devices since they use the HP pin actually for line/speaker
+ * outs although the default pin config shows a different pin (that is
+ * wrong and useless).
+ *
+ * So, it's basically a problem of default pin configs, likely a BIOS issue.
+ * But, disabling the code below just works around it, and I'm too tired of
+ * bug reports with such devices...
+ */
 		else
 			stac92xx_reset_pinctl(codec, cfg->hp_pins[i], val);
+#endif /* FIXME */
 	}
 } 
 
@@ -4254,14 +4284,17 @@ again:
 
 	switch (spec->multiout.num_dacs) {
 	case 0x3: /* 6 Channel */
+		spec->multiout.hp_nid = 0x17;
 		spec->mixer = stac92hd73xx_6ch_mixer;
 		spec->init = stac92hd73xx_6ch_core_init;
 		break;
 	case 0x4: /* 8 Channel */
+		spec->multiout.hp_nid = 0x18;
 		spec->mixer = stac92hd73xx_8ch_mixer;
 		spec->init = stac92hd73xx_8ch_core_init;
 		break;
 	case 0x5: /* 10 Channel */
+		spec->multiout.hp_nid = 0x19;
 		spec->mixer = stac92hd73xx_10ch_mixer;
 		spec->init = stac92hd73xx_10ch_core_init;
 	};
@@ -4297,6 +4330,7 @@ again:
 		spec->amp_nids = &stac92hd73xx_amp_nids[DELL_M6_AMP];
 		spec->eapd_switch = 0;
 		spec->num_amps = 1;
+		spec->multiout.hp_nid = 0; /* dual HPs */
 
 		if (!spec->init)
 			spec->init = dell_m6_core_init;
@@ -4350,6 +4384,9 @@ again:
 		stac92xx_free(codec);
 		return err;
 	}
+
+	if (spec->board_config == STAC_92HD73XX_NO_JD)
+		spec->hp_detect = 0;
 
 	codec->patch_ops = stac92xx_patch_ops;
 
@@ -4898,6 +4935,10 @@ static int patch_stac927x(struct hda_codec *codec)
 	 * in hda_intel.c).
 	 */
 	codec->bus->needs_damn_long_delay = 1;
+
+	/* no jack detecion for ref-no-jd model */
+	if (spec->board_config == STAC_D965_REF_NO_JD)
+		spec->hp_detect = 0;
 
 	return 0;
 }
