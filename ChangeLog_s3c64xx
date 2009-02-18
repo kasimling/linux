@@ -601,3 +601,7 @@ v2.6.28-rc8-s3c64xx-r0d21: SungJun Bae
 		A	sound/soc/s3c64xx/s5p6440-i2s-v40.c
 		A	sound/soc/s3c64xx/smdk6440_wm8580.c
 
+v2.6.28.6-s3c64xx: Kyoungil Kim
+
+v2.6.28.6-s3c64xx-r0d0: Kyoungil Kim
+
