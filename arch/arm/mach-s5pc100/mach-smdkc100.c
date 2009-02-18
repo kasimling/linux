@@ -78,8 +78,6 @@
 extern struct sys_timer s5pc1xx_timer;
 extern void s5pc1xx_reserve_bootmem(void);
 
-struct meminfo *s3c_mi;
-
 static struct s3c2410_uartcfg smdkc100_uartcfgs[] __initdata = {
 	[0] = {
 		.hwport	     = 0,
@@ -154,6 +152,7 @@ static void __init smdkc100_map_io(void)
 	s5pc1xx_init_io(smdkc100_iodesc, ARRAY_SIZE(smdkc100_iodesc));
 	s3c24xx_init_clocks(0);
 	s3c24xx_init_uarts(smdkc100_uartcfgs, ARRAY_SIZE(smdkc100_uartcfgs));
+	s5pc1xx_reserve_bootmem();
 }
 
 static void __init smdkc100_smc911x_set(void)
@@ -171,12 +170,6 @@ static void __init smdkc100_smc911x_set(void)
 	__raw_writel(tmp, S5PC1XX_SROM_BW);
 
 	__raw_writel((0x0<<28)|(0x4<<24)|(0xd<<16)|(0x1<<12)|(0x4<<8)|(0x6<<4)|(0x0<<0), S5PC1XX_SROM_BC3);
-}
-
-static void __init smdkc100_fixup(struct machine_desc *desc, struct tag *tags,
-	      char **cmdline, struct meminfo *mi)
-{
-	s3c_mi = mi;
 }
 
 static void __init smdkc100_machine_init(void)
@@ -204,7 +197,6 @@ static void __init smdkc100_machine_init(void)
 	s3c_fimc_reset_camera();
 #endif
 
-	s5pc1xx_reserve_bootmem();
 	platform_add_devices(smdkc100_devices, ARRAY_SIZE(smdkc100_devices));
 
 #if defined(CONFIG_PM)
@@ -220,7 +212,6 @@ MACHINE_START(SMDKC100, "SMDKC100")
 
 	.init_irq	= s5pc100_init_irq,
 	.map_io		= smdkc100_map_io,
-	.fixup		= smdkc100_fixup,
 	.init_machine	= smdkc100_machine_init,
 	.timer		= &s5pc1xx_timer,
 MACHINE_END

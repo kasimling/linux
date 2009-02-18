@@ -17,8 +17,6 @@
 #include <asm/setup.h>
 #include <mach/memory.h>
 
-extern struct meminfo *s3c_mi;
-
 /* FIXME: temporary implementation to avoid compile error */
 int dma_needs_bounce(struct device *dev, dma_addr_t addr, size_t size)
 {
@@ -27,25 +25,28 @@ int dma_needs_bounce(struct device *dev, dma_addr_t addr, size_t size)
 
 void s5pc1xx_reserve_bootmem(void)
 {
-	int dma_size = SZ_8M + SZ_4M + SZ_2M;
-	int reserve_size = 0;
-	int bootmem_size;
+	struct bootmem_data *bdata;
+	unsigned long sdram_start, sdram_size;
+	unsigned long reserved;
 
+	bdata = NODE_DATA(0)->bdata;
+	sdram_start = bdata->node_min_pfn << PAGE_SHIFT;
+	sdram_size = (bdata->node_low_pfn << PAGE_SHIFT) - sdram_start;
+	reserved = 0;
+
+	sdram_start &= PAGE_MASK;
+	
 	/* add here for devices' bootmem size */
 #ifdef CONFIG_VIDEO_FIMC_STATIC_MEMORY
-	reserve_size += CONFIG_VIDEO_FIMC_STATIC_MEMORY_SIZE * SZ_1K;
+	reserved += CONFIG_VIDEO_FIMC_STATIC_MEMSIZE * SZ_1K;
 #endif
 
-	/* bootmem_size means non-reserved memory size */
-	if (reserve_size > 0) {
-		bootmem_size = s3c_mi->bank[0].size - (dma_size + reserve_size);
-
-		reserve_bootmem(PHYS_OFFSET, \
-				PAGE_ALIGN(bootmem_size), BOOTMEM_DEFAULT);
+	if (reserved > 0) {
+		reserve_bootmem(sdram_start, \
+				PAGE_ALIGN(sdram_size - reserved), BOOTMEM_DEFAULT);
 
 		printk(KERN_INFO \
-			"S5PC1XX: %dMB system memory reserved at 0x%08x\n", \
-			reserve_size / SZ_1M, \
-			(unsigned int) PHYS_OFFSET + bootmem_size);
+			"s3c64xx: %lu bytes SDRAM reserved at 0x%08x\n", reserved, \
+			(unsigned int) (sdram_start + sdram_size - reserved));
 	}
 }
