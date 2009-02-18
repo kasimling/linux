@@ -47,6 +47,7 @@ static struct s3c_platform_fimc default_fimc1_data __initdata = {
 	.clockrate	= 133000000,
 	.line_length	= 1280,
 	.nr_frames	= 4,
+	.shared_io	= 0,
 };
 
 void __init s3c_fimc1_set_platdata(struct s3c_platform_fimc *pd)

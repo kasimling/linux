@@ -21,6 +21,7 @@ struct s3c_platform_fimc {
 	u32		clockrate;
 	int		line_length;
 	int		nr_frames;
+	int		shared_io;
 
 	void		(*cfg_gpio)(struct platform_device *dev);
 };
