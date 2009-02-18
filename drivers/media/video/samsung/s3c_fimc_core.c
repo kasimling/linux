@@ -76,6 +76,7 @@ void s3c_fimc_i2c_command(struct s3c_fimc_control *ctrl, u32 cmd, int arg)
 void s3c_fimc_register_camera(struct s3c_fimc_camera *cam)
 {
 	s3c_fimc.camera[cam->id] = cam;
+	s3c_fimc_reset_camera();
 }
 
 void s3c_fimc_unregister_camera(struct s3c_fimc_camera *cam)
@@ -204,6 +205,7 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 	if (request_irq(ctrl->irq, s3c_fimc_irq, IRQF_DISABLED, ctrl->name, ctrl))
 		err("request_irq failed\n");
 
+	s3c_fimc_reset(ctrl);
 	s3c_fimc_set_active_camera(ctrl, 0);
 
 	return ctrl;
