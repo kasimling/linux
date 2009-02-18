@@ -6,3 +6,6 @@ obj-$(CONFIG_S5K4BA)		+= s5k4ba.o
 
 EXTRA_CFLAGS += -Idrivers/media/video
 
+ifeq ($(CONFIG_VIDEO_FIMC_DEBUG),y)
+EXTRA_CFLAGS += -DDEBUG
+endif
