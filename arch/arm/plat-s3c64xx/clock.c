@@ -159,7 +159,8 @@ static int s3c64xx_setrate_sclk_cam(struct clk *clk, unsigned long rate)
 	cfg |= ((cam_div - 1) << shift);
 	__raw_writel(cfg, S3C_CLK_DIV0);
 
-	printk("parent clock for camera = %ld, divisor = %d\n", src_clk, cam_div);
+	printk("parent clock for camera: %ld.%03ld MHz, divisor: %d\n", \
+		print_mhz(src_clk), cam_div);
 
 	return 0;
 }
