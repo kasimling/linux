@@ -145,30 +145,21 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 
 static int s3c64xx_setrate_sclk_cam(struct clk *clk, unsigned long rate)
 {
-	unsigned int camclk_div, val;
+	u32 shift = 20;
+	u32 cam_div, cfg;
 	unsigned long src_clk = clk_get_rate(clk->parent);
 
-	if (rate == 4800000) {
-		printk(KERN_INFO "external camera clock is set to 48MHz\n");
-	}
-	else if (rate > 48000000) {
-		printk(KERN_ERR "Invalid camera clock\n");
-	}
+	cam_div = src_clk / rate;
 
-	camclk_div = src_clk / rate;
+	if (cam_div > 32)
+		cam_div = 32;
 
-	val = readl(S3C_CLK_DIV0);
-	val &= ~(0xf << 20);
-	writel(val, S3C_CLK_DIV0);
+	cfg = __raw_readl(S3C_CLK_DIV0);
+	cfg &= ~(0xf << shift);
+	cfg |= ((cam_div - 1) << shift);
+	__raw_writel(cfg, S3C_CLK_DIV0);
 
-	if (camclk_div > 0x10)
-		camclk_div = 0x10;
-
-	printk("parent clock for Camera = %ld, CAMDIV = %d\n", src_clk, camclk_div);
-
-	val |= ((camclk_div - 1) << 20);
-	writel(val, S3C_CLK_DIV0);
-	val = readl(S3C_CLK_DIV0);
+	printk("parent clock for camera = %ld, divisor = %d\n", src_clk, cam_div);
 
 	return 0;
 }

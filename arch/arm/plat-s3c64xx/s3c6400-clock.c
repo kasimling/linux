@@ -565,7 +565,7 @@ void __init_or_cpufreq s3c6400_setup_clocks(void)
 	unsigned long xtal;
 	unsigned long fclk;
 	unsigned long hclk;
-	unsigned long hclk2;
+	unsigned long hclkx2;
 	unsigned long pclk;
 	unsigned long epll;
 	unsigned long apll;
@@ -597,22 +597,23 @@ void __init_or_cpufreq s3c6400_setup_clocks(void)
 
 	if(__raw_readl(S3C_OTHERS) & S3C_OTHERS_SYNCMUXSEL_SYNC) {
 		/* Synchronous mode */
-		hclk2 = apll / GET_DIV(clkdiv0, S3C6400_CLKDIV0_HCLK2);
+		hclkx2 = apll / GET_DIV(clkdiv0, S3C6400_CLKDIV0_HCLK2);
 	} else {
 		/* Asynchronous mode */
-		hclk2 = mpll / GET_DIV(clkdiv0, S3C6400_CLKDIV0_HCLK2);
+		hclkx2 = mpll / GET_DIV(clkdiv0, S3C6400_CLKDIV0_HCLK2);
 	}
 
-	hclk = hclk2 / GET_DIV(clkdiv0, S3C6400_CLKDIV0_HCLK);
-	pclk = hclk2 / GET_DIV(clkdiv0, S3C6400_CLKDIV0_PCLK);
+	hclk = hclkx2 / GET_DIV(clkdiv0, S3C6400_CLKDIV0_HCLK);
+	pclk = hclkx2 / GET_DIV(clkdiv0, S3C6400_CLKDIV0_PCLK);
 
-	printk(KERN_INFO "S3C64XX: HCLK2=%ld, HCLK=%ld, PCLK=%ld\n",
-	       hclk2, hclk, pclk);
+	printk(KERN_INFO "S3C64XX: HCLKx2=%ld, HCLK=%ld, PCLK=%ld\n",
+	       hclkx2, hclk, pclk);
 
 	clk_fout_mpll.rate = mpll;
 	clk_fout_epll.rate = epll;
 	clk_fout_apll.rate = apll;
 
+	clk_hx2.rate = hclkx2;
 	clk_h.rate = hclk;
 	clk_p.rate = pclk;
 	clk_f.rate = fclk;
