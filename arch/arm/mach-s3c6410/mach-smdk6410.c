@@ -79,6 +79,7 @@
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
 
 extern struct sys_timer s3c_timer;
+extern void s3c64xx_reserve_bootmem(void);
 
 static struct s3c2410_uartcfg smdk6410_uartcfgs[] __initdata = {
 	[0] = {
@@ -160,6 +161,7 @@ static void __init smdk6410_map_io(void)
 	s3c64xx_init_io(smdk6410_iodesc, ARRAY_SIZE(smdk6410_iodesc));
 	s3c24xx_init_clocks(12000000);
 	s3c24xx_init_uarts(smdk6410_uartcfgs, ARRAY_SIZE(smdk6410_uartcfgs));
+	s3c64xx_reserve_bootmem();
 }
 
 static void __init smdk6410_smc911x_set(void)
