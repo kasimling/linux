@@ -13,6 +13,7 @@
 #include <linux/slab.h>
 #include <linux/bootmem.h>
 #include <linux/string.h>
+#include <linux/platform_device.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
 
@@ -484,13 +485,13 @@ int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl)
 
 	switch (ctrl->flag & S3C_FIMC_IRQ_MASK) {
 	case S3C_FIMC_FLAG_IRQ_NORMAL:
-		dprintk("irq normal\n");
+		dev_dbg(ctrl->dev, "irq normal\n");
 		FSET_RUNNING(ctrl);
 		ret = S3C_FIMC_FRAME_SKIP;
 		break;
 
 	case S3C_FIMC_FLAG_IRQ_X:
-		dprintk("irq x\n");
+		dev_dbg(ctrl->dev, "irq x\n");
 		s3c_fimc_enable_lastirq(ctrl);
 		s3c_fimc_disable_lastirq(ctrl);
 		FSET_HANDLE_IRQ(ctrl);
@@ -499,20 +500,20 @@ int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl)
 		break;
 
 	case S3C_FIMC_FLAG_IRQ_Y:
-		dprintk("irq y\n");
+		dev_dbg(ctrl->dev, "irq y\n");
 		FSET_IRQ_LAST(ctrl);
 		ret = S3C_FIMC_FRAME_SKIP;
 		break;
 
 	case S3C_FIMC_FLAG_IRQ_LAST:
-		dprintk("irq last\n");
+		dev_dbg(ctrl->dev, "irq last\n");
 		FSET_HANDLE_IRQ(ctrl);
 		FSET_IRQ_X(ctrl);
 		ret = S3C_FIMC_FRAME_TAKE;
 		break;
 
 	default:
-		dprintk("unknown irq\n");
+		dev_dbg(ctrl->dev, "unknown irq\n");
 		ret = S3C_FIMC_FRAME_SKIP;
 		break;
 	}
@@ -558,7 +559,7 @@ static int s3c_fimc_get_scaler_factor(u32 src, u32 tar, u32 *ratio, u32 *shift)
 int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_scaler *sc = &ctrl->scaler;
-	struct s3c_platform_fimc *pdata = to_fimc_plat(ctrl->pdev);
+	struct s3c_platform_fimc *pdata = to_fimc_plat(ctrl->dev);
 	struct s3c_fimc_window_offset *w_ofs = &ctrl->in_cam->offset;
 	struct s3c_fimc_dma_offset *d_ofs = &ctrl->in_frame.offset;
 	int ret, tx, ty, sx, sy;

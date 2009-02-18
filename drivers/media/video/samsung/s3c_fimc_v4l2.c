@@ -589,8 +589,7 @@ static int s3c_fimc_v4l2_dqbuf(struct file *filp, void *fh,
 
 	b->index = frame->cfn % frame->nr_frames;
 
-	dma_sync_single_for_cpu(platform_get_drvdata(ctrl->pdev), \
-				frame->addr[b->index].phys_y, \
+	dma_sync_single_for_cpu(ctrl->dev, frame->addr[b->index].phys_y, \
 				frame->buf_size, DMA_FROM_DEVICE);
 
 	return 0;
