@@ -109,9 +109,6 @@ void s3c_fimc_init_camera(struct s3c_fimc_control *ctrl)
 	struct s3c_fimc_camera *cam = ctrl->in_cam;
 
 	if (cam && !cam->initialized) {
-//		clk_disable(s3c_fimc.cam_clock);
-//		clk_set_rate(s3c_fimc.cam_clock, cam->clockrate);
-//		clk_enable(s3c_fimc.cam_clock);
 		s3c_fimc_i2c_command(ctrl, I2C_CAM_INIT, 0);
 		s3c_fimc_change_resolution(ctrl, CAM_RES_DEFAULT);
 		cam->initialized = 1;
