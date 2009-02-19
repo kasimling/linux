@@ -996,34 +996,47 @@ void s3c_fimc_set_output_path(struct s3c_fimc_control *ctrl)
 		s3c_fimc_set_output_path_co(ctrl);
 }
 
-static void s3c_fimc_set_input_address_pr(struct s3c_fimc_control *ctrl)
-{
-	struct s3c_fimc_frame_addr *addr = &ctrl->in_frame.addr;
-
-	writel(addr->phys_y, ctrl->regs + S3C_MSPRY0SA);
-	writel(addr->phys_cb, ctrl->regs + S3C_MSPRCB0SA);
-	writel(addr->phys_cr, ctrl->regs + S3C_MSPRCR0SA);
-
-	/* FIXME: end address needed? */
-}
-
-static void s3c_fimc_set_input_address_co(struct s3c_fimc_control *ctrl)
-{
-	struct s3c_fimc_frame_addr *addr = &ctrl->in_frame.addr;
-
-	writel(addr->phys_y, ctrl->regs + S3C_MSCOY0SA);
-	writel(addr->phys_cb, ctrl->regs + S3C_MSCOCB0SA);
-	writel(addr->phys_cr, ctrl->regs + S3C_MSCOCR0SA);
-
-	/* FIXME: end address needed? */
-}
-
 void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl)
 {
-	if (ctrl->id == 1)
-		s3c_fimc_set_input_address_pr(ctrl);
-	else
-		s3c_fimc_set_input_address_co(ctrl);
+	struct s3c_fimc_in_frame *frame = &ctrl->in_frame;
+	struct s3c_fimc_frame_addr *addr = &ctrl->in_frame.addr;
+	u32 width = frame->width;
+	u32 height = frame->height;
+	dma_addr_t start_y = addr->phys_y, start_cb = 0, start_cr = 0;
+	dma_addr_t end_y = 0, end_cb = 0, end_cr = 0;
+
+	if (frame->planes == 1)
+		end_y = start_y + frame->buf_size;
+	else {
+		start_cb = addr->phys_cb;
+		start_cr = addr->phys_cr;
+
+		if (frame->format == FORMAT_YCBCR420) {
+			end_y = start_y + (width * height);
+			end_cb = start_cb + (width * height / 4);
+			end_cr = start_cr + (width * height / 4);
+		} else {
+			end_y = start_y + (width * height);
+			end_cb = start_cb + (width * height / 2);
+			end_cr = start_cr + (width * height / 2);
+		}
+	}
+
+	if (ctrl->id == 1) {
+		writel(start_y, ctrl->regs + S3C_MSPRY0SA);
+		writel(start_cb, ctrl->regs + S3C_MSPRCB0SA);
+		writel(start_cr, ctrl->regs + S3C_MSPRCR0SA);
+		writel(end_y, ctrl->regs + S3C_MSPRY0END);
+		writel(end_cb, ctrl->regs + S3C_MSPRCB0END);
+		writel(end_cr, ctrl->regs + S3C_MSPRCR0END);
+	} else {
+		writel(start_y, ctrl->regs + S3C_MSCOY0SA);
+		writel(start_cb, ctrl->regs + S3C_MSCOCB0SA);
+		writel(start_cr, ctrl->regs + S3C_MSCOCR0SA);
+		writel(end_y, ctrl->regs + S3C_MSCOY0END);
+		writel(end_cb, ctrl->regs + S3C_MSCOCB0END);
+		writel(end_cr, ctrl->regs + S3C_MSCOCR0END);
+	}
 }
 
 static void s3c_fimc_set_output_address_pr(struct s3c_fimc_control *ctrl)
