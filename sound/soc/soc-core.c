@@ -430,6 +430,7 @@ static int soc_pcm_prepare(struct snd_pcm_substream *substream)
 
 	/* we only want to start a DAPM playback stream if we are not waiting
 	 * on an existing one stopping */
+#if !defined(CONFIG_SND_SMDKC100_WM9713)
 	if (codec_dai->pop_wait) {
 		/* we are waiting for the delayed work to start */
 		if (substream->stream == SNDRV_PCM_STREAM_CAPTURE)
@@ -474,6 +475,7 @@ static int soc_pcm_prepare(struct snd_pcm_substream *substream)
 			snd_soc_dai_digital_mute(codec_dai, 0);
 		}
 	}
+#endif
 
 out:
 	mutex_unlock(&pcm_mutex);
