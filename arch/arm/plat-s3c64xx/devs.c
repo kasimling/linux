@@ -168,6 +168,26 @@ struct platform_device s3c_device_lcd = {
 	}
 };
 
+/* VPP controller */
+static struct resource s3c_vpp_resource[] = {                                                                         
+        [0] = { 
+            .start = S3C6400_PA_VPP,
+            .end   = S3C6400_PA_VPP + S3C_SZ_VPP - 1, 
+            .flags = IORESOURCE_MEM,
+        },
+        [1] = { 
+               .start = IRQ_POST0, 
+               .end   = IRQ_POST0,
+	      .flags = IORESOURCE_IRQ,             
+	 }                                                                    };                                                                                                                    
+
+struct platform_device s3c_device_vpp = {  
+        .name             = "s3c-vpp",
+	.id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_vpp_resource),                             .resource         = s3c_vpp_resource,                                                                         
+};
+EXPORT_SYMBOL(s3c_device_vpp);
+
 /* ADC */
 static struct resource s3c_adc_resource[] = {
 	[0] = {
