@@ -236,7 +236,7 @@ static struct s3c24xx_pcm_dma_params s3c6400_ac97_pcm_stereo_out = {
 	.dma_size	= 4,
 };
 
-#ifdef SOUND_S5PC100_WM9713_INPUT_STREAM_MIC
+#ifdef CONFIG_SOUND_S5PC100_WM9713_INPUT_STREAM_MIC
 static struct s3c2410_dma_client s3c6400_dma_client_micin = {
 	.name = "AC97 Mic Mono in"
 };
@@ -317,7 +317,7 @@ static int s3c6400_ac97_hw_params(struct snd_pcm_substream *substream,
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
 		cpu_dai->dma_data = &s3c6400_ac97_pcm_stereo_out;
 	else
-#ifdef SOUND_S5PC100_WM9713_INPUT_STREAM_MIC
+#ifdef CONFIG_SOUND_S5PC100_WM9713_INPUT_STREAM_MIC
 		cpu_dai->dma_data = &s3c6400_ac97_mic_mono_in;
 #else /* Input Stream is LINE-IN */
 		cpu_dai->dma_data = &s3c6400_ac97_pcm_stereo_in;
@@ -342,7 +342,7 @@ static int s3c6400_ac97_hifi_prepare(struct snd_pcm_substream *substream)
         else
         {
                 s3c6400_ac97_write(0, 0x12, 0x0f0f);
-#ifdef SOUND_S5PC100_WM9713_INPUT_STREAM_MIC
+#ifdef CONFIG_SOUND_S5PC100_WM9713_INPUT_STREAM_MIC
                 s3c6400_ac97_write(0, 0x5c, 0x2);
                 s3c6400_ac97_write(0, 0x10, 0x68);
                 s3c6400_ac97_write(0, 0x14, 0xfe00);
@@ -398,13 +398,13 @@ struct snd_soc_dai s3c6400_ac97_dai[] = {
 	.remove = s3c6400_ac97_remove,
 	.playback = {
 		.stream_name = "AC97 Playback",
-		.channels_min = 1,
+		.channels_min = 2,
 		.channels_max = 2,
 		.rates = s3c6400_AC97_RATES,
 		.formats = SNDRV_PCM_FMTBIT_S16_LE,},
 	.capture = {
 		.stream_name = "AC97 Capture",
-		.channels_min = 1,
+		.channels_min = 2,
 		.channels_max = 2,
 		.rates = s3c6400_AC97_RATES,
 		.formats = SNDRV_PCM_FMTBIT_S16_LE,},
