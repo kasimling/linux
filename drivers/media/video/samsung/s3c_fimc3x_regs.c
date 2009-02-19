@@ -26,7 +26,7 @@ void s3c_fimc_clear_irq(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = readl(ctrl->regs + S3C_CIGCTRL);
 
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		cfg |= S3C_CIGCTRL_IRQ_CLR_P;
 	else
 		cfg |= S3C_CIGCTRL_IRQ_CLR_C;
@@ -80,7 +80,7 @@ static int s3c_fimc_check_fifo_pr(struct s3c_fimc_control *ctrl)
 
 int s3c_fimc_check_fifo(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		return s3c_fimc_check_fifo_pr(ctrl);
 	else
 		return s3c_fimc_check_fifo_co(ctrl);
@@ -253,7 +253,12 @@ static void s3c_fimc_set_rot90(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = 0;
 
-	if (IS_PREVIEW(ctrl)) {
+	if (ctrl->id == 1) {
+		cfg = readl(ctrl->regs + S3C_CIPRCTRL);
+		cfg &= ~S3C_CIPRCTRL_BURST_MASK;
+		cfg |= S3C_CIPRCTRL_YBURST1(4) | S3C_CIPRCTRL_YBURST2(4);
+		writel(cfg, ctrl->regs + S3C_CIPRCTRL);
+
 		cfg = readl(ctrl->regs + S3C_CIPRTRGFMT);
 		cfg |= S3C_CIPRTRGFMT_ROT90_CLOCKWISE;
 		writel(cfg, ctrl->regs + S3C_CIPRTRGFMT);
@@ -335,7 +340,7 @@ static void s3c_fimc_set_target_format_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_target_format(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_set_target_format_pr(ctrl);
 	else
 		s3c_fimc_set_target_format_co(ctrl);
@@ -421,10 +426,15 @@ static void s3c_fimc_set_output_dma_pr(struct s3c_fimc_control *ctrl)
 	cfg &= ~(S3C_CIPRCTRL_BURST_MASK | S3C_CIPRCTRL_ORDER422_MASK);
 	cfg |= frame->order_1p;
 
-	if (frame->format == FORMAT_RGB888)
-		s3c_fimc_get_burst(frame->width * 4, &yburst_m, &yburst_r);
-	else
-		s3c_fimc_get_burst(frame->width * 2, &yburst_m, &yburst_r);
+	if (ctrl->rot90) {
+		yburst_m = 4;
+		yburst_r = 4;
+	} else {
+		if (frame->format == FORMAT_RGB888)
+			s3c_fimc_get_burst(frame->width * 4, &yburst_m, &yburst_r);
+		else
+			s3c_fimc_get_burst(frame->width * 2, &yburst_m, &yburst_r);
+	}
 
 	cfg |= (S3C_CIPRCTRL_YBURST1(yburst_m) | S3C_CIPRCTRL_YBURST2(yburst_r));
 
@@ -459,7 +469,7 @@ static void s3c_fimc_set_output_dma_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_output_dma(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_set_output_dma_pr(ctrl);
 	else
 		s3c_fimc_set_output_dma_co(ctrl);
@@ -483,7 +493,7 @@ static void s3c_fimc_enable_lastirq_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_enable_lastirq(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_enable_lastirq_pr(ctrl);
 	else
 		s3c_fimc_enable_lastirq_co(ctrl);
@@ -507,7 +517,7 @@ static void s3c_fimc_disable_lastirq_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_disable_lastirq(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_disable_lastirq_pr(ctrl);
 	else
 		s3c_fimc_disable_lastirq_co(ctrl);
@@ -555,7 +565,7 @@ static void s3c_fimc_set_prescaler_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_prescaler(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_set_prescaler_pr(ctrl);
 	else
 		s3c_fimc_set_prescaler_co(ctrl);
@@ -653,7 +663,7 @@ static void s3c_fimc_set_scaler_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_scaler(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_set_scaler_pr(ctrl);
 	else
 		s3c_fimc_set_scaler_co(ctrl);
@@ -683,7 +693,7 @@ static void s3c_fimc_start_scaler_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_start_scaler(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_start_scaler_pr(ctrl);
 	else
 		s3c_fimc_start_scaler_co(ctrl);
@@ -713,7 +723,7 @@ static void s3c_fimc_stop_scaler_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_stop_scaler(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_stop_scaler_pr(ctrl);
 	else
 		s3c_fimc_stop_scaler_co(ctrl);
@@ -723,7 +733,7 @@ void s3c_fimc_enable_capture(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = readl(ctrl->regs + S3C_CIIMGCPT);
 
-	if (IS_PREVIEW(ctrl)) {
+	if (ctrl->id == 1) {
 		cfg &= ~S3C_CIIMGCPT_CPT_FREN_ENABLE_PR;
 		cfg |= (S3C_CIIMGCPT_IMGCPTEN | S3C_CIIMGCPT_IMGCPTEN_PRSC);
 	} else {
@@ -740,7 +750,7 @@ void s3c_fimc_disable_capture(struct s3c_fimc_control *ctrl)
 
 	cfg &= ~S3C_CIIMGCPT_IMGCPTEN;
 
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		cfg &= ~S3C_CIIMGCPT_IMGCPTEN_PRSC;
 	else
 		cfg &= ~S3C_CIIMGCPT_IMGCPTEN_COSC;
@@ -753,7 +763,7 @@ void s3c_fimc_set_effect(struct s3c_fimc_control *ctrl)
 	struct s3c_fimc_effect *effect = &ctrl->out_frame.effect;
 	u32 cfg = S3C_CIIMGEFF_IE_SC_AFTER;
 
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		cfg |= S3C_CIIMGEFF_IE_ENABLE_PR;
 	else
 		cfg |= S3C_CIIMGEFF_IE_ENABLE_CO;
@@ -864,7 +874,7 @@ static void s3c_fimc_set_input_dma_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_input_dma(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_set_input_dma_pr(ctrl);
 	else
 		s3c_fimc_set_input_dma_co(ctrl);
@@ -888,7 +898,7 @@ static void s3c_fimc_start_input_dma_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_start_input_dma(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_start_input_dma_pr(ctrl);
 	else
 		s3c_fimc_start_input_dma_co(ctrl);
@@ -912,7 +922,7 @@ static void s3c_fimc_stop_input_dma_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_stop_input_dma(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_stop_input_dma_pr(ctrl);
 	else
 		s3c_fimc_stop_input_dma_co(ctrl);
@@ -948,7 +958,7 @@ static void s3c_fimc_set_input_path_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_input_path(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_set_input_path_pr(ctrl);
 	else
 		s3c_fimc_set_input_path_co(ctrl);
@@ -980,7 +990,7 @@ static void s3c_fimc_set_output_path_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_output_path(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_set_output_path_pr(ctrl);
 	else
 		s3c_fimc_set_output_path_co(ctrl);
@@ -1010,7 +1020,7 @@ static void s3c_fimc_set_input_address_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_set_input_address_pr(ctrl);
 	else
 		s3c_fimc_set_input_address_co(ctrl);
@@ -1022,7 +1032,7 @@ static void s3c_fimc_set_output_address_pr(struct s3c_fimc_control *ctrl)
 	struct s3c_fimc_frame_addr *addr;
 	int i;
 
-	for (i = 0; i < frame->nr_frames; i++) {
+	for (i = 0; i < S3C_FIMC_MAX_FRAMES; i++) {
 		addr = &frame->addr[i];
 		writel(addr->phys_y, ctrl->regs + S3C_CIPRYSA(i));
 		writel(addr->phys_cb, ctrl->regs + S3C_CIPRCBSA(i));
@@ -1036,7 +1046,7 @@ static void s3c_fimc_set_output_address_co(struct s3c_fimc_control *ctrl)
 	struct s3c_fimc_frame_addr *addr;
 	int i;
 
-	for (i = 0; i < frame->nr_frames; i++) {
+	for (i = 0; i < S3C_FIMC_MAX_FRAMES; i++) {
 		addr = &frame->addr[i];
 		writel(addr->phys_y, ctrl->regs + S3C_CICOYSA(i));
 		writel(addr->phys_cb, ctrl->regs + S3C_CICOCBSA(i));
@@ -1046,7 +1056,7 @@ static void s3c_fimc_set_output_address_co(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		s3c_fimc_set_output_address_pr(ctrl);
 	else
 		s3c_fimc_set_output_address_co(ctrl);
@@ -1054,7 +1064,7 @@ void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl)
 
 int s3c_fimc_get_frame_count(struct s3c_fimc_control *ctrl)
 {
-	if (IS_PREVIEW(ctrl)) {
+	if (ctrl->id == 1) {
 		return S3C_CIPRSTATUS_GET_FRAME_COUNT( \
 			readl(ctrl->regs + S3C_CIPRSTATUS));
 	} else {
@@ -1071,7 +1081,7 @@ void s3c_fimc_change_effect(struct s3c_fimc_control *ctrl)
 	cfg &= ~S3C_CIIMGEFF_FIN_MASK;
 	cfg |= effect->type;
 
-	if (IS_PREVIEW(ctrl))
+	if (ctrl->id == 1)
 		cfg |= S3C_CIIMGEFF_IE_ENABLE_PR;
 	else
 		cfg |= S3C_CIIMGEFF_IE_ENABLE_CO;

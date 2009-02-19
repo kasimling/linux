@@ -26,12 +26,13 @@ int dma_needs_bounce(struct device *dev, dma_addr_t addr, size_t size)
 void s3c64xx_reserve_bootmem(void)
 {
 	struct bootmem_data *bdata;
-	unsigned long sdram_start, sdram_size;
+	unsigned long sdram_start, sdram_size, dma_size;
 	unsigned long reserved;
 
 	bdata = NODE_DATA(0)->bdata;
 	sdram_start = bdata->node_min_pfn << PAGE_SHIFT;
 	sdram_size = (bdata->node_low_pfn << PAGE_SHIFT) - sdram_start;
+	dma_size = 14 * SZ_1M;
 	reserved = 0;
 
 	sdram_start &= PAGE_MASK;
@@ -43,10 +44,11 @@ void s3c64xx_reserve_bootmem(void)
 
 	if (reserved > 0) {
 		reserve_bootmem(sdram_start, \
-				PAGE_ALIGN(sdram_size - reserved), BOOTMEM_DEFAULT);
+				PAGE_ALIGN(sdram_size - reserved - dma_size), \
+				BOOTMEM_DEFAULT);
 
 		printk(KERN_INFO \
 			"s3c64xx: %lu bytes SDRAM reserved at 0x%08x\n", reserved, \
-			(unsigned int) (sdram_start + sdram_size - reserved));
+			(unsigned int) (sdram_start + sdram_size - reserved - dma_size));
 	}
 }
