@@ -512,4 +512,5 @@
 #define S3C_HOSTIFB_MIFPCON_SEL_RS5			5
 #define S3C_HOSTIFB_MIFPCON_SEL_RS6			6
 
+#define S3C_WINCONx_ENLOCAL_POST                    	(1<<22)
 #endif
