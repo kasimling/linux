@@ -89,6 +89,11 @@
 #define S3C64XX_PA_HOSTIFB	(0x74100000)
 #define S3C64XX_SZ_HOSTIFB	SZ_1M
 
+/* VPP */
+#define S3C6400_PA_VPP          (0x77000000)
+#define S5PC100_PA_VPP          (0xF0100000)
+#define S3C_SZ_VPP              SZ_1M
+    
 /* NAND flash controller */
 #define S3C64XX_PA_NAND	   	(0x70200000)
 #define S3C64XX_SZ_NAND	   	SZ_1M
