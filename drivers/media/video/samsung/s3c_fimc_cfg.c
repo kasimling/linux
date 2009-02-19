@@ -480,18 +480,22 @@ int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl)
 
 	frame->skip_frames++;
 
-	if (IS_IRQ_NORMAL(ctrl) && frame->skip_frames > frame->nr_frames * 2)
+	dev_dbg(ctrl->dev, "irq is being handled by frame hander\n");
+
+	if (IS_IRQ_NORMAL(ctrl) && frame->skip_frames > frame->nr_frames * 2) {
+		dev_dbg(ctrl->dev, "irq flag moves into x state\n");
 		FSET_IRQ_X(ctrl);
+	}
 
 	switch (ctrl->flag & S3C_FIMC_IRQ_MASK) {
 	case S3C_FIMC_FLAG_IRQ_NORMAL:
-		dev_dbg(ctrl->dev, "irq normal\n");
+		dev_dbg(ctrl->dev, "irq flag is normal\n");
 		FSET_RUNNING(ctrl);
 		ret = S3C_FIMC_FRAME_SKIP;
 		break;
 
 	case S3C_FIMC_FLAG_IRQ_X:
-		dev_dbg(ctrl->dev, "irq x\n");
+		dev_dbg(ctrl->dev, "irq flag is x\n");
 		s3c_fimc_enable_lastirq(ctrl);
 		s3c_fimc_disable_lastirq(ctrl);
 		FSET_HANDLE_IRQ(ctrl);
@@ -500,20 +504,20 @@ int s3c_fimc_frame_handler(struct s3c_fimc_control *ctrl)
 		break;
 
 	case S3C_FIMC_FLAG_IRQ_Y:
-		dev_dbg(ctrl->dev, "irq y\n");
+		dev_dbg(ctrl->dev, "irq flag is y\n");
 		FSET_IRQ_LAST(ctrl);
 		ret = S3C_FIMC_FRAME_SKIP;
 		break;
 
 	case S3C_FIMC_FLAG_IRQ_LAST:
-		dev_dbg(ctrl->dev, "irq last\n");
+		dev_dbg(ctrl->dev, "irq flag is last\n");
 		FSET_HANDLE_IRQ(ctrl);
 		FSET_IRQ_X(ctrl);
 		ret = S3C_FIMC_FRAME_TAKE;
 		break;
 
 	default:
-		dev_dbg(ctrl->dev, "unknown irq\n");
+		dev_dbg(ctrl->dev, "unknown irq state\n");
 		ret = S3C_FIMC_FRAME_SKIP;
 		break;
 	}

@@ -125,6 +125,8 @@ static irqreturn_t s3c_fimc_irq(int irq, void *dev_id)
 	ctrl->out_frame.cfn = s3c_fimc_get_frame_count(ctrl);
 
 	if (IS_CAPTURE(ctrl)) {
+		dev_dbg(ctrl->dev, "irq is in capture state\n");
+
 		if (s3c_fimc_frame_handler(ctrl) == S3C_FIMC_FRAME_SKIP)
 			return IRQ_HANDLED;
 	}
