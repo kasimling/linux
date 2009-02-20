@@ -1273,7 +1273,6 @@ static int s3c_pp_remove(struct platform_device *dev)
 static int s3c_pp_probe(struct platform_device *pdev)
 {
 
-	printk("Entered  : %s\n",__FUNCTION__);
 	struct resource *res;
 
 	int ret;

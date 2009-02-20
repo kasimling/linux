@@ -179,14 +179,65 @@ static struct resource s3c_vpp_resource[] = {
                .start = IRQ_POST0, 
                .end   = IRQ_POST0,
 	      .flags = IORESOURCE_IRQ,             
-	 }                                                                    };                                                                                                                    
+	 } 
+};                                                                                                                    
 
 struct platform_device s3c_device_vpp = {  
         .name             = "s3c-vpp",
 	.id               = -1,
-        .num_resources    = ARRAY_SIZE(s3c_vpp_resource),                             .resource         = s3c_vpp_resource,                                                                         
+        .num_resources    = ARRAY_SIZE(s3c_vpp_resource),	
+	.resource         = s3c_vpp_resource,                                                                         
 };
 EXPORT_SYMBOL(s3c_device_vpp);
+
+/* TV encoder */
+static struct resource s3c_tvenc_resource[] = {
+	[0] = {
+		.start = S3C6400_PA_TVENC,
+		.end   = S3C6400_PA_TVENC + S3C_SZ_TVENC - 1,
+		.flags = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start = IRQ_TVENC,
+		.end   = IRQ_TVENC,
+		.flags = IORESOURCE_IRQ,
+	}
+
+};
+
+struct platform_device s3c_device_tvenc = {
+	.name		  = "s3c-tvenc",
+	.id		  = -1,
+	.num_resources	  = ARRAY_SIZE(s3c_tvenc_resource),
+	.resource	  = s3c_tvenc_resource,
+};
+
+EXPORT_SYMBOL(s3c_device_tvenc);
+
+/* TV scaler */
+static struct resource s3c_tvscaler_resource[] = {
+	[0] = {
+		.start = S3C6400_PA_TVSCALER,
+		.end   = S3C6400_PA_TVSCALER + S3C_SZ_TVSCALER - 1,
+		.flags = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start = IRQ_SCALER,
+		.end   = IRQ_SCALER,
+		.flags = IORESOURCE_IRQ,
+	}
+
+};
+
+struct platform_device s3c_device_tvscaler = {
+	.name		  = "s3c-tvscaler",
+	.id		  = -1,
+	.num_resources	  = ARRAY_SIZE(s3c_tvscaler_resource),
+	.resource	  = s3c_tvscaler_resource,
+};
+
+EXPORT_SYMBOL(s3c_device_tvscaler);
+
 
 /* ADC */
 static struct resource s3c_adc_resource[] = {
