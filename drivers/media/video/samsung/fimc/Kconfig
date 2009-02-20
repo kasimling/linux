@@ -1,6 +1,6 @@
 config VIDEO_FIMC
 	bool "Samsung Camera Interface (FIMC) driver"
-	depends on I2C && VIDEO_V4L2
+	depends on VIDEO_SAMSUNG
 	default n
 	---help---
 	  This is a video4linux driver for Samsung FIMC device.
@@ -21,9 +21,7 @@ config VIDEO_FIMC_STATIC_MEMSIZE
 	depends on VIDEO_FIMC_STATIC_MEMORY
 	default "10240"
 
-source "drivers/media/video/samsung/Kconfig-camera"
-source "drivers/media/video/samsung/post/Kconfig"
-source "drivers/media/video/samsung/tv/Kconfig"
+source "drivers/media/video/samsung/fimc/Kconfig-camera"
 
 config VIDEO_FIMC_CAM_CH
 	int "External Camera channel (0=A, 1=B)"

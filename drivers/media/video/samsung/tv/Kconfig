@@ -4,7 +4,7 @@
 
 config VIDEO_TV
 	bool "Samsung TV Driver" 
-	depends on VIDEO_V4L2
+	depends on VIDEO_SAMSUNG
 	default n
 	---help---
 	  This is a TV driver for Samsung S3C6410.
