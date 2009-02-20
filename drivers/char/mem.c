@@ -866,6 +866,16 @@ static const struct file_operations oldmem_fops = {
 };
 #endif
 
+#ifdef CONFIG_S3C_MEM
+extern int s3c_mem_mmap(struct file* filp, struct vm_area_struct *vma);
+extern int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg);
+
+static const struct file_operations s3c_mem_fops = {
+	.ioctl 	= s3c_mem_ioctl,
+	.mmap	= s3c_mem_mmap,
+};
+#endif
+
 static ssize_t kmsg_write(struct file * file, const char __user * buf,
 			  size_t count, loff_t *ppos)
 {
@@ -936,6 +946,12 @@ static int memory_open(struct inode * inode, struct file * filp)
 #ifdef CONFIG_CRASH_DUMP
 		case 12:
 			filp->f_op = &oldmem_fops;
+			break;
+#endif
+
+#ifdef CONFIG_S3C_MEM
+		case 13:
+			filp->f_op = &s3c_mem_fops;
 			break;
 #endif
 		default:
