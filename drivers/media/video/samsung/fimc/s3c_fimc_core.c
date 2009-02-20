@@ -122,8 +122,6 @@ static irqreturn_t s3c_fimc_irq(int irq, void *dev_id)
 	s3c_fimc_clear_irq(ctrl);
 	s3c_fimc_check_fifo(ctrl);
 
-//	ctrl->out_frame.cfn = s3c_fimc_get_frame_count(ctrl);
-
 	if (IS_CAPTURE(ctrl)) {
 		dev_dbg(ctrl->dev, "irq is in capture state\n");
 
