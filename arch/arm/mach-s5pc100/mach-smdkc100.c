@@ -78,6 +78,25 @@
 extern struct sys_timer s5pc1xx_timer;
 extern void s5pc1xx_reserve_bootmem(void);
 
+static struct s3c24xx_uart_clksrc smdkc100_serial_clocks[] = {
+#if defined(SERIAL_S5PC1XX_HSUART)
+/* HS-UART Clock using SCLK */
+        [0] = {
+                .name           = "uclk1",
+                .divisor        = 1,
+                .min_baud       = 0,
+                .max_baud       = 0,
+        },
+#else
+        [0] = {
+                .name           = "pclk",
+                .divisor        = 1,
+                .min_baud       = 0,
+                .max_baud       = 0,
+        },
+#endif
+};
+
 static struct s3c2410_uartcfg smdkc100_uartcfgs[] __initdata = {
 	[0] = {
 		.hwport	     = 0,
@@ -93,6 +112,24 @@ static struct s3c2410_uartcfg smdkc100_uartcfgs[] __initdata = {
 		.ulcon	     = 0x03,
 		.ufcon	     = 0x51,
 	},
+        [2] = {
+                .hwport      = 2,
+                .flags       = 0,
+                .ucon        = 0x3c5,
+                .ulcon       = 0x03,
+                .ufcon       = 0x51,
+                .clocks      = smdkc100_serial_clocks,
+                .clocks_size = ARRAY_SIZE(smdkc100_serial_clocks),
+        },
+        [3] = {
+                .hwport      = 3,
+                .flags       = 0,
+                .ucon        = 0x3c5,
+                .ulcon       = 0x03,
+                .ufcon       = 0x51,
+                .clocks      = smdkc100_serial_clocks,
+                .clocks_size = ARRAY_SIZE(smdkc100_serial_clocks),
+        },
 };
 
 struct map_desc smdkc100_iodesc[] = {};

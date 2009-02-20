@@ -540,6 +540,13 @@ config SERIAL_S5PC100
 	help
 	  Serial port support for the Samsung S5PC100 SoCs
 
+config SERIAL_S5PC1XX_HSUART
+        bool "Support for High speed UART(4Mbps) on S5PC1XX serial port"
+        depends on SERIAL_S5PC100=y
+        select SERIAL_CORE
+          help
+          Allow High speed UART on the S5PC1XX on-board serial ports
+
 config SERIAL_DZ
 	bool "DECstation DZ serial driver"
 	depends on MACH_DECSTATION && 32BIT

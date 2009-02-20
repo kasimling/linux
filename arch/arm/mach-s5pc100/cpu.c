@@ -153,5 +153,9 @@ int __init s5pc100_init(void)
 {
 	printk("S5PC100: Initialising architecture\n");
 
+#if defined (CONFIG_S3C_SIR)
+        s3c24xx_uart_src[3]->name = "s3c-irda";
+#endif
+
 	return sysdev_register(&s5pc100_sysdev);
 }
