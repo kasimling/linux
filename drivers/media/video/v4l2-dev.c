@@ -34,6 +34,8 @@
 #define VIDEO_NUM_DEVICES	256
 #define VIDEO_NAME              "video4linux"
 
+/*#define	CONFIG_VIDEO_FIXED_MINOR_RANGES */
+
 /*
  *	sysfs stuff
  */
@@ -349,6 +351,7 @@ int video_register_device_index(struct video_device *vfd, int type, int nr,
 	vfd->cdev_release = vfd->cdev.kobj.ktype->release;
 	/* Install our own */
 	vfd->cdev.kobj.ktype = &v4l2_ktype_cdev_default;
+
 	return 0;
 
 del_cdev:

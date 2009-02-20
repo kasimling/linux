@@ -22,6 +22,8 @@ config VIDEO_FIMC_STATIC_MEMSIZE
 	default "10240"
 
 source "drivers/media/video/samsung/Kconfig-camera"
+source "drivers/media/video/samsung/post/Kconfig"
+source "drivers/media/video/samsung/tv/Kconfig"
 
 config VIDEO_FIMC_CAM_CH
 	int "External Camera channel (0=A, 1=B)"

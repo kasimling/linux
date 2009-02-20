@@ -48,6 +48,11 @@ struct video_device
 	int vfl_type;
 	int minor;
 	u16 num;
+
+	/* added for TV */
+	int type2;
+	int users;
+
 	/* attribute to differentiate multiple indices on one physical device */
 	int index;
 
