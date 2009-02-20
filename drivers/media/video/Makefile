@@ -138,6 +138,7 @@ obj-$(CONFIG_SOC_CAMERA_PLATFORM)	+= soc_camera_platform.o
 obj-$(CONFIG_VIDEO_AU0828) += au0828/
 obj-$(CONFIG_VIDEO_FIMC) += samsung/
 obj-$(CONFIG_VIDEO_POST)	+= samsung/post/
+obj-$(CONFIG_VIDEO_TV)		+= samsung/tv/
 
 obj-$(CONFIG_USB_VIDEO_CLASS)	+= uvc/
 
