@@ -948,6 +948,7 @@ static int memory_open(struct inode * inode, struct file * filp)
 			filp->f_op = &oldmem_fops;
 			break;
 #endif
+
 #ifdef CONFIG_S3C_MEM
 		case 13:
 			filp->f_op = &s3c_mem_fops;
