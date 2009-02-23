@@ -539,6 +539,9 @@ struct s3c_fimc_config {
 	struct s3c_fimc_control	ctrl[S3C_FIMC_MAX_CTRLS];
 	struct s3c_fimc_camera	*camera[S3C_FIMC_MAX_CAMS];
 	struct clk		*cam_clock;
+	dma_addr_t		dma_start;
+	dma_addr_t		dma_current;
+	u32			dma_total;
 };
 
 
@@ -591,6 +594,7 @@ struct s3c_fimc_config {
  * E X T E R N S
  *
 */
+extern struct s3c_fimc_config s3c_fimc;
 extern const struct v4l2_ioctl_ops s3c_fimc_v4l2_ops;
 extern struct video_device s3c_fimc_video_device[];
 

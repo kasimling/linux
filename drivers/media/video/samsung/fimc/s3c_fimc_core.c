@@ -27,6 +27,7 @@
 #include <asm/io.h>
 #include <asm/memory.h>
 #include <plat/clock.h>
+#include <plat/media.h>
 
 #include "s3c_fimc.h"
 
@@ -241,6 +242,9 @@ static int s3c_fimc_mmap(struct file* filp, struct vm_area_struct *vma)
 	u32 size = vma->vm_end - vma->vm_start;
 	u32 pfn, total_size = frame->buf_size;
 
+	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
+	vma->vm_flags |= VM_RESERVED;
+
 	/* page frame number of the address for a source frame to be stored at. */
 	pfn = __phys_to_pfn(frame->addr[vma->vm_pgoff / PAGE_SIZE].phys_y);
 
@@ -387,6 +391,22 @@ struct video_device s3c_fimc_video_device[S3C_FIMC_MAX_CTRLS] = {
 	},
 };
 
+static int s3c_fimc_init_global(struct platform_device *pdev)
+{
+	/* camera clock */
+	s3c_fimc.cam_clock = clk_get(&pdev->dev, "sclk_cam");
+	if (IS_ERR(s3c_fimc.cam_clock)) {
+		err("failed to get camera clock source\n");
+		return -EINVAL;
+	}
+
+	s3c_fimc.dma_start = s3c_get_media_memory(S3C_MDEV_FIMC);
+	s3c_fimc.dma_total = s3c_get_media_memsize(S3C_MDEV_FIMC) * SZ_1K;
+	s3c_fimc.dma_current = s3c_fimc.dma_start;
+
+	return 0;
+}
+
 static int s3c_fimc_probe(struct platform_device *pdev)
 {
 	struct s3c_platform_fimc *pdata;
@@ -428,13 +448,11 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 
 	clk_enable(ctrl->clock);
 
-	/* camera clock */
+	/* things to initialize once */
 	if (ctrl->id == 0) {
-		s3c_fimc.cam_clock = clk_get(&pdev->dev, "sclk_cam");
-		if (IS_ERR(s3c_fimc.cam_clock)) {
-			err("failed to get camera clock source\n");
-			goto err_clk_cam;
-		}
+		ret = s3c_fimc_init_global(pdev);
+		if (ret)
+			goto err_global;
 	}
 
 	ret = video_register_device(ctrl->vd, VFL_TYPE_GRABBER, ctrl->id);
@@ -450,7 +468,7 @@ static int s3c_fimc_probe(struct platform_device *pdev)
 err_video:
 	clk_put(s3c_fimc.cam_clock);
 
-err_clk_cam:
+err_global:
 	clk_disable(ctrl->clock);
 	clk_put(ctrl->clock);
 
