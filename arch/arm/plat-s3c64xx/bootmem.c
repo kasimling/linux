@@ -118,6 +118,19 @@ dma_addr_t s3c_get_media_memory(int dev_id)
 	return mdev->paddr;
 }
 
+size_t s3c_get_media_memsize(int dev_id)
+{
+	struct s3c_media_device *mdev;
+
+	mdev = s3c_get_media_device(dev_id);
+	if (!mdev){
+		printk(KERN_ERR "invalid media device\n");
+		return 0;
+	}
+
+	return mdev->memsize;
+}
+
 void s3c64xx_reserve_bootmem(void)
 {
 	struct s3c_media_device *mdev;

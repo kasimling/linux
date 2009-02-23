@@ -27,3 +27,4 @@ struct s3c_media_device {
 };
 
 extern dma_addr_t s3c_get_media_memory(int dev_id);
+extern size_t s3c_get_media_memsize(int dev_id);
