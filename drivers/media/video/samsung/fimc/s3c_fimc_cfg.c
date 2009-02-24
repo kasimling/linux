@@ -688,26 +688,23 @@ int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 		if (ctrl->rot90 && ctrl->out_type == PATH_OUT_LCDFIFO) {
 			width = ctrl->in_frame.height;
 			height = ctrl->in_frame.width;
-			tx = ctrl->out_frame.height;
-			ty = ctrl->out_frame.width;
 			h_ofs = d_ofs->y_v * 2;
 			v_ofs = d_ofs->y_h * 2;
 		} else {
 			width = ctrl->in_frame.width;
 			height = ctrl->in_frame.height;
-			tx = ctrl->out_frame.width;
-			ty = ctrl->out_frame.height;
 			h_ofs = d_ofs->y_h * 2;
 			v_ofs = d_ofs->y_v * 2;
 		}
 	} else {
 		width = ctrl->in_cam->width;
 		height = ctrl->in_cam->height;
-		tx = ctrl->out_frame.width;
-		ty = ctrl->out_frame.height;
 		h_ofs = w_ofs->h1 + w_ofs->h2;
 		v_ofs = w_ofs->v1 + w_ofs->v2;
 	}
+
+	tx = ctrl->out_frame.width;
+	ty = ctrl->out_frame.height;
 
 	if (tx <= 0 || ty <= 0) {
 		err("invalid target size\n");
