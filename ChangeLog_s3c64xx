@@ -652,4 +652,33 @@ v2.6.28.6-s3c64xx-r0d2: SungJun	Bae
 		A       drivers/media/video/samsung/tv/s3c-tvenc.h
 		A       drivers/media/video/samsung/tv/s3c-tvscaler.c
 		A       drivers/media/video/samsung/tv/s3c-tvscaler.h
+v2.6.28.6-s3c64xx-r0d3: Jaeryul Oh
+	- Support JPEG, roator on SMDK6410
 
+	Modified Files :
+		M       arch/arm/mach-s3c6400/include/mach/map.h
+		M       arch/arm/mach-s3c6410/mach-smdk6410.c
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s3c64xx/devs.c
+		M       drivers/media/video/samsung/Kconfig
+		M       drivers/media/video/samsung/Makefile
+
+	Added Files:
+		A       drivers/media/video/samsung/jpeg/Kconfig
+		A       drivers/media/video/samsung/jpeg/Makefile
+		A       drivers/media/video/samsung/jpeg/jpg_conf.h
+		A       drivers/media/video/samsung/jpeg/jpg_mem.c
+		A       drivers/media/video/samsung/jpeg/jpg_mem.h
+		A       drivers/media/video/samsung/jpeg/jpg_misc.c
+		A       drivers/media/video/samsung/jpeg/jpg_misc.h
+		A       drivers/media/video/samsung/jpeg/jpg_opr.c
+		A       drivers/media/video/samsung/jpeg/jpg_opr.h
+		A       drivers/media/video/samsung/jpeg/log_msg.c
+		A       drivers/media/video/samsung/jpeg/log_msg.h
+		A       drivers/media/video/samsung/jpeg/s3c-jpeg.c
+		A       drivers/media/video/samsung/jpeg/s3c-jpeg.h
+		A       drivers/media/video/samsung/rotator/Kconfig
+		A       drivers/media/video/samsung/rotator/Makefile
+		A       drivers/media/video/samsung/rotator/regs-rotator.h
+		A       drivers/media/video/samsung/rotator/s3c_rotator.c
+		A 	drivers/media/video/samsung/rotator/s3c_rotator_common.h
