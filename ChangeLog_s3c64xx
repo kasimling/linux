@@ -682,3 +682,9 @@ v2.6.28.6-s3c64xx-r0d3: Jaeryul Oh
 		A       drivers/media/video/samsung/rotator/regs-rotator.h
 		A       drivers/media/video/samsung/rotator/s3c_rotator.c
 		A 	drivers/media/video/samsung/rotator/s3c_rotator_common.h
+
+v2.6.28.6-s3c64xx-r0d4: Jinsung Yang
+	- FIMC support for SMDK6410
+	- Including reserved memory feature with bootmem
+	- All functions have been finished on the planning
+
