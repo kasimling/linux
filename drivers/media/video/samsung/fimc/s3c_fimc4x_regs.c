@@ -432,7 +432,7 @@ void s3c_fimc_start_scaler(struct s3c_fimc_control *ctrl)
 	writel(cfg, ctrl->regs + S3C_CISCCTRL);
 
 	if (ctrl->out_type == PATH_OUT_LCDFIFO)
-		ctrl->open_lcdfifo(ctrl->id, 1, 0);
+		ctrl->open_lcdfifo(ctrl->id, 0, 0);
 }
 
 void s3c_fimc_stop_scaler(struct s3c_fimc_control *ctrl)
