@@ -587,11 +587,11 @@ static int s3c_fimc_v4l2_dqbuf(struct file *filp, void *fh,
 	struct s3c_fimc_control *ctrl = (struct s3c_fimc_control *) fh;
 	struct s3c_fimc_out_frame *frame = &ctrl->out_frame;
 
-	frame->cfn = s3c_fimc_get_frame_count(ctrl);
+	ctrl->out_frame.cfn = s3c_fimc_get_frame_count(ctrl);
 	b->index = (frame->cfn + 2) % frame->nr_frames;
 
-	dma_sync_single_for_cpu(ctrl->dev, frame->addr[b->index].phys_y, \
-				frame->buf_size, DMA_FROM_DEVICE);
+//	dma_sync_single_for_cpu(ctrl->dev, frame->addr[b->index].phys_y, \
+//				frame->buf_size, DMA_FROM_DEVICE);
 
 	return 0;
 }

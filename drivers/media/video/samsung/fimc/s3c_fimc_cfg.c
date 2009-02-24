@@ -16,23 +16,214 @@
 #include <linux/platform_device.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
+#include <plat/media.h>
 
 #include "s3c_fimc.h"
 
-#ifdef CONFIG_VIDEO_FIMC_STATIC_MEMORY
-#define s3c_fimc_malloc(__size)		alloc_bootmem(__size)
-#define s3c_fimc_free(__buff, __size)	free_bootmem((u32) __buff, (u32) __size)
+#if (CONFIG_VIDEO_SAMSUNG_MEMSIZE_FIMC > 0)
+static dma_addr_t s3c_fimc_get_dma_region(u32 bytes)
+{
+	dma_addr_t end, addr, *curr;
+
+	end = s3c_fimc.dma_start + s3c_fimc.dma_total;
+	curr = &s3c_fimc.dma_current;
+
+	if (*curr + bytes > end) {
+		addr = 0;
+	} else {
+		addr = *curr;
+		*curr += bytes;
+	}
+
+	return addr;
+}
+
+static void s3c_fimc_put_dma_region(u32 bytes)
+{
+	s3c_fimc.dma_current -= bytes;
+}
+
+void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info)
+{
+	struct s3c_fimc_frame_addr *frame;
+	int i;
+
+	for (i = 0; i < info->nr_frames; i++) {
+		frame = &info->addr[i];
+
+		if (frame->phys_y)
+			s3c_fimc_put_dma_region(info->buf_size);
+
+		memset(frame, 0, sizeof(*frame));
+	}
+
+	info->buf_size = 0;
+}
+
+static int s3c_fimc_alloc_rgb_memory(struct s3c_fimc_out_frame *info)
+{
+	struct s3c_fimc_frame_addr *frame;
+	int i, ret, nr_frames = info->nr_frames;
+
+	for (i = 0; i < nr_frames; i++) {
+		frame = &info->addr[i];
+
+		frame->phys_rgb = s3c_fimc_get_dma_region(info->buf_size);
+		if (frame->phys_rgb == 0) {
+			ret = -ENOMEM;
+			goto alloc_fail;
+		}
+		
+		frame->virt_rgb = phys_to_virt(frame->phys_rgb);
+	}
+
+	for (i = nr_frames; i < S3C_FIMC_MAX_FRAMES; i++) {
+		frame = &info->addr[i];
+		frame->phys_rgb = info->addr[i - nr_frames].phys_rgb;
+		frame->virt_rgb = info->addr[i - nr_frames].virt_rgb;		
+	}
+
+	return 0;
+
+alloc_fail:
+	s3c_fimc_free_output_memory(info);
+	return ret;
+}
+
+static int s3c_fimc_alloc_yuv_memory(struct s3c_fimc_out_frame *info, \
+					u32 size, u32 cbcr_size)
+{
+	struct s3c_fimc_frame_addr *frame;
+	int i, ret, nr_frames = info->nr_frames;
+
+	for (i = 0; i < nr_frames; i++) {
+		frame = &info->addr[i];
+
+		frame->phys_y = s3c_fimc_get_dma_region(info->buf_size);
+		if (frame->phys_y == 0) {
+			ret = -ENOMEM;
+			goto alloc_fail;
+		}
+
+		frame->phys_cb = frame->phys_y + size;
+		frame->phys_cr = frame->phys_cb + cbcr_size;
+
+		frame->virt_y = phys_to_virt(frame->phys_y);
+		frame->virt_cb = frame->virt_y + size;
+		frame->virt_cr = frame->virt_cb + cbcr_size;
+	}
+
+	for (i = nr_frames; i < S3C_FIMC_MAX_FRAMES; i++) {
+		frame = &info->addr[i];
+		frame->phys_y = info->addr[i - nr_frames].phys_y;
+		frame->phys_cb = info->addr[i - nr_frames].phys_cb;
+		frame->phys_cr = info->addr[i - nr_frames].phys_cr;
+		frame->virt_y = info->addr[i - nr_frames].virt_y;
+		frame->virt_cb = info->addr[i - nr_frames].virt_cb;
+		frame->virt_cr = info->addr[i - nr_frames].virt_cr;
+	}
+
+	return 0;
+
+alloc_fail:
+	s3c_fimc_free_output_memory(info);
+	return ret;
+}
+
 #else
-#define	s3c_fimc_malloc(__size)		kmalloc((size_t) __size, GFP_DMA)
-#define s3c_fimc_free(__buff, __size)	kfree(__buff)
+void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info)
+{
+	struct s3c_fimc_frame_addr *frame;
+	int i;
+
+	for (i = 0; i < info->nr_frames; i++) {
+		frame = &info->addr[i];
+
+		if (frame->virt_y)
+			kfree(frame->virt_y);
+
+		memset(frame, 0, sizeof(*frame));
+	}
+
+	info->buf_size = 0;
+}
+
+static int s3c_fimc_alloc_rgb_memory(struct s3c_fimc_out_frame *info)
+{
+	struct s3c_fimc_frame_addr *frame;
+	int i, ret, nr_frames = info->nr_frames;
+
+	for (i = 0; i < nr_frames; i++) {
+		frame = &info->addr[i];
+
+		frame->virt_rgb = kmalloc(info->buf_size, GFP_DMA);
+		if (frame->virt_rgb == NULL) {
+			ret = -ENOMEM;
+			goto alloc_fail;
+		}
+		
+		frame->phys_rgb = virt_to_phys(frame->virt_rgb);
+	}
+
+	for (i = nr_frames; i < S3C_FIMC_MAX_FRAMES; i++) {
+		frame = &info->addr[i];
+		frame->virt_rgb = info->addr[i - nr_frames].virt_rgb;
+		frame->phys_rgb = info->addr[i - nr_frames].phys_rgb;
+	}
+
+	return 0;
+
+alloc_fail:
+	s3c_fimc_free_output_memory(info);
+	return ret;
+}
+
+static int s3c_fimc_alloc_yuv_memory(struct s3c_fimc_out_frame *info, \
+					u32 size, u32 cbcr_size)
+{
+	struct s3c_fimc_frame_addr *frame;
+	int i, ret, nr_frames = info->nr_frames;
+
+	for (i = 0; i < nr_frames; i++) {
+		frame = &info->addr[i];
+
+		frame->virt_y = kmalloc(info->buf_size, GFP_DMA);
+		if (frame->virt_y == NULL) {
+			ret = -ENOMEM;
+			goto alloc_fail;
+		}
+
+		frame->virt_cb = frame->virt_y + size;
+		frame->virt_cr = frame->virt_cb + cbcr_size;
+
+		frame->phys_y = virt_to_phys(frame->virt_y);
+		frame->phys_cb = frame->phys_y + size;
+		frame->phys_cr = frame->phys_cb + cbcr_size;
+	}
+
+	for (i = nr_frames; i < S3C_FIMC_MAX_FRAMES; i++) {
+		frame = &info->addr[i];
+		frame->phys_y = info->addr[i - nr_frames].phys_y;
+		frame->phys_cb = info->addr[i - nr_frames].phys_cb;
+		frame->phys_cr = info->addr[i - nr_frames].phys_cr;
+		frame->virt_y = info->addr[i - nr_frames].virt_y;
+		frame->virt_cb = info->addr[i - nr_frames].virt_cb;
+		frame->virt_cr = info->addr[i - nr_frames].virt_cr;
+	}
+
+	return 0;
+
+alloc_fail:
+	s3c_fimc_free_output_memory(info);
+	return ret;
+}
 #endif
 
 int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info)
 {
-	struct s3c_fimc_frame_addr *frame;
-	int i, ret, nr_frames = info->nr_frames;
 	u32 size = info->width * info->height;
 	u32 cbcr_size = 0, *buf_size = NULL, one_p_size;
+	int ret;
 
 	switch (info->format) {
 	case FORMAT_RGB565:
@@ -64,90 +255,12 @@ int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info)
 
 	info->buf_size = *buf_size;
 
-	switch (info->format) {
-	case FORMAT_RGB565:	/* fall through */
-	case FORMAT_RGB666:	/* fall through */
-	case FORMAT_RGB888:
-		for (i = 0; i < nr_frames; i++) {
-			frame = &info->addr[i];
-
-			frame->virt_rgb = s3c_fimc_malloc(info->buf_size);
-			if (frame->virt_rgb == NULL) {
-				ret = -ENOMEM;
-				goto alloc_fail;
-			}
-
-			frame->phys_rgb = virt_to_phys(frame->virt_rgb);
-		}
-
-		for (i = nr_frames; i < S3C_FIMC_MAX_FRAMES; i++) {
-			frame = &info->addr[i];
-			frame->virt_rgb = info->addr[i - nr_frames].virt_rgb;
-			frame->phys_rgb = info->addr[i - nr_frames].phys_rgb;
-		}
-
-		break;
-
-	case FORMAT_YCBCR420:	/* fall through */
-	case FORMAT_YCBCR422:
-		for (i = 0; i < nr_frames; i++) {
-			frame = &info->addr[i];
-
-			frame->virt_y = s3c_fimc_malloc(info->buf_size);
-			if (frame->virt_y == NULL) {
-				ret = -ENOMEM;
-				goto alloc_fail;
-			}
-
-			frame->virt_cb = frame->virt_y + size;
-			frame->virt_cr = frame->virt_cb + cbcr_size;
-
-			frame->phys_y = virt_to_phys(frame->virt_y);
-			frame->phys_cb = frame->phys_y + size;
-			frame->phys_cr = frame->phys_cb + cbcr_size;
-		}
-
-		for (i = nr_frames; i < S3C_FIMC_MAX_FRAMES; i++) {
-			frame = &info->addr[i];
-			frame->virt_y = info->addr[i - nr_frames].virt_y;
-			frame->virt_cb = info->addr[i - nr_frames].virt_cb;
-			frame->virt_cr = info->addr[i - nr_frames].virt_cr;
-			frame->phys_y = info->addr[i - nr_frames].phys_y;
-			frame->phys_cb = info->addr[i - nr_frames].phys_cb;
-			frame->phys_cr = info->addr[i - nr_frames].phys_cr;
-		}
-
-		break;
-	}
-
-	return 0;
-
-alloc_fail:
-	for (i = 0; i < nr_frames; i++) {
-		frame = &info->addr[i];
-
-		if (!frame->virt_y) {
-			s3c_fimc_free(frame->virt_y, info->buf_size);
-			frame->virt_y = NULL;
-		}
-	}
+	if (info->format == FORMAT_YCBCR420 || info->format == FORMAT_YCBCR422)
+		ret = s3c_fimc_alloc_yuv_memory(info, size, cbcr_size);
+	else
+		ret = s3c_fimc_alloc_rgb_memory(info);
 
 	return ret;
-}
-
-void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info)
-{
-	struct s3c_fimc_frame_addr *frame;
-	int i;
-
-	for (i = 0; i < info->nr_frames; i++) {
-		frame = &info->addr[i];
-
-		if (!frame->virt_y)
-			s3c_fimc_free(frame->virt_y, info->buf_size);
-
-		memset(frame, 0, sizeof(*frame));
-	}
 }
 
 int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
@@ -208,7 +321,10 @@ int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 
 void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr)
 {
-	ctrl->out_frame.nr_frames = nr;
+	if (nr == 3)
+		ctrl->out_frame.nr_frames = 2;
+	else
+		ctrl->out_frame.nr_frames = nr;
 }
 
 static void s3c_fimc_set_input_format(struct s3c_fimc_control *ctrl,
@@ -616,7 +732,7 @@ int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 	s3c_fimc_get_scaler_factor(sx, tx, &sc->pre_hratio, &sc->hfactor);
 	s3c_fimc_get_scaler_factor(sy, ty, &sc->pre_vratio, &sc->vfactor);
 
-	if (sx / sc->pre_hratio > pdata->line_length)
+	if (IS_PREVIEW(ctrl) && (sx / sc->pre_hratio > pdata->line_length))
 		info("line buffer size overflow\n");
 
 	sc->pre_dst_width = sx / sc->pre_hratio;
