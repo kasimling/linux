@@ -51,11 +51,13 @@ void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info)
 	for (i = 0; i < info->nr_frames; i++) {
 		frame = &info->addr[i];
 
-		if (!frame->phys_y) {
+		if (frame->phys_y)
 			s3c_fimc_put_dma_region(info->buf_size);
-			memset(frame, 0, sizeof(*frame));
-		}
+
+		memset(frame, 0, sizeof(*frame));
 	}
+
+	info->buf_size = 0;
 }
 
 static int s3c_fimc_alloc_rgb_memory(struct s3c_fimc_out_frame *info)
@@ -137,11 +139,13 @@ void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info)
 	for (i = 0; i < info->nr_frames; i++) {
 		frame = &info->addr[i];
 
-		if (!frame->virt_y)
+		if (frame->virt_y)
 			kfree(frame->virt_y);
 
 		memset(frame, 0, sizeof(*frame));
 	}
+
+	info->buf_size = 0;
 }
 
 static int s3c_fimc_alloc_rgb_memory(struct s3c_fimc_out_frame *info)
@@ -317,7 +321,10 @@ int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 
 void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr)
 {
-	ctrl->out_frame.nr_frames = nr;
+	if (nr == 3)
+		ctrl->out_frame.nr_frames = 2;
+	else
+		ctrl->out_frame.nr_frames = nr;
 }
 
 static void s3c_fimc_set_input_format(struct s3c_fimc_control *ctrl,
