@@ -1,0 +1,26 @@
+#
+# Configuration for Multi Format Codecs (MFC)
+#
+
+config VIDEO_MFC
+	bool "Samsung MFC Driver" 
+	depends on VIDEO_SAMSUNG && (CPU_S3C6410 || CPU_S3C6400)
+	default n
+	---help---
+	  This is a Multi Format Codecs (MFC) driver for Samsung S3C6400 and s3C6410.
+
+config VIDEV_MFC_DEBUG
+	bool "MFC driver debug messages"
+	depends on VIDEO_MFC
+
+config VIDEO_MFC_STATIC_MEMORY
+	bool "Reserved memory allocation support"
+	depends on VIDEO_MFC
+	---help---
+	  Enabling this option makes kernel reserves some memory spaces
+	  for output frames at boot time with bootmem allocator.
+
+config VIDEO_MFC_STATIC_MEMSIZE
+	int "Memory size in KB for reserve defalut size is 16MB"
+	depends on VIDEO_MFC_STATIC_MEMORY
+	default "16384"
