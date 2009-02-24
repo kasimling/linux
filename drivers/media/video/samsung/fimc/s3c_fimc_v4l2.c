@@ -245,7 +245,7 @@ static int s3c_fimc_v4l2_overlay(struct file *filp, void *fh, unsigned int i)
 	} else {
 		s3c_fimc_stop_dma(ctrl);
 
-		if (ctrl->in_type != PATH_IN_DMA) {
+		if (ctrl->out_type != PATH_OUT_LCDFIFO) {
 			s3c_fimc_free_output_memory(&ctrl->out_frame);
 			s3c_fimc_set_output_address(ctrl);
 		}

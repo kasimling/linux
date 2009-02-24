@@ -312,7 +312,6 @@ int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 		frame->phys_y = addr;
 		frame->phys_cb = frame->phys_y + size;
 		frame->phys_cr = frame->phys_cb + cbcr_size;
-
 		break;
 	}
 
@@ -434,7 +433,6 @@ int s3c_fimc_set_input_frame(struct s3c_fimc_control *ctrl,
 				struct v4l2_pix_format *fmt)
 {
 	s3c_fimc_set_input_format(ctrl, fmt);
-	s3c_fimc_set_input_address(ctrl);
 
 	return 0;
 }

@@ -120,6 +120,8 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 	&s3c_device_vpp,
 	&s3c_device_tvenc,
 	&s3c_device_tvscaler,
+	&s3c_device_rotator,
+	&s3c_device_jpeg,
 	&s3c_device_nand,
 	&s3c_device_onenand,
 	&s3c_device_usb,
