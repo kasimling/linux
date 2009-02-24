@@ -9,18 +9,6 @@ config VIDEO_FIMC_DEBUG
 	bool "FIMC driver debug messages"
 	depends on VIDEO_FIMC
 
-config VIDEO_FIMC_STATIC_MEMORY
-	bool "Reserved memory allocation support"
-	depends on VIDEO_FIMC
-	---help---
-	  Enabling this option makes kernel reserves some memory spaces
-	  for output frames at boot time with bootmem allocator.
-
-config VIDEO_FIMC_STATIC_MEMSIZE
-	int "Memory size in KB for reserve"
-	depends on VIDEO_FIMC_STATIC_MEMORY
-	default "10240"
-
 source "drivers/media/video/samsung/fimc/Kconfig-camera"
 
 config VIDEO_FIMC_CAM_CH
