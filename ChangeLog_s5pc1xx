@@ -645,3 +645,9 @@ v2.6.28.6-s5pc1xx-r0d0: Kyoungil Kim
 
 v2.6.28.6-s5pc1xx-r0d1: Abhilash Kesava
 	- Pre-Beta Version
+
+v2.6.28.6-s5pc1xx-r0d2: Jinsung Yang
+	- FIMC support for SMDKC100
+	- Including reserved memory feature with bootmem
+	- All functions have been finished on the planning except for 'Input Rotator' with LCD FIFO Output
+
