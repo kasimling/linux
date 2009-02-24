@@ -102,6 +102,11 @@
 #define S3C6400_PA_VPP          (0x77000000)
 #define S5PC100_PA_VPP          (0xF0100000)
 #define S3C_SZ_VPP              SZ_1M
+
+/* MFC */
+#define S3C6400_PA_MFC		(0x7E002000)
+#define S5PC100_PA_MFC		(0xF1000000)
+#define S3C_SZ_MFC		SZ_4K
     
 /* NAND flash controller */
 #define S3C64XX_PA_NAND	   	(0x70200000)

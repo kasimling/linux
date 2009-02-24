@@ -214,6 +214,29 @@ struct platform_device s3c_device_tvenc = {
 
 EXPORT_SYMBOL(s3c_device_tvenc);
 
+/* MFC controller */
+static struct resource s3c_mfc_resource[] = {
+	[0] = {
+		.start	= S3C6400_PA_MFC,
+		.end	= S3C6400_PA_MFC + S3C_SZ_MFC - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	[1] = {
+		.start	= IRQ_MFC,
+		.end	= IRQ_MFC,
+		.flags	= IORESOURCE_IRQ,
+	}
+};
+
+struct platform_device s3c_device_mfc = {
+	.name		= "s3c-mfc",
+	.id		= -1,
+	.num_resources	= ARRAY_SIZE(s3c_mfc_resource),
+	.resource	= s3c_mfc_resource
+};
+
+EXPORT_SYMBOL(s3c_device_mfc);
+
 /* TV scaler */
 static struct resource s3c_tvscaler_resource[] = {
 	[0] = {
