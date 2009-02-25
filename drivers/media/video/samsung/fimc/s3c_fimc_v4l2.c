@@ -590,9 +590,6 @@ static int s3c_fimc_v4l2_dqbuf(struct file *filp, void *fh,
 	ctrl->out_frame.cfn = s3c_fimc_get_frame_count(ctrl);
 	b->index = (frame->cfn + 2) % frame->nr_frames;
 
-//	dma_sync_single_for_cpu(ctrl->dev, frame->addr[b->index].phys_y, \
-//				frame->buf_size, DMA_FROM_DEVICE);
-
 	return 0;
 }
 
