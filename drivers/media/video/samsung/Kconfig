@@ -34,14 +34,14 @@ config VIDEO_SAMSUNG_MEMSIZE_TV
 if CPU_S3C6410
 config VIDEO_SAMSUNG_MEMSIZE_MFC
 	int "Memory size in kbytes for MFC"
-#	depends on VIDEO_MFC
+	depends on VIDEO_MFC
 	default "6144"
 endif
 
 if ARCH_S5PC1XX
 config VIDEO_SAMSUNG_MEMSIZE_MFC
 	int "Memory size in kbytes for MFC"
-#	depends on VIDEO_MFC
+	depends on VIDEO_MFC
 	default "32768"
 endif
 
