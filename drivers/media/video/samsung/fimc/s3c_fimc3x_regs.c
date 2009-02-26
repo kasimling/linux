@@ -816,16 +816,7 @@ static void s3c_fimc_set_input_dma_pr(struct s3c_fimc_control *ctrl)
 	case FORMAT_YCBCR422:
 		if (frame->planes == 1) {
 			cfg |= S3C_MSPRCTRL_INFORMAT_YCBCR422I;
-
-			/* fimc3.x does not work for all orders */
-			if (frame->order_1p == IN_ORDER422_YCBYCR)
-				cfg |= S3C_MSPRCTRL_ORDER422_YCBYCR;
-			else if (frame->order_1p == IN_ORDER422_YCRYCB)
-				cfg |= S3C_MSPRCTRL_ORDER422_YCRYCB;
-			else if (frame->order_1p == IN_ORDER422_CBYCRY)
-				cfg |= S3C_MSPRCTRL_ORDER422_CBYCRY;
-			else if (frame->order_1p == IN_ORDER422_CRYCBY)
-				cfg |= S3C_MSPRCTRL_ORDER422_CRYCBY;
+			cfg |= frame->order_1p;
 		} else
 			cfg |= S3C_MSPRCTRL_INFORMAT_YCBCR422;
 
