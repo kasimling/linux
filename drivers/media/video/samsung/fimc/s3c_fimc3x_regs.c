@@ -814,9 +814,10 @@ static void s3c_fimc_set_input_dma_pr(struct s3c_fimc_control *ctrl)
 		break;
 
 	case FORMAT_YCBCR422:
-		if (frame->planes == 1)
+		if (frame->planes == 1) {
 			cfg |= S3C_MSPRCTRL_INFORMAT_YCBCR422I;
-		else
+			cfg |= frame->order_1p;
+		} else
 			cfg |= S3C_MSPRCTRL_INFORMAT_YCBCR422;
 
 		break;
@@ -1022,6 +1023,10 @@ void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl)
 		}
 	}
 
+	addr->phys_y = start_y;
+	addr->phys_cb = start_cb;
+	addr->phys_cr = start_cr;
+
 	if (ctrl->id == 1) {
 		writel(start_y, ctrl->regs + S3C_MSPRY0SA);
 		writel(start_cb, ctrl->regs + S3C_MSPRCB0SA);
@@ -1047,9 +1052,9 @@ static void s3c_fimc_set_output_address_pr(struct s3c_fimc_control *ctrl)
 
 	for (i = 0; i < S3C_FIMC_MAX_FRAMES; i++) {
 		addr = &frame->addr[i];
-		writel(addr->phys_y, ctrl->regs + S3C_CIPRYSA(i));
-		writel(addr->phys_cb, ctrl->regs + S3C_CIPRCBSA(i));
-		writel(addr->phys_cr, ctrl->regs + S3C_CIPRCRSA(i));
+		writel(addr->phys_rgb, ctrl->regs + S3C_CIPRYSA(i));
+		writel(0, ctrl->regs + S3C_CIPRCBSA(i));
+		writel(0, ctrl->regs + S3C_CIPRCRSA(i));
 	}
 }
 

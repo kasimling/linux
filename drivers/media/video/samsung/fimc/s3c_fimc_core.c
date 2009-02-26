@@ -33,6 +33,13 @@
 
 struct s3c_fimc_config s3c_fimc;
 
+struct s3c_platform_fimc *to_fimc_plat(struct device *dev)
+{
+	struct platform_device *pdev = to_platform_device(dev);
+
+	return (struct s3c_platform_fimc *) pdev->dev.platform_data;
+}
+
 u8 s3c_fimc_i2c_read(struct i2c_client *client, u8 subaddr)
 {
 	u8 buf[1];
@@ -128,18 +135,11 @@ static irqreturn_t s3c_fimc_irq(int irq, void *dev_id)
 
 		if (s3c_fimc_frame_handler(ctrl) == S3C_FIMC_FRAME_SKIP)
 			return IRQ_HANDLED;
+
+		wake_up_interruptible(&ctrl->waitq);
 	}
 
-	wake_up_interruptible(&ctrl->waitq);
-
 	return IRQ_HANDLED;
-}
-
-struct s3c_platform_fimc *to_fimc_plat(struct device *dev)
-{
-	struct platform_device *pdev = to_platform_device(dev);
-
-	return (struct s3c_platform_fimc *) pdev->dev.platform_data;
 }
 
 static
@@ -246,7 +246,7 @@ static int s3c_fimc_mmap(struct file* filp, struct vm_area_struct *vma)
 	vma->vm_flags |= VM_RESERVED;
 
 	/* page frame number of the address for a source frame to be stored at. */
-	pfn = __phys_to_pfn(frame->addr[vma->vm_pgoff / PAGE_SIZE].phys_y);
+	pfn = __phys_to_pfn(frame->addr[vma->vm_pgoff].phys_y);
 
 	if (size > total_size) {
 		err("the size of mapping is too big\n");
