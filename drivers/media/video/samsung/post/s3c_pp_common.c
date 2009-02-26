@@ -1,6 +1,6 @@
 
 /*
- * linux/drivers/video/s3c_pp_common.c
+ * linux/drivers/drivers/media/video/samsung/s3c_pp_common.c
  *
  * Revision 1.0  
  *

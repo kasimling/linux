@@ -1,5 +1,5 @@
 /*
- * linux/drivers/video/s3c_pp_6400.c
+ * linux/drivers/drivers/media/video/samsung/post/s3c_pp_6400.c
  *
  * Revision 3.0
  *

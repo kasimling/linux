@@ -131,8 +131,9 @@ static void s3c24xx_audio_buffdone(struct s3c2410_dma_chan *channel,
 
 	s3cdbg("Entered %s\n", __FUNCTION__);
 
-	if (result == S3C2410_RES_ABORT || result == S3C2410_RES_ERR)
+	if (result == S3C2410_RES_ABORT || result == S3C2410_RES_ERR){
 		return;
+	}
 	else {
 		prtd = substream->runtime->private_data;
 		
@@ -143,10 +144,11 @@ static void s3c24xx_audio_buffdone(struct s3c2410_dma_chan *channel,
 
 		spin_lock(&prtd->lock);
 		if (prtd->state & ST_RUNNING) {
-			prtd->dma_loaded--;
+		//	prtd->dma_loaded--;
 			s3c24xx_pcm_enqueue(substream);
 		}
 
+		prtd->dma_loaded--;
 		spin_unlock(&prtd->lock);
 	}
 #if 0
