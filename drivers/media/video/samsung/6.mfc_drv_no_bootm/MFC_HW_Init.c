@@ -29,7 +29,7 @@
 BOOL MFC_MemorySetup(void)
 {
 	//MfcMemMapping();
-	BOOL ret_sfr, ret_bit, ret_dat;
+	BOOL ret_bit, ret_dat;
 	unsigned char *pDataBuf;
 
 

@@ -523,6 +523,7 @@ cs89x0_probe1(struct net_device *dev, int ioaddr, int modular)
 	int retval;
 	DECLARE_MAC_BUF(mac);
 
+
 	/* Initialize the device structure. */
 	if (!modular) {
 		memset(lp, 0, sizeof(*lp));
@@ -537,6 +538,7 @@ cs89x0_probe1(struct net_device *dev, int ioaddr, int modular)
 #endif
 		lp->force = g_cs89x0_media__force;
 #endif
+
         }
 
 #ifdef CONFIG_ARCH_PNX010X

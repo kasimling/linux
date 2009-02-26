@@ -12,9 +12,16 @@
 */
 
 
+#include <plat/reserved_mem.h>
+
+//dma_addr_t      s3c_mfc_phys_data_buffer;
+//unsigned char   *s3c_mfc_virt_data_buffer;
+
 // Physical Base Address for the MFC Host I/F Registers
 // #define S3C6400_BASEADDR_MFC_SFR			0x7e002000
 
+
+//#define MFC_RESERVED_MEM_START			0x57800000
 
 // Physical Base Address for the MFC Shared Buffer
 //   Shared Buffer = {CODE_BUF, WORK_BUF, PARA_BUF}

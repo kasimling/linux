@@ -31,11 +31,11 @@
 #include "MfcIntrNotification.h"
 
 
-static volatile S3C6400_MFC_SFR   *vir_pMFC_SFR		= NULL;
-static volatile unsigned int      *vir_pSW_RESET	= NULL;
+//static volatile S3C6400_MFC_SFR   *vir_pMFC_SFR		= NULL;
+//static volatile unsigned int      *vir_pSW_RESET	= NULL;
 
-static unsigned int                phyMFC_SFR		= 0;
-static unsigned int                phySW_RESET		= 0;
+//static unsigned int                phyMFC_SFR		= 0;
+//static unsigned int                phySW_RESET		= 0;
 
 extern wait_queue_head_t	WaitQueue_MFC;
 extern unsigned int		gIntrType;
@@ -206,14 +206,14 @@ BOOL MfcIssueCmd(int inst_no, MFC_CODECMODE codec_mode, MFC_COMMAND mfc_cmd)
 			return FALSE;
 		}
 		if (intr_reason & MFC_INTR_REASON_BUFFER_EMPTY) {
-			printk(KERN_ERR "\n%s: command = %s, BUFFER EMPTY interrupt was raised\n", GetCmdString(mfc_cmd));
+			printk(KERN_ERR "\n%s: command = %s, BUFFER EMPTY interrupt was raised\n", __FUNCTION__, GetCmdString(mfc_cmd));
 			return FALSE;
 		}
 		break;
 		
 	default:
 		if (WaitForReady() == FALSE) {
-			printk(KERN_ERR "\n%s: command = %s, bitprocessor is busy before issuing the command\n", GetCmdString(mfc_cmd));
+			printk(KERN_ERR "\n%s: command = %s, bitprocessor is busy before issuing the command\n", __FUNCTION__, GetCmdString(mfc_cmd));
 			return FALSE;
 		}
 
@@ -252,6 +252,8 @@ BOOL MfcSfrMemMapping(void)
 	return ret;
 }
 */
+
+/*
 volatile S3C6400_MFC_SFR *GetMfcSfrVirAddr(void)
 {
 	volatile S3C6400_MFC_SFR	*mfc_sfr;
@@ -265,6 +267,7 @@ void *MfcGetCmdParamRegion(void)
 {
 	//return (void *) &(vir_pMFC_SFR->param);
 }
+*/
 
 // Perform the SW_RESET
 void MfcReset(void)

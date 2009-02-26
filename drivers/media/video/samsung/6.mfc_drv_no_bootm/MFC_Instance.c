@@ -212,7 +212,8 @@ BOOL MFCInst_GetStreamRWPtrs(MFCInstCtx *ctx, unsigned char **ppRD_PTR, unsigned
 {
 	//S3C6400_MFC_SFR	*mfc_sfr;		// MFC SFR pointer
 	int              diff_vir_phy;
-	unsigned int	read_pointer, write_pointer;
+	unsigned int	read_pointer = 0;
+	unsigned int	write_pointer = 0;
 
 	if (MFCINST_STATE(ctx) < MFCINST_STATE_CREATED)
 		return FALSE;
@@ -687,9 +688,9 @@ int MFCInst_Enc_Init(MFCInstCtx *ctx, MFC_CODECMODE codec_mode, enc_info_t *enc_
 	ctx->gopNum       = enc_info->gopNum;
 	ctx->bitrate      = enc_info->bitrate;
 
-	ctx->intraqp        = enc_info->intraqp;
-	ctx->qpmax        = enc_info->qpmax;
-	ctx->gamma        = enc_info->gamma;
+//	ctx->intraqp        = enc_info->intraqp;
+//	ctx->qpmax        = enc_info->qpmax;
+//	ctx->gamma        = enc_info->gamma;
 
 	/*
 	 * At least 2 frame buffers are needed. 
@@ -818,9 +819,11 @@ int MFCInst_Enc_Init(MFCInstCtx *ctx, MFC_CODECMODE codec_mode, enc_info_t *enc_
 	writel(RC_ENABLE | (ctx->bitrate << 1) | (SKIP_ENABLE << 31), mfc_base + S3C_MFC_PARAM_ENC_SEQ_RC_PARA);
 	writel(0x0, mfc_base + S3C_MFC_PARAM_ENC_SEQ_INTRA_MB);
 	writel(FMO_DISABLE, mfc_base + S3C_MFC_PARAM_ENC_SEQ_FMO);
-	writel(ctx->intraqp, mfc_base + S3C_MFC_PARAM_ENC_SEQ_INTRA_QP);
+//	writel(ctx->intraqp, mfc_base + S3C_MFC_PARAM_ENC_SEQ_INTRA_QP);
 
-	
+
+	writel(USE_GAMMA_DISABLE, mfc_base + S3C_MFC_PARAM_ENC_SEQ_RC_OPTION);
+/*	
 	if (ctx->gamma < 0 || ctx->gamma > 1)
 	{
 		//pPARAM_SEQ_INIT->ENC_SEQ_RC_OPTION = USE_GAMMA_DISABLE;
@@ -836,7 +839,7 @@ int MFCInst_Enc_Init(MFCInstCtx *ctx, MFC_CODECMODE codec_mode, enc_info_t *enc_
 		writel(USE_GAMMA_ENABLE, mfc_base + S3C_MFC_PARAM_ENC_SEQ_RC_OPTION);
 		writel(ctx->gamma * MFCINST_GAMMA_FACTEE, mfc_base + S3C_MFC_PARAM_ENC_SEQ_RC_GAMMA);		
 	}
-    
+*/  
 	switch(ctx->codec_mode) {
 		case MP4_ENC:
 			//pPARAM_SEQ_INIT->ENC_SEQ_COD_STD  = MPEG4_ENCODE;
@@ -894,6 +897,9 @@ int MFCInst_Enc_Init(MFCInstCtx *ctx, MFC_CODECMODE codec_mode, enc_info_t *enc_
 			return MFCINST_ERR_INVALID_PARAM;
 	}
 
+	writel(USER_QP_MAX_DISABLE, mfc_base + S3C_MFC_PARAM_ENC_SEQ_RC_OPTION);
+	
+/*
 	switch(ctx->codec_mode) 
 	{
 	case MP4_ENC:
@@ -945,7 +951,7 @@ int MFCInst_Enc_Init(MFCInstCtx *ctx, MFC_CODECMODE codec_mode, enc_info_t *enc_
 		break;
 
 	}
-    
+*/
 
 
 	// SEQ_INIT command
@@ -1261,7 +1267,7 @@ int MFCInst_Encode(MFCInstCtx *ctx, int *enc_data_size, int *header_size)
 
 	int                                  hdr_size, hdr_size2;
 	unsigned char                       *hdr_buf_tmp=NULL;
-	unsigned int				bits_wr_ptr_value;
+	unsigned int				bits_wr_ptr_value = 0;
 
 	////////////////////////////
 	///    STATE checking    ///
@@ -1432,7 +1438,7 @@ int MFCInst_EncHeader(MFCInstCtx *ctx, int hdr_code, int hdr_num, unsigned int o
 {
 	//volatile S3C6400_MFC_PARAM_REG_ENC_HEADER	*pPARAM_ENC_HEADER;
 	//S3C6400_MFC_SFR						*mfc_sfr;
-	unsigned int bit_wr_ptr_value;
+	unsigned int bit_wr_ptr_value = 0;
 
 	if (!MFCINST_STATE_CHECK(ctx, MFCINST_STATE_ENC_INITIALIZED) && !MFCINST_STATE_CHECK(ctx, MFCINST_STATE_ENC_PIC_RUN_LINE_BUF)) {
 
@@ -1507,7 +1513,7 @@ int MFCInst_EncHeader(MFCInstCtx *ctx, int hdr_code, int hdr_num, unsigned int o
 
 int MFCInst_EncParamChange(MFCInstCtx *ctx, unsigned int param_change_enable, unsigned int param_change_val)
 {
-	volatile S3C6400_MFC_PARAM_REG_ENC_PARAM_CHANGE    *pPARAM_ENC_PARAM_CHANGE;
+	//volatile S3C6400_MFC_PARAM_REG_ENC_PARAM_CHANGE    *pPARAM_ENC_PARAM_CHANGE;
 
 
 	int              num_mbs;		// Number of MBs
@@ -1602,7 +1608,7 @@ int MFCInst_EncParamChange(MFCInstCtx *ctx, unsigned int param_change_enable, un
 			slices_mb = (num_mbs / param_change_val);
 			ctx->enc_num_slices = param_change_val;
 
-			pPARAM_ENC_PARAM_CHANGE->ENC_PARAM_CHANGE_SLICE_MODE   = SLICE_MODE_MULTIPLE | (1 << 1) | (slices_mb<< 2);
+			//pPARAM_ENC_PARAM_CHANGE->ENC_PARAM_CHANGE_SLICE_MODE   = SLICE_MODE_MULTIPLE | (1 << 1) | (slices_mb<< 2);
 			writel(SLICE_MODE_MULTIPLE | (1 << 1) | (slices_mb<< 2), mfc_base + S3C_MFC_PARAM_ENC_CHANGE_SLICE_MODE);
 		}
 	}

@@ -98,9 +98,9 @@ typedef struct
 	int				gopNum;
 	int				bitrate;
 
-	int				intraqp;
-	int				qpmax;
-	float				gamma;
+//	int				intraqp;
+//	int				qpmax;
+//	float				gamma;
 	
 	// encoding configuration info (misc.)
 	int             h263_annex;
