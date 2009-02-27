@@ -157,6 +157,10 @@
 #define S5PC1XX_PA_AC97         (0xF2300000)
 #define S5PC1XX_SZ_AC97         SZ_1M
 
+/* G3D */
+#define S5PC1XX_PA_G3D		(0xEF000000)
+#define S5PC1XX_SZ_G3D		SZ_16M
+
 /* re-define */
 #define S3C_SZ_HSMMC		S5PC1XX_SZ_HSMMC
 

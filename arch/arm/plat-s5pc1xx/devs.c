@@ -422,3 +422,31 @@ struct platform_device s3c_device_ac97 = {
 
 EXPORT_SYMBOL(s3c_device_ac97);
 
+static struct resource s3c_g3d_resource[] = {
+        [0] = {
+                .start = S5PC1XX_PA_G3D,
+                .end   = S5PC1XX_PA_G3D + S5PC1XX_SZ_G3D - 1,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_3D,
+                .end   = IRQ_3D,
+                .flags = IORESOURCE_IRQ,
+        }
+};
+
+static u64 s3c_device_g3d_dmamask = 0xffffffffUL;
+
+struct platform_device s3c_device_g3d = {
+        .name             = "s3c-g3d",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_g3d_resource),
+        .resource         = s3c_g3d_resource,
+        .dev              = {
+                .dma_mask = &s3c_device_g3d_dmamask,
+                .coherent_dma_mask = 0xffffffffUL
+        }
+};
+
+EXPORT_SYMBOL(s3c_device_g3d);
+
