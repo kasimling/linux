@@ -252,6 +252,51 @@ static struct resource s3c_tvscaler_resource[] = {
 
 };
 
+/* rotator interface */
+static struct resource s3c_rotator_resource[] = {
+        [0] = {
+                .start = S3C6400_PA_ROTATOR,
+                .end   = S3C6400_PA_ROTATOR + S3C_SZ_ROTATOR - 1,
+                .flags = IORESOURCE_MEM,
+                },
+        [1] = {
+                .start = IRQ_ROTATOR,
+                .end   = IRQ_ROTATOR,
+                .flags = IORESOURCE_IRQ,
+        }
+};
+
+struct platform_device s3c_device_rotator = {
+        .name             = "s3c-rotator",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_rotator_resource),
+        .resource         = s3c_rotator_resource
+};
+
+EXPORT_SYMBOL(s3c_device_rotator);
+
+/* JPEG controller  */
+static struct resource s3c_jpeg_resource[] = {
+        [0] = {
+                .start = S3C6400_PA_JPEG,
+                .end   = S3C6400_PA_JPEG + S3C_SZ_JPEG - 1,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_JPEG,
+                .end   = IRQ_JPEG,
+                .flags = IORESOURCE_IRQ,
+        }
+
+};
+
+struct platform_device s3c_device_jpeg = {
+        .name             = "s3c-jpeg",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_jpeg_resource),
+        .resource         = s3c_jpeg_resource,
+};
+
 struct platform_device s3c_device_tvscaler = {
 	.name		  = "s3c-tvscaler",
 	.id		  = -1,

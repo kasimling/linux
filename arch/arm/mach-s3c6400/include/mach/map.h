@@ -98,6 +98,14 @@
 #define S3C6400_PA_TVSCALER	(0x76300000)
 #define S3C_SZ_TVSCALER		SZ_1M
 
+/* Rotator */
+#define S3C6400_PA_ROTATOR      (0x77200000)
+#define S3C_SZ_ROTATOR          SZ_1M
+
+/* JPEG */
+#define S3C6400_PA_JPEG         (0x78800000)
+#define S3C_SZ_JPEG             SZ_4M
+
 /* VPP */
 #define S3C6400_PA_VPP          (0x77000000)
 #define S5PC100_PA_VPP          (0xF0100000)

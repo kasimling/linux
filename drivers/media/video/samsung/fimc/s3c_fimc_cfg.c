@@ -51,11 +51,13 @@ void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info)
 	for (i = 0; i < info->nr_frames; i++) {
 		frame = &info->addr[i];
 
-		if (!frame->phys_y) {
+		if (frame->phys_y)
 			s3c_fimc_put_dma_region(info->buf_size);
-			memset(frame, 0, sizeof(*frame));
-		}
+
+		memset(frame, 0, sizeof(*frame));
 	}
+
+	info->buf_size = 0;
 }
 
 static int s3c_fimc_alloc_rgb_memory(struct s3c_fimc_out_frame *info)
@@ -137,11 +139,13 @@ void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info)
 	for (i = 0; i < info->nr_frames; i++) {
 		frame = &info->addr[i];
 
-		if (!frame->virt_y)
+		if (frame->virt_y)
 			kfree(frame->virt_y);
 
 		memset(frame, 0, sizeof(*frame));
 	}
+
+	info->buf_size = 0;
 }
 
 static int s3c_fimc_alloc_rgb_memory(struct s3c_fimc_out_frame *info)
@@ -308,7 +312,6 @@ int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 		frame->phys_y = addr;
 		frame->phys_cb = frame->phys_y + size;
 		frame->phys_cr = frame->phys_cb + cbcr_size;
-
 		break;
 	}
 
@@ -317,7 +320,10 @@ int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 
 void s3c_fimc_set_nr_frames(struct s3c_fimc_control *ctrl, int nr)
 {
-	ctrl->out_frame.nr_frames = nr;
+	if (nr == 3)
+		ctrl->out_frame.nr_frames = 2;
+	else
+		ctrl->out_frame.nr_frames = nr;
 }
 
 static void s3c_fimc_set_input_format(struct s3c_fimc_control *ctrl,
@@ -427,7 +433,6 @@ int s3c_fimc_set_input_frame(struct s3c_fimc_control *ctrl,
 				struct v4l2_pix_format *fmt)
 {
 	s3c_fimc_set_input_format(ctrl, fmt);
-	s3c_fimc_set_input_address(ctrl);
 
 	return 0;
 }
@@ -683,26 +688,23 @@ int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 		if (ctrl->rot90 && ctrl->out_type == PATH_OUT_LCDFIFO) {
 			width = ctrl->in_frame.height;
 			height = ctrl->in_frame.width;
-			tx = ctrl->out_frame.height;
-			ty = ctrl->out_frame.width;
 			h_ofs = d_ofs->y_v * 2;
 			v_ofs = d_ofs->y_h * 2;
 		} else {
 			width = ctrl->in_frame.width;
 			height = ctrl->in_frame.height;
-			tx = ctrl->out_frame.width;
-			ty = ctrl->out_frame.height;
 			h_ofs = d_ofs->y_h * 2;
 			v_ofs = d_ofs->y_v * 2;
 		}
 	} else {
 		width = ctrl->in_cam->width;
 		height = ctrl->in_cam->height;
-		tx = ctrl->out_frame.width;
-		ty = ctrl->out_frame.height;
 		h_ofs = w_ofs->h1 + w_ofs->h2;
 		v_ofs = w_ofs->v1 + w_ofs->v2;
 	}
+
+	tx = ctrl->out_frame.width;
+	ty = ctrl->out_frame.height;
 
 	if (tx <= 0 || ty <= 0) {
 		err("invalid target size\n");

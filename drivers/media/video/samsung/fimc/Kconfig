@@ -1,3 +1,8 @@
+
+if VIDEO_FIMC
+comment "FIMC configurations"
+endif
+
 config VIDEO_FIMC
 	bool "Samsung Camera Interface (FIMC) driver"
 	depends on VIDEO_SAMSUNG

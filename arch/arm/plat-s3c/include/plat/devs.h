@@ -31,7 +31,8 @@ extern struct platform_device s3c_device_lcd;
 extern struct platform_device s3c_device_vpp;
 extern struct platform_device s3c_device_tvenc;
 extern struct platform_device s3c_device_tvscaler;
-extern struct platform_device s3c_device_mfc;
+extern struct platform_device s3c_device_rotator;
+extern struct platform_device s3c_device_jpeg;
 extern struct platform_device s3c_device_wdt;
 extern struct platform_device s3c_device_i2c0;
 extern struct platform_device s3c_device_i2c1;
@@ -57,6 +58,8 @@ extern struct platform_device s3c_device_smc911x;
 
 extern struct platform_device s3c_device_fimc0;
 extern struct platform_device s3c_device_fimc1;
+
+extern struct platform_device s3c_device_mfc;
 
 /* s3c2440 specific devices */
 
