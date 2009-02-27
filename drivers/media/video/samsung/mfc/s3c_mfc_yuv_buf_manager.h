@@ -1,9 +1,19 @@
+/* linux/driver/media/video/mfc/s3c_mfc_yuv_buf_manager.h
+ *
+ * Header file for Samsung MFC (Multi Function Codec - FIMV) driver 
+ *
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics 
+ * http://www.samsungsemi.com/ 
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
 #ifndef _S3C_MFC_YUV_BUF_MANAGER_H
 #define _S3C_MFC_YUV_BUF_MANAGER_H
 
-
 #include "s3c_mfc_types.h"
-
 
 BOOL            s3c_mfc_yuv_buf_mgr_init(unsigned char *pBufBase, int nBufSize);
 void            s3c_mfc_yuv_buffer_mgr_final(void);

@@ -1,19 +1,16 @@
-/*
- * Project Name MFC DRIVER 
- * Copyright  2007 Samsung Electronics Co, Ltd. All Rights Reserved. 
+/* linux/driver/media/video/mfc/s3c_mfc_yuv_buf_manager.c
  *
- * This software is the confidential and proprietary information
- * of Samsung Electronics  ("Confidential Information").   
- * you shall not disclose such Confidential Information and shall use
- * it only in accordance with the terms of the license agreement
- * you entered into with Samsung Electronics 
+ * C file for Samsung MFC (Multi Function Codec - FIMV) driver 
+ * This source file is for managing the YUV buffer.
  *
- * This source file is for managing the Frame buffer.
- *
- * @name MFC DRIVER MODULE Module (FramBufMgr.c)
- * @author name(email address)
- * @date 03-28-07
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics 
+ * http://www.samsungsemi.com/ 
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
  */
+
 #include <linux/slab.h>
 #include <linux/kernel.h>
 

@@ -1,12 +1,29 @@
+/* linux/driver/media/video/mfc/s3c_mfc_config.h
+ *
+ * Header file for Samsung MFC (Multi Function Codec - FIMV) driver 
+ *
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics 
+ * http://www.samsungsemi.com/ 
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
 #ifndef _S3C_MFC_CONFIG_H
 #define _S3C_MFC_CONFIG_H
 
-
-#include <plat/reserved_mem.h>
+#include <asm/types.h>
 
 /* Physical Base Address for the MFC Host I/F Registers */
 /* #define S3C6400_BASEADDR_MFC_SFR			0x7e002000 */
 /* #define MFC_RESERVED_MEM_START			0x57800000 */
+
+#ifndef S3C_MFC_PHYS_BUFFER_SET
+extern dma_addr_t s3c_mfc_phys_buffer;
+#endif
+
+#define MFC_RESERVED_MEM_START			s3c_mfc_phys_buffer
 
 /* 
  * Physical Base Address for the MFC Shared Buffer 

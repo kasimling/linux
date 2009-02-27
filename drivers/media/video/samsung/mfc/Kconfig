@@ -8,7 +8,3 @@ config VIDEO_MFC
 	default n
 	---help---
 	  This is a Multi Format Codecs (MFC) driver for Samsung S3C6400 and s3C6410.
-
-config VIDEV_MFC_DEBUG
-	bool "MFC driver debug messages"
-	depends on VIDEO_MFC

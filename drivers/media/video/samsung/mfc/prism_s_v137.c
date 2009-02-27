@@ -1,8 +1,18 @@
-//==============================================================================
-//    BIT ASSEMBLY CODE TABLE
-//      generated with <Prism.out>
-//      generated at Mon Sep 08 21:36:59 2008
-//==============================================================================
+/* linux/driver/media/video/mfc/prism_s_v137.c
+ *
+ * C file for Samsung MFC (Multi Function Codec - FIMV) driver 
+ * 	BIT ASSEMBLY CODE TABLE 
+ * 		generated with <Prism.out> 
+ * 		generated at Mon Sep 08 21:36:59 2008
+ *
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics 
+ * http://www.samsungsemi.com/ 
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
 const unsigned short s3c_mfc_bit_code[40960] = {
     0xe40e, 0x0022, 0xe470, 0xe190, 0xe470, 0xe190, 0xe470, 0xe190, 
     0xe470, 0xe190, 0xe40e, 0x0152, 0xe470, 0xe190, 0xe470, 0xe190, 

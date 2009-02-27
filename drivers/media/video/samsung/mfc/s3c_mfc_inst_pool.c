@@ -1,18 +1,14 @@
-/*
- * Project Name MFC DRIVER
- * Copyright (c) Samsung Electronics 
- * All right reserved.
+/* linux/driver/media/video/mfc/s3c_mfc_inst_pool.c
  *
- * This software is the confidential and proprietary information
- * of Samsung Electronics  ("Confidential Information").   
- * you shall not disclose such Confidential Information and shall use
- * it only in accordance with the terms of the license agreement
- * you entered into with Samsung Electronics 
- *
+ * C file for Samsung MFC (Multi Function Codec - FIMV) driver 
  * This file stores information about different instancesof MFC.
  *
- * @name MFC DRIVER MODULE Module (MFC_Inst_Pool.c)
- * @author Simon Chun (simon.chun@samsung.com)
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics 
+ * http://www.samsungsemi.com/ 
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
  */
 
 #include "s3c_mfc_config.h"

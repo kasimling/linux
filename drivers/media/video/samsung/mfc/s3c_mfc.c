@@ -1,3 +1,15 @@
+/* linux/driver/media/video/mfc/s3c_mfc.c
+ *
+ * C file for Samsung MFC (Multi Function Codec - FIMV) driver 
+ *
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics 
+ * http://www.samsungsemi.com/ 
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
 #include <linux/version.h>
 #include <linux/module.h>
 #include <linux/delay.h>
@@ -32,7 +44,7 @@
 #include <asm/page.h>
 #include <asm/pgtable.h>
 
-#include <plat/reserved_mem.h>
+//#include <plat/reserved_mem.h>
 #include <plat/regs-clock.h>
 #include <plat/regs-mfc.h>
 #include <plat/map.h>
@@ -45,6 +57,8 @@
 #include <asm/arch/kdpmd.h>
 #endif
 #endif
+
+#define S3C_MFC_PHYS_BUFFER_SET
 
 #include "s3c_mfc_base.h"
 #include "s3c_mfc_config.h"
@@ -114,6 +128,8 @@ DECLARE_WAIT_QUEUE_HEAD(s3c_mfc_wait_queue);
 static struct resource	*s3c_mfc_mem;
 void __iomem	*s3c_mfc_sfr_base_virt_addr;
 
+dma_addr_t s3c_mfc_phys_buffer;
+
 
 static irqreturn_t s3c_mfc_irq(int irq, void *dev_id)
 {
@@ -171,7 +187,7 @@ static int s3c_mfc_open(struct inode *inode, struct file *file)
 	if (!handle) {
 		printk(KERN_ERR "\n%s: mfc open error\n", __FUNCTION__);
 		mutex_unlock(s3c_mfc_mutex);
-		return -1;
+		return -ENOMEM;
 	}
 	memset(handle, 0, sizeof(s3c_mfc_handle_t));
 
@@ -183,7 +199,7 @@ static int s3c_mfc_open(struct inode *inode, struct file *file)
 	if (handle->mfc_inst == NULL) {
 		printk(KERN_ERR "\n%s: fail to mfc instance allocation\n", __FUNCTION__);
 		mutex_unlock(s3c_mfc_mutex);
-		return -1;
+		return -EPERM;
 	}
 
 	/*
@@ -209,7 +225,7 @@ static int s3c_mfc_release(struct inode *inode, struct file *file)
 	handle = (s3c_mfc_handle_t *)file->private_data;
 	if (handle->mfc_inst == NULL) {
 		mutex_unlock(s3c_mfc_mutex);
-		return -1;
+		return -EPERM;
 	};
 
 	printk(KERN_DEBUG "\n%s: deleting instance number = %d\n", __FUNCTION__, handle->mfc_inst->inst_no);
@@ -550,16 +566,16 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			mutex_lock(s3c_mfc_mutex);
 			printk(KERN_DEBUG "\n%s: requested ioctl command is not defined (ioctl cmd = 0x%x)\n", __FUNCTION__, cmd);
 			mutex_unlock(s3c_mfc_mutex);
-			return -EINVAL;
+			return -ENOIOCTLCMD;
 	}
 
 	switch (ret) {
 		case S3C_MFC_INST_RET_OK:
-			return TRUE;
+			return 0;
 		default:
-			return -1;
+			return -EPERM;
 	}
-	return -1;
+	return -EPERM;
 }
 
 int s3c_mfc_mmap(struct file *filp, struct vm_area_struct *vma)
@@ -666,6 +682,9 @@ static int s3c_mfc_probe(struct platform_device *pdev)
 		printk(KERN_ERR "\n%s: failed to install irq (%d)\n", __FUNCTION__, ret);
 		return ret;
 	}
+
+	s3c_mfc_phys_buffer = s3c_get_media_memory(S3C_MDEV_MFC);
+	//s3c_mfc_virt_buffer = ioremap_nocache(s3c_mfc_phys_buffer, s3c_get_media_memsize(S3C_MDEV_MFC))
 
 	/* mutex creation and initialization */
 	s3c_mfc_mutex = (struct mutex *)kmalloc(sizeof(struct mutex), GFP_KERNEL);
@@ -870,7 +889,7 @@ static int __init s3c_mfc_init(void)
 
 	if (platform_driver_register(&s3c_mfc_driver) != 0) {
 		printk(KERN_ERR "\n%s: fail to register platform device\n", __FUNCTION__);
-		return -1;
+		return -EPERM;
 	}
 
 	return 0;
