@@ -41,7 +41,11 @@
 #include <plat/regs-serial.h>
 #include <plat/gpio-cfg.h>
 #include <plat/regs-gpio.h>
+#if defined(CONFIG_PLAT_S5PC1XX)
 #include <plat/gpio-bank-a1.h>
+#elif defined(CONFIG_PLAT_S3C64XX)
+#include <plat/gpio-bank-b.h>
+#endif
 
 #include <asm/dma.h>
 #include <plat/dma.h>
@@ -81,7 +85,8 @@ struct s3c_irda {
 
         iobuff_t                tx_buff;
         iobuff_t                rx_buff;
-        unsigned int		sir_irq;
+        unsigned int		sir_irq_rx;
+        unsigned int		sir_irq_tx;
         
 	struct resource         *sir_mem;
         struct clk              *sir_clk;
@@ -96,7 +101,7 @@ struct s3c_irda {
 static const unsigned int nSlotTable[16] = {0x0000,0x0080,0x0808,0x8888,0x2222,0x4924,0x4a52,0x54aa,
 				     0x5555,0xd555,0xd5d5,0xddd5,0xdddd,0xdfdd,0xdfdf,0xffdf};
 
-#if defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410)
+#if defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410) || defined(CONFIG_CPU_S5PC100)
 /* UART3 port has been reserved for Irda */
 #define sir_writereg(val,reg) writel(val, (S3C24XX_VA_UART3 + reg))
 #define sir_readreg(reg)  readl(S3C24XX_VA_UART3 + reg)
@@ -117,11 +122,11 @@ extern void clk_disable(struct clk *clk);
 static void  s3c_irda_gpio_conf(void)
 {
 #if defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410)
-	gpio_set_pin(S3C_GPB3, S3C_GPB3_UART_TXD3);
-	gpio_set_pin(S3C_GPB2, S3C_GPB2_UART_RXD3);
+	s3c_gpio_cfgpin(S3C64XX_GPB(2), S3C64XX_GPB2_UART_RXD3);
+	s3c_gpio_cfgpin(S3C64XX_GPB(3), S3C64XX_GPB3_UART_TXD3);
 #elif defined(CONFIG_CPU_S5PC100)
-	s3c_gpio_cfgpin(S5PC1XX_GPA1(0), S5PC1XX_GPA1_0_UART_2_RXD);
-	s3c_gpio_cfgpin(S5PC1XX_GPA1(1), S5PC1XX_GPA1_1_UART_2_TXD);
+	s3c_gpio_cfgpin(S5PC1XX_GPA1(2), S5PC1XX_GPA1_2_UART_3_RXD);
+	s3c_gpio_cfgpin(S5PC1XX_GPA1(3), S5PC1XX_GPA1_3_UART_3_TXD);
 #endif
 }
 
@@ -135,6 +140,7 @@ static int s3c_irda_sir_init(struct s3c_irda *si)
         /* Enable uart clock */
         clk_enable(si->sir_clk);
 
+	/* Setup the GPIOs */
 	s3c_irda_gpio_conf();
 
 	ulcon = S3C_LCON_IRM | S3C_LCON_PNONE | S3C_LCON_CS8;
@@ -157,13 +163,14 @@ static int s3c_irda_sir_stop(struct s3c_irda *si)
 {
         DBG("%s\r\n", __FUNCTION__);
 
-	disable_irq(si->sir_irq);
+	disable_irq(si->sir_irq_rx);
+	disable_irq(si->sir_irq_tx);
 
         sir_writereg(0, S3C_ULCON);
         sir_writereg(0, S3C_UFCON);
         sir_writereg(0, S3C_UCON);
 
-        /* disable  uart clock */
+        /* Disable the uart clock */
         clk_disable(si->sir_clk);
 
         return 0;
@@ -259,20 +266,17 @@ static int s3c_irda_startup(struct s3c_irda *si)
 {
         int ret;
 
-        /*
-         * Ensure that the ports for this device are setup correctly.
-         */
-
+        
         DBG("%s\r\n", __FUNCTION__);
 
+        /* Ensure that the ports for this device are setup correctly */
 #if defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410)
-        gpio_pullup(S3C_GPB3, 1);
-        gpio_pullup(S3C_GPB2, 1);
+        s3c_gpio_setpull(S3C64XX_GPB(2), S3C_GPIO_PULL_UP);
+        s3c_gpio_setpull(S3C64XX_GPB(3), S3C_GPIO_PULL_UP);
 #elif defined(CONFIG_CPU_S5PC100)
-        s3c_gpio_setpull(S5PC1XX_GPA1(0), S3C_GPIO_PULL_UP);
-        s3c_gpio_setpull(S5PC1XX_GPA1(1), S3C_GPIO_PULL_UP);
+        s3c_gpio_setpull(S5PC1XX_GPA1(2), S3C_GPIO_PULL_UP);
+        s3c_gpio_setpull(S5PC1XX_GPA1(3), S3C_GPIO_PULL_UP);
 #endif
-
 
         ret = s3c_irda_sir_init(si);
         if(ret) {
@@ -295,7 +299,7 @@ static void s3c_irda_shutdown(struct s3c_irda *si)
 }
 
 
-#ifdef CONFIG_PM
+#if defined(CONFIG_PM)
 /*
  * Suspend the IrDA interface.
  */
@@ -311,9 +315,7 @@ static int s3c_irda_suspend(struct platform_device *pdev, pm_message_t state)
 
         si = dev->priv;
         if (si->open) {
-                /*
-                 * Stop the transmit queue
-                 */
+                /* Stop the transmit queue */
                 netif_device_detach(dev);
                 s3c_irda_shutdown(si);
                 __s3c_irda_set_power(si, 0);
@@ -353,9 +355,8 @@ static int s3c_irda_resume(struct platform_device *pdev)
                 s3c_irda_startup(si);
                 __s3c_irda_set_power(si, si->power);
 
-                /*
-                 * This automatically wakes up the queue
-                 */
+                
+                /* This automatically wakes up the queue */
                 netif_device_attach(dev);
         }
 
@@ -378,10 +379,8 @@ static irqreturn_t  s3c_irda_sir_irq(int irq, void *dev_id)
         int err_status;
 
         u8 data;
-	u32 ucon, ufcon, ufstat, intpnd;
+	u32 ucon, ufcon, ufstat;
 
-	intpnd = sir_readreg(S3C_UINTPND);
-        DBG("%s == 0x%1x\r\n", __FUNCTION__, sir_readreg(S3C_UINTPND));
 
         err_status = sir_readreg(S3C_UERSTAT);
 
@@ -391,15 +390,8 @@ static irqreturn_t  s3c_irda_sir_irq(int irq, void *dev_id)
                 si->stats.rx_errors++;
                 si->stats.rx_frame_errors++;
         }
-	if(intpnd & UART_ERR_INT){
-		printk(KERN_DEBUG "Uart Error = 0x%1x", intpnd);
-		sir_writereg(UART_ERR_INT, S3C_UINTPND);
-		sir_readreg(S3C_UINTPND);
-	}
-    	if(intpnd & UART_RX_INT) {
-		DBG("Rx intr : 0x%1x\n", intpnd);
-		sir_writereg(UART_RX_INT, S3C_UINTPND);
-		sir_readreg(S3C_UINTPND);
+
+	if(irq == si->sir_irq_rx){
 		DBG("Rx intr : 0x%1x\n", intpnd);
 
                 while ((sir_readreg(S3C_UFSTAT) & 0X3F) > 0) {
@@ -414,74 +406,62 @@ static irqreturn_t  s3c_irda_sir_irq(int irq, void *dev_id)
 		sir_writereg(ufcon, S3C_UFCON);
         }
 
-	if(intpnd & UART_TX_INT) {
+	if(irq == si->sir_irq_tx) {
 		DBG("Tx intr : 0x%1x\n", intpnd);
-		sir_writereg(UART_TX_INT , S3C_UINTPND);
-		sir_readreg(S3C_UINTPND);
-		DBG("Tx intr : 0x%1x\n", intpnd);
-
-      	 	if(si->tx_buff.len > 0) {
-
-                	ufstat = sir_readreg(S3C_UFSTAT);
+		
+		if(si->tx_buff.len > 0) {
+               		ufstat = sir_readreg(S3C_UFSTAT);
                 
-	                /* Transmitter FIFO is not full */
-                	while (!(ufstat & (1 << 14)) ) {
+		        /* Transmitter FIFO is not full */
+        	       	while (!(ufstat & (1 << 14)) ) {
 				while(!(sir_readreg(S3C_UTRSTAT) & 0x02));
 				sir_writereg(*si->tx_buff.data++, S3C_UTXH);
-                       	 	if(si->tx_buff.len == 0)
-                               		 break;
-                        	si->tx_buff.len -= 1;
+	              	 	if(si->tx_buff.len == 0)
+        	                	break;
+         		        si->tx_buff.len -= 1;
                         	rmb();
-                        	ufstat = sir_readreg(S3C_UFSTAT);
-			}
+	                        ufstat = sir_readreg(S3C_UFSTAT);
+				}
 
                 	if (si->tx_buff.len == 0) {
-                        	si->stats.tx_packets++;
-                       		si->stats.tx_bytes += si->tx_buff.data -
-                                              si->tx_buff.head;
+                       		si->stats.tx_packets++;
+	               		si->stats.tx_bytes += si->tx_buff.data -
+        	  			              si->tx_buff.head;
+	
+        	     	 /* We need to ensure that the transmitter has finished */
+                	 do {
+                 		rmb();
+	                       	ufstat = sir_readreg(S3C_UFSTAT);
+        	       	} while (((ufstat >> 8) & 0x3f) > 0);
 
-                        	/*
-                        	 * We need to ensure that the transmitter has
-                         	* finished.
-                         	*/
-                        	do {
-                                	rmb();
-                                	ufstat = sir_readreg(S3C_UFSTAT);
-                        	} while (((ufstat >> 8) & 0x3f) > 0);
+               
+              		/* Transmission complete.  Now enable the receiver.  
+	 		 * Sometimes we get a receive IRQ immediately after a transmit 
+ 		         */
+              
+	               	ufcon = sir_readreg(S3C_UFCON);
+        	       	ufcon |= 7;
+               		sir_writereg(ufcon, S3C_UFCON);
 
-                        	/*
-                         	* Ok, we've finished transmitting.  Now enable
-                         	* the receiver.  Sometimes we get a receive IRQ
-                        	 * immediately after a transmit...
-                         	*/
-                         	ufcon = sir_readreg(S3C_UFCON);
-                        	ufcon |= 7;
-                        	sir_writereg(ufcon, S3C_UFCON);
+	               	ucon = sir_readreg(S3C_UCON);
+        	      	ucon &= ~( 3 << 2);
+               		sir_writereg(ucon, S3C_UCON);
 
-                        	ucon = sir_readreg(S3C_UCON);
-                        	ucon &= ~( 3 << 2);
-                        	sir_writereg(ucon, S3C_UCON);
+	               	if (si->newspeed) {
+        	               	s3c_irda_set_speed(si, si->newspeed);
+                	       	si->newspeed = 0;
+               		}
 
-                        	if (si->newspeed) {
-                                	s3c_irda_set_speed(si, si->newspeed);
-                                	si->newspeed = 0;
-                        	}
+      	 		if (1) {
+                      		ucon |= 1;
+	                      	sir_writereg(ucon, S3C_UCON);
+        	             	}
 
-                       	 	if (1) {
-                                	ucon |= 1;
-                                	sir_writereg(ucon, S3C_UCON);
-                        	}
-
-                        	netif_wake_queue(dev);
-                }
-              }
-        }
-	if(intpnd & UART_MODEM_INT) {
-		printk("MODEM interrupt ...\n");
+               		netif_wake_queue(dev);
+			}
+		}
 	}
-
         return IRQ_HANDLED;
-
 }
 
 static int s3c_irda_hard_xmit(struct sk_buff *skb, struct net_device *dev)
@@ -501,9 +481,9 @@ static int s3c_irda_hard_xmit(struct sk_buff *skb, struct net_device *dev)
 
                 si->newspeed = speed;
         }
-        /*
-         * If this is an empty frame, we can bypass a lot.
-         */
+        
+        /* If this is an empty frame, we can bypass a lot */
+         
         if (skb->len == 0) {
                 if (si->newspeed) {
                         si->newspeed = 0;
@@ -534,8 +514,6 @@ static int s3c_irda_hard_xmit(struct sk_buff *skb, struct net_device *dev)
 		 * UCON  : Receive Mode Disable 
 		 */
                 ucon = sir_readreg(S3C_UCON);
-
-                /* UCON  : Receive Mode Disable */
                 ucon &= ~( 3); 
                 sir_writereg(ucon, S3C_UCON);
 
@@ -568,10 +546,8 @@ static int s3c_irda_ioctl(struct net_device *dev, struct ifreq *ifreq, int cmd)
         case SIOCSBANDWIDTH:
 
                 if (capable(CAP_NET_ADMIN)) {
-                        /*
-                         * We are unable to set the speed if the
-                         * device is not running.
-                         */
+                        
+                        /* We are unable to set the speed if the device is not running */
                         if (si->open) {
                                 ret = s3c_irda_set_speed(si,
                                                 rq->ifr_baudrate);
@@ -620,35 +596,36 @@ static int s3c_irda_start(struct net_device *dev)
 
         si->speed = 9600;
 	
-	err = request_irq(si->sir_irq, s3c_irda_sir_irq, 0, dev->name, dev);
+	err = request_irq(si->sir_irq_rx, s3c_irda_sir_irq, 0, dev->name, dev);
 	if (err)
                 goto err_irq1;
 
-        /*
-         * The interrupt must remain disabled for now.
-         */
-	disable_irq(si->sir_irq);
+        err = request_irq(si->sir_irq_tx, s3c_irda_sir_irq, 0, dev->name, dev);
+          if (err)                                                     
+                  goto err_irq1; 
 
-        /*
-         * Setup the serial port for the specified speed.
-         */
+        /* The interrupt must remain disabled for now */
+	disable_irq(si->sir_irq_rx);
+        disable_irq(si->sir_irq_tx);
+
+        
+        /* Setup the serial port for the specified speed */
         err = s3c_irda_startup(si);
         if (err)
                 goto err_irq2;
 
-        /*
-         * Open a new IrLAP layer instance.
-         */
+        
+        /* Open a new IrLAP layer instance */
         si->irlap = irlap_open(dev, &si->qos, "s3c");
 
         err = -ENOMEM;
         if (!si->irlap)
                 goto err_irlap;
 
-        /*
-         * Now enable the interrupt and start the queue
-         */
-	enable_irq(si->sir_irq);
+        
+        /* Now enable the interrupt and start the queue */
+	enable_irq(si->sir_irq_rx);
+	enable_irq(si->sir_irq_tx);
         si->open = 1;
         netif_start_queue(dev);
 	sir_writereg(0, S3C_UINTMSK); 
@@ -659,7 +636,8 @@ err_irlap:
         si->open = 0;
         s3c_irda_shutdown(si);
 err_irq2:
-        free_irq(si->sir_irq, dev);
+        free_irq(si->sir_irq_rx, dev);
+        free_irq(si->sir_irq_tx, dev);
 err_irq1:
         return err;
 }
@@ -670,14 +648,12 @@ static int s3c_irda_stop(struct net_device *dev)
 
         DBG("%s\r\n", __FUNCTION__);
 
-	disable_irq(si->sir_irq);
+	disable_irq(si->sir_irq_rx);
+        disable_irq(si->sir_irq_tx);
 
         s3c_irda_shutdown(si);
 
-        /*
-         * If we have been doing DMA receive, make sure we
-         * tidy that up cleanly.
-         */
+        /* Clean up */
         if (si->rxskb) {
                 dev_kfree_skb(si->rxskb);
                 si->rxskb = NULL;
@@ -750,11 +726,7 @@ static int s3c_irda_init_clk(struct device *dev,
         int ret;
         DBG("%s   \r\n", __FUNCTION__);
 
-#if defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410)
-        si->sir_clk = clk_get(dev, "UART2");
-#elif defined(CONFIG_CPU_S5PC100)
         si->sir_clk = clk_get(dev, "uart");
-#endif
 
         if (IS_ERR(si->sir_clk)) {
                 DBG(KERN_INFO PFX "failed to find sir clock source.\n");
@@ -825,12 +797,19 @@ static int s3c_irda_probe(struct platform_device *pdev)
         dev->do_ioctl           = s3c_irda_ioctl;
         dev->get_stats          = s3c_irda_stats;
         
-	si->sir_irq = platform_get_irq(pdev, 0);
+	si->sir_irq_rx = platform_get_irq(pdev, 0);
 
-        if (si->sir_irq == 0) {
-                printk("failed to get interrupt resouce.\n");
+        if (si->sir_irq_rx == 0) {
+                printk("failed to get rx interrupt resource.\n");
                 goto err_irq;
         }
+
+	si->sir_irq_tx = platform_get_irq(pdev, 1);                              
+                                                           
+        if (si->sir_irq_tx == 0) {                        
+                printk("failed to get tx interrupt resource.\n");   
+                goto err_irq;                                 
+        }                      
 
         if(s3c_irda_init_clk(&pdev->dev, si)!= 0)
                     goto err_irq;
@@ -855,7 +834,7 @@ static int s3c_irda_probe(struct platform_device *pdev)
         sir_writereg(0, S3C_ULCON);
 
         err = register_netdev(dev);
-        if (err == 0){
+        if (err == 0) {
                 platform_set_drvdata(pdev, dev);
         	DBG("%s success \r\n", __FUNCTION__);
 	}
@@ -905,7 +884,7 @@ static struct platform_driver s3c_irda_driver = {
 	},
 };
 
-static char banner[] = KERN_INFO "S3C IrDA driver, (c) 2006 Samsung Electronics\n";
+static char banner[] = KERN_INFO "S3C IrDA driver, (c) 2009 Samsung Electronics\n";
 
 static int __init s3c_irda_init(void)
 {
@@ -917,7 +896,6 @@ static int __init s3c_irda_init(void)
 
 static void __exit s3c_irda_exit(void)
 {
-        DBG("%s\r\n", __FUNCTION__);
         platform_driver_unregister(&s3c_irda_driver);
 }
 
@@ -925,7 +903,7 @@ static void __exit s3c_irda_exit(void)
 module_init(s3c_irda_init);
 module_exit(s3c_irda_exit);
 
-MODULE_AUTHOR("alinuxguy <alinuxguy@samsung.com>");
+MODULE_AUTHOR("SAMSUNG");
 MODULE_DESCRIPTION("S3C IrDA driver");
 MODULE_LICENSE("GPL");
 
