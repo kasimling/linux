@@ -3,7 +3,7 @@
 #
 
 config VIDEO_MFC
-	bool "Samsung MFC Driver" 
+	bool "Samsung MFC (Multi Format Codec) Driver" 
 	depends on VIDEO_SAMSUNG && (CPU_S3C6410 || CPU_S3C6400)
 	default n
 	---help---
