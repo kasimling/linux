@@ -693,7 +693,7 @@ v2.6.28.6-s3c64xx-r0d5: SungJun Bae
 		M	drivers/media/video/samsung/post/s3c_pp_6400.c
 		M	drivers/media/video/samsung/tv/s3c-tvscaler.h
 
-v2.6.28.6-s3c64xx-r0d6: PyoungJae Jung, Yujiun U
+v2.6.28.6-s3c64xx-r0d6: PyoungJae Jung, Jiun Yu
 	- MFC support for SMDK6410
 	- It support bootmem for large buffer memory
 	- changed coding style to linux kernel coding style
