@@ -66,29 +66,29 @@ int s3c_mfc_wakeup()
 static char *s3c_mfc_get_cmd_string(s3c_mfc_command_t mfc_cmd)
 {
 	switch ((int)mfc_cmd) {
-		case SEQ_INIT:
-			return "SEQ_INIT";
+	case SEQ_INIT:
+		return "SEQ_INIT";
 
-		case SEQ_END:
-			return "SEQ_END";
+	case SEQ_END:
+		return "SEQ_END";
 
-		case PIC_RUN:
-			return "PIC_RUN";
+	case PIC_RUN:
+		return "PIC_RUN";
 
-		case SET_FRAME_BUF:
-			return "SET_FRAME_BUF";
+	case SET_FRAME_BUF:
+		return "SET_FRAME_BUF";
 
-		case ENC_HEADER:
-			return "ENC_HEADER";
+	case ENC_HEADER:
+		return "ENC_HEADER";
 
-		case ENC_PARA_SET:
-			return "ENC_PARA_SET";
+	case ENC_PARA_SET:
+		return "ENC_PARA_SET";
 
-		case DEC_PARA_SET:
-			return "DEC_PARA_SET";
+	case DEC_PARA_SET:
+		return "DEC_PARA_SET";
 
-		case GET_FW_VER:
-			return "GET_FW_VER";
+	case GET_FW_VER:
+		return "GET_FW_VER";
 
 	}
 
@@ -150,37 +150,39 @@ BOOL s3c_mfc_issue_command(int inst_no, s3c_mfc_codec_mode_t codec_mode, s3c_mfc
 	}
 
 	switch (mfc_cmd) {
-		case PIC_RUN:
-		case SEQ_INIT:
-		case SEQ_END:
-			writel(mfc_cmd, s3c_mfc_sfr_base_virt_addr + S3C_MFC_RUN_CMD);
+	case PIC_RUN:
+	case SEQ_INIT:
+	case SEQ_END:
+		writel(mfc_cmd, s3c_mfc_sfr_base_virt_addr + S3C_MFC_RUN_CMD);
 
-			if(interruptible_sleep_on_timeout(&s3c_mfc_wait_queue, 500) == 0)
-			{
-				s3c_mfc_stream_end();
-				return FALSE; 
-			}
+		if(interruptible_sleep_on_timeout(&s3c_mfc_wait_queue, 500) == 0) {
+			s3c_mfc_stream_end();
+			return FALSE; 
+		}
 
-			intr_reason = s3c_mfc_intr_type;
+		intr_reason = s3c_mfc_intr_type;
 
-			if (intr_reason == S3C_MFC_INTR_REASON_INTRNOTI_TIMEOUT) {
-				printk(KERN_ERR "\n%s: command = %s, WaitInterruptNotification returns TIMEOUT\n", __FUNCTION__, s3c_mfc_get_cmd_string(mfc_cmd));
-				return FALSE;
-			}
-			if (intr_reason & S3C_MFC_INTR_REASON_BUFFER_EMPTY) {
-				printk(KERN_ERR "\n%s: command = %s, BUFFER EMPTY interrupt was raised\n", __FUNCTION__, s3c_mfc_get_cmd_string(mfc_cmd));
-				return FALSE;
-			}
-			break;
+		if (intr_reason == S3C_MFC_INTR_REASON_INTRNOTI_TIMEOUT) {
+			printk(KERN_ERR "\n%s: command = %s, WaitInterruptNotification returns TIMEOUT\n", __FUNCTION__,  \
+											s3c_mfc_get_cmd_string(mfc_cmd));
+			return FALSE;
+		}
+		if (intr_reason & S3C_MFC_INTR_REASON_BUFFER_EMPTY) {
+			printk(KERN_ERR "\n%s: command = %s, BUFFER EMPTY interrupt was raised\n", __FUNCTION__, 	  \
+											s3c_mfc_get_cmd_string(mfc_cmd));
+			return FALSE;
+		}
+		break;
 
-		default:
-			if (s3c_mfc_wait_for_ready() == FALSE) {
-				printk(KERN_ERR "\n%s: command = %s, bitprocessor is busy before issuing the command\n", __FUNCTION__, s3c_mfc_get_cmd_string(mfc_cmd));
-				return FALSE;
-			}
+	default:
+		if (s3c_mfc_wait_for_ready() == FALSE) {
+			printk(KERN_ERR "\n%s: command = %s, bitprocessor is busy before issuing the command\n", 	  \
+										__FUNCTION__, s3c_mfc_get_cmd_string(mfc_cmd));
+			return FALSE;
+		}
 
-			writel(mfc_cmd, s3c_mfc_sfr_base_virt_addr + S3C_MFC_RUN_CMD);
-			s3c_mfc_wait_for_ready();
+		writel(mfc_cmd, s3c_mfc_sfr_base_virt_addr + S3C_MFC_RUN_CMD);
+		s3c_mfc_wait_for_ready();
 
 	} 
 
@@ -292,7 +294,8 @@ void s3c_mfc_config_sfr_ctrl_opts(void)
 
 	/* BIT STREAM BUFFER CONTROL (BASE + 0x10C) */
 	uRegData = readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_STRM_BUF_CTRL);
-	writel((uRegData & ~(0x03)) | S3C_MFC_BUF_STATUS_FULL_EMPTY_CHECK_BIT | S3C_MFC_STREAM_ENDIAN_LITTLE, s3c_mfc_sfr_base_virt_addr + S3C_MFC_STRM_BUF_CTRL);
+	writel((uRegData & ~(0x03)) | S3C_MFC_BUF_STATUS_FULL_EMPTY_CHECK_BIT | S3C_MFC_STREAM_ENDIAN_LITTLE, 	\
+								s3c_mfc_sfr_base_virt_addr + S3C_MFC_STRM_BUF_CTRL);
 
 	/* FRAME MEMORY CONTROL  (BASE + 0x110) */
 	writel(S3C_MFC_YUV_MEM_ENDIAN_LITTLE, s3c_mfc_sfr_base_virt_addr + S3C_MFC_FRME_BUF_CTRL);

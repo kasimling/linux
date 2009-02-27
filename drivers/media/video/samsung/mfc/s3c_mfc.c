@@ -293,287 +293,299 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 	pMfcInst = handle->mfc_inst;
 
 	switch (cmd) {
-		case S3C_MFC_IOCTL_MFC_MPEG4_ENC_INIT:
-		case S3C_MFC_IOCTL_MFC_H264_ENC_INIT:
-		case S3C_MFC_IOCTL_MFC_H263_ENC_INIT:
-			mutex_lock(s3c_mfc_mutex);
+	case S3C_MFC_IOCTL_MFC_MPEG4_ENC_INIT:
+	case S3C_MFC_IOCTL_MFC_H264_ENC_INIT:
+	case S3C_MFC_IOCTL_MFC_H263_ENC_INIT:
+		mutex_lock(s3c_mfc_mutex);
 
-			printk(KERN_DEBUG "\n%s: cmd = %d\n", __FUNCTION__, cmd);
+		printk(KERN_DEBUG "\n%s: cmd = %d\n", __FUNCTION__, cmd);
 
-			out = copy_from_user(&args.enc_init, (s3c_mfc_enc_init_arg_t *)arg, sizeof(s3c_mfc_enc_init_arg_t));
+		out = copy_from_user(&args.enc_init, (s3c_mfc_enc_init_arg_t *)arg, sizeof(s3c_mfc_enc_init_arg_t));
 
-			if ( cmd == S3C_MFC_IOCTL_MFC_MPEG4_ENC_INIT )
-				codec_mode = MP4_ENC;
-			else if ( cmd == S3C_MFC_IOCTL_MFC_H264_ENC_INIT )
-				codec_mode = AVC_ENC;
-			else if ( cmd == S3C_MFC_IOCTL_MFC_H263_ENC_INIT )
-				codec_mode = H263_ENC;
+		if ( cmd == S3C_MFC_IOCTL_MFC_MPEG4_ENC_INIT )
+			codec_mode = MP4_ENC;
+		else if ( cmd == S3C_MFC_IOCTL_MFC_H264_ENC_INIT )
+			codec_mode = AVC_ENC;
+		else if ( cmd == S3C_MFC_IOCTL_MFC_H263_ENC_INIT )
+			codec_mode = H263_ENC;
 
-			/* 
-			 * Initialize MFC Instance
-			 */
-			enc_info.width			= args.enc_init.in_width;
-			enc_info.height			= args.enc_init.in_height;
-			enc_info.bitrate		= args.enc_init.in_bitrate;
-			enc_info.gop_number		= args.enc_init.in_gopNum;
-			enc_info.frame_rate_residual	= args.enc_init.in_frameRateRes;
-			enc_info.frame_rate_division	= args.enc_init.in_frameRateDiv;
+		/* 
+		 * Initialize MFC Instance
+		 */
+		enc_info.width			= args.enc_init.in_width;
+		enc_info.height			= args.enc_init.in_height;
+		enc_info.bitrate		= args.enc_init.in_bitrate;
+		enc_info.gop_number		= args.enc_init.in_gopNum;
+		enc_info.frame_rate_residual	= args.enc_init.in_frameRateRes;
+		enc_info.frame_rate_division	= args.enc_init.in_frameRateDiv;
 
-			/*
-			enc_info.intraqp	= args.enc_init.in_intraqp;
-			enc_info.qpmax		= args.enc_init.in_qpmax;
-			enc_info.gamma		= args.enc_init.in_gamma;
-			*/
+		/*
+		enc_info.intraqp	= args.enc_init.in_intraqp;
+		enc_info.qpmax		= args.enc_init.in_qpmax;
+		enc_info.gamma		= args.enc_init.in_gamma;
+		*/
 
-			ret = s3c_mfc_instance_enc_init(pMfcInst, codec_mode, &enc_info);
+		ret = s3c_mfc_instance_enc_init(pMfcInst, codec_mode, &enc_info);
 
-			args.enc_init.ret_code = ret;
-			out = copy_to_user((s3c_mfc_enc_init_arg_t *)arg, &args.enc_init, sizeof(s3c_mfc_enc_init_arg_t));
+		args.enc_init.ret_code = ret;
+		out = copy_to_user((s3c_mfc_enc_init_arg_t *)arg, &args.enc_init, sizeof(s3c_mfc_enc_init_arg_t));
 
+		mutex_unlock(s3c_mfc_mutex);
+		break;
+
+	case S3C_MFC_IOCTL_MFC_MPEG4_ENC_EXE:
+	case S3C_MFC_IOCTL_MFC_H264_ENC_EXE:
+	case S3C_MFC_IOCTL_MFC_H263_ENC_EXE:
+		mutex_lock(s3c_mfc_mutex);
+
+		out = copy_from_user(&args.enc_exe, (s3c_mfc_enc_exe_arg_t *)arg, sizeof(s3c_mfc_enc_exe_arg_t));
+
+		tmp = (pMfcInst->width * pMfcInst->height * 3) >> 1;
+		dmac_clean_range(pMfcInst->yuv_buffer, pMfcInst->yuv_buffer + tmp);
+		outer_clean_range(__pa(pMfcInst->yuv_buffer), __pa(pMfcInst->yuv_buffer + tmp));
+
+		/* 
+		 * Decode MFC Instance
+		 */
+		ret = s3c_mfc_instance_encode(pMfcInst, &nStrmLen, &nHdrLen);
+
+		dmac_clean_range(pMfcInst->stream_buffer, pMfcInst->stream_buffer + S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE);
+		outer_clean_range(__pa(pMfcInst->stream_buffer), 		\
+						__pa(pMfcInst->stream_buffer + S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
+
+		args.enc_exe.ret_code	= ret;
+		if (ret == S3C_MFC_INST_RET_OK) {
+			args.enc_exe.out_encoded_size = nStrmLen;
+			args.enc_exe.out_header_size  = nHdrLen;
+		}
+		out = copy_to_user((s3c_mfc_enc_exe_arg_t *)arg, &args.enc_exe, sizeof(s3c_mfc_enc_exe_arg_t));
+
+		mutex_unlock(s3c_mfc_mutex);
+		break;
+
+	case S3C_MFC_IOCTL_MFC_MPEG4_DEC_INIT:
+	case S3C_MFC_IOCTL_MFC_H264_DEC_INIT:
+	case S3C_MFC_IOCTL_MFC_H263_DEC_INIT:
+	case S3C_MFC_IOCTL_MFC_VC1_DEC_INIT:
+		mutex_lock(s3c_mfc_mutex);
+
+		out = copy_from_user(&args.dec_init, (s3c_mfc_dec_init_arg_t *)arg, sizeof(s3c_mfc_dec_init_arg_t));
+
+		if ( cmd == S3C_MFC_IOCTL_MFC_MPEG4_DEC_INIT )
+			codec_mode = MP4_DEC;
+		else if ( cmd == S3C_MFC_IOCTL_MFC_H264_DEC_INIT )
+			codec_mode = AVC_DEC;
+		else if ( cmd == S3C_MFC_IOCTL_MFC_H263_DEC_INIT)
+			codec_mode = H263_DEC;
+		else {
+			codec_mode = VC1_DEC;
+		}
+
+		/* 
+		 * Initialize MFC Instance
+		 */
+		ret = s3c_mfc_instance_dec_init(pMfcInst, codec_mode, args.dec_init.in_strmSize);
+
+		args.dec_init.ret_code	= ret;
+		if (ret == S3C_MFC_INST_RET_OK) {
+			args.dec_init.out_width	     = pMfcInst->width;
+			args.dec_init.out_height     = pMfcInst->height;
+			args.dec_init.out_buf_width  = pMfcInst->buf_width;
+			args.dec_init.out_buf_height = pMfcInst->buf_height;
+		}
+		out = copy_to_user((s3c_mfc_dec_init_arg_t *)arg, &args.dec_init, sizeof(s3c_mfc_dec_init_arg_t));
+
+		mutex_unlock(s3c_mfc_mutex);
+		break;
+
+	case S3C_MFC_IOCTL_MFC_MPEG4_DEC_EXE:
+	case S3C_MFC_IOCTL_MFC_H264_DEC_EXE:
+	case S3C_MFC_IOCTL_MFC_H263_DEC_EXE:
+	case S3C_MFC_IOCTL_MFC_VC1_DEC_EXE:
+		mutex_lock(s3c_mfc_mutex);
+
+		out = copy_from_user(&args.dec_exe, (s3c_mfc_dec_exe_arg_t *)arg, sizeof(s3c_mfc_dec_exe_arg_t));
+
+		dmac_clean_range(pMfcInst->stream_buffer, pMfcInst->stream_buffer + S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE);
+		outer_clean_range(__pa(pMfcInst->stream_buffer), 			\
+						__pa(pMfcInst->stream_buffer + S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
+
+		ret = s3c_mfc_instance_decode(pMfcInst, args.dec_exe.in_strmSize);
+
+		args.dec_exe.ret_code = ret;
+		out = copy_to_user((s3c_mfc_dec_exe_arg_t *)arg, &args.dec_exe, sizeof(s3c_mfc_dec_exe_arg_t));
+
+		mutex_unlock(s3c_mfc_mutex);
+		break;
+
+	case S3C_MFC_IOCTL_MFC_GET_LINE_BUF_ADDR:
+		mutex_lock(s3c_mfc_mutex);
+
+		out = copy_from_user(&args.get_buf_addr, (s3c_mfc_get_buf_addr_arg_t *)arg, sizeof(s3c_mfc_get_buf_addr_arg_t));
+
+		ret = s3c_mfc_instance_get_line_buffer(pMfcInst, &OutBuf, &buf_size);
+
+		args.get_buf_addr.out_buf_size	= buf_size;
+		args.get_buf_addr.out_buf_addr	= args.get_buf_addr.in_usr_data + (OutBuf - s3c_mfc_get_databuf_virt_addr());
+		args.get_buf_addr.ret_code	= ret;
+
+		out = copy_to_user((s3c_mfc_get_buf_addr_arg_t *)arg, &args.get_buf_addr, sizeof(s3c_mfc_get_buf_addr_arg_t));
+
+		mutex_unlock(s3c_mfc_mutex);
+		break;
+
+	case S3C_MFC_IOCTL_MFC_GET_YUV_BUF_ADDR:
+		mutex_lock(s3c_mfc_mutex);
+
+		out = copy_from_user(&args.get_buf_addr, (s3c_mfc_get_buf_addr_arg_t *)arg, sizeof(s3c_mfc_get_buf_addr_arg_t));
+
+		if (pMfcInst->yuv_buffer == NULL) {
+			printk(KERN_ERR "\n%s: mfc frame buffer is not internally allocated yet\n", __FUNCTION__);
 			mutex_unlock(s3c_mfc_mutex);
-			break;
+			return -EFAULT;
+		}
 
-		case S3C_MFC_IOCTL_MFC_MPEG4_ENC_EXE:
-		case S3C_MFC_IOCTL_MFC_H264_ENC_EXE:
-		case S3C_MFC_IOCTL_MFC_H263_ENC_EXE:
-			mutex_lock(s3c_mfc_mutex);
-
-			out = copy_from_user(&args.enc_exe, (s3c_mfc_enc_exe_arg_t *)arg, sizeof(s3c_mfc_enc_exe_arg_t));
-
-			tmp = (pMfcInst->width * pMfcInst->height * 3) >> 1;
-			dmac_clean_range(pMfcInst->yuv_buffer, pMfcInst->yuv_buffer + tmp);
-			outer_clean_range(__pa(pMfcInst->yuv_buffer), __pa(pMfcInst->yuv_buffer + tmp));
-
-			/* 
-			 * Decode MFC Instance
-			 */
-			ret = s3c_mfc_instance_encode(pMfcInst, &nStrmLen, &nHdrLen);
-
-			dmac_clean_range(pMfcInst->stream_buffer, pMfcInst->stream_buffer + S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE);
-			outer_clean_range(__pa(pMfcInst->stream_buffer), __pa(pMfcInst->stream_buffer + S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
-
-			args.enc_exe.ret_code	= ret;
-			if (ret == S3C_MFC_INST_RET_OK) {
-				args.enc_exe.out_encoded_size = nStrmLen;
-				args.enc_exe.out_header_size  = nHdrLen;
-			}
-			out = copy_to_user((s3c_mfc_enc_exe_arg_t *)arg, &args.enc_exe, sizeof(s3c_mfc_enc_exe_arg_t));
-
-			mutex_unlock(s3c_mfc_mutex);
-			break;
-
-		case S3C_MFC_IOCTL_MFC_MPEG4_DEC_INIT:
-		case S3C_MFC_IOCTL_MFC_H264_DEC_INIT:
-		case S3C_MFC_IOCTL_MFC_H263_DEC_INIT:
-		case S3C_MFC_IOCTL_MFC_VC1_DEC_INIT:
-			mutex_lock(s3c_mfc_mutex);
-
-			out = copy_from_user(&args.dec_init, (s3c_mfc_dec_init_arg_t *)arg, sizeof(s3c_mfc_dec_init_arg_t));
-
-			if ( cmd == S3C_MFC_IOCTL_MFC_MPEG4_DEC_INIT )
-				codec_mode = MP4_DEC;
-			else if ( cmd == S3C_MFC_IOCTL_MFC_H264_DEC_INIT )
-				codec_mode = AVC_DEC;
-			else if ( cmd == S3C_MFC_IOCTL_MFC_H263_DEC_INIT)
-				codec_mode = H263_DEC;
-			else {
-				codec_mode = VC1_DEC;
-			}
-
-			/* 
-			 * Initialize MFC Instance
-			 */
-			ret = s3c_mfc_instance_dec_init(pMfcInst, codec_mode, args.dec_init.in_strmSize);
-
-			args.dec_init.ret_code	= ret;
-			if (ret == S3C_MFC_INST_RET_OK) {
-				args.dec_init.out_width	     = pMfcInst->width;
-				args.dec_init.out_height     = pMfcInst->height;
-				args.dec_init.out_buf_width  = pMfcInst->buf_width;
-				args.dec_init.out_buf_height = pMfcInst->buf_height;
-			}
-			out = copy_to_user((s3c_mfc_dec_init_arg_t *)arg, &args.dec_init, sizeof(s3c_mfc_dec_init_arg_t));
-
-			mutex_unlock(s3c_mfc_mutex);
-			break;
-
-		case S3C_MFC_IOCTL_MFC_MPEG4_DEC_EXE:
-		case S3C_MFC_IOCTL_MFC_H264_DEC_EXE:
-		case S3C_MFC_IOCTL_MFC_H263_DEC_EXE:
-		case S3C_MFC_IOCTL_MFC_VC1_DEC_EXE:
-			mutex_lock(s3c_mfc_mutex);
-
-			out = copy_from_user(&args.dec_exe, (s3c_mfc_dec_exe_arg_t *)arg, sizeof(s3c_mfc_dec_exe_arg_t));
-
-			dmac_clean_range(pMfcInst->stream_buffer, pMfcInst->stream_buffer + S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE);
-			outer_clean_range(__pa(pMfcInst->stream_buffer), __pa(pMfcInst->stream_buffer + S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
-
-			ret = s3c_mfc_instance_decode(pMfcInst, args.dec_exe.in_strmSize);
-
-			args.dec_exe.ret_code = ret;
-			out = copy_to_user((s3c_mfc_dec_exe_arg_t *)arg, &args.dec_exe, sizeof(s3c_mfc_dec_exe_arg_t));
-
-			mutex_unlock(s3c_mfc_mutex);
-			break;
-
-		case S3C_MFC_IOCTL_MFC_GET_LINE_BUF_ADDR:
-			mutex_lock(s3c_mfc_mutex);
-
-			out = copy_from_user(&args.get_buf_addr, (s3c_mfc_get_buf_addr_arg_t *)arg, sizeof(s3c_mfc_get_buf_addr_arg_t));
-
-			ret = s3c_mfc_instance_get_line_buffer(pMfcInst, &OutBuf, &buf_size);
-
-			args.get_buf_addr.out_buf_size	= buf_size;
-			args.get_buf_addr.out_buf_addr	= args.get_buf_addr.in_usr_data + (OutBuf - s3c_mfc_get_databuf_virt_addr());
-			args.get_buf_addr.ret_code	= ret;
-
-			out = copy_to_user((s3c_mfc_get_buf_addr_arg_t *)arg, &args.get_buf_addr, sizeof(s3c_mfc_get_buf_addr_arg_t));
-
-			mutex_unlock(s3c_mfc_mutex);
-			break;
-
-		case S3C_MFC_IOCTL_MFC_GET_YUV_BUF_ADDR:
-			mutex_lock(s3c_mfc_mutex);
-
-			out = copy_from_user(&args.get_buf_addr, (s3c_mfc_get_buf_addr_arg_t *)arg, sizeof(s3c_mfc_get_buf_addr_arg_t));
-
-			if (pMfcInst->yuv_buffer == NULL) {
-				printk(KERN_ERR "\n%s: mfc frame buffer is not internally allocated yet\n", __FUNCTION__);
-				mutex_unlock(s3c_mfc_mutex);
-				return -EFAULT;
-			}
-
-			/* FRAM_BUF address is calculated differently for Encoder and Decoder. */
-			switch (pMfcInst->codec_mode) {
-				case MP4_DEC:
-				case AVC_DEC:
-				case VC1_DEC:
-				case H263_DEC:
-					/* Decoder case */
-					args.get_buf_addr.out_buf_size	= (pMfcInst->buf_width * pMfcInst->buf_height * 3) >> 1;
-					tmp	= (unsigned int)args.get_buf_addr.in_usr_data + ( ((unsigned int) pMfcInst->yuv_buffer)	\
-							+ (pMfcInst->run_index) * (args.get_buf_addr.out_buf_size) - (unsigned int)s3c_mfc_get_databuf_virt_addr() );
+		/* FRAM_BUF address is calculated differently for Encoder and Decoder. */
+		switch (pMfcInst->codec_mode) {
+		case MP4_DEC:
+		case AVC_DEC:
+		case VC1_DEC:
+		case H263_DEC:
+			/* Decoder case */
+			args.get_buf_addr.out_buf_size = (pMfcInst->buf_width * pMfcInst->buf_height * 3) >> 1;
+			tmp = (unsigned int)args.get_buf_addr.in_usr_data + (((unsigned int) pMfcInst->yuv_buffer)	\
+						+ (pMfcInst->run_index) * (args.get_buf_addr.out_buf_size) -		\
+						(unsigned int)s3c_mfc_get_databuf_virt_addr());
 #if (S3C_MFC_ROTATE_ENABLE == 1)
-					if ( (pMfcInst->codec_mode != VC1_DEC) && (pMfcInst->post_rotation_mode & 0x0010) ) {
-						tmp	= (unsigned int)args.get_buf_addr.in_usr_data + ( ((unsigned int) pMfcInst->yuv_buffer)	\
-								+ (pMfcInst->yuv_buffer_count) * (args.get_buf_addr.out_buf_size) - (unsigned int)s3c_mfc_get_databuf_virt_addr() );	
-					}
-#endif
-					args.get_buf_addr.out_buf_addr = tmp;
-					break;
-
-				case MP4_ENC:
-				case AVC_ENC:
-				case H263_ENC:
-					/* Encoder case */
-					tmp = (pMfcInst->width * pMfcInst->height * 3) >> 1;
-					args.get_buf_addr.out_buf_addr = args.get_buf_addr.in_usr_data + (pMfcInst->run_index * tmp) + (int)(pMfcInst->yuv_buffer - s3c_mfc_get_databuf_virt_addr());
-					break;
-			}
-
-			args.get_buf_addr.ret_code	= S3C_MFC_INST_RET_OK;
-			out = copy_to_user((s3c_mfc_get_buf_addr_arg_t *)arg, &args.get_buf_addr, sizeof(s3c_mfc_get_buf_addr_arg_t));
-
-			mutex_unlock(s3c_mfc_mutex);
-			break;
-
-		case S3C_MFC_IOCTL_MFC_GET_PHY_FRAM_BUF_ADDR:
-			mutex_lock(s3c_mfc_mutex);
-
-			out = copy_from_user(&args.get_buf_addr, (s3c_mfc_get_buf_addr_arg_t *)arg, sizeof(s3c_mfc_get_buf_addr_arg_t));
-
-			args.get_buf_addr.out_buf_size	= (pMfcInst->buf_width * pMfcInst->buf_height * 3) >> 1;
-			tmp	= (unsigned int)S3C_MFC_BASEADDR_DATA_BUF + ( ((unsigned int) pMfcInst->yuv_buffer)	\
-					+ (pMfcInst->run_index) * (args.get_buf_addr.out_buf_size) - (unsigned int)s3c_mfc_get_databuf_virt_addr() );
-
-#if (S3C_MFC_ROTATE_ENABLE == 1)
-			if ( (pMfcInst->codec_mode != VC1_DEC) && (pMfcInst->post_rotation_mode & 0x0010) ) {
-				tmp = (unsigned int)S3C_MFC_BASEADDR_DATA_BUF + ( ((unsigned int) pMfcInst->yuv_buffer)   \
-						+ (pMfcInst->yuv_buffer_count) * (args.get_buf_addr.out_buf_size) - (unsigned int)s3c_mfc_get_databuf_virt_addr() );  
+			if ((pMfcInst->codec_mode != VC1_DEC) && (pMfcInst->post_rotation_mode & 0x0010)) {
+				tmp = (unsigned int)args.get_buf_addr.in_usr_data + (((unsigned int)pMfcInst->yuv_buffer)  \
+				+ (pMfcInst->yuv_buffer_count) * (args.get_buf_addr.out_buf_size) - 			   \
+				(unsigned int)s3c_mfc_get_databuf_virt_addr());	
 			}
 #endif
-
 			args.get_buf_addr.out_buf_addr = tmp;
-			args.get_buf_addr.ret_code = S3C_MFC_INST_RET_OK;
-
-			out = copy_to_user((s3c_mfc_get_buf_addr_arg_t *)arg, &args.get_buf_addr, sizeof(s3c_mfc_get_buf_addr_arg_t));
-
-			mutex_unlock(s3c_mfc_mutex);
 			break;
 
-		case S3C_MFC_IOCTL_MFC_GET_MPEG4_ASP_PARAM:
+		case MP4_ENC:
+		case AVC_ENC:
+		case H263_ENC:
+			/* Encoder case */
+			tmp = (pMfcInst->width * pMfcInst->height * 3) >> 1;
+			args.get_buf_addr.out_buf_addr = args.get_buf_addr.in_usr_data + (pMfcInst->run_index * tmp) + 	\
+								(int)(pMfcInst->yuv_buffer - s3c_mfc_get_databuf_virt_addr());
+			break;
+		}
+
+		args.get_buf_addr.ret_code = S3C_MFC_INST_RET_OK;
+		out = copy_to_user((s3c_mfc_get_buf_addr_arg_t *)arg, &args.get_buf_addr, sizeof(s3c_mfc_get_buf_addr_arg_t));
+
+		mutex_unlock(s3c_mfc_mutex);
+		break;
+
+	case S3C_MFC_IOCTL_MFC_GET_PHY_FRAM_BUF_ADDR:
+		mutex_lock(s3c_mfc_mutex);
+
+		out = copy_from_user(&args.get_buf_addr, (s3c_mfc_get_buf_addr_arg_t *)arg, sizeof(s3c_mfc_get_buf_addr_arg_t));
+
+		args.get_buf_addr.out_buf_size = (pMfcInst->buf_width * pMfcInst->buf_height * 3) >> 1;
+		tmp = (unsigned int)S3C_MFC_BASEADDR_DATA_BUF + (((unsigned int)pMfcInst->yuv_buffer)		\
+				+ (pMfcInst->run_index) * (args.get_buf_addr.out_buf_size) - 			\
+				(unsigned int)s3c_mfc_get_databuf_virt_addr());
+
+#if (S3C_MFC_ROTATE_ENABLE == 1)
+		if ((pMfcInst->codec_mode != VC1_DEC) && (pMfcInst->post_rotation_mode & 0x0010)) {
+				tmp = (unsigned int)S3C_MFC_BASEADDR_DATA_BUF + (((unsigned int) pMfcInst->yuv_buffer)   \
+				+ (pMfcInst->yuv_buffer_count) * (args.get_buf_addr.out_buf_size) - 			 \
+				(unsigned int)s3c_mfc_get_databuf_virt_addr());
+		}
+#endif
+
+		args.get_buf_addr.out_buf_addr = tmp;
+		args.get_buf_addr.ret_code = S3C_MFC_INST_RET_OK;
+
+		out = copy_to_user((s3c_mfc_get_buf_addr_arg_t *)arg, &args.get_buf_addr, sizeof(s3c_mfc_get_buf_addr_arg_t));
+
+		mutex_unlock(s3c_mfc_mutex);
+		break;
+
+	case S3C_MFC_IOCTL_MFC_GET_MPEG4_ASP_PARAM:
 #if (defined(DIVX_ENABLE) && (DIVX_ENABLE == 1))
 
-			out = copy_from_user(&args.mpeg4_asp_param, (s3c_mfc_get_mpeg4asp_arg_t *)arg, sizeof(s3c_mfc_get_mpeg4asp_arg_t));
+		out = copy_from_user(&args.mpeg4_asp_param, (s3c_mfc_get_mpeg4asp_arg_t *)arg, 			\
+										sizeof(s3c_mfc_get_mpeg4asp_arg_t));
 
-			ret = S3C_MFC_INST_RET_OK;
-			args.mpeg4_asp_param.ret_code              = S3C_MFC_INST_RET_OK;
-			args.mpeg4_asp_param.mp4asp_vop_time_res   = pMfcInst->RET_DEC_SEQ_INIT_BAK_MP4ASP_VOP_TIME_RES;
-			args.mpeg4_asp_param.byte_consumed         = pMfcInst->RET_DEC_PIC_RUN_BAK_BYTE_CONSUMED;
-			args.mpeg4_asp_param.mp4asp_fcode          = pMfcInst->RET_DEC_PIC_RUN_BAK_MP4ASP_FCODE;
-			args.mpeg4_asp_param.mp4asp_time_base_last = pMfcInst->RET_DEC_PIC_RUN_BAK_MP4ASP_TIME_BASE_LAST;
-			args.mpeg4_asp_param.mp4asp_nonb_time_last = pMfcInst->RET_DEC_PIC_RUN_BAK_MP4ASP_NONB_TIME_LAST;
-			args.mpeg4_asp_param.mp4asp_trd            = pMfcInst->RET_DEC_PIC_RUN_BAK_MP4ASP_MP4ASP_TRD;
+		ret = S3C_MFC_INST_RET_OK;
+		args.mpeg4_asp_param.ret_code              = S3C_MFC_INST_RET_OK;
+		args.mpeg4_asp_param.mp4asp_vop_time_res   = pMfcInst->RET_DEC_SEQ_INIT_BAK_MP4ASP_VOP_TIME_RES;
+		args.mpeg4_asp_param.byte_consumed         = pMfcInst->RET_DEC_PIC_RUN_BAK_BYTE_CONSUMED;
+		args.mpeg4_asp_param.mp4asp_fcode          = pMfcInst->RET_DEC_PIC_RUN_BAK_MP4ASP_FCODE;
+		args.mpeg4_asp_param.mp4asp_time_base_last = pMfcInst->RET_DEC_PIC_RUN_BAK_MP4ASP_TIME_BASE_LAST;
+		args.mpeg4_asp_param.mp4asp_nonb_time_last = pMfcInst->RET_DEC_PIC_RUN_BAK_MP4ASP_NONB_TIME_LAST;
+		args.mpeg4_asp_param.mp4asp_trd            = pMfcInst->RET_DEC_PIC_RUN_BAK_MP4ASP_MP4ASP_TRD;
 
-			args.mpeg4_asp_param.mv_addr      = (args.mpeg4_asp_param.in_usr_mapped_addr + S3C_MFC_STREAM_BUF_SIZE) + (pMfcInst->mv_mbyte_addr - pMfcInst->phys_addr_yuv_buffer);
-			args.mpeg4_asp_param.mb_type_addr = args.mpeg4_asp_param.mv_addr + 25920;	
-			args.mpeg4_asp_param.mv_size      = 25920; /* '25920' is the maximum MV size (=45*36*16) */
-			args.mpeg4_asp_param.mb_type_size = 1620;  /* '1620' is the maximum MBTYE size (=45*36*1) */
+		args.mpeg4_asp_param.mv_addr = (args.mpeg4_asp_param.in_usr_mapped_addr + S3C_MFC_STREAM_BUF_SIZE) 	\
+								+ (pMfcInst->mv_mbyte_addr - pMfcInst->phys_addr_yuv_buffer);
+		args.mpeg4_asp_param.mb_type_addr = args.mpeg4_asp_param.mv_addr + 25920;	
+		args.mpeg4_asp_param.mv_size      = 25920; /* '25920' is the maximum MV size (=45*36*16) */
+		args.mpeg4_asp_param.mb_type_size = 1620;  /* '1620' is the maximum MBTYE size (=45*36*1) */
 
-			vir_mv_addr = (unsigned int)((pMfcInst->stream_buffer + S3C_MFC_STREAM_BUF_SIZE) + (pMfcInst->mv_mbyte_addr - pMfcInst->phys_addr_yuv_buffer));
-			vir_mb_type_addr = vir_mv_addr + 25920;
+		vir_mv_addr = (unsigned int)((pMfcInst->stream_buffer + S3C_MFC_STREAM_BUF_SIZE) + 			\
+								(pMfcInst->mv_mbyte_addr - pMfcInst->phys_addr_yuv_buffer));
+		vir_mb_type_addr = vir_mv_addr + 25920;
 
-			out = copy_to_user((s3c_mfc_get_mpeg4asp_arg_t *)arg, &args.mpeg4_asp_param, sizeof(s3c_mfc_get_mpeg4asp_arg_t));
+		out = copy_to_user((s3c_mfc_get_mpeg4asp_arg_t *)arg, &args.mpeg4_asp_param, 				\
+										sizeof(s3c_mfc_get_mpeg4asp_arg_t));
 
-			dmac_clean_range((unsigned char *)vir_mv_addr, (unsigned char *)(vir_mv_addr + args.mpeg4_asp_param.mv_size));
-			outer_clean_range(__pa(vir_mv_addr), __pa(vir_mv_addr + args.mpeg4_asp_param.mv_size));
+		dmac_clean_range((unsigned char *)vir_mv_addr, (unsigned char *)(vir_mv_addr + args.mpeg4_asp_param.mv_size));
+		outer_clean_range(__pa(vir_mv_addr), __pa(vir_mv_addr + args.mpeg4_asp_param.mv_size));
 
-			dmac_clean_range((unsigned char *)vir_mb_type_addr, (unsigned char *)(vir_mb_type_addr + args.mpeg4_asp_param.mb_type_size));
-			outer_clean_range(__pa(vir_mb_type_addr), __pa(vir_mb_type_addr + args.mpeg4_asp_param.mb_type_size));
+		dmac_clean_range((unsigned char *)vir_mb_type_addr, 	\
+						(unsigned char *)(vir_mb_type_addr + args.mpeg4_asp_param.mb_type_size));
+		outer_clean_range(__pa(vir_mb_type_addr), __pa(vir_mb_type_addr + args.mpeg4_asp_param.mb_type_size));
 #endif	
-			break;
+		break;
 
-		case S3C_MFC_IOCTL_MFC_GET_CONFIG:
-			mutex_lock(s3c_mfc_mutex);
+	case S3C_MFC_IOCTL_MFC_GET_CONFIG:
+		mutex_lock(s3c_mfc_mutex);
 
-			out = copy_from_user(&args, (s3c_mfc_args_t *)arg, sizeof(s3c_mfc_args_t));
+		out = copy_from_user(&args, (s3c_mfc_args_t *)arg, sizeof(s3c_mfc_args_t));
 
-			ret = s3c_mfc_get_config_params(pMfcInst, &args);
+		ret = s3c_mfc_get_config_params(pMfcInst, &args);
 
-			out = copy_to_user((s3c_mfc_args_t *)arg, &args, sizeof(s3c_mfc_args_t));
+		out = copy_to_user((s3c_mfc_args_t *)arg, &args, sizeof(s3c_mfc_args_t));
 
-			mutex_unlock(s3c_mfc_mutex);
-			break;
+		mutex_unlock(s3c_mfc_mutex);
+		break;
 
-		case S3C_MFC_IOCTL_MFC_SET_CONFIG:
-			mutex_lock(s3c_mfc_mutex);
+	case S3C_MFC_IOCTL_MFC_SET_CONFIG:
+		mutex_lock(s3c_mfc_mutex);
 
-			out = copy_from_user(&args, (s3c_mfc_args_t *)arg, sizeof(s3c_mfc_args_t));
+		out = copy_from_user(&args, (s3c_mfc_args_t *)arg, sizeof(s3c_mfc_args_t));
 
-			ret = s3c_mfc_set_config_params(pMfcInst, &args);
+		ret = s3c_mfc_set_config_params(pMfcInst, &args);
 
-			out = copy_to_user((s3c_mfc_args_t *)arg, &args, sizeof(s3c_mfc_args_t));
+		out = copy_to_user((s3c_mfc_args_t *)arg, &args, sizeof(s3c_mfc_args_t));
 
-			mutex_unlock(s3c_mfc_mutex);
-			break;
+		mutex_unlock(s3c_mfc_mutex);
+		break;
 
-		case S3C_MFC_IOCTL_VIRT_TO_PHYS:
-			temp = __virt_to_phys((void *)arg);
-			return (int)temp;
-			break;
+	case S3C_MFC_IOCTL_VIRT_TO_PHYS:
+		temp = __virt_to_phys((void *)arg);
+		return (int)temp;
+		break;
 
-		default:
-			mutex_lock(s3c_mfc_mutex);
-			printk(KERN_DEBUG "\n%s: requested ioctl command is not defined (ioctl cmd = 0x%x)\n", __FUNCTION__, cmd);
-			mutex_unlock(s3c_mfc_mutex);
-			return -ENOIOCTLCMD;
+	default:
+		mutex_lock(s3c_mfc_mutex);
+		printk(KERN_DEBUG "\n%s: requested ioctl command is not defined (ioctl cmd = 0x%x)\n", __FUNCTION__, cmd);
+		mutex_unlock(s3c_mfc_mutex);
+		return -ENOIOCTLCMD;
 	}
 
 	switch (ret) {
-		case S3C_MFC_INST_RET_OK:
-			return 0;
-		default:
-			return -EPERM;
+	case S3C_MFC_INST_RET_OK:
+		return 0;
+	default:
+		return -EPERM;
 	}
 	return -EPERM;
 }

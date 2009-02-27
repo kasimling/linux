@@ -74,13 +74,15 @@ BOOL s3c_mfc_yuv_buf_mgr_init(unsigned char *buffer_base, int buffer_size)
 	s3c_mfc_buffer_size = buffer_size;
 	s3c_mfc_num_segments = buffer_size / S3C_MFC_BUF_SEGMENT_SIZE;
 
-	s3c_mfc_segment_info = (s3c_mfc_segment_info_t *) kmalloc(s3c_mfc_num_segments * sizeof(s3c_mfc_segment_info_t), GFP_KERNEL);
+	s3c_mfc_segment_info = (s3c_mfc_segment_info_t *)kmalloc(s3c_mfc_num_segments * sizeof(s3c_mfc_segment_info_t),  \
+													GFP_KERNEL);
 	for (i = 0; i < s3c_mfc_num_segments; i++) {
 		s3c_mfc_segment_info[i].pBaseAddr   = buffer_base  +  (i * S3C_MFC_BUF_SEGMENT_SIZE);
 		s3c_mfc_segment_info[i].idx_commit  = 0;
 	}
 
-	s3c_mfc_commit_info  = (s3c_mfc_commit_info_t *) kmalloc(s3c_mfc_num_segments * sizeof(s3c_mfc_commit_info_t), GFP_KERNEL);
+	s3c_mfc_commit_info  = (s3c_mfc_commit_info_t *)kmalloc(s3c_mfc_num_segments * sizeof(s3c_mfc_commit_info_t),    \
+													GFP_KERNEL);
 	for (i = 0; i < s3c_mfc_num_segments; i++) {
 		s3c_mfc_commit_info[i].index_base_seg  = -1;
 		s3c_mfc_commit_info[i].num_segs        = 0;
@@ -101,7 +103,6 @@ void s3c_mfc_yuv_buffer_mgr_final()
 		kfree(s3c_mfc_commit_info);
 		s3c_mfc_commit_info = NULL;
 	}
-
 
 	s3c_mfc_buffer_base  = NULL;
 	s3c_mfc_buffer_size  = 0;
@@ -289,8 +290,10 @@ void s3c_mfc_yuv_buffer_mgr_print_commit_info()
 
 	for (i = 0; i < s3c_mfc_num_segments; i++) {
 		if (s3c_mfc_commit_info[i].index_base_seg != -1)  {
-			printk(KERN_DEBUG "\n%s: commit index = %03d, base segment index = %d\n", __FUNCTION__, i, s3c_mfc_commit_info[i].index_base_seg);
-			printk(KERN_DEBUG "\n%s: commit index = %03d, number of segment = %d\n", __FUNCTION__, i, s3c_mfc_commit_info[i].num_segs);			
+			printk(KERN_DEBUG "\n%s: commit index = %03d, base segment index = %d\n", __FUNCTION__, i, 	\
+										s3c_mfc_commit_info[i].index_base_seg);
+			printk(KERN_DEBUG "\n%s: commit index = %03d, number of segment = %d\n", __FUNCTION__, i, 	\
+										s3c_mfc_commit_info[i].num_segs);		
 		}
 	}
 }

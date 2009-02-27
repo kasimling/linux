@@ -27,7 +27,8 @@ BOOL s3c_mfc_bitproc_buff_mem_mapping()
 	BOOL	ret = FALSE;
 
 	/* FIRWARE/WORKING/PARAMETER BUFFER  <-- virtual bitprocessor buffer address mapping */
-	s3c_mfc_virt_bitproc_buff = (volatile unsigned char *)ioremap_nocache(S3C_MFC_BASEADDR_BITPROC_BUF, S3C_MFC_BITPROC_BUF_SIZE);
+	s3c_mfc_virt_bitproc_buff = (volatile unsigned char *)ioremap_nocache(S3C_MFC_BASEADDR_BITPROC_BUF, 	\
+												S3C_MFC_BITPROC_BUF_SIZE);
 	if (s3c_mfc_virt_bitproc_buff == NULL) {
 		printk(KERN_ERR "\n%s: fail to mapping bitprocessor buffer\n", __FUNCTION__);
 		return ret;
