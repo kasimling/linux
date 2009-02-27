@@ -1,7 +1,7 @@
 #ifndef __S3CTVSCALER_H_
 #define __S3CTVSCALER_H_
 
-#include <plat/reserved_mem.h>
+#include "plat/media.h"
 
 #define TVSCALER_IOCTL_MAGIC 'S'
 
@@ -20,17 +20,16 @@
 
 #define SCALER_MINOR  251                     // Just some number
 
-
 //#define SYSTEM_RAM		0x08000000	// 128mb
 #define SYSTEM_RAM		0x07800000	// 120mb
 #define RESERVE_POST_MEM	8*1024*1024	// 8mb
 #define PRE_BUFF_SIZE		4*1024*1024	//4 // 4mb
 #define POST_BUFF_SIZE		( RESERVE_POST_MEM - PRE_BUFF_SIZE )
-#if 0
-#define POST_BUFF_BASE_ADDR	(0x50000000 + (SYSTEM_RAM - RESERVE_POST_MEM))
-#else	// TV_RESERVED_MEM_START is defined in the s3c-linux-2.6.21_dev_4_4_15
-#define POST_BUFF_BASE_ADDR	TV_RESERVED_MEM_START
-#endif
+
+typedef unsigned int UINT32;
+
+#define post_buff_base_addr	0x55B00000
+#define POST_BUFF_BASE_ADDR	(UINT32)s3c_get_media_memory(S3C_MDEV_TV)
 
 #define USE_DEDICATED_MEM	1
 
