@@ -44,11 +44,11 @@
 #include <plat/regs-lcd.h>
 #include <plat/clock.h>
 #include <plat/regs-clock.h>
-#include <plat/reserved_mem.h>
 #include <plat/pm.h>
 
 #include "s3c_pp.h"   // ioctl
 #include "s3c_pp_common.h" // internal used struct & type
+#include "plat/media.h"
 
 //#define DEBUG
 
@@ -60,9 +60,12 @@
 
 #define PFX "s3c_pp"
 
+typedef unsigned int UINT32;
+
 // if you want to modify src/dst buffer size, modify below defined size 
 #define PP_RESERVED_MEM_SIZE 	    8*1024*1024	// 8mb
-#define PP_RESERVED_MEM_ADDR_PHY    POST_RESERVED_MEM_START
+#define pp_reserved_mem_addr_phy	0x57800000	
+#define PP_RESERVED_MEM_ADDR_PHY	(UINT32)s3c_get_media_memory(S3C_MDEV_POST)    
 
 #define ALLOC_KMEM		        1
 

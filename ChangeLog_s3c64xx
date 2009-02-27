@@ -688,3 +688,7 @@ v2.6.28.6-s3c64xx-r0d4: Jinsung Yang
 	- Including reserved memory feature with bootmem
 	- All functions have been finished on the planning
 
+v2.6.28.6-s3c64xx-r0d5: Jinsung Yang
+	- bootmem applied to post and tv.
+		M	drivers/media/video/samsung/post/s3c_pp_6400.c
+		M	drivers/media/video/samsung/tv/s3c-tvscaler.h
