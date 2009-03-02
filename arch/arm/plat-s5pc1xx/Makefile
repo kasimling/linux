@@ -24,9 +24,10 @@ obj-y				+= bootmem.o
 # CPU support
 
 obj-$(CONFIG_CPU_S5PC100_INIT)	+= s5pc100-init.o
-obj-$(CONFIG_CPU_S5PC100_CLOCK)	+= s5pc100-clock.o
+obj-$(CONFIG_CPU_S5PC100_CLOCK)	+= s5pc100-clock.o changediv.o
 obj-$(CONFIG_PM)                += pm.o
 obj-$(CONFIG_PM)                += sleep.o
+obj-$(CONFIG_CPU_FREQ)		      += s5pc1xx-cpufreq.o ltc3714.o
 
 # Device setup
 obj-$(CONFIG_S5PC1XX_SETUP_I2C0) += setup-i2c0.o
