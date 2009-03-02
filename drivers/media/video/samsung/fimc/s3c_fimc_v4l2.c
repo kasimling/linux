@@ -399,6 +399,7 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 	case V4L2_CID_INPUT_ADDR:
 		s3c_fimc_alloc_input_memory(&ctrl->in_frame, \
 						(dma_addr_t) c->value);
+		s3c_fimc_set_input_address(ctrl);
 		break;
 
 	case V4L2_CID_RESET:
