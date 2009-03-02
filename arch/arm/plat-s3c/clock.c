@@ -182,7 +182,6 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
 
 	if (clk->set_rate == NULL)
 		return -EINVAL;
-
 	spin_lock(&clocks_lock);
 	ret = (clk->set_rate)(clk, rate);
 	spin_unlock(&clocks_lock);
@@ -267,7 +266,7 @@ struct clk clk_f = {
 	.rate		= 0,
 	.parent		= &clk_mpll,
 	.ctrlbit	= 0,
-#if defined(CONFIG_CPU_FREQ)
+#if defined(CONFIG_CPU_FREQ) && defined(CONFIG_CPU_S3C6410)
 	.set_rate	= s3c_fclk_set_rate,
 	.round_rate	= s3c_fclk_round_rate,
 #endif

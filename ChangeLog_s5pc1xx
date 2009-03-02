@@ -658,3 +658,20 @@ v2.6.28.6-s5pc1xx-r0d3: Abhilash Kesavan
 	Modified files:
 		M   	drivers/net/irda/s3c-sir.c
 		M   	include/net/irda/irda_device.h
+
+v2.6.28.6-s5pc1xx-r0d4: Jae-Cheol Lee
+	- Support CPUFREQ for SMDKC100
+	- DFS is only enabled, not DVS.
+	
+	Modified files:
+		M	arch/arm/plat-s5pc1xx/s5pc100-clock.c
+		M 	arch/arm/Kconfig
+		M	arch/arm/plat-s5pc1xx/Makefile
+		M	arch/arm/plat-s3c/clock.c
+
+	Added files:
+		A	arch/arm/plat-s5pc1xx/s5pc1xx-cpufreq.c
+		A	arch/arm/plat-s5pc1xx/changediv.S
+		A	arch/arm/plat-s5pc1xx/ltc3714.c
+
+

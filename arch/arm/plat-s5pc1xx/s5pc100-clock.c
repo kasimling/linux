@@ -29,9 +29,18 @@
 #include <plat/cpu.h>
 #include <plat/pll.h>
 
+/* For S5PC100 EVT0 workaround
+ * When we modify DIVarm value to change ARM speed D0_BUS parent clock is also changed
+ * If we prevent from unwanted changing of bus clock, we should modify DIVd0_bus value also.
+ */
+#define PREVENT_BUS_CLOCK_CHANGE
+
+extern void ChangeClkDiv0(unsigned int val);
+
 /* fin_apll, fin_mpll and fin_epll are all the same clock, which we call
  * ext_xtal_mux for want of an actual name from the manual.
 */
+static unsigned long s5pc1xx_roundrate_clksrc(struct clk *clk, unsigned long rate);
 
 struct clk clk_ext_xtal_mux = {
 	.name		= "ext_xtal",
@@ -91,6 +100,139 @@ struct clksrc_clk clk_mout_apll = {
 	.mask		= S5P_CLKSRC0_APLL_MASK,
 	.sources	= &clk_src_apll,
 	.reg_source	= S5P_CLK_SRC0,
+};
+
+
+static unsigned long s5pc1xx_clk_doutapll_get_rate(struct clk *clk)
+{
+  	unsigned long rate = clk_get_rate(clk->parent);
+
+	rate /= (((__raw_readl(S5P_CLK_DIV0) & S5P_CLKDIV0_APLL_MASK) >> S5P_CLKDIV0_APLL_SHIFT) + 1);
+
+	return rate;
+}
+
+int s5pc1xx_clk_doutapll_set_rate(struct clk *clk, unsigned int rate)
+{
+	struct clk *temp_clk = clk;
+	unsigned int div;
+	u32 val;
+
+	rate = clk_round_rate(temp_clk, rate);
+	div = clk_get_rate(temp_clk->parent) / rate;
+
+	val = __raw_readl(S5P_CLK_DIV0);
+	val &=~ S5P_CLKDIV0_APLL_MASK;
+	val |= (div - 1) << S5P_CLKDIV0_APLL_SHIFT;
+	__raw_writel(val, S5P_CLK_DIV0);
+
+	return 0;
+}
+
+struct clk clk_dout_apll = {
+	.name = "dout_apll",
+	.id = -1,
+	.parent = &clk_mout_apll.clk,
+	.get_rate = s5pc1xx_clk_doutapll_get_rate,
+	.set_rate = s5pc1xx_clk_doutapll_set_rate,
+};
+
+static unsigned long s5pc1xx_clk_doutarm_get_rate(struct clk *clk)
+{
+	unsigned long rate = clk_get_rate(clk->parent);
+
+	rate /= (((__raw_readl(S5P_CLK_DIV0) & S5P_CLKDIV0_ARM_MASK) >> S5P_CLKDIV0_ARM_SHIFT) + 1);
+
+	return rate;
+}
+
+static unsigned long s5pc1xx_doutarm_roundrate(struct clk *clk,
+					      unsigned long rate)
+{
+	unsigned long parent_rate = clk_get_rate(clk->parent);
+	int div;
+
+	if (rate > parent_rate)
+		rate = parent_rate;
+	else {
+		div = parent_rate / rate;
+
+		div ++;
+		
+		rate = parent_rate / div;
+	}
+
+	return rate;
+}
+
+int s5pc1xx_clk_doutarm_set_rate(struct clk *clk, unsigned int rate)
+{
+	struct clk *temp_clk = clk;
+	unsigned int div_arm;
+	u32 val,flag;
+#ifdef PREVENT_BUS_CLOCK_CHANGE
+	unsigned int d0_bus_ratio, arm_ratio_old, ratio, iter;
+	val = __raw_readl(S5P_CLK_DIV0);
+	d0_bus_ratio = (val & S5P_CLKDIV0_D0_MASK) >> S5P_CLKDIV0_D0_SHIFT;
+	arm_ratio_old = (val & S5P_CLKDIV0_ARM_MASK) >> S5P_CLKDIV0_ARM_SHIFT;
+	ratio = (arm_ratio_old + 1) * (d0_bus_ratio + 1);
+#endif
+	div_arm = clk_get_rate(temp_clk->parent) / rate;
+	
+#ifndef PREVENT_BUS_CLOCK_CHANGE
+	val = __raw_readl(S5P_CLK_DIV0);
+	val &=~ S5P_CLKDIV0_ARM_MASK;
+	val |= (div_arm - 1) << S5P_CLKDIV0_ARM_SHIFT;
+#else	
+	d0_bus_ratio = (ratio / div_arm) -1;
+	val &=~ (S5P_CLKDIV0_ARM_MASK | S5P_CLKDIV0_D0_MASK);
+	val |= (div_arm - 1) << S5P_CLKDIV0_ARM_SHIFT;
+	val |= d0_bus_ratio << S5P_CLKDIV0_D0_SHIFT;
+	//printk(KERN_INFO "d0_bus_ratio : %08d ,arm_ratio: %08d\n",d0_bus_ratio, (div_arm-1));
+	
+#endif
+
+#ifdef PREVENT_BUS_CLOCK_CHANGE
+
+#if 0
+	iter = 0x4000;
+	flag = __raw_readl(S5P_CLK_DIV0);
+	__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
+				    : : "r" (flag) : "memory");
+	__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 5" \
+				    : : "r" (flag) : "memory");
+	
+	do {
+		iter--;
+		if(iter == 0x2000) {
+			__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
+						    : : "r" (flag) : "memory");
+			__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 5" \
+						    : : "r" (flag) : "memory");
+			__raw_writel(val, S5P_CLK_DIV0);			
+		}
+		if(iter <= 0)
+			break;
+		
+	} while(1);
+#else
+	ChangeClkDiv0(val);
+
+#endif
+
+#else
+	__raw_writel(val, S5P_CLK_DIV0);
+#endif
+	return 0;
+}
+
+struct clk clk_dout_arm = {
+	.name = "dout_arm",
+	.id = -1,
+	.parent = &clk_dout_apll,
+	.get_rate = s5pc1xx_clk_doutarm_get_rate,
+	.set_rate = s5pc1xx_clk_doutarm_set_rate,
+	.round_rate	= s5pc1xx_doutarm_roundrate,
 };
 
 struct clk clk_fout_epll = {
@@ -996,6 +1138,8 @@ static struct clk *clks[] __initdata = {
 	&clk_fimc1.clk,
 	&clk_fimc2.clk,
 	&clk_mixer.clk,
+	&clk_dout_apll,
+	&clk_dout_arm,
 };
 
 void __init s5pc100_register_clocks(void)
