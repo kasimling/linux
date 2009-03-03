@@ -696,7 +696,7 @@ v2.6.28.6-s3c64xx-r0d5: SungJun Bae
 v2.6.28.6-s3c64xx-r0d6: PyoungJae Jung, Jiun Yu
 	- MFC support for SMDK6410
 	- It support bootmem for large buffer memory
-	- changed coding style to linux kernel coding style
+	- Changed coding style to linux kernel coding style
 	- Bug fixed in Hybrid DiVX encoding problem
 
 	Modified Files:
