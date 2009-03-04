@@ -31,7 +31,7 @@
 
 #define USE_FREQ_TABLE
 
-//#define USE_DVS
+#define USE_DVS
 
 #define VERY_HI_RATE	666*1000*1000
 #define APLL_GEN_CLK	666*1000	//khz
@@ -43,8 +43,9 @@
 extern int set_power(unsigned int freq);
 extern void ltc3714_init(void);
 
-#define PMIC_ARM	0
-#define PMIC_INT	1
+#define PMIC_ARM		0
+#define PMIC_INT		1
+#define PMIC_BOTH	2
 
 #define CLK_OUT_PROBING	//TP80 on SMDKC100 board
 
