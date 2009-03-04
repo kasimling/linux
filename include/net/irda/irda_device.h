@@ -254,7 +254,6 @@ static inline __u16 irda_get_mtt(const struct sk_buff *skb)
 static inline __u32 irda_get_next_speed(const struct sk_buff *skb)
 {
 	const struct irda_skb_cb *cb = (const struct irda_skb_cb *) skb->cb;
-	printk("%s, speed: %d, magic: %d, LAP_MAGIC: %d\n", __func__, cb->next_speed, cb->magic, LAP_MAGIC);
 	return (cb->magic == LAP_MAGIC) ? cb->next_speed : -1;
 }
 
