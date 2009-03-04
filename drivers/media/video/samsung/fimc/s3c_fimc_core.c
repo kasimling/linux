@@ -401,7 +401,7 @@ static int s3c_fimc_init_global(struct platform_device *pdev)
 	}
 
 	s3c_fimc.dma_start = s3c_get_media_memory(S3C_MDEV_FIMC);
-	s3c_fimc.dma_total = s3c_get_media_memsize(S3C_MDEV_FIMC) * SZ_1K;
+	s3c_fimc.dma_total = s3c_get_media_memsize(S3C_MDEV_FIMC);
 	s3c_fimc.dma_current = s3c_fimc.dma_start;
 
 	return 0;
