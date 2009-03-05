@@ -696,7 +696,7 @@ v2.6.28.6-s3c64xx-r0d5: SungJun Bae
 v2.6.28.6-s3c64xx-r0d6: PyoungJae Jung, Jiun Yu
 	- MFC support for SMDK6410
 	- It support bootmem for large buffer memory
-	- changed coding style to linux kernel coding style
+	- Changed coding style to linux kernel coding style
 	- Bug fixed in Hybrid DiVX encoding problem
 
 	Modified Files:
@@ -736,3 +736,14 @@ v2.6.28.6-s3c64xx-r0d6: PyoungJae Jung, Jiun Yu
 		A	drivers/media/video/samsung/mfc/s3c_mfc_types.h
 		A	drivers/media/video/samsung/mfc/s3c_mfc_yuv_buf_manager.c
 		A	drivers/media/video/samsung/mfc/s3c_mfc_yuv_buf_manager.h
+
+v2.6.28.6-s3c64xx-r0d7: Kyoungil Kim
+	- Just Prevent tag for SMDK6410
+
+v2.6.28.6-s3c64xx-r0d8: Jaeryul Oh
+	- Fixed Bug in case of dynamic fps change of MPEG4 encoding 
+
+	Modified Files:
+		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.h
+		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.c
+
