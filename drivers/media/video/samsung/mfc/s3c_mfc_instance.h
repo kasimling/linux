@@ -87,6 +87,7 @@ typedef struct
 	unsigned int	enc_pic_option;			/* 0-th bit : S3C_ENC_PIC_OPT_SKIP, */
 							/* 1-st bit : S3C_ENC_PIC_OPT_IDR, */
 							/* 24-th bit: S3C_ENC_PIC_OPT_RECOVERY */
+	unsigned int	enc_change_framerate;  		/* when Frame Rate changing */							
 	int		frame_num;			/* DEC_PIC_FRAME_NUM */
 	int		run_index;			/* DEC_PIC_RUN_IDX */
 

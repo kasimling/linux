@@ -90,11 +90,16 @@ alloc_fail:
 	return ret;
 }
 
-static int s3c_fimc_alloc_yuv_memory(struct s3c_fimc_out_frame *info, \
-					u32 size, u32 cbcr_size)
+static int s3c_fimc_alloc_yuv_memory(struct s3c_fimc_out_frame *info)
 {
 	struct s3c_fimc_frame_addr *frame;
 	int i, ret, nr_frames = info->nr_frames;
+	u32 size = info->width * info->height, cbcr_size;
+	
+	if (info->format == FORMAT_YCBCR420)
+		cbcr_size = size / 4;
+	else
+		cbcr_size = size / 2;
 
 	for (i = 0; i < nr_frames; i++) {
 		frame = &info->addr[i];
@@ -178,11 +183,16 @@ alloc_fail:
 	return ret;
 }
 
-static int s3c_fimc_alloc_yuv_memory(struct s3c_fimc_out_frame *info, \
-					u32 size, u32 cbcr_size)
+static int s3c_fimc_alloc_yuv_memory(struct s3c_fimc_out_frame *info)
 {
 	struct s3c_fimc_frame_addr *frame;
 	int i, ret, nr_frames = info->nr_frames;
+	u32 size = info->width * info->height, cbcr_size;
+	
+	if (info->format == FORMAT_YCBCR420)
+		cbcr_size = size / 4;
+	else
+		cbcr_size = size / 2;
 
 	for (i = 0; i < nr_frames; i++) {
 		frame = &info->addr[i];
@@ -219,12 +229,48 @@ alloc_fail:
 }
 #endif
 
+static u32 s3c_fimc_get_buffer_size(int width, int height, enum s3c_fimc_format_t fmt)
+{
+	u32 size = width * height;
+	u32 cbcr_size = 0, *buf_size = NULL, one_p_size;
+
+	switch (fmt) {
+	case FORMAT_RGB565:
+		size *= 2;
+		buf_size = &size;
+		break;
+
+	case FORMAT_RGB666:	/* fall through */
+	case FORMAT_RGB888:
+		size *= 4;
+		buf_size = &size;
+		break;
+
+	case FORMAT_YCBCR420:
+		cbcr_size = size / 4;
+		one_p_size = size + (2 * cbcr_size);
+		buf_size = &one_p_size;
+		break;
+
+	case FORMAT_YCBCR422:
+		cbcr_size = size / 2;
+		one_p_size = size + (2 * cbcr_size);
+		buf_size = &one_p_size;
+		break;
+	}
+
+	if (*buf_size % PAGE_SIZE != 0)
+		*buf_size = (*buf_size / PAGE_SIZE + 1) * PAGE_SIZE;
+
+	return *buf_size;
+}
+
 int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info)
 {
-	u32 size = info->width * info->height;
-	u32 cbcr_size = 0, *buf_size = NULL, one_p_size;
+//	u32 size = info->width * info->height;
+//	u32 cbcr_size = 0, *buf_size = NULL, one_p_size;
 	int ret;
-
+#if 0
 	switch (info->format) {
 	case FORMAT_RGB565:
 		size *= 2;
@@ -254,9 +300,12 @@ int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info)
 		*buf_size = (*buf_size / PAGE_SIZE + 1) * PAGE_SIZE;
 
 	info->buf_size = *buf_size;
+#endif
+	info->buf_size = s3c_fimc_get_buffer_size(info->width, info->height, \
+							info->format);
 
 	if (info->format == FORMAT_YCBCR420 || info->format == FORMAT_YCBCR422)
-		ret = s3c_fimc_alloc_yuv_memory(info, size, cbcr_size);
+		ret = s3c_fimc_alloc_yuv_memory(info);
 	else
 		ret = s3c_fimc_alloc_rgb_memory(info);
 
@@ -266,9 +315,15 @@ int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info)
 int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 {
 	struct s3c_fimc_frame_addr *frame;
-	u32 size = info->width * info->height;
-	u32 cbcr_size = 0, *buf_size = NULL, one_p_size;
-
+	u32 size = info->width * info->height, cbcr_size;
+	
+	if (info->format == FORMAT_YCBCR420)
+		cbcr_size = size / 4;
+	else
+		cbcr_size = size / 2;
+//	u32 size = info->width * info->height;
+//	u32 cbcr_size = 0, *buf_size = NULL, one_p_size;
+#if 0
 	switch (info->format) {
 	case FORMAT_RGB565:
 		size *= 2;
@@ -298,6 +353,9 @@ int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 		*buf_size = (*buf_size / PAGE_SIZE + 1) * PAGE_SIZE;
 
 	info->buf_size = *buf_size;
+#endif
+	info->buf_size = s3c_fimc_get_buffer_size(info->width, info->height, \
+							info->format);
 
 	switch (info->format) {
 	case FORMAT_RGB565:	/* fall through */
@@ -314,6 +372,36 @@ int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 		frame->phys_cr = frame->phys_cb + cbcr_size;
 		break;
 	}
+
+	return 0;
+}
+
+int s3c_fimc_alloc_y_memory(struct s3c_fimc_in_frame *info, 
+					dma_addr_t addr)
+{
+	info->addr.phys_y = addr;
+	info->buf_size = s3c_fimc_get_buffer_size(info->width, \
+					info->height, info->format);
+
+	return 0;
+}
+
+int s3c_fimc_alloc_cb_memory(struct s3c_fimc_in_frame *info, 
+					dma_addr_t addr)
+{
+	info->addr.phys_cb = addr;
+	info->buf_size = s3c_fimc_get_buffer_size(info->width, \
+					info->height, info->format);
+
+	return 0;
+}
+
+int s3c_fimc_alloc_cr_memory(struct s3c_fimc_in_frame *info, 
+					dma_addr_t addr)
+{
+	info->addr.phys_cr = addr;
+	info->buf_size = s3c_fimc_get_buffer_size(info->width, \
+					info->height, info->format);
 
 	return 0;
 }

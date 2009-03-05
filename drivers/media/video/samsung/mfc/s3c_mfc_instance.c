@@ -963,6 +963,25 @@ int s3c_mfc_instance_encode(s3c_mfc_instance_context_t *ctx, int *enc_data_size,
 		}
 	}
 
+	// Dynamic Change for fps of MPEG4 Encoder
+	if ( (ctx->codec_mode == MP4_ENC) && 
+		S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_ENC_PIC_RUN_LINE_BUF) &&
+		(ctx->enc_change_framerate == 1) ) { 
+			
+            		//  ENC_HEADER command  //
+            		s3c_mfc_instance_enc_header(ctx, 0, 0, ctx->phys_addr_stream_buffer, ctx->stream_buffer_size, \
+												&hdr_size);	// VOL
+
+            		// Backup the stream header in the temporary header buffer.
+            		hdr_buf_tmp = (unsigned char *)kmalloc(hdr_size, GFP_KERNEL);
+            		if (hdr_buf_tmp) {
+			memcpy(hdr_buf_tmp, ctx->stream_buffer, hdr_size);
+			dmac_clean_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
+			dmac_flush_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
+		} else 
+			return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;            							
+    	}
+
 	/* SEI message with recovery point */
 	if ((ctx->enc_pic_option & 0x0F000000) && (ctx->codec_mode == AVC_ENC)) {
 		/* ENC_HEADER command */
@@ -996,7 +1015,8 @@ int s3c_mfc_instance_encode(s3c_mfc_instance_context_t *ctx, int *enc_data_size,
 
 	ctx->enc_pic_option = 0; /* reset the encoding picture option at every picture */
 	ctx->run_index = 0;
-
+	ctx->enc_change_framerate = 0;	
+	
 	switch(ctx->inst_no) {
 	case 0:
 		bits_wr_ptr_value = readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_BIT_STR_WR_PTR0);
@@ -1161,6 +1181,7 @@ int s3c_mfc_instance_enc_param_change(s3c_mfc_instance_context_t *ctx, unsigned 
 		writel(param_change_val, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_ENC_CHANGE_BITRATE);
 	} else if (param_change_enable == (1 << 3)) { /* frame rate */
 		writel(param_change_val, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_ENC_CHANGE_F_RATE);
+		ctx->enc_change_framerate = 1;	
 	} else if (param_change_enable == (1 << 4)) { /* intra refresh */
 		if (param_change_val > ((ctx->width * ctx->height) >> 8)) {
 			printk(KERN_ERR "\n%s: mfc encoder parameter change value is invalid\n", __FUNCTION__);
