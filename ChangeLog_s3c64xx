@@ -739,3 +739,11 @@ v2.6.28.6-s3c64xx-r0d6: PyoungJae Jung, Jiun Yu
 
 v2.6.28.6-s3c64xx-r0d7: Kyoungil Kim
 	- Just Prevent tag for SMDK6410
+
+v2.6.28.6-s3c64xx-r0d8: Jaeryul Oh
+	- Fixed Bug in case of dynamic fps change of MPEG4 encoding 
+
+	Modified Files:
+		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.h
+		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.c
+
