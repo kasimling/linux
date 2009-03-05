@@ -267,40 +267,8 @@ static u32 s3c_fimc_get_buffer_size(int width, int height, enum s3c_fimc_format_
 
 int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info)
 {
-//	u32 size = info->width * info->height;
-//	u32 cbcr_size = 0, *buf_size = NULL, one_p_size;
 	int ret;
-#if 0
-	switch (info->format) {
-	case FORMAT_RGB565:
-		size *= 2;
-		buf_size = &size;
-		break;
 
-	case FORMAT_RGB666:	/* fall through */
-	case FORMAT_RGB888:
-		size *= 4;
-		buf_size = &size;
-		break;
-
-	case FORMAT_YCBCR420:
-		cbcr_size = size / 4;
-		one_p_size = size + (2 * cbcr_size);
-		buf_size = &one_p_size;
-		break;
-
-	case FORMAT_YCBCR422:
-		cbcr_size = size / 2;
-		one_p_size = size + (2 * cbcr_size);
-		buf_size = &one_p_size;
-		break;
-	}
-
-	if (*buf_size % PAGE_SIZE != 0)
-		*buf_size = (*buf_size / PAGE_SIZE + 1) * PAGE_SIZE;
-
-	info->buf_size = *buf_size;
-#endif
 	info->buf_size = s3c_fimc_get_buffer_size(info->width, info->height, \
 							info->format);
 
@@ -321,39 +289,7 @@ int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr)
 		cbcr_size = size / 4;
 	else
 		cbcr_size = size / 2;
-//	u32 size = info->width * info->height;
-//	u32 cbcr_size = 0, *buf_size = NULL, one_p_size;
-#if 0
-	switch (info->format) {
-	case FORMAT_RGB565:
-		size *= 2;
-		buf_size = &size;
-		break;
 
-	case FORMAT_RGB666:	/* fall through */
-	case FORMAT_RGB888:
-		size *= 4;
-		buf_size = &size;
-		break;
-
-	case FORMAT_YCBCR420:
-		cbcr_size = size / 4;
-		one_p_size = size + (2 * cbcr_size);
-		buf_size = &one_p_size;
-		break;
-
-	case FORMAT_YCBCR422:
-		cbcr_size = size / 2;
-		one_p_size = size + (2 * cbcr_size);
-		buf_size = &one_p_size;
-		break;
-	}
-
-	if (*buf_size % PAGE_SIZE != 0)
-		*buf_size = (*buf_size / PAGE_SIZE + 1) * PAGE_SIZE;
-
-	info->buf_size = *buf_size;
-#endif
 	info->buf_size = s3c_fimc_get_buffer_size(info->width, info->height, \
 							info->format);
 
