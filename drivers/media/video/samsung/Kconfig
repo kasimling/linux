@@ -8,7 +8,12 @@ config VIDEO_SAMSUNG
 
 source "drivers/media/video/samsung/fimc/Kconfig"
 source "drivers/media/video/samsung/post/Kconfig"
-source "drivers/media/video/samsung/mfc/Kconfig"
+if CPU_S3C6410
+source "drivers/media/video/samsung/mfc10/Kconfig"
+endif
+if CPU_S5PC100
+source "drivers/media/video/samsung/mfc40/Kconfig"
+endif
 source "drivers/media/video/samsung/tv/Kconfig"
 source "drivers/media/video/samsung/rotator/Kconfig"
 source "drivers/media/video/samsung/jpeg/Kconfig"
