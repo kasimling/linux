@@ -208,6 +208,11 @@ static void __init smdkc100_smc911x_set(void)
 	__raw_writel(tmp, S5PC1XX_SROM_BW);
 
 	__raw_writel((0x0<<28)|(0x4<<24)|(0xd<<16)|(0x1<<12)|(0x4<<8)|(0x6<<4)|(0x0<<0), S5PC1XX_SROM_BC3);
+	
+	/* XX
+	 * __raw_writel((0x0<<28)|(0x0<<24)|(27<<16)|(0x0<<12)|(2<<8)|(0x0<<4)|(0x0<<0), S5PC1XX_SROM_BC3);
+	 */
+	
 }
 
 static void __init smdkc100_machine_init(void)
