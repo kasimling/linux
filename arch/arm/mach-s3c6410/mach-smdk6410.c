@@ -129,6 +129,7 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 	&s3c_device_usbgadget,
 	&s3c_device_fimc0,
 	&s3c_device_fimc1,
+	&s3c_device_g2d,	
 
 #ifdef CONFIG_S3C64XX_ADC
 	&s3c_device_adc,
