@@ -37,39 +37,6 @@ void init_scheduler(void)
 	init_transfer_ready_q();
 }
 
-#if 0 //by ss1 inlined
-/******************************************************************************/
-/*! 
- * @name	int  	insert_ed_to_scheduler(ed_t 	*pInsertED)
- *
- * @brief		this function transfers the pInsertED to S3C6400Scheduler, and
- *			after that, the pInsertED is inserted to TransferReadyQ and scheduled by Scheduler.
- *
- *
- * @param	[IN]	pInsertED	= indicates pointer of ed_t to be inserted to TransferReadyQ.
- *
- * @return	USB_ERR_ALREADY_EXIST	-	if the pInsertED is already existed.
- *			USB_ERR_SUCCESS		- 	if success to insert pInsertED to S3CScheduler.
- */
-/******************************************************************************/
-int  	insert_ed_to_scheduler(ed_t *pInsertED)
-{	
-	if(!pInsertED->is_need_to_insert_scheduler)
-	{
-		return USB_ERR_ALREADY_EXIST;
-	}
-
-	insert_ed_to_ready_q(pInsertED, false);
-	pInsertED->is_need_to_insert_scheduler = false;
-	pInsertED->ed_status.is_in_transfer_ready_q = true;
-	
-	do_periodic_schedule();
-	do_nonperiodic_schedule();
-	
-	return USB_ERR_SUCCESS;
-}
-#endif 
-
 /******************************************************************************/
 /*! 
  * @name	int  	reserve_used_resource_for_periodic(u32	usb_time)

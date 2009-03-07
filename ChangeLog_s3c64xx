@@ -789,3 +789,16 @@ v2.6.28.6-s3c64xx-r1d1 : Byungjae Lee
 
 	Added Files:
 		A	drivers/usb/host/s3c-otg/*
+
+v2.6.28.6-s3c64xx-r1d2 : Byungjae Lee
+	- implemented s3c6410 OTG host role for HID(Keyboard, Mouse)
+	  and Card Reader
+
+	Modified Files:
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-driver.c
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-hcd.c
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-kal.h
+		M	drivers/usb/host/s3c-otg/s3c-otg-scheduler-ischeduler.c
+		M	drivers/usb/host/s3c-otg/s3c-otg-scheduler-scheduler.h
+		M	drivers/usb/host/s3c-otg/s3c-otg-transfer-common.c
+		M	drivers/usb/host/s3c-otg/s3c-otg-transferchecker-common.c

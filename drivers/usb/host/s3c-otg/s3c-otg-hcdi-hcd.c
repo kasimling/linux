@@ -29,9 +29,8 @@
  ****************************************************************************/
 
 #include "s3c-otg-hcdi-hcd.h" 
-
-//static	SPINLOCK_t	otg_hcd_spin_lock = SPIN_LOCK_INIT;
 static DEFINE_SPINLOCK(otg_hcd_spin_lock);
+
 /**
  * otg_hcd_init_modules()
  * 
@@ -252,11 +251,8 @@ s3c6410_otghcd_urb_enqueue
 	u8 	hub_addr = 0;
 	u8 	hub_port = 0; 
 	bool	f_is_do_split = false;
-
-	unsigned long	spin_lock_flag = 0;
-	
-	ed_t *	target_ed = NULL;
-	isoch_packet_desc_t *		new_isoch_packet_desc = NULL;
+	ed_t	*target_ed = NULL;
+	isoch_packet_desc_t *new_isoch_packet_desc = NULL;
 	
 	otg_dbg(false, "s3c6410_otghcd_urb_enqueue \n");
 	
@@ -300,17 +296,7 @@ s3c6410_otghcd_urb_enqueue
 		}
 
 		max_packet_size = usb_maxpacket(urb->dev, urb->pipe, !(usb_pipein(urb->pipe)));
-
 		additional_multi_count = ((max_packet_size) >> 11) & 0x03;
-
-#if 0
-		if ( ((dev_speed == FULL_SPEED_OTG) || (dev_speed == LOW_SPEED_OTG)) &&
-			(urb->dev->tt) && (urb->dev->tt->hub->devnum != 1) ) 
-		{
-			f_is_do_split = true;
-		}
-#endif
-
 		dev_addr = usb_pipedevice(urb->pipe);
 		ep_num = usb_pipeendpoint(urb->pipe);
 		f_is_ep_in = usb_pipein(urb->pipe) ? true : false;	
@@ -318,30 +304,28 @@ s3c6410_otghcd_urb_enqueue
 		sched_frame = (u8)(urb->start_frame);
 
 		//check 
-#if 0
 		if(urb->dev->tt == NULL)
-#else
-		if((urb->dev->tt == NULL) || (urb->dev->tt->hub == NULL))
-#endif
 		{	
-			otg_dbg(OTG_DBG_OTGHCDI_HCD, "tt = %p\n", urb->dev->tt);
-			if (urb->dev->tt != NULL)
-				otg_dbg(OTG_DBG_OTGHCDI_HCD, "hub = %p\n", urb->dev->tt->hub);
+			otg_dbg(OTG_DBG_OTGHCDI_HCD, "urb->dev->tt == NULL\n");
 			hub_port = 0; //u8 hub_port
 			hub_addr = 0; //u8 hub_addr,
 		}
 		else
 		{
-#if 1
-			if ( ((dev_speed == FULL_SPEED_OTG) || (dev_speed == LOW_SPEED_OTG)) &&
-				(urb->dev->tt) && (urb->dev->tt->hub->devnum != 1)) 
-			{
-				f_is_do_split = true;
-			}
-#endif
 			hub_port = (u8)(urb->dev->ttport); //u8 hub_port,
-			hub_addr = (u8)(urb->dev->tt->hub->devnum);//u8 hub_addr,			
+			if (urb->dev->tt->hub) {
+				if ( ((dev_speed == FULL_SPEED_OTG) || (dev_speed == LOW_SPEED_OTG)) &&
+					(urb->dev->tt) && (urb->dev->tt->hub->devnum != 1)) {
+					f_is_do_split = true;
+				}
+
+				hub_addr = (u8)(urb->dev->tt->hub->devnum);//u8 hub_addr,			
+			}
+			if (urb->dev->tt->multi) {
+				hub_addr = 0x80;//u8 hub_addr,			
+			}
 		}
+		otg_dbg(OTG_DBG_OTGHCDI_HCD, "hub_port=%d, hub_addr=%d\n", hub_port, hub_addr);
 
 		ret_val = create_ed(&target_ed);
 		if(ret_val != USB_ERR_SUCCESS)
@@ -396,15 +380,8 @@ s3c6410_otghcd_urb_enqueue
 		return USB_ERR_FAIL;
 	}
 	
-#if 0
-	spin_lock_irg_save_otg(&otg_hcd_spin_lock, spin_lock_flag);
-#endif
-
 	if (!HC_IS_RUNNING(hcd->state)) {
 		otg_err(OTG_DBG_OTGHCDI_HCD, "!HC_IS_RUNNING(hcd->state) \n");
-#if 0
-		spin_unlock_irq_save_otg(&otg_hcd_spin_lock, spin_lock_flag);
-#endif
 		return -USB_ERR_NODEV;
 	}
 
@@ -412,7 +389,7 @@ s3c6410_otghcd_urb_enqueue
 	if (urb->status != -EINPROGRESS) {
 		urb->hcpriv = NULL;
 		usb_hcd_giveback_urb(hcd, urb, urb->status);
-		goto fail;
+		return USB_ERR_SUCCESS;
 	}
 			
 	ret_val =	issue_transfer( target_ed, (void *)NULL, (void *)NULL,
@@ -431,11 +408,6 @@ s3c6410_otghcd_urb_enqueue
 	}
 	urb->hcpriv = (void *)return_td_addr;
 
-fail:
-	
-#if 0
-	spin_unlock_irq_save_otg(&otg_hcd_spin_lock, spin_lock_flag);
-#endif
 	return USB_ERR_SUCCESS;
 } 
 //-------------------------------------------------------------------------------
@@ -453,7 +425,7 @@ fail:
  */
 int		s3c6410_otghcd_urb_dequeue(struct usb_hcd *_hcd, struct urb *_urb, int status) 
 { 
-	int	ret_val = 0, rc = 0;
+	int	ret_val = 0;
 	
 	unsigned long	spin_lock_flag = 0;
 	td_t *	cancel_td = (td_t *)_urb->hcpriv;
@@ -463,50 +435,36 @@ int		s3c6410_otghcd_urb_dequeue(struct usb_hcd *_hcd, struct urb *_urb, int stat
 		otg_err(OTG_DBG_OTGHCDI_HCD, "cancel_td == NULL\n"); 
 		return USB_ERR_FAIL;
 	}
-
 	otg_dbg(OTG_DBG_OTGHCDI_HCD, "s3c6410_otghcd_urb_dequeue, status = %d\n", status);	
 
 	spin_lock_irg_save_otg(&otg_hcd_spin_lock, spin_lock_flag);
-#if 1
-	rc = usb_hcd_check_unlink_urb(_hcd, _urb, status);
-	
 
-        if (rc) {
-		otg_dbg(OTG_DBG_OTGHCDI_HCD, "rc = %d\n", rc);	
+	ret_val = usb_hcd_check_unlink_urb(_hcd, _urb, status);
+        if (ret_val) {
+		otg_dbg(OTG_DBG_OTGHCDI_HCD, "ret_val = %d\n", ret_val);	
                 goto done;
         }
-#endif
 
 	if (!HC_IS_RUNNING(_hcd->state)) {
 		otg_err(OTG_DBG_OTGHCDI_HCD, "!HC_IS_RUNNING(hcd->state) \n");		
-		otg_usbcore_giveback(cancel_td); 
+		usb_hcd_giveback_urb(_hcd, _urb, status);
 		spin_unlock_irq_save_otg(&otg_hcd_spin_lock, spin_lock_flag);
-		return 0;
-	}
-
-#if 1
-	if (cancel_td->parent_ed_p->td_list_entry.next == NULL) {
-		otg_dbg(OTG_DBG_TRANSFER, "parent_ed = %p, td_list_entry.next = %p, num_td = %d\n",
-				cancel_td->parent_ed_p, cancel_td->parent_ed_p->td_list_entry.next, cancel_td->parent_ed_p->num_td);
-
 		return USB_ERR_SUCCESS;
 	}
-#endif
 
 	ret_val = cancel_transfer(cancel_td->parent_ed_p, cancel_td);
 	if(ret_val != USB_ERR_DEQUEUED && ret_val != USB_ERR_NOELEMENT)
 	{
 		otg_err(OTG_DBG_OTGHCDI_HCD, "fail to cancel_transfer() \n");		
-		otg_usbcore_giveback(cancel_td); 
+		usb_hcd_giveback_urb(_hcd, _urb, status);
 		spin_unlock_irq_save_otg(&otg_hcd_spin_lock, spin_lock_flag);
 		return USB_ERR_FAIL;
 	}
-
-	otg_usbcore_giveback(cancel_td);	
-
+	ret_val = USB_ERR_SUCCESS;
 done:
+	usb_hcd_giveback_urb(_hcd, _urb, status);
 	spin_unlock_irq_save_otg(&otg_hcd_spin_lock, spin_lock_flag);
-	return USB_ERR_SUCCESS;
+	return ret_val;
 } 
 //-------------------------------------------------------------------------------
 
@@ -537,11 +495,8 @@ void	s3c6410_otghcd_endpoint_disable(struct usb_hcd *hcd, struct usb_host_endpoi
 		otg_err(OTG_DBG_OTGHCDI_HCD, "fail to delete_ed() \n");
 		return ;
 	}
-#if 0
-	//ep->hcpriv = NULL; delete_ed coveres it
-#else
+
 	ep->hcpriv = NULL;
-#endif
 } 
 //-------------------------------------------------------------------------------
 

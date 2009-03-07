@@ -730,14 +730,7 @@ int  	cancel_transfer(ed_t 	*parent_ed,
 		return cancel_td->error_code;
 	}	
 
-#if 0
-	for (tmp_list_p = (&parent_ed->td_list_entry)->next, tmp_list2_p = tmp_list_p->next;\
-				tmp_list_p != (&parent_ed->td_list_entry); \
-				tmp_list_p = tmp_list2_p, tmp_list2_p = tmp_list_p->next) {
-
-#else
 	otg_list_for_each_safe(tmp_list_p, tmp_list2_p, &parent_ed->td_list_entry) {
-#endif
 		if(&cancel_td->td_list_entry == tmp_list_p)
 		{
 			cond_found = true;

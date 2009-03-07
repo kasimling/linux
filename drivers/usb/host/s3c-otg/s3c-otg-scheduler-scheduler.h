@@ -54,7 +54,6 @@ extern "C"
 
 //Defines external functions of IScheduler.c
 extern 	void	 init_scheduler(void);
-//extern	int  	insert_ed_to_scheduler(ed_t *insert_ed);
 extern	int  	reserve_used_resource_for_periodic(u32	usb_time,u8 dev_speed, u8	trans_type);
 extern	int  	free_usb_resource_for_periodic(u32	free_usb_time, u8	free_chnum, u8	trans_type);
 extern	int  	remove_ed_from_scheduler(ed_t	*remove_ed);

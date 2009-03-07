@@ -53,15 +53,6 @@ static int s3c6410_otg_drv_probe (struct platform_device *pdev)
 	
 	otg_dbg(OTG_DBG_OTGHCDI_DRIVER, "s3c6410_otg_drv_probe \n");
 	
-/**	
-	2.6.20+ requires pdev.dma_mask to be set prior to calling usb_create_hcd()
-	Set device flags indicating whether the HCD supports DMA. 
-*/	
-#if 0
-	pdev->dev.dma_mask = (void *) ~0;
-	pdev->dev.coherent_dma_mask = ~0;
-#endif
-
 ///init for host mode
 /** 
 	Allocate memory for the base HCD &	Initialize the base HCD.

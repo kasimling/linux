@@ -95,16 +95,19 @@ start_do_transfer_checker:
 		}
 
 		//Gets the address of the td_t to have the channel to be interrupted.
-		get_td_info(do_try_cnt, &td_addr);
-		
-		done_td 	= 	(td_t *)td_addr;
+		if(!(get_td_info(do_try_cnt, &td_addr))) {
 
-		if(do_try_cnt != done_td->cur_stransfer.alloc_chnum)
-		{
+			done_td = (td_t *)td_addr;
+
+			if(do_try_cnt != done_td->cur_stransfer.alloc_chnum) {
+				do_try_cnt++;
+				goto start_do_transfer_checker;
+			}
+
+		} else {
 			do_try_cnt++;
 			goto start_do_transfer_checker;
 		}
-		
 		//Gets the informationof channel to be interrupted.
 		get_ch_info(&ch_info,do_try_cnt);
 		

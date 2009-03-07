@@ -182,20 +182,7 @@ otg_usbcore_giveback(td_t * td_p)
 	urb_p->status		= (int)(td_p->error_code);
 	urb_p->error_count	= (int)(td_p->err_cnt);
 	urb_p->hcpriv 		= NULL;	
-	
-#ifdef OTG_DEBUG
-	if(urb_p->transfer_buffer_length != td_p->transferred_szie)
-	{
-		if(!td_p->parent_ed_p->ed_desc.is_ep_in)
-		{
-			otg_dbg(false, "###OUT ==> %d:  %d : %d\n",(int)urb_p->transfer_buffer_length,(int)td_p->transferred_szie, (int)td_p->buf_size);	
-		}
-		else
-		{
-			otg_dbg(false, "###IN ==> %d:  %d : %d\n",(int)urb_p->transfer_buffer_length,(int)td_p->transferred_szie, (int)td_p->buf_size);	
-		}
-	}
-#endif
+
 	usb_hcd_giveback_urb(g_pUsbHcd, urb_p, urb_p->status);
 } 
 //-------------------------------------------------------------------------------
