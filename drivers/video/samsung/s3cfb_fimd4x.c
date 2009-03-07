@@ -1074,8 +1074,11 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 		if ((next_fb_info.xres + next_fb_info.xoffset) > next_fb_info.xres_virtual ||
 			(next_fb_info.yres + next_fb_info.yoffset) > next_fb_info.yres_virtual ||
 			(next_fb_info.xres + next_fb_info.lcd_offset_x ) > s3cfb_fimd.width ||
-			(next_fb_info.yres + next_fb_info.lcd_offset_y ) > s3cfb_fimd.height)
-			return -EINVAL;
+			(next_fb_info.yres + next_fb_info.lcd_offset_y ) > s3cfb_fimd.height) {
+			printk("Error : S3CFB_SET_NEXT_FB_INFO\n");
+ 			return -EINVAL;
+		}
+
 
 		fbi->next_fb_info = next_fb_info;
 		fbi->next_fb_info_change_req = 1;

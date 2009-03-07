@@ -736,3 +736,43 @@ v2.6.28.6-s3c64xx-r0d6: PyoungJae Jung, Jiun Yu
 		A	drivers/media/video/samsung/mfc/s3c_mfc_types.h
 		A	drivers/media/video/samsung/mfc/s3c_mfc_yuv_buf_manager.c
 		A	drivers/media/video/samsung/mfc/s3c_mfc_yuv_buf_manager.h
+
+v2.6.28.6-s3c64xx-r0d7: Kyoungil Kim
+	- Just Prevent tag for SMDK6410
+
+v2.6.28.6-s3c64xx-r0d8: Jaeryul Oh
+	- Fixed Bug in case of dynamic fps change of MPEG4 encoding 
+
+	Modified Files:
+		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.h
+		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.c
+
+v2.6.28.6-s3c64xx-r0d9: Jonghun Han
+        - S3C6410 FIMG-2D driver support
+
+		Added Files:
+			drivers/media/video/samsung/g2d/Kconfig
+			drivers/media/video/samsung/g2d/Makefile
+			drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
+			drivers/media/video/samsung/g2d/s3c_fimg2d2x.h
+			arch/arm/plat-s3c/include/plat/regs-g2d.h
+
+		Modified Files:
+			arch/arm/configs/smdk6410mtd_defconfig
+			arch/arm/configs/smdk6410nfs_defconfig
+			arch/arm/configs/smdk6410onenand_defconfig
+			arch/arm/configs/smdk6410ramdisk_defconfig
+			arch/arm/mach-s3c6400/include/mach/map.h
+			arch/arm/mach-s3c6410/mach-smdk6410.c
+			arch/arm/plat-s3c/include/plat/devs.h
+			arch/arm/plat-s3c64xx/devs.c
+			drivers/media/video/samsung/Kconfig
+			drivers/media/video/samsung/Makefile
+			drivers/video/samsung/s3cfb.c
+			drivers/video/samsung/s3cfb_fimd4x.c
+
+v2.6.28.6-s3c64xx-r1: Jonghun Han
+	- Official Release (09.03.06)
+
+v2.6.28.6-s3c64xx-r1d0: Kyoungil Kim
+
