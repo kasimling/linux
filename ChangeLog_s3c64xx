@@ -776,3 +776,16 @@ v2.6.28.6-s3c64xx-r1: Jonghun Han
 
 v2.6.28.6-s3c64xx-r1d0: Kyoungil Kim
 
+v2.6.28.6-s3c64xx-r1d1 : Byungjae Lee
+	- implemented s3c6410 OTG host role for Mass storage only
+
+	Modified Files:
+		M	arch/arm/mach-s3c6410/mach-smdk6410.c
+		M	arch/arm/plat-s3c/include/plat/devs.h
+		M	arch/arm/plat-s3c64xx/devs.c
+		M	drivers/usb/Makefile
+		M	drivers/usb/host/Kconfig
+		M	drivers/usb/host/Makefile
+
+	Added Files:
+		A	drivers/usb/host/s3c-otg/*
