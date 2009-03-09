@@ -28,6 +28,7 @@ extern struct platform_device s3c_device_timer[];
 
 extern struct platform_device s3c_device_usb;
 extern struct platform_device s3c_device_lcd;
+extern struct platform_device s3c_device_g2d;
 extern struct platform_device s3c_device_vpp;
 extern struct platform_device s3c_device_tvenc;
 extern struct platform_device s3c_device_tvscaler;
@@ -51,6 +52,7 @@ extern struct platform_device s3c_device_nand;
 extern struct platform_device s3c_device_onenand;
 
 extern struct platform_device s3c_device_usbgadget;
+extern struct platform_device s3c_device_usb_otghcd;
 extern struct platform_device s3c_device_keypad;
 extern struct platform_device s3c_device_ts;
 extern struct platform_device s3c_device_g3d;
