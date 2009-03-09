@@ -446,19 +446,25 @@ void s3c6410_pm_do_restore(struct sleep_save *ptr, int count)
  * struct sleep_save_phy type
 */
 
-void s3c2410_pm_do_save_phy(struct sleep_save_phy *ptr, struct platform_device *pdev, int count)
+int s3c2410_pm_do_save_phy(struct sleep_save_phy *ptr, struct platform_device *pdev, int count)
 {
 	void __iomem *target_reg;
 	struct resource *res;
 	u32 reg_size;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if(res == NULL){
+		printk(KERN_ERR "%s resource get error\n",__FUNCTION__);
+		return 0;
+	}
 	reg_size = res->end - res->start + 1;
 	target_reg = ioremap(res->start,reg_size);
 
 	for (; count > 0; count--, ptr++) {
 		ptr->val = readl(target_reg + (ptr->reg));
 	}
+
+	return 0;
 }
 
 /* s3c6410_pm_do_restore_phy
@@ -470,19 +476,25 @@ void s3c2410_pm_do_save_phy(struct sleep_save_phy *ptr, struct platform_device *
  * struct sleep_save_phy type
 */
 
-void s3c2410_pm_do_restore_phy(struct sleep_save_phy *ptr, struct platform_device *pdev, int count)
+int s3c2410_pm_do_restore_phy(struct sleep_save_phy *ptr, struct platform_device *pdev, int count)
 {
 	void __iomem *target_reg;
 	struct resource *res;
 	u32 reg_size;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if(res == NULL){
+		printk(KERN_ERR "%s resource get error\n",__FUNCTION__);
+		return 0;
+	}
 	reg_size = res->end - res->start + 1;
 	target_reg = ioremap(res->start,reg_size);
 
 	for (; count > 0; count--, ptr++) {
 		writel(ptr->val, (target_reg + ptr->reg));
 	}
+
+	return 0;
 }
 
 static void s3c6410_pm_do_restore_core(struct sleep_save *ptr, int count)
