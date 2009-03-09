@@ -310,7 +310,7 @@ static int __init s3c_ts_probe(struct platform_device *pdev)
 
 	if (!input_dev) {
 		ret = -ENOMEM;
-		goto fail;
+		goto err_alloc;
 	}
 	
 	ts->dev = input_dev;
@@ -347,14 +347,14 @@ static int __init s3c_ts_probe(struct platform_device *pdev)
 	if (ts_irq == NULL) {
 		dev_err(dev, "no irq resource specified\n");
 		ret = -ENOENT;
-		goto err_clk;
+		goto err_irq;
 	}
 
 	ret = request_irq(ts_irq->start, stylus_updown, IRQF_SAMPLE_RANDOM, "s3c_updown", ts);
 	if (ret != 0) {
 		dev_err(dev,"s3c_ts.c: Could not allocate ts IRQ_PENDN !\n");
 		ret = -EIO;
-		goto err_clk;
+		goto err_irq;
 	}
 
 	/* For IRQ_ADC */
@@ -362,7 +362,7 @@ static int __init s3c_ts_probe(struct platform_device *pdev)
 	if (ts_irq == NULL) {
 		dev_err(dev, "no irq resource specified\n");
 		ret = -ENOENT;
-		goto err_clk;
+		goto err_irq;
 	}
 
 	ret = request_irq(ts_irq->start, stylus_action, IRQF_SAMPLE_RANDOM, "s3c_action", ts);
@@ -385,24 +385,26 @@ static int __init s3c_ts_probe(struct platform_device *pdev)
 
 	return 0;
 
-fail:	input_free_device(input_dev);
-	kfree(ts);
-	
-err_irq:
+fail:
 	free_irq(ts_irq->start, ts->dev);
 	free_irq(ts_irq->end, ts->dev);
 	
-err_clk:
+err_irq:
+	input_free_device(input_dev);
+	kfree(ts);
+
+err_alloc:
 	clk_disable(ts_clock);
 	clk_put(ts_clock);
 	
-err_map:
+err_clk:
 	iounmap(ts_base);
 
-err_req:
+err_map:
 	release_resource(ts_mem);
 	kfree(ts_mem);
 
+err_req:
 	return ret;
 }
 
