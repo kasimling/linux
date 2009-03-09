@@ -104,6 +104,8 @@
 #define S3C_G2D_FULL_H(x)				((x)&0x7FF)
 #define S3C_G2D_FULL_V(x)				(((x)&0x7FF)<<16)
 
+#define S3C_G2D_ALPHA(x)				((x)&0xFF)
+
 /* interrupt mode select */
 #define	S3C_G2D_INTC_PEND_REG_CLRSEL_LEVEL		(1<<31)
 #define	S3C_G2D_INTC_PEND_REG_CLRSEL_PULSE		(0<<31)

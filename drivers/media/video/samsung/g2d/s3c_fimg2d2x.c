@@ -1,4 +1,4 @@
-/* linux/drivers/video/samsung/s3cfb_fimg2d2x.c
+/* linux/drivers/video/samsung/s3c_fimg2d2x.c
  *
  * Driver file for Samsung 2D Accelerator(FIMG-2D)
  * Jonghun Han, Copyright (c) 2009 Samsung Electronics
@@ -51,7 +51,7 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 {
 	u32 bpp_mode;
 	u32 tmp_reg;
-	s3c_g2d_check_fifo(17);
+	s3c_g2d_check_fifo(25);
 
 
 	switch(params->bpp) {
@@ -107,25 +107,24 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 
 	/*set register for ROP & Alpha==================================*/
 	if(params->alpha_mode == TRUE) {
+		if(params->alpha_val > ALPHA_VALUE_MAX) {
+			printk(KERN_ALERT "s3c g2d dirver error: exceed alpha value range 0~255\n");
+ 	 		return -ENOENT;
+		}
+
 		__raw_writel(S3C_G2D_ROP_REG_OS_FG_COLOR | 
 				S3C_G2D_ROP_REG_ABM_REGISTER | 
 				S3C_G2D_ROP_REG_T_OPAQUE_MODE | 
 				G2D_ROP_SRC_ONLY, 
 				s3c_g2d_base + S3C_G2D_ROP_REG);
-		
-		if(params->alpha_val > ALPHA_VALUE_MAX) {
-			printk(KERN_ALERT"s3c g2d dirver error: exceed alpha value range 0~255\n");
- 	 		return -ENOENT;
-		}
-		
-		__raw_writel(((0x0<<8) | (params->alpha_val<<0)), s3c_g2d_base + S3C_G2D_ALPHA_REG);
+		__raw_writel(S3C_G2D_ALPHA(params->alpha_val), s3c_g2d_base + S3C_G2D_ALPHA_REG);
 	} else {
 		__raw_writel(S3C_G2D_ROP_REG_OS_FG_COLOR | 
 				S3C_G2D_ROP_REG_ABM_NO_BLENDING | 
 				S3C_G2D_ROP_REG_T_OPAQUE_MODE | 
 				G2D_ROP_SRC_ONLY, 
 				s3c_g2d_base + S3C_G2D_ROP_REG);
-		__raw_writel(((0x0<<8) | (0xff<<0)), s3c_g2d_base + S3C_G2D_ALPHA_REG);
+		__raw_writel(S3C_G2D_ALPHA(0x00), s3c_g2d_base + S3C_G2D_ALPHA_REG);		
 	}
 
 	/*set register for color key====================================*/
@@ -142,7 +141,6 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 	__raw_writel(S3C_G2D_ROTATRE_REG_R0_0, s3c_g2d_base + S3C_G2D_ROTATE_REG);
 	
 	return 0;
-	
 }
 
 
@@ -151,7 +149,7 @@ void s3c_g2d_bitblt(u16 src_x1, u16 src_y1, u16 src_x2, u16 src_y2,
 {
 	u32 cmd_reg_val;
 
-	s3c_g2d_check_fifo(17);
+	s3c_g2d_check_fifo(25);
 
  	__raw_writel(src_x1, s3c_g2d_base + S3C_G2D_COORD0_X_REG);
 	__raw_writel(src_y1, s3c_g2d_base + S3C_G2D_COORD0_Y_REG);
@@ -164,18 +162,16 @@ void s3c_g2d_bitblt(u16 src_x1, u16 src_y1, u16 src_x2, u16 src_y2,
  	__raw_writel(dst_y2, s3c_g2d_base + S3C_G2D_COORD3_Y_REG);
 
 	cmd_reg_val = readl(s3c_g2d_base + S3C_G2D_CMD1_REG);
-	cmd_reg_val = ~(0x3<<0);
+	cmd_reg_val = ~(S3C_G2D_CMD1_REG_S|S3C_G2D_CMD1_REG_N);
 	cmd_reg_val |= S3C_G2D_CMD1_REG_N;
 	__raw_writel(cmd_reg_val, s3c_g2d_base + S3C_G2D_CMD1_REG);
-		
-
 }
 
 
 static void s3c_g2d_rotate_with_bitblt(s3c_g2d_params *params, ROT_DEG rot_degree)
 {
 	u16 org_x=0, org_y=0;
-	u32 rot_reg_val;
+	u32 rot_reg_val = 0;
 	u32 src_x1, src_y1, src_x2, src_y2, dst_x1, dst_y1, dst_x2, dst_y2;
 
 	src_x1 = params->src_start_x;
@@ -187,7 +183,7 @@ static void s3c_g2d_rotate_with_bitblt(s3c_g2d_params *params, ROT_DEG rot_degre
 	dst_x2 = params->dst_start_x + params->dst_work_width;
 	dst_y2 = params->dst_start_y + params->dst_work_height;
 	
-	s3c_g2d_check_fifo(17);
+	s3c_g2d_check_fifo(25);
 	__raw_writel(S3C_G2D_INTEN_REG_CCF, s3c_g2d_base + S3C_G2D_INTEN_REG);	
 
 	s3c_g2d_get_rotation_origin(src_x1, src_y1, src_x2, src_y2, 
@@ -265,7 +261,7 @@ static void s3c_g2d_get_rotation_origin(u16 src_x1, u16 src_y1,
 					ROT_DEG rot_degree, 
 					u16* org_x, u16* org_y)
 {
-	s3c_g2d_check_fifo(17);
+	s3c_g2d_check_fifo(25);
 
 	switch(rot_degree) {
 	case ROT_90:
@@ -307,6 +303,7 @@ irqreturn_t s3c_g2d_irq(int irq, void *dev_id)
 		wake_up_interruptible(&waitq_g2d);
 		s3c_g2d_poll_flag = 1;
 	}
+
 	return IRQ_HANDLED;
 }
 
@@ -324,7 +321,8 @@ int s3c_g2d_open(struct inode *inode, struct file *file)
 
 	file->private_data	= (s3c_g2d_params *)params;
 	
-	printk("s3c_g2d_open() \n"); 	
+	printk("s3c_g2d_open() \n");
+
 	return 0;
 }
 
@@ -341,7 +339,8 @@ int s3c_g2d_release(struct inode *inode, struct file *file)
 
 	kfree(params);
 	
-	printk("s3c_g2d_release() \n"); 
+	printk("s3c_g2d_release() \n");
+
 	return 0;
 }
 
@@ -369,7 +368,7 @@ int s3c_g2d_mmap(struct file* filp, struct vm_area_struct *vma)
 	
 	if(remap_pfn_range(vma, vma->vm_start, pageFrameNo, size, vma->vm_page_prot))
 		return -EINVAL;
-	
+
 	return 0;
 }
 
@@ -536,7 +535,7 @@ int s3c_g2d_probe(struct platform_device *pdev)
 
 	printk(KERN_ALERT" s3c_g2d_probe Success\n");
 
-	return 0; 
+	return 0;
 }
 
 
