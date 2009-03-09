@@ -571,23 +571,28 @@ struct s3c_fimc_config {
 /* CID extensions */
 #define V4L2_CID_ACTIVE_CAMERA		(V4L2_CID_PRIVATE_BASE + 0)
 #define V4L2_CID_NR_FRAMES		(V4L2_CID_PRIVATE_BASE + 1)
-#define V4L2_CID_INPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 2)
-#define V4L2_CID_OUTPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 3)
-#define V4L2_CID_RESET			(V4L2_CID_PRIVATE_BASE + 4)
-#define V4L2_CID_EFFECT_ORIGINAL	(V4L2_CID_PRIVATE_BASE + 10)
-#define V4L2_CID_EFFECT_ARBITRARY	(V4L2_CID_PRIVATE_BASE + 11)
-#define V4L2_CID_EFFECT_NEGATIVE 	(V4L2_CID_PRIVATE_BASE + 13)
-#define V4L2_CID_EFFECT_ARTFREEZE	(V4L2_CID_PRIVATE_BASE + 14)
-#define V4L2_CID_EFFECT_EMBOSSING	(V4L2_CID_PRIVATE_BASE + 15)
-#define V4L2_CID_EFFECT_SILHOUETTE	(V4L2_CID_PRIVATE_BASE + 16)
-#define V4L2_CID_ROTATE_ORIGINAL	(V4L2_CID_PRIVATE_BASE + 20)
-#define V4L2_CID_ROTATE_90		(V4L2_CID_PRIVATE_BASE + 21)
-#define V4L2_CID_ROTATE_180		(V4L2_CID_PRIVATE_BASE + 22)
-#define V4L2_CID_ROTATE_270		(V4L2_CID_PRIVATE_BASE + 23)
-#define V4L2_CID_ROTATE_90_HFLIP	(V4L2_CID_PRIVATE_BASE + 24)
-#define V4L2_CID_ROTATE_90_VFLIP	(V4L2_CID_PRIVATE_BASE + 25)
-#define	V4L2_CID_ZOOM_IN		(V4L2_CID_PRIVATE_BASE + 31)
-#define V4L2_CID_ZOOM_OUT		(V4L2_CID_PRIVATE_BASE + 32)
+#define V4L2_CID_RESET			(V4L2_CID_PRIVATE_BASE + 2)
+#define V4L2_CID_OUTPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 10)
+#define V4L2_CID_INPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 20)
+#define V4L2_CID_INPUT_ADDR_RGB		(V4L2_CID_PRIVATE_BASE + 21)
+#define V4L2_CID_INPUT_ADDR_Y		(V4L2_CID_PRIVATE_BASE + 22)
+#define V4L2_CID_INPUT_ADDR_CB		(V4L2_CID_PRIVATE_BASE + 23)
+#define V4L2_CID_INPUT_ADDR_CBCR	(V4L2_CID_PRIVATE_BASE + 24)
+#define V4L2_CID_INPUT_ADDR_CR		(V4L2_CID_PRIVATE_BASE + 25)
+#define V4L2_CID_EFFECT_ORIGINAL	(V4L2_CID_PRIVATE_BASE + 30)
+#define V4L2_CID_EFFECT_ARBITRARY	(V4L2_CID_PRIVATE_BASE + 31)
+#define V4L2_CID_EFFECT_NEGATIVE 	(V4L2_CID_PRIVATE_BASE + 33)
+#define V4L2_CID_EFFECT_ARTFREEZE	(V4L2_CID_PRIVATE_BASE + 34)
+#define V4L2_CID_EFFECT_EMBOSSING	(V4L2_CID_PRIVATE_BASE + 35)
+#define V4L2_CID_EFFECT_SILHOUETTE	(V4L2_CID_PRIVATE_BASE + 36)
+#define V4L2_CID_ROTATE_ORIGINAL	(V4L2_CID_PRIVATE_BASE + 40)
+#define V4L2_CID_ROTATE_90		(V4L2_CID_PRIVATE_BASE + 41)
+#define V4L2_CID_ROTATE_180		(V4L2_CID_PRIVATE_BASE + 42)
+#define V4L2_CID_ROTATE_270		(V4L2_CID_PRIVATE_BASE + 43)
+#define V4L2_CID_ROTATE_90_HFLIP	(V4L2_CID_PRIVATE_BASE + 44)
+#define V4L2_CID_ROTATE_90_VFLIP	(V4L2_CID_PRIVATE_BASE + 45)
+#define	V4L2_CID_ZOOM_IN		(V4L2_CID_PRIVATE_BASE + 51)
+#define V4L2_CID_ZOOM_OUT		(V4L2_CID_PRIVATE_BASE + 52)
 
 
 /*
@@ -607,6 +612,9 @@ extern void s3c_fimc_set_active_camera(struct s3c_fimc_control *ctrl, int id);
 extern void s3c_fimc_init_camera(struct s3c_fimc_control *ctrl);
 extern int s3c_fimc_alloc_input_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr);
 extern int s3c_fimc_alloc_output_memory(struct s3c_fimc_out_frame *info);
+extern int s3c_fimc_alloc_y_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr);
+extern int s3c_fimc_alloc_cb_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr);
+extern int s3c_fimc_alloc_cr_memory(struct s3c_fimc_in_frame *info, dma_addr_t addr);
 extern void s3c_fimc_free_output_memory(struct s3c_fimc_out_frame *info);
 extern int s3c_fimc_set_input_frame(struct s3c_fimc_control *ctrl, struct v4l2_pix_format *fmt);
 extern int s3c_fimc_set_output_frame(struct s3c_fimc_control *ctrl, struct v4l2_pix_format *fmt);

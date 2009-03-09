@@ -738,7 +738,15 @@ static void s3cfb_init_fbinfo(s3cfb_info_t *finfo, char *drv_name, int index)
 	finfo->fb.var.sync = s3cfb_fimd.sync;
 	finfo->fb.var.grayscale = s3cfb_fimd.cmap_grayscale;
 
-	finfo->fb.fix.smem_len = finfo->fb.var.xres_virtual * finfo->fb.var.yres_virtual * s3cfb_fimd.bytes_per_pixel;
+	/*
+	* Some systems(ex. DirectFB) use FB0 memory as a video memory.
+	* You can modify the size of multiple.
+	*/
+	if (index == 0)
+		finfo->fb.fix.smem_len = finfo->fb.var.xres_virtual * finfo->fb.var.yres_virtual * s3cfb_fimd.bytes_per_pixel * 5;
+	else
+		finfo->fb.fix.smem_len = finfo->fb.var.xres_virtual * finfo->fb.var.yres_virtual * s3cfb_fimd.bytes_per_pixel;
+
 
 	finfo->fb.fix.line_length = finfo->fb.var.width * s3cfb_fimd.bytes_per_pixel;
 
