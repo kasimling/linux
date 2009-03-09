@@ -194,6 +194,7 @@ static int s3c_jpeg_ioctl(struct inode *inode, struct file *file, unsigned
 	JPG_ENC_PROC_PARAM	EncParam;
 	BOOL				result = TRUE;
 	DWORD				ret;
+	int out;
 	
 
 	JPGRegCtx = (s3c6400_jpg_ctx *)file->private_data;
@@ -214,20 +215,20 @@ static int s3c_jpeg_ioctl(struct inode *inode, struct file *file, unsigned
 			
 			log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "IOCTL_JPEG_DECODE\n");
 
-			copy_from_user(&DecReturn, (JPG_DEC_PROC_PARAM *)arg, sizeof(JPG_DEC_PROC_PARAM));
+			out = copy_from_user(&DecReturn, (JPG_DEC_PROC_PARAM *)arg, sizeof(JPG_DEC_PROC_PARAM));
 			result = decode_jpg(JPGRegCtx, &DecReturn);
 
 			log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "width : %d hegiht : %d size : %d\n", 
 					DecReturn.width, DecReturn.height, DecReturn.dataSize);
 
-			copy_to_user((void *)arg, (void *)&DecReturn, sizeof(JPG_DEC_PROC_PARAM));
+			out = copy_to_user((void *)arg, (void *)&DecReturn, sizeof(JPG_DEC_PROC_PARAM));
 			break;
 
 		case IOCTL_JPG_ENCODE:
 		
 			log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "IOCTL_JPEG_ENCODE\n");
 
-			copy_from_user(&EncParam, (JPG_ENC_PROC_PARAM *)arg, sizeof(JPG_ENC_PROC_PARAM));
+			out = copy_from_user(&EncParam, (JPG_ENC_PROC_PARAM *)arg, sizeof(JPG_ENC_PROC_PARAM));
 
 			log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "width : %d hegiht : %d\n", 
 					EncParam.width, EncParam.height);
@@ -236,7 +237,7 @@ static int s3c_jpeg_ioctl(struct inode *inode, struct file *file, unsigned
 
 			log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "encoded file size : %d\n", EncParam.fileSize);
 
-			copy_to_user((void *)arg, (void *)&EncParam,  sizeof(JPG_ENC_PROC_PARAM));
+			out = copy_to_user((void *)arg, (void *)&EncParam,  sizeof(JPG_ENC_PROC_PARAM));
 
 			break;
 
