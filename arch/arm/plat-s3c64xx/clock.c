@@ -133,6 +133,9 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 			break;
 	}
 
+	if(iter >= ARRAY_SIZE(s3c_cpu_clock_table))
+		iter = ARRAY_SIZE(s3c_cpu_clock_table) - 1;
+
 	clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
 	clk_div0_tmp |= s3c_cpu_clock_table[iter][5];
 
