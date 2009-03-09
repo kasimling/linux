@@ -802,3 +802,10 @@ v2.6.28.6-s3c64xx-r1d2 : Byungjae Lee
 		M	drivers/usb/host/s3c-otg/s3c-otg-scheduler-scheduler.h
 		M	drivers/usb/host/s3c-otg/s3c-otg-transfer-common.c
 		M	drivers/usb/host/s3c-otg/s3c-otg-transferchecker-common.c
+
+v2.6.28.6-s3c64xx-r1d3 : Jongpill Lee
+	- defect is fixed on cpufreq driver
+
+	Modified Files:
+		M	arch/arm/plat-s3c64xx/clock.c
+
