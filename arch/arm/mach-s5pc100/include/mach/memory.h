@@ -14,7 +14,7 @@
 #define __ASM_ARCH_MEMORY_H
 
 #define PHYS_OFFSET     	UL(0x20000000)
-#define CONSISTENT_DMA_SIZE	SZ_8M
+#define CONSISTENT_DMA_SIZE	(SZ_8M + SZ_4M + SZ_2M)
 
 #define __virt_to_bus(x) __virt_to_phys(x)
 #define __bus_to_virt(x) __phys_to_virt(x)
