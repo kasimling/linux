@@ -1000,8 +1000,6 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 
 		if (alpha_level > S3CFB_MAX_ALPHA_LEVEL)
 			alpha_level = S3CFB_MAX_ALPHA_LEVEL;
-		else if(alpha_level < 0)
-			alpha_level = 0;
 
 		s3cfb_set_alpha_level(fbi, alpha_level, 0);
 		break;
@@ -1011,8 +1009,6 @@ int s3cfb_ioctl(struct fb_info *info, unsigned int cmd, unsigned long arg)
 
 		if (alpha_level > S3CFB_MAX_ALPHA_LEVEL)
 			alpha_level = S3CFB_MAX_ALPHA_LEVEL;
-		else if (alpha_level < 0)
-			alpha_level = 0;
 
 		s3cfb_set_alpha_level(fbi, alpha_level, 1);
 		break;

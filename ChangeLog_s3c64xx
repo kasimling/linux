@@ -809,3 +809,9 @@ v2.6.28.6-s3c64xx-r1d3 : Jongpill Lee
 	Modified Files:
 		M	arch/arm/plat-s3c64xx/clock.c
 
+v2.6.28.6-s3c64xx-r1d4 : Jongpill Lee
+        - defect is fixed on pm
+
+	MOdified Fils:
+		M	arch/arm/plat-s3c64xx/pm.c
+
