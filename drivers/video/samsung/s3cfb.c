@@ -738,23 +738,25 @@ static void s3cfb_init_fbinfo(s3cfb_info_t *finfo, char *drv_name, int index)
 	finfo->fb.var.sync = s3cfb_fimd.sync;
 	finfo->fb.var.grayscale = s3cfb_fimd.cmap_grayscale;
 
+	finfo->fb.fix.smem_len = finfo->fb.var.xres_virtual * finfo->fb.var.yres_virtual * s3cfb_fimd.bytes_per_pixel;
+	finfo->fb.fix.line_length = finfo->fb.var.width * s3cfb_fimd.bytes_per_pixel;
+
+#if !defined(CONFIG_FB_S3C_VIRTUAL_SCREEN)
+
+#if defined(CONFIG_FB_S3C_DOUBLE_BUFFERING)
+	if (index < 2)
+		finfo->fb.fix.smem_len *= 2;
+#else
 	/*
 	* Some systems(ex. DirectFB) use FB0 memory as a video memory.
 	* You can modify the size of multiple.
 	*/
 	if (index == 0)
-		finfo->fb.fix.smem_len = finfo->fb.var.xres_virtual * finfo->fb.var.yres_virtual * s3cfb_fimd.bytes_per_pixel * 5;
-	else
-		finfo->fb.fix.smem_len = finfo->fb.var.xres_virtual * finfo->fb.var.yres_virtual * s3cfb_fimd.bytes_per_pixel;
-
-
-	finfo->fb.fix.line_length = finfo->fb.var.width * s3cfb_fimd.bytes_per_pixel;
-
-#if !defined(CONFIG_FB_S3C_VIRTUAL_SCREEN) && defined(CONFIG_FB_S3C_DOUBLE_BUFFERING)
-	if (index < 2)
-		finfo->fb.fix.smem_len *= 2;
+		finfo->fb.fix.smem_len *= 5;
 #endif
 
+#endif
+	
 	for (i = 0; i < 256; i++)
 		finfo->palette_buffer[i] = S3CFB_PALETTE_BUFF_CLEAR;
 }
