@@ -815,3 +815,5 @@ v2.6.28.6-s3c64xx-r1d4 : Jongpill Lee
 	MOdified Fils:
 		M	arch/arm/plat-s3c64xx/pm.c
 
+v2.6.28.6-s3c64xx-r1d5: Kyoungil Kim
+	- Just Second Prevent tag for SMDK6410
