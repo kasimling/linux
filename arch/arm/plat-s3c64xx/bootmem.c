@@ -20,60 +20,78 @@
 
 #include "plat/media.h"
 
-static struct s3c_media_device s3c_mdevs[] = {
-#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_FIMC
+static struct s3c_media_device s3c_mdevs[S3C_MDEV_MAX] = {
 	{
 		.id = S3C_MDEV_FIMC,
 		.name = "fimc",
+
+#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_FIMC
 		.memsize = CONFIG_VIDEO_SAMSUNG_MEMSIZE_FIMC * SZ_1K,
+#else
+		.memsize = 0,
+#endif
 		.paddr = 0,
 	},
-#endif
 
-#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_POST
 	{
 		.id = S3C_MDEV_POST,
 		.name = "pp",
+
+#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_POST
 		.memsize = CONFIG_VIDEO_SAMSUNG_MEMSIZE_POST * SZ_1K,
+#else
+		.memsize = 0,
+#endif
 		.paddr = 0,
 	},
-#endif
 
-#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_TV
 	{
 		.id = S3C_MDEV_TV,
 		.name = "tv",
+
+#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_TV
 		.memsize = CONFIG_VIDEO_SAMSUNG_MEMSIZE_TV * SZ_1K,
+#else
+		.memsize = 0,
+#endif
 		.paddr = 0,
 	},
-#endif
 
-#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_MFC
 	{
 		.id = S3C_MDEV_MFC,
 		.name = "mfc",
+
+#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_MFC
 		.memsize = CONFIG_VIDEO_SAMSUNG_MEMSIZE_MFC * SZ_1K,
+#else
+		.memsize = 0,
+#endif
 		.paddr = 0,
 	},
-#endif
 
-#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_JPEG
 	{
 		.id = S3C_MDEV_JPEG,
 		.name = "jpeg",
+
+#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_JPEG
 		.memsize = CONFIG_VIDEO_SAMSUNG_MEMSIZE_JPEG * SZ_1K,
+#else
+		.memsize = 0,
+#endif
 		.paddr = 0,
 	},
-#endif
 
-#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_CMM
 	{
 		.id = S3C_MDEV_CMM,
 		.name = "cmm",
+
+#ifdef CONFIG_VIDEO_SAMSUNG_MEMSIZE_CMM
 		.memsize = CONFIG_VIDEO_SAMSUNG_MEMSIZE_CMM * SZ_1K,
+#else
+		.memsize = 0,
+#endif
 		.paddr = 0,
 	}
-#endif
 };
 
 static struct s3c_media_device *s3c_get_media_device(int dev_id)

@@ -402,6 +402,26 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 		s3c_fimc_set_input_address(ctrl);
 		break;
 
+	case V4L2_CID_INPUT_ADDR_Y:
+	case V4L2_CID_INPUT_ADDR_RGB:
+		s3c_fimc_alloc_y_memory(&ctrl->in_frame, \
+						(dma_addr_t) c->value);
+		s3c_fimc_set_input_address(ctrl);
+		break;
+
+	case V4L2_CID_INPUT_ADDR_CB:	/* fall through */
+	case V4L2_CID_INPUT_ADDR_CBCR:
+		s3c_fimc_alloc_cb_memory(&ctrl->in_frame, \
+						(dma_addr_t) c->value);
+		s3c_fimc_set_input_address(ctrl);
+		break;
+
+	case V4L2_CID_INPUT_ADDR_CR:
+		s3c_fimc_alloc_cr_memory(&ctrl->in_frame, \
+						(dma_addr_t) c->value);
+		s3c_fimc_set_input_address(ctrl);
+		break;
+
 	case V4L2_CID_RESET:
 		ctrl->rot90 = 0;
 		ctrl->in_frame.flip = FLIP_ORIGINAL;

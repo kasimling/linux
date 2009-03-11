@@ -34,6 +34,7 @@
 #define S5PC1XX_GPK0_3_SROM_CSn3	(0x2 << 12)
 #define S5PC1XX_GPK0_3_NF_CSn1		(0x3 << 12)
 #define S5PC1XX_GPK0_3_ONENAND_CSn1	(0x5 << 12)
+#define S5PC1XX_GPK0_3_MASK		(0xf << 12)
 
 #define S5PC1XX_GPK0_4_SROM_CSn4	(0x2 << 16)
 #define S5PC1XX_GPK0_4_NF_CSn2		(0x3 << 16)

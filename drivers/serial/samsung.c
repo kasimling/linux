@@ -625,7 +625,8 @@ static unsigned int s3c24xx_serial_getclk(struct uart_port *port,
 		}
 	}
 
-	/* store results to pass back */
+	if(best) {
+		/* store results to pass back */
 
 	*clksrc = best->clksrc;
 	*clk    = best->src;
@@ -633,7 +634,10 @@ static unsigned int s3c24xx_serial_getclk(struct uart_port *port,
         *slot   = best->slot;
 #endif
 
-	return best->quot;
+		return best->quot;
+	} else {
+		return -EINVAL;
+	}
 }
 
 static void s3c24xx_serial_set_termios(struct uart_port *port,

@@ -140,6 +140,36 @@ struct platform_device s3c_device_usbgadget = {
 
 EXPORT_SYMBOL(s3c_device_usbgadget);
 
+/* USB Device (OTG hcd)*/
+
+static struct resource s3c_usb_otghcd_resource[] = {
+	[0] = {
+		.start = S3C_PA_OTG,
+		.end   = S3C_PA_OTG + S3C_SZ_OTG - 1,
+		.flags = IORESOURCE_MEM,
+	},
+	[1] = {
+		.start = IRQ_OTG,
+		.end   = IRQ_OTG,
+		.flags = IORESOURCE_IRQ,
+	}
+};
+
+static u64 s3c_device_usb_otghcd_dmamask = 0xffffffffUL;
+
+struct platform_device s3c_device_usb_otghcd = {
+	.name		= "s3c_otghcd",
+	.id		= -1,
+	.num_resources	= ARRAY_SIZE(s3c_usb_otghcd_resource),
+	.resource	= s3c_usb_otghcd_resource,
+        .dev              = {
+                .dma_mask = &s3c_device_usb_otghcd_dmamask,
+                .coherent_dma_mask = 0xffffffffUL
+        }
+};
+
+EXPORT_SYMBOL(s3c_device_usb_otghcd);
+
 /* LCD Controller */
 
 static struct resource s3c_lcd_resource[] = {
@@ -167,6 +197,28 @@ struct platform_device s3c_device_lcd = {
 		.coherent_dma_mask	= 0xffffffffUL
 	}
 };
+
+/* FIMG-2D controller */
+static struct resource s3c_g2d_resource[] = {
+	[0] = {
+		.start	= S3C64XX_PA_G2D,
+		.end	= S3C64XX_PA_G2D + S3C64XX_SZ_G2D - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	[1] = {
+		.start	= IRQ_2D,
+		.end	= IRQ_2D,
+		.flags	= IORESOURCE_IRQ,
+	}
+};
+
+struct platform_device s3c_device_g2d = {
+	.name		= "s3c-g2d",
+	.id		= -1,
+	.num_resources	= ARRAY_SIZE(s3c_g2d_resource),
+	.resource	= s3c_g2d_resource
+};
+EXPORT_SYMBOL(s3c_device_g2d);
 
 /* VPP controller */
 static struct resource s3c_vpp_resource[] = {                                                                         

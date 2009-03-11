@@ -131,6 +131,7 @@ int s3c_rotator_open(struct inode *inode, struct file *file)
 	params	= (ro_params *)kmalloc(sizeof(ro_params), GFP_KERNEL);
 	if (params == NULL) {
 		printk(KERN_ERR "Instance memory allocation was failed\n");
+		return -ENOMEM;
 	}
 
 	memset(params, 0, sizeof(ro_params));

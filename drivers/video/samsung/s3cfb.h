@@ -57,8 +57,11 @@ extern int s5pc100_timer_setup (int channel, int usec, unsigned long g_tcnt, uns
 #if defined(CONFIG_CPU_S3C2443) || defined(CONFIG_CPU_S3C2450) || defined(CONFIG_CPU_S3C2416)
 #define S3CFB_MAX_NUM	2
 
-#elif defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410) || defined (CONFIG_CPU_S5PC100) || defined(CONFIG_CPU_S5P6440)
+#elif defined(CONFIG_CPU_S3C6400) || defined(CONFIG_CPU_S3C6410) || defined(CONFIG_CPU_S5PC100)
 #define S3CFB_MAX_NUM	5
+
+#elif defined(CONFIG_CPU_S5P6440)
+#define S3CFB_MAX_NUM	3
 
 #else
 #define S3CFB_MAX_NUM	1
@@ -86,8 +89,8 @@ extern int s5pc100_timer_setup (int channel, int usec, unsigned long g_tcnt, uns
  *  macros
  */
 #define PRINT_MHZ(m) 			((m) / MHZ), ((m / 1000) % 1000)
-#define FB_MAX_NUM(x, y)		((x) > (y) ? (y) : (x))
-#define S3CFB_NUM			FB_MAX_NUM(S3CFB_MAX_NUM, CONFIG_FB_S3C_NUM)
+#define FB_MIN_NUM(x, y)		((x) < (y) ? (x) : (y))
+#define S3CFB_NUM			FB_MIN_NUM(S3CFB_MAX_NUM, CONFIG_FB_S3C_NUM)
 
 /*
  *  ioctls

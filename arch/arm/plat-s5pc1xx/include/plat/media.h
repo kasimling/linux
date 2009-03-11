@@ -14,6 +14,8 @@
 #ifndef _S3C_MEDIA_H
 #define _S3C_MEDIA_H
 
+#include <linux/types.h>
+
 #define S3C_MDEV_FIMC		0
 #define S3C_MDEV_POST		1
 #define S3C_MDEV_TV		2

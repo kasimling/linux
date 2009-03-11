@@ -173,7 +173,7 @@ static irqreturn_t s3c_keypad_isr(int irq, void *dev_id)
 
 static int __init s3c_keypad_probe(struct platform_device *pdev)
 {
-	struct resource *res, *keypad_mem, *keypad_irq = NULL;
+	struct resource *res, *keypad_mem, *keypad_irq;
 	struct input_dev *input_dev;
 	struct s3c_keypad *s3c_keypad;
 	int ret, size;
@@ -215,7 +215,7 @@ static int __init s3c_keypad_probe(struct platform_device *pdev)
 
 	if (!s3c_keypad || !input_dev) {
 		ret = -ENOMEM;
-		goto out;
+		goto err_alloc;
 	}
 
 	platform_set_drvdata(pdev, s3c_keypad);
@@ -263,7 +263,7 @@ static int __init s3c_keypad_probe(struct platform_device *pdev)
 	if (keypad_irq == NULL) {
 		dev_err(&pdev->dev, "no irq resource specified\n");
 		ret = -ENOENT;
-		goto err_clk;
+		goto err_irq;
 	}
 
 	ret = request_irq(keypad_irq->start, s3c_keypad_isr, IRQF_SAMPLE_RANDOM,
@@ -293,24 +293,25 @@ static int __init s3c_keypad_probe(struct platform_device *pdev)
 	return 0;
 
 out:
-	input_free_device(input_dev);
-	kfree(s3c_keypad);
-
-err_irq:
 	free_irq(keypad_irq->start, input_dev);
 	free_irq(keypad_irq->end, input_dev);
+
+err_irq:
+	input_free_device(input_dev);
+	kfree(s3c_keypad);
 	
-err_clk:
+err_alloc:
 	clk_disable(keypad_clock);
 	clk_put(keypad_clock);
 
-err_map:
+err_clk:
 	iounmap(key_base);
 
-err_req:
+err_map:
 	release_resource(keypad_mem);
 	kfree(keypad_mem);
 
+err_req:
 	return ret;
 }
 

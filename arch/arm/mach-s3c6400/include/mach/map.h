@@ -61,6 +61,9 @@
 #define S3C64XX_PA_LCD	   	(0x77100000)
 #define S3C64XX_SZ_LCD		SZ_1M
 
+#define S3C64XX_PA_G2D	   	(0x76100000)
+#define S3C64XX_SZ_G2D		SZ_1M
+
 #define S3C64XX_PA_FIMC		(0x78000000)
 #define S3C64XX_SZ_FIMC		SZ_1M
 
