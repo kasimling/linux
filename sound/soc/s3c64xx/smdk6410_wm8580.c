@@ -281,11 +281,9 @@ static struct platform_device *smdk6410_snd_device;
 static int __init smdk6410_init(void)
 {
 	int ret;
-	unsigned int *reg_GPHCON0;
 	unsigned int *reg_GPHCON1;
 	unsigned int *reg_GPCCON;
 
-	reg_GPHCON0 = ioremap(0x7f0080e0,0x100);
 	reg_GPHCON1 = ioremap(0x7f0080e4,0x100);
 	reg_GPCCON = ioremap(0x7f008040,0x100);
 
