@@ -1,12 +1,13 @@
-/* linux/include/asm-arm/arch-s3c2410/regs_s3c-g2d2d.h
+/* linux/arch/arm/plat-s3c/include/plat/regs-g2d.h
  *
- * Copyright (c) 2007 Samsung Electronics
- *		 http://www.samsungsemi.com/
+ * Driver file for Samsung 2D Accelerator(FIMG-2D)
+ * Jonghun Han, Copyright (c) 2009 Samsung Electronics
+ * 	http://www.samsungsemi.com/
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.*/
-
+ * published by the Free Software Foundation.
+*/
 #ifndef __ASM_ARM_REGS_S3C_G2D_H
 #define __ASM_ARM_REGS_S3C_G2D_H
  
