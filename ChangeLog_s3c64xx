@@ -815,7 +815,22 @@ v2.6.28.6-s3c64xx-r1d4 : Jongpill Lee
 	MOdified Fils:
 		M	arch/arm/plat-s3c64xx/pm.c
 
-v2.6.28.6-s3c64xx-r1d5: Jaeryul Oh
+v2.6.28.6-s3c64xx-r1d5: Kyoungil Kim
+	- Just Second Prevent tag for SMDK6410
+
+v2.6.28.6-s3c64xx-r1d6 : Jonghun Han
+        - update S3C6410 FIMG-2D driver
+
+	Modified Fils:
+		M	arch/arm/plat-s3c/include/plat/regs-g2d.h
+		M	drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
+
+v2.6.28.6-s3c64xx-r2: Kyoungil Kim
+	- Official Release (09.03.09)
+
+v2.6.28.6-s3c64xx-r2d0: Kyoungil Kim
+
+v2.6.28.6-s3c64xx-r2d1: Jaeryul Oh
 	- Fixed Bug in case of rotator function of MFC
 
 	Modified Files:
