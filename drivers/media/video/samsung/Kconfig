@@ -47,9 +47,15 @@ endif
 if ARCH_S5PC1XX
 config VIDEO_SAMSUNG_MEMSIZE_MFC
 	int "Memory size in kbytes for MFC"
-	depends on VIDEO_MFC
+	depends on VIDEO_FIMC
 	default "32768"
 endif
+
+config VIDEO_FIMV40_MAX_INSTANCE
+	int "Maximum size of FIMV instance (1-4)"
+	range 1 4
+	depends on VIDEO_FIMC && ARCH_S5PC1XX
+	default 1
 
 config VIDEO_SAMSUNG_MEMSIZE_JPEG
 	int "Memory size in kbytes for JPEG"

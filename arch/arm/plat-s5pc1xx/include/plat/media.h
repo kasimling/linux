@@ -18,6 +18,9 @@
 #define S3C_MDEV_POST		1
 #define S3C_MDEV_TV		2
 #define S3C_MDEV_MFC		3
+/*
+#define S3C_MDEV_FIMV40		3
+*/
 #define S3C_MDEV_JPEG		4
 #define S3C_MDEV_CMM		5
 #define S3C_MDEV_MAX		6
