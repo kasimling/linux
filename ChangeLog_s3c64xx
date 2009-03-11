@@ -815,3 +815,8 @@ v2.6.28.6-s3c64xx-r1d4 : Jongpill Lee
 	MOdified Fils:
 		M	arch/arm/plat-s3c64xx/pm.c
 
+v2.6.28.6-s3c64xx-r1d5: Jaeryul Oh
+	- Fixed Bug in case of rotator function of MFC
+
+	Modified Files:
+		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.c
