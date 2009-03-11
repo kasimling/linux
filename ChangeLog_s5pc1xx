@@ -674,4 +674,10 @@ v2.6.28.6-s5pc1xx-r0d4: Jae-Cheol Lee
 		A	arch/arm/plat-s5pc1xx/changediv.S
 		A	arch/arm/plat-s5pc1xx/ltc3714.c
 
+v2.6.28.6-s5pc1xx-r0d5: Kukjin Kim
+	- System Timer Modified for EVT1
+
+	Modified files:
+		M	arch/arm/plat-s5pc1xx/include/plat/regs-sys-timer.h
+		M	arch/arm/plat-s5pc1xx/s5pc1xx-time.c
 
