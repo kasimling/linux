@@ -690,3 +690,11 @@ v2.6.28.6-s5pc1xx-r0d6: Jonghun Han
 		M       arch/arm/plat-s5pc1xx/devs.c
 		M       drivers/media/video/samsung/g2d/Kconfig
 		M       drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
+
+v2.6.28.6-s5pc1xx-r0d7: Jae-Cheol Lee
+	- Support SMDKC100 EVT1 POP type (Onenand+mDDR+OneDRAM)
+	Modified files:
+		M	arch/arm/configs/smdkc100onenand_defconfig
+		M	arch/arm/plat-s5pc1xx/cpu.c
+		M	arch/arm/plat-s5pc1xx/s5pc100-clock.c
+
