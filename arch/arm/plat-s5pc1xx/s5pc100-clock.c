@@ -216,7 +216,29 @@ int s5pc1xx_clk_doutarm_set_rate(struct clk *clk, unsigned int rate)
 		
 	} while(1);
 #else
-	ChangeClkDiv0(val);
+	/* Clock Down */
+	if(arm_ratio_old < (div_arm - 1)) {
+		val = __raw_readl(S5P_CLK_DIV0);
+		val &=~ S5P_CLKDIV0_ARM_MASK;
+		val |= (div_arm - 1) << S5P_CLKDIV0_ARM_SHIFT;
+		__raw_writel(val, S5P_CLK_DIV0);
+
+		val = __raw_readl(S5P_CLK_DIV0);
+		val &=~ S5P_CLKDIV0_D0_MASK;
+		val |= d0_bus_ratio << S5P_CLKDIV0_D0_SHIFT;
+		__raw_writel(val, S5P_CLK_DIV0);
+		
+	} else {
+		val = __raw_readl(S5P_CLK_DIV0);
+		val &=~ S5P_CLKDIV0_D0_MASK;
+		val |= d0_bus_ratio << S5P_CLKDIV0_D0_SHIFT;
+		__raw_writel(val, S5P_CLK_DIV0);
+
+		val = __raw_readl(S5P_CLK_DIV0);
+		val &=~ S5P_CLKDIV0_ARM_MASK;
+		val |= (div_arm - 1) << S5P_CLKDIV0_ARM_SHIFT;
+		__raw_writel(val, S5P_CLK_DIV0);
+	}
 
 #endif
 
