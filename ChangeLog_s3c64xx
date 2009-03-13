@@ -829,3 +829,9 @@ v2.6.28.6-s3c64xx-r2: Kyoungil Kim
 	- Official Release (09.03.09)
 
 v2.6.28.6-s3c64xx-r2d0: Kyoungil Kim
+
+v2.6.28.6-s3c64xx-r2d1: Jaeryul Oh
+	- Fixed Bug in case of rotator function of MFC
+
+	Modified Files:
+		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.c
