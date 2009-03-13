@@ -674,4 +674,27 @@ v2.6.28.6-s5pc1xx-r0d4: Jae-Cheol Lee
 		A	arch/arm/plat-s5pc1xx/changediv.S
 		A	arch/arm/plat-s5pc1xx/ltc3714.c
 
+v2.6.28.6-s5pc1xx-r0d5: Kukjin Kim
+	- System Timer Modified for EVT1
+
+	Modified files:
+		M	arch/arm/plat-s5pc1xx/include/plat/regs-sys-timer.h
+		M	arch/arm/plat-s5pc1xx/s5pc1xx-time.c
+
+v2.6.28.6-s5pc1xx-r0d6: Jonghun Han
+        - S5PC100 FIMG-2D driver support
+        Modified files:
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+		M       arch/arm/mach-s5pc100/mach-smdkc100.c
+		M       arch/arm/plat-s3c/include/plat/regs-g2d.h
+		M       arch/arm/plat-s5pc1xx/devs.c
+		M       drivers/media/video/samsung/g2d/Kconfig
+		M       drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
+
+v2.6.28.6-s5pc1xx-r0d7: Jae-Cheol Lee
+	- Support SMDKC100 EVT1 POP type (Onenand+mDDR+OneDRAM)
+	Modified files:
+		M	arch/arm/configs/smdkc100onenand_defconfig
+		M	arch/arm/plat-s5pc1xx/cpu.c
+		M	arch/arm/plat-s5pc1xx/s5pc100-clock.c
 

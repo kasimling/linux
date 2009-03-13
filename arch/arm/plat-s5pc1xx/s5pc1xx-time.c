@@ -52,7 +52,7 @@ static unsigned long timer_usec_ticks;
 #define TICK_MAX (0xffff)
 #endif
 
-#define T32_DEBUG
+//#define T32_DEBUG
 
 #define TIMER_USEC_SHIFT 16
 
@@ -61,27 +61,29 @@ static unsigned int s5pc1xx_systimer_read(unsigned int *reg_offset)
 	return __raw_readl(reg_offset);
 }
 
-static unsigned int s5pc1xx_systimer_write(unsigned int *reg_offset,unsigned int value)
+static unsigned int s5pc1xx_systimer_write(unsigned int *reg_offset, unsigned int value)
 {
 	unsigned int temp_regs;
 
-	__raw_writel(value,reg_offset);
+	__raw_writel(value, reg_offset);
 
-	if (reg_offset == S3C_SYSTIMER_TCON){
+	if (reg_offset == S3C_SYSTIMER_TCON) {
 		while(!(__raw_readl(S3C_SYSTIMER_INT_CSTAT) & S3C_SYSTIMER_INT_TCON));
 		temp_regs = __raw_readl(S3C_SYSTIMER_INT_CSTAT);
 		temp_regs |= S3C_SYSTIMER_INT_TCON;
-		__raw_writel(temp_regs,S3C_SYSTIMER_INT_CSTAT);
-	}else if(reg_offset == S3C_SYSTIMER_ICNTB){
+		__raw_writel(temp_regs, S3C_SYSTIMER_INT_CSTAT);
+
+	} else if (reg_offset == S3C_SYSTIMER_ICNTB) {
 		while(!(__raw_readl(S3C_SYSTIMER_INT_CSTAT) & S3C_SYSTIMER_INT_ICNTB));
 		temp_regs = __raw_readl(S3C_SYSTIMER_INT_CSTAT);
 		temp_regs |= S3C_SYSTIMER_INT_ICNTB;
-		__raw_writel(temp_regs,S3C_SYSTIMER_INT_CSTAT);
-	}else if(reg_offset == S3C_SYSTIMER_TCNTB){
+		__raw_writel(temp_regs, S3C_SYSTIMER_INT_CSTAT);
+
+	} else if (reg_offset == S3C_SYSTIMER_TCNTB) {
 		while(!(__raw_readl(S3C_SYSTIMER_INT_CSTAT) & S3C_SYSTIMER_INT_TCNTB));
 		temp_regs = __raw_readl(S3C_SYSTIMER_INT_CSTAT);
 		temp_regs |= S3C_SYSTIMER_INT_TCNTB;
-		__raw_writel(temp_regs,S3C_SYSTIMER_INT_CSTAT);
+		__raw_writel(temp_regs, S3C_SYSTIMER_INT_CSTAT);
 	}
 
 	return 0;
@@ -94,25 +96,24 @@ static unsigned int s5pc1xx_systimer_write(unsigned int *reg_offset,unsigned int
  * interrupt interval without stopping reference tick timer.
  */
 
-/* timer_mask_usec_ticks
+/* 
+ * timer_mask_usec_ticks
  *
  * given a clock and divisor, make the value to pass into timer_ticks_to_usec
  * to scale the ticks into usecs
-*/
-
-static inline unsigned long
-timer_mask_usec_ticks(unsigned long scaler, unsigned long pclk)
+ */
+static inline unsigned long timer_mask_usec_ticks(unsigned long scaler, unsigned long pclk)
 {
 	unsigned long den = pclk / 1000;
 
 	return ((1000 << TIMER_USEC_SHIFT) * scaler + (den >> 1)) / den;
 }
 
-/* timer_ticks_to_usec
+/* 
+ * timer_ticks_to_usec
  *
  * convert timer ticks to usec.
-*/
-
+ */
 static inline unsigned long timer_ticks_to_usec(unsigned long ticks)
 {
 	unsigned long res;
@@ -128,19 +129,16 @@ static inline unsigned long timer_ticks_to_usec(unsigned long ticks)
  * will have been disabled by do_gettimeoffset()
  * IRQs are disabled before entering here from do_gettimeofday()
  */
-
 static unsigned long s5pc1xx_gettimeoffset (void)
 {
 	unsigned long tdone;
 	unsigned long tval;
 
 	/* work out how many ticks have gone since last timer interrupt */
-
 	tval = s5pc1xx_systimer_read(S3C_SYSTIMER_TCNTO);
 	tdone = timer_startval - tval;
 
 	/* check to see if there is an interrupt pending */
-
 	if (s5pc1xx_ostimer_pending()) {
 		/* re-read the timer, and try and fix up for the missed
 		 * interrupt. Note, the interrupt may go off before the
@@ -161,8 +159,7 @@ static unsigned long s5pc1xx_gettimeoffset (void)
 /*
  * IRQ handler for the timer
  */
-static irqreturn_t
-s5pc1xx_timer_interrupt(int irq, void *dev_id)
+static irqreturn_t s5pc1xx_timer_interrupt(int irq, void *dev_id)
 {
 	volatile unsigned int temp_cstat;
 
@@ -206,9 +203,9 @@ static void s5pc1xx_timer_setup (void)
 	tcnt = TICK_MAX;  /* default value for tcnt */
 
 	/* TCFG must not be changed at run-time. If you want to change TCFG, stop timer(TCON[0] = 0) */
-	s5pc1xx_systimer_write(S3C_SYSTIMER_TCON,0);
-	/* read the current timer configuration bits */
+	s5pc1xx_systimer_write(S3C_SYSTIMER_TCON, 0);
 
+	/* read the current timer configuration bits */
 	tcon = s5pc1xx_systimer_read(S3C_SYSTIMER_TCON);
 	tcfg = s5pc1xx_systimer_read(S3C_SYSTIMER_TCFG);
 	icntb = s5pc1xx_systimer_read(S3C_SYSTIMER_ICNTB);
@@ -222,15 +219,14 @@ static void s5pc1xx_timer_setup (void)
 	pclk = clk_get_rate(clk);
 
 	/* configure clock tick */
-
-	timer_usec_ticks = timer_mask_usec_ticks(S3C_SYSTIMER_PRESCALE, pclk);
+	timer_usec_ticks = timer_mask_usec_ticks(S3C_SYSTIMER_PRESCALER, pclk);
 
 	tcfg &= ~S3C_SYSTIMER_TCLK_MASK;
 	tcfg |= S3C_SYSTIMER_TCLK_PCLK;
 	tcfg &= ~S3C_SYSTIMER_PRESCALER_MASK;
-	tcfg |= S3C_SYSTIMER_PRESCALE - 1;
+	tcfg |= S3C_SYSTIMER_PRESCALER - 1;
 
-	tcnt = ((pclk / S3C_SYSTIMER_PRESCALE) / S3C_SYSTIMER_TARGET_HZ) - 1;
+	tcnt = ((pclk / S3C_SYSTIMER_PRESCALER) / S3C_SYSTIMER_TARGET_HZ) - 1;
 
 	/* check to see if timer is within 16bit range... */
 	if (tcnt > TICK_MAX) {
@@ -241,20 +237,20 @@ static void s5pc1xx_timer_setup (void)
 	s5pc1xx_systimer_write(S3C_SYSTIMER_TCFG, tcfg);
 
 	timer_startval = tcnt;
-	s5pc1xx_systimer_write(S3C_SYSTIMER_TCNTB,tcnt);
+	s5pc1xx_systimer_write(S3C_SYSTIMER_TCNTB, tcnt);
 
 	/* set Interrupt tick value */
 	icntb = (S3C_SYSTIMER_TARGET_HZ / HZ) - 1;
-	s5pc1xx_systimer_write(S3C_SYSTIMER_ICNTB,icntb);
+	s5pc1xx_systimer_write(S3C_SYSTIMER_ICNTB, icntb);
 
 	tcon = S3C_SYSTIMER_INT_AUTO | S3C_SYTIMERS_START | S3C_SYSTIMER_INT_START | S3C_SYSTIMER_AUTO_RELOAD;
-	s5pc1xx_systimer_write(S3C_SYSTIMER_TCON,tcon);
+	s5pc1xx_systimer_write(S3C_SYSTIMER_TCON, tcon);
 
 	printk("timer tcon=%08lx, tcnt %04lx, icnt %04lx, tcfg %08lx, usec %08lx\n",
 	       tcon, tcnt, icntb, tcfg, timer_usec_ticks);
 
 	/* Interrupt Start and Enable */
-	s5pc1xx_systimer_write(S3C_SYSTIMER_INT_CSTAT, (S3C_SYSTIMER_INT_ENABLE));
+	s5pc1xx_systimer_write(S3C_SYSTIMER_INT_CSTAT, (S3C_SYSTIMER_INT_ICNTEIE));
 
 }
 
