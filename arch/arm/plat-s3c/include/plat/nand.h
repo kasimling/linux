@@ -22,7 +22,9 @@
 */
 
 struct s3c2410_nand_set {
-	unsigned int		disable_ecc : 1;
+	unsigned int		disable_ecc : 1,
+			 /* openmoko u-boot can create BBT */
+				flash_bbt : 1;
 
 	int			nr_chips;
 	int			nr_partitions;
