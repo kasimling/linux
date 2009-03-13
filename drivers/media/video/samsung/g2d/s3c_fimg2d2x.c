@@ -353,7 +353,7 @@ int s3c_g2d_mmap(struct file* filp, struct vm_area_struct *vma)
 	size = vma->vm_end - vma->vm_start;
 
 	// page frame number of the address for a source G2D_SFR_SIZE to be stored at. 
-	pageFrameNo = __phys_to_pfn(S3C64XX_PA_G2D);
+	pageFrameNo = __phys_to_pfn(s3c_g2d_mem->start);
 	
 	if(size > G2D_SFR_SIZE) {
 		printk("The size of G2D_SFR_SIZE mapping is too big!\n");
