@@ -135,12 +135,12 @@ static void s3c24xx_audio_buffdone(struct s3c2410_dma_chan *channel,
 		return;
 	}
 	else {
-		prtd = substream->runtime->private_data;
 		
-		if (substream)
-			snd_pcm_period_elapsed(substream);
-		else
+		if (!substream)
 			return;
+
+		prtd = substream->runtime->private_data;
+		snd_pcm_period_elapsed(substream);
 
 		spin_lock(&prtd->lock);
 		if (prtd->state & ST_RUNNING) {

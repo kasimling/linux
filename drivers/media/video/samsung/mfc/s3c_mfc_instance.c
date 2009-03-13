@@ -836,12 +836,13 @@ int s3c_mfc_instance_decode(s3c_mfc_instance_context_t *ctx, unsigned long strm_
 			switch (ctx->post_rotation_mode & 0x0003) {
 				case 0:	/* 0   degree counterclockwise rotate */
 				case 2:	/* 180 degree counterclockwise rotate */
-					writel(ctx->buf_width, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_DEC_PIC_RUN);
+					writel(ctx->buf_width, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_DEC_PIC_ROT_STRIDE);
+					
 					break;
 
 				case 1:	/* 90  degree counterclockwise rotate */
 				case 3:	/* 270 degree counterclockwise rotate */
-					writel(ctx->buf_height, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_DEC_PIC_RUN);
+					writel(ctx->buf_height, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_DEC_PIC_ROT_STRIDE);
 					break;
 			}
 		}
