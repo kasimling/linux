@@ -862,3 +862,6 @@ v2.6.28.6-s3c64xx-r2d3: Jonghun Han
 		M	drivers/media/video/samsung/g2d/Kconfig
 		M	drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
 
+v2.6.28.6-s3c64xx-r3: Kyoungil Kim
+	- Official Release (09.03.13)
+
