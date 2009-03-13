@@ -1,9 +1,15 @@
-//*********************************************************************************
-//    FileName : MFC40FW_20090130\h264_dec_mc.fw
-//    Creation Date : 2009.01.29 09:27
-//*********************************************************************************
-
-
+/*
+ * drivers/media/video/samsung/mfc40/h264_dec_fw.c
+ *
+ * C file for Samsung MFC (Multi Function Codec - FIMV) driver
+ *
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics
+ * http://www.samsungsemi.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
 
 const unsigned char h264_dec_mc_fw[39260] = {
 0x31, 0x00, 0x00, 0xea, 0x06, 0x00, 0x00, 0xea, 0x0b, 0x00, 0x00, 0xea, 0x10, 0x00, 0x00, 0xea, 0x15, 0x00, 0x00, 0xea, 

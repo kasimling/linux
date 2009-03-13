@@ -1,9 +1,15 @@
-//*********************************************************************************
-//    FileName : mp4_dec_order.fw
-//    Creation Date : 2008.10.14 04:55
-//*********************************************************************************
-
-
+/*
+ * drivers/media/video/samsung/mfc40/mp4_dec_order_fw.c
+ *
+ * C file for Samsung MFC (Multi Function Codec - FIMV) driver
+ *
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics
+ * http://www.samsungsemi.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
 
 const unsigned char mp4_dec_order_fw[25676] = {
 0x31, 0x00, 0x00, 0xea, 0x06, 0x00, 0x00, 0xea, 0x0b, 0x00, 0x00, 0xea, 0x10, 0x00, 0x00, 0xea, 0x15, 0x00, 0x00, 0xea, 

@@ -1,9 +1,22 @@
+/*
+ * drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.c
+ *
+ * C file for Samsung MFC (Multi Function Codec - FIMV) driver
+ *
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics
+ * http://www.samsungsemi.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
 #include <linux/string.h>
 #include <linux/kernel.h>
 #include <asm/param.h>
 #include <linux/delay.h>
 
-#include "LogMsg.h"
+#include "s3c_mfc_logmsg.h"
 
 static const LOG_LEVEL log_level = LOG_WARNING;
 

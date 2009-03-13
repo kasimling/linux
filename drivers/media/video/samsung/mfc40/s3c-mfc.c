@@ -1,3 +1,17 @@
+/*
+ * drivers/media/video/samsung/mfc40/s3c-mfc.c
+ *
+ * C file for Samsung MFC (Multi Function Codec - FIMV) driver
+ *
+ * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics
+ * http://www.samsungsemi.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -19,7 +33,7 @@
 #include "s3c-mfc.h"
 #include "s3c_mfc_interface.h"
 #include "s3c_mfc_common.h"
-#include "LogMsg.h"
+#include "s3c_mfc_logmsg.h"
 #include "s3c_mfc_opr.h"
 #include "s3c_mfc_intr.h"
 #include "s3c_mfc_memory.h"
