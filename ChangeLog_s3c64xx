@@ -855,3 +855,10 @@ v2.6.28.6-s3c64xx-r2d2: Jonghun Han
 		A       drivers/media/video/samsung/g3d/s3c_fimg3d.c
 		A       drivers/media/video/samsung/g3d/s3c_fimg3d.h		
 
+v2.6.28.6-s3c64xx-r2d3: Jonghun Han
+	- S5PC100 FIMG-2D driver support
+
+	Modified Files:
+		M	drivers/media/video/samsung/g2d/Kconfig
+		M	drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
+
