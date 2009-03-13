@@ -474,7 +474,7 @@ int s3c_g2d_probe(struct platform_device *pdev)
 	s3c_g2d_irq_num = platform_get_irq(pdev, 0);
 	if(s3c_g2d_irq_num <= 0) {
 		printk(KERN_ERR "failed to get irq resouce\n");
- 	return -ENOENT;
+ 		return -ENOENT;
 	}
 
 	ret = request_irq(s3c_g2d_irq_num, s3c_g2d_irq, IRQF_DISABLED, pdev->name, NULL);

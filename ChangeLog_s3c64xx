@@ -835,3 +835,23 @@ v2.6.28.6-s3c64xx-r2d1: Jaeryul Oh
 
 	Modified Files:
 		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.c
+
+v2.6.28.6-s3c64xx-r2d2: Jonghun Han
+	- S3C6410 FIMG-3D driver support
+
+	Modified Files:
+		M       arch/arm/mach-s3c6400/include/mach/map.h
+		M       arch/arm/mach-s3c6410/mach-smdk6410.c
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s3c64xx/devs.c
+		M       drivers/char/s3c_mem.c
+		M       drivers/media/video/samsung/Kconfig
+		M       drivers/media/video/samsung/Makefile
+		M       drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
+
+	Added Files:
+		A       drivers/media/video/samsung/g3d/Kconfig
+		A       drivers/media/video/samsung/g3d/Makefile
+		A       drivers/media/video/samsung/g3d/s3c_fimg3d.c
+		A       drivers/media/video/samsung/g3d/s3c_fimg3d.h		
+
