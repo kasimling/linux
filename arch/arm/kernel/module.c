@@ -132,6 +132,13 @@ apply_relocate(Elf32_Shdr *sechdrs, const char *strtab, unsigned int symindex,
 			*(u32 *)loc |= offset & 0x00ffffff;
 			break;
 
+#ifdef CONFIG_CPU_ARM920T
+		/* modern toolchain generate V4BX for the modules, and there is no
+		 * way to skip them being generated in the .ko, so in our case, we just
+		 * can ignore them */
+		case R_ARM_V4BX: /* Ignore these sections */
+			break;
+#endif
 		default:
 			printk(KERN_ERR "%s: unknown relocation: %u\n",
 			       module->name, ELF32_R_TYPE(rel->r_info));
