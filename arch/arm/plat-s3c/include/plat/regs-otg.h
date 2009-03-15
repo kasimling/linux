@@ -97,32 +97,17 @@
 
 //------------------------------------------------
 // Device Logical IN Endpoint-Specific Registers
-#define S3C_UDC_OTG_DIEPCTL0		S3C_USBOTGREG(0x900)		// Device IN Endpoint 0 Control
-#define S3C_UDC_OTG_DIEPINT0		S3C_USBOTGREG(0x908)		// Device IN Endpoint 0 Interrupt
-#define S3C_UDC_OTG_DIEPTSIZ0		S3C_USBOTGREG(0x910)		// Device IN Endpoint 0 Transfer Size
-#define S3C_UDC_OTG_DIEPDMA0		S3C_USBOTGREG(0x914)		// Device IN Endpoint 0 DMA Address
-
-#define S3C_UDC_OTG_DIEPCTL2		S3C_USBOTGREG(0x940)		// Device IN Endpoint 2 Control
-#define S3C_UDC_OTG_DIEPINT2		S3C_USBOTGREG(0x948)		// Device IN Endpoint 2 Interrupt
-#define S3C_UDC_OTG_DIEPTSIZ2		S3C_USBOTGREG(0x950)		// Device IN Endpoint 2 Transfer Size
-#define S3C_UDC_OTG_DIEPDMA2		S3C_USBOTGREG(0x954)		// Device IN Endpoint 2 DMA Address
-
-#define S3C_UDC_OTG_DIEPCTL3		S3C_USBOTGREG(0x960)		// Device IN Endpoint 3 Control
-#define S3C_UDC_OTG_DIEPINT3		S3C_USBOTGREG(0x968)		// Device IN Endpoint 3 Interrupt
-#define S3C_UDC_OTG_DIEPTSIZ3		S3C_USBOTGREG(0x970)		// Device IN Endpoint 3 Transfer Size
-#define S3C_UDC_OTG_DIEPDMA3		S3C_USBOTGREG(0x974)		// Device IN Endpoint 3 DMA Address
+#define S3C_UDC_OTG_DIEPCTL(n)		S3C_USBOTGREG(0x900 + n*0x20)	// Device IN Endpoint n Control
+#define S3C_UDC_OTG_DIEPINT(n)		S3C_USBOTGREG(0x908 + n*0x20)	// Device IN Endpoint n Interrupt
+#define S3C_UDC_OTG_DIEPTSIZ(n)		S3C_USBOTGREG(0x910 + n*0x20)	// Device IN Endpoint n Transfer Size
+#define S3C_UDC_OTG_DIEPDMA(n)		S3C_USBOTGREG(0x914 + n*0x20)	// Device IN Endpoint n DMA Address
 
 //------------------------------------------------
 // Device Logical OUT Endpoint-Specific Registers
-#define S3C_UDC_OTG_DOEPCTL0		S3C_USBOTGREG(0xB00)		// Device OUT Endpoint 0 Control
-#define S3C_UDC_OTG_DOEPINT0		S3C_USBOTGREG(0xB08)		// Device OUT Endpoint 0 Interrupt
-#define S3C_UDC_OTG_DOEPTSIZ0		S3C_USBOTGREG(0xB10)		// Device OUT Endpoint 0 Transfer Size
-#define S3C_UDC_OTG_DOEPDMA0		S3C_USBOTGREG(0xB14)		// Device OUT Endpoint 0 DMA Address
-
-#define S3C_UDC_OTG_DOEPCTL1		S3C_USBOTGREG(0xB20)		// Device OUT Endpoint 1 Control
-#define S3C_UDC_OTG_DOEPINT1		S3C_USBOTGREG(0xB28)		// Device OUT Endpoint 1 Interrupt
-#define S3C_UDC_OTG_DOEPTSIZ1		S3C_USBOTGREG(0xB30)		// Device OUT Endpoint 1 Transfer Size
-#define S3C_UDC_OTG_DOEPDMA1		S3C_USBOTGREG(0xB34)		// Device OUT Endpoint 1 DMA Address
+#define S3C_UDC_OTG_DOEPCTL(n)		S3C_USBOTGREG(0xB00 + n*0x20)	// Device OUT Endpoint n Control
+#define S3C_UDC_OTG_DOEPINT(n)		S3C_USBOTGREG(0xB08 + n*0x20)	// Device OUT Endpoint n Interrupt
+#define S3C_UDC_OTG_DOEPTSIZ(n)		S3C_USBOTGREG(0xB10 + n*0x20)	// Device OUT Endpoint n Transfer Size
+#define S3C_UDC_OTG_DOEPDMA(n)		S3C_USBOTGREG(0xB14 + n*0x20)	// Device OUT Endpoint n DMA Address
 
 //------------------------------------------------
 // Endpoint FIFO address
@@ -172,7 +157,7 @@
 #define INT_RESET				(0x1<<12)
 #define INT_SUSPEND				(0x1<<11)
 #define INT_EARLY_SUSPEND			(0x1<<10)
-#define INT_TX_FIFO_EMPTY			(0x1<<5)
+#define INT_NP_TX_FIFO_EMPTY			(0x1<<5)
 #define INT_RX_FIFO_NOT_EMPTY			(0x1<<4)
 #define INT_SOF					(0x1<<3)
 #define INT_DEV_MODE				(0x0<<0)
@@ -206,25 +191,30 @@
 #define SOFT_DISCONNECT				(0x1<<1)
 
 // S3C_UDC_OTG_DAINT device all endpoint interrupt register
-#define S3C_UDC_INT_IN_EP0			(0x1<<0)
-#define S3C_UDC_INT_IN_EP2			(0x1<<2)
-#define S3C_UDC_INT_IN_EP3			(0x1<<3)
-#define S3C_UDC_INT_OUT_EP0			(0x1<<16)
-#define S3C_UDC_INT_OUT_EP1			(0x1<<17)
-#define S3C_UDC_INT_OUT_EP4			(0x1<<20)
+#define DAINT_OUT_BIT				(16)
+#define DAINT_MASK				(0xFFFF)
 
 
 
 // S3C_UDC_OTG_DIEPCTL0/DOEPCTL0 device control IN/OUT endpoint 0 control register
 #define DEPCTL_EPENA				(0x1<<31)
 #define DEPCTL_EPDIS				(0x1<<30)
+#define DEPCTL_SETD1PID				(0x1<<29)
+#define DEPCTL_SETD0PID				(0x1<<28)
 #define DEPCTL_SNAK				(0x1<<27)
 #define DEPCTL_CNAK				(0x1<<26)
+#define DEPCTL_STALL				(0x1<<21)
+#define DEPCTL_TYPE_BIT				(18)
+#define DEPCTL_TYPE_MASK			(0x3<<18)
 #define DEPCTL_CTRL_TYPE			(0x0<<18)
 #define DEPCTL_ISO_TYPE				(0x1<<18)
 #define DEPCTL_BULK_TYPE			(0x2<<18)
 #define DEPCTL_INTR_TYPE			(0x3<<18)
 #define DEPCTL_USBACTEP				(0x1<<15)
+#define DEPCTL_NEXT_EP_BIT			(11)
+#define DEPCTL_MPS_BIT				(0)
+#define DEPCTL_MPS_MASK				(0x7FF)
+
 #define DEPCTL0_MPS_64				(0x0<<0)
 #define DEPCTL0_MPS_32				(0x1<<0)
 #define DEPCTL0_MPS_16				(0x2<<0)

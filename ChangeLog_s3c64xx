@@ -866,3 +866,12 @@ v2.6.28.6-s3c64xx-r3: Kyoungil Kim
 	- Official Release (09.03.13)
 
 v2.6.28.6-s3c64xx-r3d0: Kyoungil Kim
+
+v2.6.28.6-s3c64xx-r3d1: Byungae Lee
+	- Support SMDK6410 USB Serial Gadget (with CDC ACM)
+
+	Modified Files:
+		M	arch/arm/plat-s3c/include/plat/regs-otg.h
+		M	drivers/usb/gadget/s3c_udc_otg.c
+		M	drivers/usb/gadget/s3c_udc_otg_xfer_dma.c
+		M	drivers/usb/gadget/s3c_udc_otg_xfer_slave.c
