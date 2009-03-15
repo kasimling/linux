@@ -57,7 +57,9 @@
 #define EP3_IN		3
 #define EP_MASK		0xF
 
-#if defined(DEBUG_S3C_UDC_ISR)
+#if defined(DEBUG_S3C_UDC_SETUP) || defined(DEBUG_S3C_UDC_ISR)\
+	|| defined(DEBUG_S3C_UDC_OUT_EP)
+
 static char *state_names[] = {
 	"WAIT_FOR_SETUP",
 	"DATA_STATE_XMIT",

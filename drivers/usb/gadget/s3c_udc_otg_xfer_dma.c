@@ -1218,7 +1218,7 @@ static void s3c_ep0_setup(struct s3c_udc *dev)
 		if (i < 0) {
 			if (dev->req_config) {
 				DEBUG_SETUP("\tconfig change 0x%02x fail %d?\n",
-					&usb_ctrl.bRequest, i);
+					(u32)&usb_ctrl.bRequest, i);
 				return;
 			}
 
