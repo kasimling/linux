@@ -8,7 +8,12 @@ config VIDEO_SAMSUNG
 
 source "drivers/media/video/samsung/fimc/Kconfig"
 source "drivers/media/video/samsung/post/Kconfig"
-source "drivers/media/video/samsung/mfc/Kconfig"
+if CPU_S3C6410
+source "drivers/media/video/samsung/mfc10/Kconfig"
+endif
+if CPU_S5PC100
+source "drivers/media/video/samsung/mfc40/Kconfig"
+endif
 source "drivers/media/video/samsung/tv/Kconfig"
 source "drivers/media/video/samsung/rotator/Kconfig"
 source "drivers/media/video/samsung/jpeg/Kconfig"
@@ -36,16 +41,22 @@ config VIDEO_SAMSUNG_MEMSIZE_TV
 if CPU_S3C6410
 config VIDEO_SAMSUNG_MEMSIZE_MFC
 	int "Memory size in kbytes for MFC"
-	depends on VIDEO_MFC
+	depends on VIDEO_MFC10
 	default "6144"
 endif
 
 if ARCH_S5PC1XX
 config VIDEO_SAMSUNG_MEMSIZE_MFC
 	int "Memory size in kbytes for MFC"
-	depends on VIDEO_MFC
+	depends on VIDEO_MFC40
 	default "32768"
 endif
+
+config VIDEO_MFC_MAX_INSTANCE
+	int "Maximum size of MFC instance (1-4)"
+	range 1 4
+	depends on VIDEO_MFC40 && ARCH_S5PC1XX
+	default 1
 
 config VIDEO_SAMSUNG_MEMSIZE_JPEG
 	int "Memory size in kbytes for JPEG"

@@ -117,6 +117,7 @@ dma_addr_t s3c_get_media_memory(int dev_id)
 
 	return mdev->paddr;
 }
+EXPORT_SYMBOL(s3c_get_media_memory);
 
 size_t s3c_get_media_memsize(int dev_id)
 {
@@ -130,6 +131,7 @@ size_t s3c_get_media_memsize(int dev_id)
 
 	return mdev->memsize;
 }
+EXPORT_SYMBOL(s3c_get_media_memsize);
 
 void s5pc1xx_reserve_bootmem(void)
 {

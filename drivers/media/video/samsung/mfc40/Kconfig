@@ -1,0 +1,10 @@
+#
+# Configuration for Multi Format Codecs (MFC)
+#
+#
+config VIDEO_MFC40
+	bool "Samsung MFC (Multi Format Codec - FIMV 4.0) Driver" 
+	depends on VIDEO_SAMSUNG && CPU_S5PC100
+	default n
+	---help---
+	  This is a Samsung Multi Format Codecs (MFC) FIMV V4.0 - driver for Samsung S5PC100

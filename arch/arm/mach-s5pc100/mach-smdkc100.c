@@ -210,6 +210,8 @@ static void __init smdkc100_smc911x_set(void)
 
 	__raw_writel(tmp, S5PC1XX_SROM_BW);
 
+	__raw_writel((0x0<<28)|(0x4<<24)|(0xd<<16)|(0x1<<12)|(0x4<<8)|(0x6<<4)|(0x0<<0), S5PC1XX_SROM_BC3);
+	
 	__raw_writel(S5PC1XX_SROM_BCn_TACS(1) | S5PC1XX_SROM_BCn_TCOS(0) |
 			S5PC1XX_SROM_BCn_TACC(27) | S5PC1XX_SROM_BCn_TCOH(0) |
 			S5PC1XX_SROM_BCn_TCAH(2) | S5PC1XX_SROM_BCn_TACP(0) |
