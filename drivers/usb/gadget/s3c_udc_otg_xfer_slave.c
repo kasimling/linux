@@ -803,6 +803,23 @@ static int s3c_ep0_write(struct s3c_udc *dev)
 	return 1;
 }
 
+static int s3c_udc_set_halt(struct usb_ep *_ep, int value)
+{
+	struct s3c_ep	*ep;
+	u32 ep_num;
+	ep = container_of(_ep, struct s3c_ep, ep);
+	ep_num =ep_index(ep);
+	
+	DEBUG("%s: ep_num = %d, value = %d\n", __FUNCTION__, ep_num, value);
+	/* TODO */
+	return 0;
+}
+
+void s3c_udc_ep_activate(struct s3c_ep *ep)
+{
+	/* TODO */
+}
+
 /*
  * WAIT_FOR_SETUP (OUT_PKT_RDY)
  */
