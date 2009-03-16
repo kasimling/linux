@@ -68,7 +68,7 @@ static unsigned int physical_address;
 
 int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
-	u_int virt_addr;
+	unsigned long *virt_addr;
 	struct mm_struct *mm = current->mm;
 	struct s3c_mem_alloc param;
 	struct s3c_mem_dma_param dma_param;
@@ -202,7 +202,7 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 				mutex_unlock(&mem_free_lock);
 				return -EINVAL;
 			}
-			virt_addr = phys_to_virt(param.phy_addr);
+			virt_addr = (unsigned long *)phys_to_virt(param.phy_addr);
 
 			kfree(virt_addr);
 			param.size = 0;
@@ -306,21 +306,22 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 
 int s3c_mem_mmap(struct file* filp, struct vm_area_struct *vma)
 {
-	unsigned long pageFrameNo=0, size, virt_addr, phys_addr;
+	unsigned long pageFrameNo=0, size, phys_addr;
+	unsigned long *virt_addr;
 
 	size = vma->vm_end - vma->vm_start;
 
 	switch (flag) {
 	case MEM_ALLOC :
 	case MEM_ALLOC_CACHEABLE :
-		virt_addr = kmalloc(size, GFP_DMA|GFP_ATOMIC);
+		virt_addr = (unsigned long *)kmalloc(size, GFP_DMA|GFP_ATOMIC);
 
 		if (virt_addr == NULL) {
 			printk("kmalloc() failed !\n");
 			return -EINVAL;
 		}
 		DEBUG("MMAP_KMALLOC : virt addr = 0x%08x, size = %d, %d\n", virt_addr, size, __LINE__);
-		phys_addr = virt_to_phys(virt_addr);
+		phys_addr = virt_to_phys((unsigned long *)virt_addr);
 		physical_address = (unsigned int)phys_addr;
 
 		pageFrameNo = __phys_to_pfn(phys_addr);

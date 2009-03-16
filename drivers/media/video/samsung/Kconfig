@@ -18,6 +18,7 @@ source "drivers/media/video/samsung/tv/Kconfig"
 source "drivers/media/video/samsung/rotator/Kconfig"
 source "drivers/media/video/samsung/jpeg/Kconfig"
 source "drivers/media/video/samsung/g2d/Kconfig"
+source "drivers/media/video/samsung/g3d/Kconfig"
 
 if VIDEO_SAMSUNG
 
