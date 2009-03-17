@@ -91,6 +91,16 @@ void s3c_fimc_select_camera(struct s3c_fimc_control *ctrl)
 	/* nothing to do */
 }
 
+void s3c_fimc_set_test_pattern(struct s3c_fimc_control *ctrl, int type)
+{
+	u32 cfg = readl(ctrl->regs + S3C_CIGCTRL);
+
+	cfg &= ~S3C_CIGCTRL_TESTPATTERN_MASK;
+	cfg |= type;
+
+	writel(cfg, ctrl->regs + S3C_CIGCTRL);
+}
+
 void s3c_fimc_set_source_format(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_camera *cam = ctrl->in_cam;
