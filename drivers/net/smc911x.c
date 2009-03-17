@@ -862,11 +862,14 @@ static void smc911x_phy_check_media(struct net_device *dev, int init)
 		if (lp->mii.full_duplex) {
 			DBG(SMC_DEBUG_MISC, "%s: Configuring for full-duplex mode\n", dev->name);
 			bmcr |= BMCR_FULLDPLX;
-			cr |= MAC_CR_RCVOWN_;
+//			cr |= MAC_CR_RCVOWN_;
+			cr &= ~MAC_CR_RCVOWN_;
+			cr |= MAC_CR_FDPX_;
 		} else {
 			DBG(SMC_DEBUG_MISC, "%s: Configuring for half-duplex mode\n", dev->name);
 			bmcr &= ~BMCR_FULLDPLX;
 			cr &= ~MAC_CR_RCVOWN_;
+			cr &= ~MAC_CR_FDPX_;
 		}
 		SMC_SET_PHY_BMCR(lp, phyaddr, bmcr);
 		SMC_SET_MAC_CR(lp, cr);
@@ -1916,7 +1919,7 @@ static int __devinit smc911x_probe(struct net_device *dev)
 
 	SMC_SET_MAC_ADDR(lp, dev->dev_addr);
 #endif
-	
+
 	/* Get the MAC address */
 	SMC_GET_MAC_ADDR(lp, dev->dev_addr);
 
