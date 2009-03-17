@@ -88,7 +88,10 @@ int s3c_fimc_check_fifo(struct s3c_fimc_control *ctrl)
 
 void s3c_fimc_select_camera(struct s3c_fimc_control *ctrl)
 {
-	/* nothing to do */
+	u32 cfg = readl(ctrl->regs + S3C_CIGCTRL);
+
+	cfg &= ~S3C_CIGCTRL_TESTPATTERN_MASK;
+	writel(cfg, ctrl->regs + S3C_CIGCTRL);
 }
 
 void s3c_fimc_set_test_pattern(struct s3c_fimc_control *ctrl, int type)
@@ -96,7 +99,7 @@ void s3c_fimc_set_test_pattern(struct s3c_fimc_control *ctrl, int type)
 	u32 cfg = readl(ctrl->regs + S3C_CIGCTRL);
 
 	cfg &= ~S3C_CIGCTRL_TESTPATTERN_MASK;
-	cfg |= type;
+	cfg |= type << S3C_CIGCTRL_TESTPATTERN_SHIFT;
 
 	writel(cfg, ctrl->regs + S3C_CIGCTRL);
 }
