@@ -740,3 +740,13 @@ v2.6.28.6-s5pc1xx-r0d8: PyoungJae Jung/JiUn Yu
 	Modified files:
 		M	arch/arm/mach-s5pc100/mach-smdkc100.c
 
+v2.6.28.6-s5pc1xx-r0d9: Jonghun Han
+        - S5PC100 FIMG-3D driver support
+        Modified files:
+			M	arch/arm/plat-s3c/dma-pl330.c
+			M	arch/arm/plat-s3c/include/mach/s3c-dma.h
+			M	drivers/char/s3c_mem.c
+			M	drivers/char/s3c_mem.h
+			M	drivers/media/video/samsung/g3d/Kconfig
+			M	drivers/media/video/samsung/g3d/s3c_fimg3d.h
+
