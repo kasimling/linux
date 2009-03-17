@@ -6,6 +6,7 @@ obj-$(CONFIG_VIDEO_ROTATOR)	+= rotator/
 obj-$(CONFIG_VIDEO_JPEG)	+= jpeg/
 obj-$(CONFIG_VIDEO_G2D)		+= g2d/
 obj-$(CONFIG_VIDEO_G3D)		+= g3d/
+obj-$(CONFIG_VIDEO_CMM)		+= cmm/
  
 EXTRA_CFLAGS += -Idrivers/media/video
 
