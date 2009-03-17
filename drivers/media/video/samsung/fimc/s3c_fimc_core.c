@@ -133,7 +133,7 @@ void s3c_fimc_set_active_camera(struct s3c_fimc_control *ctrl, int id)
 {
 	ctrl->in_cam = s3c_fimc.camera[id];
 
-	if (ctrl->in_cam)
+	if (ctrl->in_cam && id < S3C_FIMC_TPID)
 		s3c_fimc_select_camera(ctrl);
 }
 
