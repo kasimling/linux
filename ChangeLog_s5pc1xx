@@ -750,3 +750,7 @@ v2.6.28.6-s5pc1xx-r0d9: Jonghun Han
 			M	drivers/media/video/samsung/g3d/Kconfig
 			M	drivers/media/video/samsung/g3d/s3c_fimg3d.h
 
+v2.6.28.6-s5pc1xx-r0d10: Seungchull Suh
+	- SMC9115 works correctly. Before, full-duplex mode is not set.
+			M	drivers/net/smc911x.c
+
