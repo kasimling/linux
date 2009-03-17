@@ -884,7 +884,7 @@ v2.6.28.6-s3c64xx-r3d2: Byungae Lee
 		M	drivers/usb/gadget/s3c_udc_otg_xfer_dma.c
 
 v2.6.28.6-s3c64xx-r3d3: SungJun Bae 
-	- Support CMM.  
+	- Support CMM driver.  
 
 	Added Files:
 		A	drivers/media/video/samsung/cmm/CMMMisc.c
