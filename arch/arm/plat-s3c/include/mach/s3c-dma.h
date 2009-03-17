@@ -120,6 +120,7 @@ enum s3c2410_dmasrc {
 	S3C2410_DMASRC_HW,		/* source is memory */
 	S3C2410_DMASRC_MEM,		/* source is hardware */
 	S3C_DMA_MEM2MEM,      		/* source is memory - READ/WRITE */
+	S3C_DMA_MEM2MEM_SET,      	/* source is memory - READ/WRITE for MEMSET*/
 	S3C_DMA_MEM2MEM_P,      	/* source is hardware - READ/WRITE */
 	S3C_DMA_PER2PER      		/* source is hardware - READ/WRITE */
 };
