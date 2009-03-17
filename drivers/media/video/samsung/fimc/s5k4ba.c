@@ -58,7 +58,7 @@ static struct s3c_fimc_camera s5k4ba_data = {
 		.hsync	= 0,
 	},
 
-	.initialized	= 0,	
+	.initialized	= 0,
 };
 
 static struct i2c_client_address_data addr_data = {
