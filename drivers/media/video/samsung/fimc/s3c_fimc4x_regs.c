@@ -55,7 +55,7 @@ void s3c_fimc_select_camera(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = readl(ctrl->regs + S3C_CIGCTRL);
 
-	cfg &= ~(S3C_CIGCTRL_SELCAM_ITU_MASK | S3C_CIGCTRL_TESTPATTERN_MASK);
+	cfg &= ~(S3C_CIGCTRL_TESTPATTERN_MASK | S3C_CIGCTRL_SELCAM_ITU_MASK);
 
 	if (ctrl->in_cam->id == 0)
 		cfg |= S3C_CIGCTRL_SELCAM_ITU_A;
