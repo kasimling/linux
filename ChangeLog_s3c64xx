@@ -835,3 +835,50 @@ v2.6.28.6-s3c64xx-r2d1: Jaeryul Oh
 
 	Modified Files:
 		M	drivers/media/video/samsung/mfc/s3c_mfc_instance.c
+
+v2.6.28.6-s3c64xx-r2d2: Jonghun Han
+	- S3C6410 FIMG-3D driver support
+
+	Modified Files:
+		M       arch/arm/mach-s3c6400/include/mach/map.h
+		M       arch/arm/mach-s3c6410/mach-smdk6410.c
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s3c64xx/devs.c
+		M       drivers/char/s3c_mem.c
+		M       drivers/media/video/samsung/Kconfig
+		M       drivers/media/video/samsung/Makefile
+		M       drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
+
+	Added Files:
+		A       drivers/media/video/samsung/g3d/Kconfig
+		A       drivers/media/video/samsung/g3d/Makefile
+		A       drivers/media/video/samsung/g3d/s3c_fimg3d.c
+		A       drivers/media/video/samsung/g3d/s3c_fimg3d.h		
+
+v2.6.28.6-s3c64xx-r2d3: Jonghun Han
+	- S5PC100 FIMG-2D driver support
+
+	Modified Files:
+		M	drivers/media/video/samsung/g2d/Kconfig
+		M	drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
+
+v2.6.28.6-s3c64xx-r3: Kyoungil Kim
+	- Official Release (09.03.13)
+
+v2.6.28.6-s3c64xx-r3d0: Kyoungil Kim
+
+v2.6.28.6-s3c64xx-r3d1: Byungae Lee
+	- Support SMDK6410 USB Serial Gadget (with CDC ACM)
+
+	Modified Files:
+		M	arch/arm/plat-s3c/include/plat/regs-otg.h
+		M	drivers/usb/gadget/s3c_udc_otg.c
+		M	drivers/usb/gadget/s3c_udc_otg_xfer_dma.c
+		M	drivers/usb/gadget/s3c_udc_otg_xfer_slave.c
+
+v2.6.28.6-s3c64xx-r3d2: Byungae Lee
+	- Removed warning on the debug message for the USB Gadget
+
+	Modified Files:
+		M	drivers/usb/gadget/s3c_udc_otg.c
+		M	drivers/usb/gadget/s3c_udc_otg_xfer_dma.c

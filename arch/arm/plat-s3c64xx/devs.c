@@ -220,6 +220,30 @@ struct platform_device s3c_device_g2d = {
 };
 EXPORT_SYMBOL(s3c_device_g2d);
 
+
+/* FIMG-3D controller */
+static struct resource s3c_g3d_resource[] = {
+	[0] = {
+		.start	= S3C64XX_PA_G3D,
+		.end	= S3C64XX_PA_G3D + S3C64XX_SZ_G3D - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	[1] = {
+		.start	= IRQ_S3C6410_G3D,
+		.end	= IRQ_S3C6410_G3D,
+		.flags	= IORESOURCE_IRQ,
+	}
+};
+
+struct platform_device s3c_device_g3d = {
+	.name		= "s3c-g3d",
+	.id		= -1,
+	.num_resources	= ARRAY_SIZE(s3c_g3d_resource),
+	.resource	= s3c_g3d_resource
+};
+EXPORT_SYMBOL(s3c_device_g3d);
+
+
 /* VPP controller */
 static struct resource s3c_vpp_resource[] = {                                                                         
         [0] = { 
