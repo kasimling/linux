@@ -36,6 +36,8 @@
 #include <mach/map.h>
 #include <mach/hardware.h>
 
+#include <linux/dma-mapping.h>
+
 #include <asm/dma.h>
 #include <mach/dma.h>
 #include <plat/dma.h>
@@ -57,7 +59,7 @@ static void *s3c_m2m_dma_done = &s3c_m2m_dma_complete;			/* completion */
 static void s3c_m2m_dma_finish(struct s3c2410_dma_chan *dma_ch, void *buf_id,
         int size, enum s3c2410_dma_buffresult result)
 {
-	printk("s3c_m2m_dma_finish() called\n");
+	//printk("s3c_m2m_dma_finish() called\n");
 	complete(s3c_m2m_dma_done);
 }
 /*----------------------------------------------------------------------*/
@@ -249,7 +251,7 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			if(copy_from_user(&dma_param, (struct s3c_mem_dma_param *)arg, sizeof(struct s3c_mem_dma_param))) {
 				return -EFAULT;
 			}
-			printk("S3C_MEM_DMA_COPY called\n");
+			//printk("S3C_MEM_DMA_COPY called\n");
 
 			if (s3c2410_dma_request(DMACH_3D_M2M, &s3c_m2m_dma_client, NULL)) {
 				printk(KERN_WARNING "Unable to get DMA channel.\n");
@@ -258,16 +260,20 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 
 			s3c2410_dma_set_buffdone_fn(DMACH_3D_M2M, s3c_m2m_dma_finish);
 
+			//dma_cache_maint(dma_param.src_addr,sizeof(unsigned long long), DMA_BIDIRECTIONAL);
+
+ //  		    	printk("MEMCPY src=%p,dst=%p,size=%d\n", dma_param.src_addr,dma_param.dst_addr, dma_param.size);
+
 			/* Source address */
-			s3c2410_dma_devconfig(DMACH_3D_M2M, S3C_DMA_MEM2MEM, 1, virt_to_phys(dma_param.src_addr));
+			s3c2410_dma_devconfig(DMACH_3D_M2M, S3C_DMA_MEM2MEM, 1, dma_param.src_addr);
 			s3c2410_dma_config(DMACH_3D_M2M, 8, 0);
-#if 1
+
 			/* Destination address : Data buffer address */
-			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, virt_to_phys(dma_param.dst_addr), dma_param.size);
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, dma_param.dst_addr, dma_param.size);
 			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
 
 			wait_for_completion(&s3c_m2m_dma_complete);
-#else
+#if 0
 			/* Destination address : Data buffer address */
 			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000, 0x4000);
 			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, 0x27a00000+0x10000, 0x4000);
@@ -288,12 +294,46 @@ int s3c_mem_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsi
 			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
 			wait_for_completion(&s3c_m2m_dma_complete);
 #endif
+
 			s3c2410_dma_free(DMACH_3D_M2M, &s3c_m2m_dma_client);
 
 			if(copy_to_user((struct s3c_mem_dma_param *)arg, &dma_param, sizeof(struct s3c_mem_dma_param))) {
 				return -EFAULT;
 			}
 
+			break;
+
+		case S3C_MEM_DMA_SET:
+			if(copy_from_user(&dma_param, (struct s3c_mem_dma_param *)arg, sizeof(struct s3c_mem_dma_param))) {
+				return -EFAULT;
+			}
+
+			if (s3c2410_dma_request(DMACH_3D_M2M, &s3c_m2m_dma_client, NULL)) {
+				printk(KERN_WARNING "Unable to get DMA channel.\n");
+				return -1;
+			}
+
+			s3c2410_dma_set_buffdone_fn(DMACH_3D_M2M, s3c_m2m_dma_finish);
+
+			//dma_cache_maint(dma_param.src_addr,sizeof(unsigned long long), DMA_BIDIRECTIONAL);
+
+//   		    	printk("MEMSET src=%p,dst=%p,size=%d\n", dma_param.src_addr,dma_param.dst_addr, dma_param.size);
+
+			/* Source address */
+			s3c2410_dma_devconfig(DMACH_3D_M2M, S3C_DMA_MEM2MEM_SET, 1,dma_param.src_addr); 
+			s3c2410_dma_config(DMACH_3D_M2M, 8, 0);
+			
+			/* Destination address : Data buffer address */
+			s3c2410_dma_enqueue(DMACH_3D_M2M, 0, dma_param.dst_addr, dma_param.size);
+			s3c2410_dma_ctrl(DMACH_3D_M2M, S3C2410_DMAOP_START);
+
+			wait_for_completion(&s3c_m2m_dma_complete);
+
+			s3c2410_dma_free(DMACH_3D_M2M, &s3c_m2m_dma_client);
+
+			if(copy_to_user((struct s3c_mem_dma_param *)arg, &dma_param, sizeof(struct s3c_mem_dma_param))) {
+				return -EFAULT;
+			}
 			break;
 
 		default:
