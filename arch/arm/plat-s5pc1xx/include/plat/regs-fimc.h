@@ -266,6 +266,7 @@
 
 /* Real input DMA size register */
 #define S3C_CIREAL_ISIZE_AUTOLOAD_ENABLE	(1 << 31)
+#define S3C_CIREAL_ISIZE_ADDR_CH_DISABLE	(1 << 30)
 
 /* Input DMA control register */
 #define S3C_MSCTRL_2PLANE_SHIFT			(16)

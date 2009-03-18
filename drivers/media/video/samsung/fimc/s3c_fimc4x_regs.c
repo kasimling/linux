@@ -614,10 +614,18 @@ void s3c_fimc_set_output_path(struct s3c_fimc_control *ctrl)
 void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_frame_addr *addr = &ctrl->in_frame.addr;
+	u32 cfg = 0;
+
+	cfg = readl(ctrl->regs + S3C_CIREAL_ISIZE);
+	cfg &= ~S3C_CIREAL_ISIZE_ADDR_CH_DISABLE;
+	writel(cfg, ctrl->regs + S3C_CIREAL_ISIZE);
 
 	writel(addr->phys_y, ctrl->regs + S3C_CIIYSA0);
 	writel(addr->phys_cb, ctrl->regs + S3C_CIICBSA0);
 	writel(addr->phys_cr, ctrl->regs + S3C_CIICRSA0);
+
+	cfg |= S3C_CIREAL_ISIZE_ADDR_CH_DISABLE;
+	writel(cfg, ctrl->regs + S3C_CIREAL_ISIZE);
 }
 
 void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl)
