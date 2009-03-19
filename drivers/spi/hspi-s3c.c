@@ -128,7 +128,11 @@ static int s3c_spi_dma_init(struct s3c_spi *spi, int mode)
 	if (mode == 1) 
 		s3c2410_dma_devconfig(spi->dma, S3C2410_DMASRC_HW, 0, S3C_SPI_RX_DATA_REG);
 
+#if defined(CONFIG_WORD_TRANSIZE)
+        s3c2410_dma_config(spi->dma, S3C_DMA_XFER_WORD, 0);
+#else
 	s3c2410_dma_config(spi->dma, S3C_DMA_XFER_BYTE, 0);
+#endif
 	s3c2410_dma_setflags(spi->dma, S3C2410_DMAF_AUTOSTART);
 
 	return 0;
@@ -276,7 +280,11 @@ static void s3c_spi_message_start(struct s3c_spi *spi)
 	writel(spi_clkcfg, spi->regs + S3C_CLK_CFG);
 
 	/* 3. Set SPI MODE configuration register */
-	spi_modecfg = SPI_MODE_CH_TSZ_BYTE| SPI_MODE_BUS_TSZ_BYTE;
+#if defined(CONFIG_WORD_TRANSIZE)
+        spi_modecfg = SPI_MODE_CH_TSZ_WORD| SPI_MODE_BUS_TSZ_WORD;
+#else
+        spi_modecfg = SPI_MODE_CH_TSZ_BYTE| SPI_MODE_BUS_TSZ_BYTE;
+#endif
 		
 	spi_modecfg |= SPI_MODE_TXDMA_OFF| SPI_MODE_SINGLE| SPI_MODE_RXDMA_OFF;
 
