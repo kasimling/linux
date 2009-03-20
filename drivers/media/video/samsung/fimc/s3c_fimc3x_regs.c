@@ -748,10 +748,16 @@ void s3c_fimc_enable_capture(struct s3c_fimc_control *ctrl)
 
 	if (ctrl->id == 1) {
 		cfg &= ~S3C_CIIMGCPT_CPT_FREN_ENABLE_PR;
-		cfg |= (S3C_CIIMGCPT_IMGCPTEN | S3C_CIIMGCPT_IMGCPTEN_PRSC);
+		cfg |= S3C_CIIMGCPT_IMGCPTEN;
+
+		if (!ctrl->scaler.bypass)
+			cfg |= S3C_CIIMGCPT_IMGCPTEN_PRSC;
 	} else {
 		cfg &= ~S3C_CIIMGCPT_CPT_FREN_ENABLE_CO;
-		cfg |= (S3C_CIIMGCPT_IMGCPTEN | S3C_CIIMGCPT_IMGCPTEN_COSC);
+		cfg |= S3C_CIIMGCPT_IMGCPTEN;
+
+		if (!ctrl->scaler.bypass)
+			cfg |= S3C_CIIMGCPT_IMGCPTEN_COSC;
 	}
 
 	writel(cfg, ctrl->regs + S3C_CIIMGCPT);
