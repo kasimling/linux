@@ -432,7 +432,13 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 		ctrl->in_frame.flip = FLIP_ORIGINAL;
 		ctrl->out_frame.flip = FLIP_ORIGINAL;
 		ctrl->out_frame.effect.type = EFFECT_ORIGINAL;
+		ctrl->scaler.bypass = 0;
 		s3c_fimc_reset(ctrl);
+		break;
+
+	case V4L2_CID_JPEG_INPUT:	/* fall through */
+	case V4L2_CID_SCALER_BYPASS:
+		ctrl->scaler.bypass = 1;
 		break;
 
 	default:
