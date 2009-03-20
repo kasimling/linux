@@ -63,9 +63,13 @@
 #define S3C_FIMC_FRAME_SKIP		0
 #define S3C_FIMC_FRAME_TAKE		1
 
-#define S3C_FIMC_MAX_CAMS		3
 #define S3C_FIMC_MAX_CTRLS		3
 #define S3C_FIMC_MAX_FRAMES		4
+
+/* including 1 more for test pattern */
+#define S3C_FIMC_MAX_CAMS		4
+#define S3C_FIMC_TPID			(S3C_FIMC_MAX_CAMS - 1)
+
 
 #define S3C_FIMC_ZOOM_PIXELS		32
 
@@ -559,6 +563,10 @@ struct s3c_fimc_config {
 #define V4L2_FMT_IN			0
 #define V4L2_FMT_OUT			1
 
+#define TPATTERN_COLORBAR		1
+#define TPATTERN_HORIZONTAL		2
+#define TPATTERN_VERTICAL		3
+
 /* FOURCC for FIMC specific */
 #define V4L2_PIX_FMT_NV12X		v4l2_fourcc('N', '1', '2', 'X')
 #define V4L2_PIX_FMT_NV21X		v4l2_fourcc('N', '2', '1', 'X')
@@ -572,6 +580,9 @@ struct s3c_fimc_config {
 #define V4L2_CID_ACTIVE_CAMERA		(V4L2_CID_PRIVATE_BASE + 0)
 #define V4L2_CID_NR_FRAMES		(V4L2_CID_PRIVATE_BASE + 1)
 #define V4L2_CID_RESET			(V4L2_CID_PRIVATE_BASE + 2)
+#define V4L2_CID_TEST_PATTERN		(V4L2_CID_PRIVATE_BASE + 3)
+#define V4L2_CID_SCALER_BYPASS		(V4L2_CID_PRIVATE_BASE + 4)
+#define V4L2_CID_JPEG_INPUT		(V4L2_CID_PRIVATE_BASE + 5)
 #define V4L2_CID_OUTPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 10)
 #define V4L2_CID_INPUT_ADDR		(V4L2_CID_PRIVATE_BASE + 20)
 #define V4L2_CID_INPUT_ADDR_RGB		(V4L2_CID_PRIVATE_BASE + 21)
@@ -630,6 +641,7 @@ extern int s3c_fimc_check_zoom(struct s3c_fimc_control *ctrl, int type);
 extern void s3c_fimc_clear_irq(struct s3c_fimc_control *ctrl);
 extern int s3c_fimc_check_fifo(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_select_camera(struct s3c_fimc_control *ctrl);
+extern void s3c_fimc_set_test_pattern(struct s3c_fimc_control *ctrl, int type);
 extern void s3c_fimc_set_source_format(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_window_offset(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_reset(struct s3c_fimc_control *ctrl);

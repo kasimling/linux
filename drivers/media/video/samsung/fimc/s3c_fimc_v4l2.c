@@ -392,6 +392,11 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 		s3c_fimc_i2c_command(ctrl, I2C_CAM_WB, WB_AUTO);
 		break;
 
+	case V4L2_CID_TEST_PATTERN:
+		s3c_fimc_set_active_camera(ctrl, S3C_FIMC_TPID);
+		s3c_fimc_set_test_pattern(ctrl, c->value);
+		break;
+
 	case V4L2_CID_NR_FRAMES:
 		s3c_fimc_set_nr_frames(ctrl, c->value);
 		break;
@@ -427,7 +432,13 @@ static int s3c_fimc_v4l2_s_ctrl(struct file *filp, void *fh,
 		ctrl->in_frame.flip = FLIP_ORIGINAL;
 		ctrl->out_frame.flip = FLIP_ORIGINAL;
 		ctrl->out_frame.effect.type = EFFECT_ORIGINAL;
+		ctrl->scaler.bypass = 0;
 		s3c_fimc_reset(ctrl);
+		break;
+
+	case V4L2_CID_JPEG_INPUT:	/* fall through */
+	case V4L2_CID_SCALER_BYPASS:
+		ctrl->scaler.bypass = 1;
 		break;
 
 	default:

@@ -31,6 +31,31 @@
 
 #include "s3c_fimc.h"
 
+static struct s3c_fimc_camera test_pattern = {
+	.id 		= S3C_FIMC_TPID,
+	.type		= CAM_TYPE_ITU,
+	.mode		= ITU_601_YCBCR422_8BIT,
+	.order422	= CAM_ORDER422_8BIT_YCBYCR,
+	.clockrate	= 0,
+	.width		= 640,
+	.height		= 480,
+	.offset		= {
+		.h1 = 0,
+		.h2 = 0,
+		.v1 = 0,
+		.v2 = 0,
+	},
+
+	.polarity	= {
+		.pclk	= 0,
+		.vsync	= 0,
+		.href	= 0,
+		.hsync	= 0,
+	},
+
+	.initialized	= 0,	
+};
+
 struct s3c_fimc_config s3c_fimc;
 
 struct s3c_platform_fimc *to_fimc_plat(struct device *dev)
@@ -108,7 +133,7 @@ void s3c_fimc_set_active_camera(struct s3c_fimc_control *ctrl, int id)
 {
 	ctrl->in_cam = s3c_fimc.camera[id];
 
-	if (ctrl->in_cam)
+	if (ctrl->in_cam && id < S3C_FIMC_TPID)
 		s3c_fimc_select_camera(ctrl);
 }
 
@@ -116,7 +141,7 @@ void s3c_fimc_init_camera(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_camera *cam = ctrl->in_cam;
 
-	if (cam && !cam->initialized) {
+	if (cam && cam->id != S3C_FIMC_TPID && !cam->initialized) {
 		s3c_fimc_i2c_command(ctrl, I2C_CAM_INIT, 0);
 		s3c_fimc_change_resolution(ctrl, CAM_RES_DEFAULT);
 		cam->initialized = 1;
@@ -403,6 +428,9 @@ static int s3c_fimc_init_global(struct platform_device *pdev)
 	s3c_fimc.dma_start = s3c_get_media_memory(S3C_MDEV_FIMC);
 	s3c_fimc.dma_total = s3c_get_media_memsize(S3C_MDEV_FIMC);
 	s3c_fimc.dma_current = s3c_fimc.dma_start;
+
+	/* test pattern */
+	s3c_fimc.camera[test_pattern.id] = &test_pattern;
 
 	return 0;
 }

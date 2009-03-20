@@ -246,7 +246,7 @@ endchoice
 
 config WORD_TRANSIZE
 	bool "Tansfer size as Word"
-	depends on HS_SPI_S3C6400 || HS_SPI_S3C6410
+	depends on HS_SPI_S3C6400 || HS_SPI_S3C6410 || HS_SPI_S5PC100
 	help
 	  Say Y here to include support for word transfer size.
 
