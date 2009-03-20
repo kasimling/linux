@@ -1,10 +1,12 @@
-/*  
-    Copyright (C) 2004 Samsung Electronics 
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+/* linux/drivers/media/video/samsung/s3c_rotator.c
+ *
+ * Driver file for Samsung Image Rotator
+ * Jonghun Han, Copyright (c) 2009 Samsung Electronics
+ * 	http://www.samsungsemi.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
 */
 
 #include <linux/init.h>
@@ -114,9 +116,13 @@ static void s3c_rotator_disable_int(void)
 	__raw_writel(tmp, s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
 }
 
-irqreturn_t s3c_rotator_irq(int irq, void *dev_id, struct pt_regs *regs)
+irqreturn_t s3c_rotator_irq(int irq, void *dev_id)
 {
-	__raw_readl(s3c_rotator_base + S3C_ROTATOR_STATCFG);
+	unsigned int tmp;
+
+	tmp = __raw_readl(s3c_rotator_base + S3C_ROTATOR_STATCFG);
+	tmp |= S3C_ROTATOR_STATCFG_INT_PEND;
+	__raw_writel(tmp, s3c_rotator_base + S3C_ROTATOR_STATCFG);
 
 	wake_up_interruptible(&waitq_rotator);
 
@@ -156,39 +162,12 @@ int s3c_rotator_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-int s3c_rotator_mmap(struct file* filp, struct vm_area_struct *vma) 
-{
-	unsigned long pageFrameNo, size;
-	
-	size = vma->vm_end - vma->vm_start;
-
-	printk(KERN_INFO "s3c_rotator_mmap()\n");
-
-	pageFrameNo = __phys_to_pfn(S3C6400_PA_ROTATOR);
-	
-	if(size > ROTATOR_SFR_SIZE) {
-		printk(KERN_ERR "The size of ROTATOR_SFR_SIZE mapping is too big!\n");
-		return -EINVAL;
-	}
-	vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot); 
-	
-	if((vma->vm_flags & VM_WRITE) && !(vma->vm_flags & VM_SHARED)) {
-		printk(KERN_ERR "Writable ROTATOR_SFR_SIZE mapping must be shared!\n");
-		return -EINVAL;
-	}
-	
-	if(remap_pfn_range(vma, vma->vm_start, pageFrameNo, size, vma->vm_page_prot))
-		return -EINVAL;
-	
-	return 0;
-}
 
 static int s3c_rotator_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
-	int         ret;
-	ro_params	*params;
-	ro_params	*parg;
-	unsigned int mode;
+	ro_params *params;
+	ro_params *parg;
+	unsigned int mode, divisor = 0;
 
 	mutex_lock(h_rot_mutex);
 
@@ -199,55 +178,72 @@ static int s3c_rotator_ioctl(struct inode *inode, struct file *file, unsigned in
 	get_user(params->src_width,     &parg->src_width);
 	get_user(params->src_height,    &parg->src_height);
 
-    get_user(params->src_format,    &parg->src_format);
-    get_user(params->src_addr_rgb_y,&parg->src_addr_rgb_y);
+	get_user(params->src_format,    &parg->src_format);
+	get_user(params->src_addr_rgb_y,&parg->src_addr_rgb_y);
 	get_user(params->src_addr_cb,   &parg->src_addr_cb);
 	get_user(params->src_addr_cr,   &parg->src_addr_cr);    
 
 	get_user(params->dst_addr_rgb_y,&parg->dst_addr_rgb_y);    
-    get_user(params->dst_addr_cb,   &parg->dst_addr_cb);    
-    get_user(params->dst_addr_cr,   &parg->dst_addr_cr);    
+	get_user(params->dst_addr_cb,   &parg->dst_addr_cb);    
+	get_user(params->dst_addr_cr,   &parg->dst_addr_cr);    
 
-	if((params->src_width % 4) || (params->src_height %4)){
-		printk(KERN_ERR "\n%s: src & dst size is aligned to word boundary\n", __FUNCTION__);
-		return -EINVAL;
-	}
-	
-	if( (params->src_width > 2048) || (params->src_height > 2048)){
+	if( (params->src_width > 2048) || (params->src_height > 2048)) {
 		printk(KERN_ERR "\n%s: maximum width and height size are 2048\n", __FUNCTION__);
 		return -EINVAL;
 	}
 
+	switch(params->src_format) {
+	case S3C_ROTATOR_CTRLCFG_INPUT_YUV420:
+		divisor = 8;
+		break;
+	case S3C_ROTATOR_CTRLCFG_INPUT_YUV422:			
+	case S3C_ROTATOR_CTRLCFG_INPUT_RGB565:	
+		divisor = 2;
+		break;			
+	case S3C_ROTATOR_CTRLCFG_INPUT_RGB888:
+		divisor = 1;
+		break;
+	default :
+		printk(KERN_ERR "requested src type is not supported!! plz check src format!!\n");
+		break;
+	}
+	
+	if((params->src_width % divisor) || (params->src_height % divisor)) {
+		printk(KERN_ERR "\n%s: src & dst size is aligned to %d pixel boundary\n", __FUNCTION__, divisor);
+		mutex_unlock(h_rot_mutex);
+		return -EINVAL;
+	}
+
 	switch(cmd) {
-		case ROTATOR_90:   
-			mode = S3C_ROTATOR_CTRLCFG_DEGREE_90    | S3C_ROTATOR_CTRLCFG_FLIP_BYPASS;
-			break;
+	case ROTATOR_90:   
+		mode = S3C_ROTATOR_CTRLCFG_DEGREE_90    | S3C_ROTATOR_CTRLCFG_FLIP_BYPASS;
+		break;
 
-		case ROTATOR_180:   
-			mode = S3C_ROTATOR_CTRLCFG_DEGREE_180   | S3C_ROTATOR_CTRLCFG_FLIP_BYPASS;
-			break;
+	case ROTATOR_180:   
+		mode = S3C_ROTATOR_CTRLCFG_DEGREE_180   | S3C_ROTATOR_CTRLCFG_FLIP_BYPASS;
+		break;
 
-		case ROTATOR_270:   
-			mode = S3C_ROTATOR_CTRLCFG_DEGREE_270   | S3C_ROTATOR_CTRLCFG_FLIP_BYPASS;
-			break;
+	case ROTATOR_270:   
+		mode = S3C_ROTATOR_CTRLCFG_DEGREE_270   | S3C_ROTATOR_CTRLCFG_FLIP_BYPASS;
+		break;
 
-		case HFLIP:   
-			mode = S3C_ROTATOR_CTRLCFG_DEGREE_BYPASS| S3C_ROTATOR_CTRLCFG_FLIP_HOR;
-			break;
+	case HFLIP:   
+		mode = S3C_ROTATOR_CTRLCFG_DEGREE_BYPASS| S3C_ROTATOR_CTRLCFG_FLIP_HOR;
+		break;
 
-		case VFLIP:   
-			mode = S3C_ROTATOR_CTRLCFG_DEGREE_BYPASS| S3C_ROTATOR_CTRLCFG_FLIP_VER;
-			break;
+	case VFLIP:   
+		mode = S3C_ROTATOR_CTRLCFG_DEGREE_BYPASS| S3C_ROTATOR_CTRLCFG_FLIP_VER;
+		break;
 
-		default:
-			return -EINVAL;
+	default:
+		return -EINVAL;
 	}
 
 	s3c_rotator_set_source(params);
 	s3c_rotator_set_dest(params);
 	s3c_rotator_start(params, mode);
 
-	if(!(file->f_flags & O_NONBLOCK)){
+	if(!(file->f_flags & O_NONBLOCK)) {
 		if (interruptible_sleep_on_timeout(&waitq_rotator, ROTATOR_TIMEOUT) == 0) {
 			printk(KERN_ERR "\n%s: Waiting for interrupt is timeout\n", __FUNCTION__);
 		}
@@ -264,7 +260,7 @@ static unsigned int s3c_rotator_poll(struct file *file, poll_table *wait)
 
 	poll_wait(file, &waitq_rotator, wait);
 
-	if (S3C_ROTATOR_IDLE == s3c_rotator_get_status()){
+	if (S3C_ROTATOR_IDLE == s3c_rotator_get_status()) {
 		mask = POLLOUT|POLLWRNORM;
 	}
 
@@ -275,7 +271,6 @@ struct file_operations s3c_rotator_fops = {
 	.owner      = THIS_MODULE,
 	.open       = s3c_rotator_open,
 	.release    = s3c_rotator_release,
-	.mmap       = s3c_rotator_mmap,
 	.ioctl      = s3c_rotator_ioctl,
 	.poll       = s3c_rotator_poll,
 };
@@ -300,7 +295,7 @@ int s3c_rotator_probe(struct platform_device *pdev)
 		return -ENOENT;
 	}
 
-   ret = request_irq(s3c_rotator_irq_num, s3c_rotator_irq, IRQF_DISABLED, pdev->name, NULL);
+	ret = request_irq(s3c_rotator_irq_num, s3c_rotator_irq, IRQF_DISABLED, pdev->name, NULL);
 	if (ret) {
 		printk("request_irq(Rotator) failed.\n");
 		return ret;
@@ -327,7 +322,6 @@ int s3c_rotator_probe(struct platform_device *pdev)
 
 	s3c_rotator_enable_int();
 
-
 	init_waitqueue_head(&waitq_rotator);
 
 	ret = misc_register(&s3c_rotator_dev);
@@ -337,8 +331,7 @@ int s3c_rotator_probe(struct platform_device *pdev)
 	}
 
 	h_rot_mutex = (struct mutex *)kmalloc(sizeof(struct mutex), GFP_KERNEL);
-	if (h_rot_mutex == NULL)
-	{
+	if (h_rot_mutex == NULL) {
 		printk (KERN_ERR "cannot allocate rotator mutex\n");
 		return -ENOENT;
 	}
@@ -376,10 +369,10 @@ static int s3c_rotator_resume(struct platform_device *pdev)
 }
 
 static struct platform_driver s3c_rotator_driver = {
-       .probe          = s3c_rotator_probe,
-       .remove         = s3c_rotator_remove,
-       .suspend        = s3c_rotator_suspend,
-       .resume         = s3c_rotator_resume,
+       .probe		= s3c_rotator_probe,
+       .remove		= s3c_rotator_remove,
+       .suspend		= s3c_rotator_suspend,
+       .resume		= s3c_rotator_resume,
        .driver		= {
 		    .owner	= THIS_MODULE,
 		    .name	= "s3c-rotator",
