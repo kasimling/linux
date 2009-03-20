@@ -461,7 +461,11 @@ void s3c_fimc_enable_capture(struct s3c_fimc_control *ctrl)
 	u32 cfg = readl(ctrl->regs + S3C_CIIMGCPT);
 
 	cfg &= ~S3C_CIIMGCPT_CPT_FREN_ENABLE;
-	cfg |= (S3C_CIIMGCPT_IMGCPTEN | S3C_CIIMGCPT_IMGCPTEN_SC);
+	cfg |= S3C_CIIMGCPT_IMGCPTEN;
+
+	if (!ctrl->scaler.bypass)
+		cfg |= S3C_CIIMGCPT_IMGCPTEN_SC;
+
 	writel(cfg, ctrl->regs + S3C_CIIMGCPT);
 }
 
