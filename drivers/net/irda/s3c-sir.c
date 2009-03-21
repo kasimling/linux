@@ -1,17 +1,25 @@
 /*
- *  linux/drivers/net/irda/s3c-sir.c
- *
- *  Copyright (C) 2000-2001 Russell King
- *  Copyright (C) 2006   Naushad K
- *
+ * drivers/net/irda/s3c-sir.c
+ * Samsung Infra-red driver for the S3C embedded microprocessor 
+ * 
+ * Copyright (C) 2009 for Samsung Electronics
+ * 
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- *  Infra-red driver for the S3C embedded microprocessor
- *  Derived from sa1100 irda file.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * 
  */
+
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/types.h>
@@ -51,8 +59,7 @@
 #include <plat/dma.h>
 #include <mach/irqs.h>
 
-#undef S3C_IRDA_DEBUG
-//#define S3C_IRDA_DEBUG
+/* #define S3C_IRDA_DEBUG */
 
 #ifdef S3C_IRDA_DEBUG
 #define DBG(x...)       printk(PFX x)
@@ -95,8 +102,8 @@ struct s3c_irda {
 };
 
 
-#define RESSIZE(ressource) (((ressource)->end - (ressource)->start)+1)
-#define S3C_SIR_MAX_RXLEN                2047
+#define RESSIZE(ressource)	(((ressource)->end - (ressource)->start)+1)
+#define S3C_SIR_MAX_RXLEN	2047
 
 static const unsigned int nSlotTable[16] = {0x0000,0x0080,0x0808,0x8888,0x2222,0x4924,0x4a52,0x54aa,
 				     0x5555,0xd555,0xd5d5,0xddd5,0xdddd,0xdfdd,0xdfdf,0xffdf};
@@ -144,12 +151,12 @@ static int s3c_irda_sir_init(struct s3c_irda *si)
 	s3c_irda_gpio_conf();
 
 	ulcon = S3C_LCON_IRM | S3C_LCON_PNONE | S3C_LCON_CS8;
-	ucon = S3C_UCON_PCLK | S3C_UCON_TXILEVEL | S3C_UCON_RXILEVEL | \
-	       S3C_UCON_RXFIFO_TOI| S3C_UCON_RX_ESIE | S3C_UCON_LOOP_OPERATION | \
-	       S3C_UCON_NO_SBS | S3C_UCON_RXIRQMODE;
-	ufcon = S3C_UFCON_TXTRIG16 | S3C_UFCON_RXTRIG32 | S3C_UFCON_RESETBOTH | \
-		S3C_UFCON_FIFO_ENABLE;
-
+	ucon =  S3C_UCON_PCLK | S3C_UCON_TXILEVEL | S3C_UCON_RXILEVEL | \
+	        S3C_UCON_RXFIFO_TOI| S3C_UCON_RX_ESIE | \
+	        S3C_UCON_LOOP_OPERATION | S3C_UCON_NO_SBS | \
+		S3C_UCON_RXIRQMODE;
+	ufcon = S3C_UFCON_TXTRIG16 | S3C_UFCON_RXTRIG32 | \
+		S3C_UFCON_RESETBOTH | S3C_UFCON_FIFO_ENABLE;
 
         sir_writereg(ulcon, S3C_ULCON);
         sir_writereg(ufcon, S3C_UFCON);
@@ -220,6 +227,7 @@ static int s3c_irda_set_speed(struct s3c_irda *si, int speed)
                 break;
 
         default:
+		printk(KERN_ERR "Invalid speed requested\n");
                 break;
         }
 
@@ -244,7 +252,7 @@ __s3c_irda_set_power(struct s3c_irda *si, unsigned int state)
         int ret = 0;
         DBG("%s\r\n", __FUNCTION__);
 
-        if (si->pdata->set_power)
+        if(si->pdata->set_power)
                 ret = si->pdata->set_power(si->dev, state);
         return ret;
 }
@@ -256,7 +264,7 @@ static inline int s3c_set_power(struct s3c_irda *si, unsigned int state)
         DBG("%s\r\n", __FUNCTION__);
 
         ret = __s3c_irda_set_power(si, state);
-        if (ret == 0)
+        if(ret == 0)
                 si->power = state;
 
         return ret;
@@ -265,7 +273,6 @@ static inline int s3c_set_power(struct s3c_irda *si, unsigned int state)
 static int s3c_irda_startup(struct s3c_irda *si)
 {
         int ret;
-
         
         DBG("%s\r\n", __FUNCTION__);
 
@@ -285,9 +292,8 @@ static int s3c_irda_startup(struct s3c_irda *si)
         }
 
         ret = s3c_irda_set_speed(si, si->speed = 9600);
-        if (ret) {
+        if(ret) 
                 s3c_irda_sir_stop(si);
-        }
 
         return ret;
 }
@@ -310,11 +316,11 @@ static int s3c_irda_suspend(struct platform_device *pdev, pm_message_t state)
 
         DBG("%s\r\n", __FUNCTION__);
 
-        if (!dev)
+        if(!dev)
                 return 0;
 
         si = dev->priv;
-        if (si->open) {
+        if(si->open) {
                 /* Stop the transmit queue */
                 netif_device_detach(dev);
                 s3c_irda_shutdown(si);
@@ -335,11 +341,11 @@ static int s3c_irda_resume(struct platform_device *pdev)
 
         DBG("%s\r\n", __FUNCTION__);
 
-        if (!dev)
+        if(!dev)
                 return 0;
 
         si = dev->priv;
-        if (si->open) {
+        if(si->open) {
                 /*
                  * If we missed a speed change, initialise at the new speed
                  * directly.  It is debatable whether this is actually
@@ -347,7 +353,7 @@ static int s3c_irda_resume(struct platform_device *pdev)
                  * we left off it is desireable.  The converse argument is
                  * that we should re-negotiate at 9600 baud again.
                  */
-                if (si->newspeed) {
+                if(si->newspeed) {
                         si->speed = si->newspeed;
                         si->newspeed = 0;
                 }
@@ -423,20 +429,21 @@ static irqreturn_t  s3c_irda_sir_irq(int irq, void *dev_id)
 	                        ufstat = sir_readreg(S3C_UFSTAT);
 				}
 
-                	if (si->tx_buff.len == 0) {
+                	if(si->tx_buff.len == 0) {
                        		si->stats.tx_packets++;
 	               		si->stats.tx_bytes += si->tx_buff.data -
         	  			              si->tx_buff.head;
 	
-        	     	 /* We need to ensure that the transmitter has finished */
+        	     	 /* We need to ensure that transmit has finished */
                 	 do {
                  		rmb();
 	                       	ufstat = sir_readreg(S3C_UFSTAT);
         	       	} while (((ufstat >> 8) & 0x3f) > 0);
 
                
-              		/* Transmission complete.  Now enable the receiver.  
-	 		 * Sometimes we get a receive IRQ immediately after a transmit 
+              		/* Transmission complete. Now enable the receiver.  
+	 		 * Sometimes we get a receive IRQ immediately 
+	 		 * after a transmit 
  		         */
               
 	               	ufcon = sir_readreg(S3C_UFCON);
@@ -447,12 +454,12 @@ static irqreturn_t  s3c_irda_sir_irq(int irq, void *dev_id)
         	      	ucon &= ~( 3 << 2);
                		sir_writereg(ucon, S3C_UCON);
 
-	               	if (si->newspeed) {
+	               	if(si->newspeed) {
         	               	s3c_irda_set_speed(si, si->newspeed);
                 	       	si->newspeed = 0;
                		}
 
-      	 		if (1) {
+      	 		if(1) {
                       		ucon |= 1;
 	                      	sir_writereg(ucon, S3C_UCON);
         	             	}
@@ -476,16 +483,14 @@ static int s3c_irda_hard_xmit(struct sk_buff *skb, struct net_device *dev)
          * speed?  If so, remember it until we complete the transmission
          * of this frame.
          */
-        if (speed != si->speed && speed != -1) {
+        if(speed != si->speed && speed != -1) {
                 DBG("Irda  New Speed %d bps\r\n", speed);
-
                 si->newspeed = speed;
         }
         
         /* If this is an empty frame, we can bypass a lot */
-         
-        if (skb->len == 0) {
-                if (si->newspeed) {
+        if(skb->len == 0) {
+                if(si->newspeed) {
                         si->newspeed = 0;
                         s3c_irda_set_speed(si, speed);
                 }
@@ -545,13 +550,13 @@ static int s3c_irda_ioctl(struct net_device *dev, struct ifreq *ifreq, int cmd)
         switch (cmd) {
         case SIOCSBANDWIDTH:
 
-                if (capable(CAP_NET_ADMIN)) {
+                if(capable(CAP_NET_ADMIN)) {
                         
                         /* We are unable to set the speed if the device is not running */
-                        if (si->open) {
+                        if(si->open) 
                                 ret = s3c_irda_set_speed(si,
                                                 rq->ifr_baudrate);
-                        } else {
+                        else {
                                 DBG("s3c_irda_ioctl: SIOCSBANDWIDTH: !netif_running\n");
 				ret = 0;
                         }
@@ -560,7 +565,7 @@ static int s3c_irda_ioctl(struct net_device *dev, struct ifreq *ifreq, int cmd)
 
         case SIOCSMEDIABUSY:
                 ret = -EPERM;
-                if (capable(CAP_NET_ADMIN)) {
+                if(capable(CAP_NET_ADMIN)) {
                         irda_device_set_media_busy(dev, TRUE);
                         ret = 0;
                 }
@@ -597,11 +602,11 @@ static int s3c_irda_start(struct net_device *dev)
         si->speed = 9600;
 	
 	err = request_irq(si->sir_irq_rx, s3c_irda_sir_irq, 0, dev->name, dev);
-	if (err)
+	if(err)
                 goto err_irq1;
 
         err = request_irq(si->sir_irq_tx, s3c_irda_sir_irq, 0, dev->name, dev);
-          if (err)                                                     
+        if(err)                                                     
                   goto err_irq1; 
 
         /* The interrupt must remain disabled for now */
@@ -611,7 +616,7 @@ static int s3c_irda_start(struct net_device *dev)
         
         /* Setup the serial port for the specified speed */
         err = s3c_irda_startup(si);
-        if (err)
+        if(err)
                 goto err_irq2;
 
         
@@ -619,7 +624,7 @@ static int s3c_irda_start(struct net_device *dev)
         si->irlap = irlap_open(dev, &si->qos, "s3c");
 
         err = -ENOMEM;
-        if (!si->irlap)
+        if(!si->irlap)
                 goto err_irlap;
 
         
@@ -654,13 +659,13 @@ static int s3c_irda_stop(struct net_device *dev)
         s3c_irda_shutdown(si);
 
         /* Clean up */
-        if (si->rxskb) {
+        if(si->rxskb) {
                 dev_kfree_skb(si->rxskb);
                 si->rxskb = NULL;
         }
 
         /* Stop IrLAP */
-        if (si->irlap) {
+        if(si->irlap) {
                 irlap_close(si->irlap);
                 si->irlap = NULL;
         }
@@ -677,7 +682,7 @@ static int s3c_irda_init_iobuf(iobuff_t *io, int size)
 
 	io->head = kmalloc(size, GFP_KERNEL | GFP_DMA);
 
-        if (io->head != NULL) {
+        if(io->head != NULL) {
                 io->truesize = size;
                 io->in_frame = FALSE;
                 io->state    = OUTSIDE_FRAME;
@@ -697,7 +702,7 @@ static int s3c_irda_init_mem( struct s3c_irda *si,
 
         si->sir_mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 
-        if (!si->sir_mem) {
+        if(!si->sir_mem) {
                 printk("failed to get io sir_memory region resouce.\n");
                 return -ENOENT;
         }
@@ -728,7 +733,7 @@ static int s3c_irda_init_clk(struct device *dev,
 
         si->sir_clk = clk_get(dev, "uart");
 
-        if (IS_ERR(si->sir_clk)) {
+        if(IS_ERR(si->sir_clk)) {
                 DBG(KERN_INFO PFX "failed to find sir clock source.\n");
                 ret = PTR_ERR(si->sir_clk);
                 si->sir_clk = NULL;
@@ -770,7 +775,7 @@ static int s3c_irda_probe(struct platform_device *pdev)
         DBG("%s\r\n", __FUNCTION__);
 
         dev = alloc_irdadev(sizeof(struct s3c_irda));
-        if (!dev){
+        if(!dev){
         	printk("alloc_irdadev Error! \r\n");
                 return -ENOMEM;
         }
@@ -779,16 +784,16 @@ static int s3c_irda_probe(struct platform_device *pdev)
         si->dev = &pdev->dev;
         si->pdata = pdev->dev.platform_data;
 
-        if( (err = s3c_irda_init_mem(si, pdev)) != 0)
+        if((err = s3c_irda_init_mem(si, pdev)) != 0)
                 goto err_mem;
 
 
         err = s3c_irda_init_iobuf(&si->rx_buff, 14384);
-        if (err)
+        if(err)
                 goto err_iobuf_rx;
 
         err = s3c_irda_init_iobuf(&si->tx_buff, 14384);
-        if (err)
+        if(err)
                 goto err_iobuf_tx;
 
         dev->hard_start_xmit    = s3c_irda_hard_xmit;
@@ -799,14 +804,14 @@ static int s3c_irda_probe(struct platform_device *pdev)
         
 	si->sir_irq_rx = platform_get_irq(pdev, 0);
 
-        if (si->sir_irq_rx == 0) {
+        if(si->sir_irq_rx == 0) {
                 printk("failed to get rx interrupt resource.\n");
                 goto err_irq;
         }
 
 	si->sir_irq_tx = platform_get_irq(pdev, 1);                              
                                                            
-        if (si->sir_irq_tx == 0) {                        
+        if(si->sir_irq_tx == 0) {                        
                 printk("failed to get tx interrupt resource.\n");   
                 goto err_irq;                                 
         }                      
@@ -834,12 +839,12 @@ static int s3c_irda_probe(struct platform_device *pdev)
         sir_writereg(0, S3C_ULCON);
 
         err = register_netdev(dev);
-        if (err == 0) {
+        if(err == 0) {
                 platform_set_drvdata(pdev, dev);
         	DBG("%s success \r\n", __FUNCTION__);
 	}
 
-        if (err) {
+        if(err) {
                 s3c_irda_stop_clk(si);
  err_irq:
                 kfree(si->tx_buff.head);
@@ -860,7 +865,7 @@ static int s3c_irda_remove(struct platform_device *pdev)
 
         DBG("%s\r\n", __FUNCTION__);
 
-        if (dev) {
+        if(dev) {
                 struct s3c_irda *si = dev->priv;
                 unregister_netdev(dev);
                 kfree(si->tx_buff.head);
