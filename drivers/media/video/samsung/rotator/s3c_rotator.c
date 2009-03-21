@@ -61,12 +61,13 @@ static struct mutex *h_rot_mutex;
 
 static inline void s3c_rotator_set_source(ro_params *params)
 {
-	__raw_writel(S3C_ROT_SRC_HEIGHT(params->src_height) | S3C_ROT_SRC_WIDTH( params->src_width) , 
-			s3c_rotator_base + S3C_ROTATOR_SRCSIZEREG);
+	__raw_writel(S3C_ROT_SRC_HEIGHT(params->src_height) | 
+			S3C_ROT_SRC_WIDTH( params->src_width) , s3c_rotator_base + S3C_ROTATOR_SRCSIZEREG);
 	__raw_writel(params->src_addr_rgb_y, s3c_rotator_base + S3C_ROTATOR_SRCADDRREG0);
 	__raw_writel(params->src_addr_cb, s3c_rotator_base + S3C_ROTATOR_SRCADDRREG1);
 	__raw_writel(params->src_addr_cr, s3c_rotator_base + S3C_ROTATOR_SRCADDRREG2);    
 }
+
 
 static inline void s3c_rotator_set_dest(ro_params *params)
 {
@@ -75,59 +76,66 @@ static inline void s3c_rotator_set_dest(ro_params *params)
 	__raw_writel(params->dst_addr_cr, s3c_rotator_base + S3C_ROTATOR_DESTADDRREG2);    
 }
 
+
 static inline void s3c_rotator_start(ro_params *params, unsigned mode)
 {
-	u32 tmp = 0;
+	u32 cfg = 0;
 
-	tmp = __raw_readl(s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
-	tmp &= ~S3C_ROTATOR_CTRLREG_MASK;
-	tmp |= params->src_format | mode;
+	cfg = __raw_readl(s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
+	cfg &= ~S3C_ROTATOR_CTRLREG_MASK;
+	cfg |= params->src_format | mode;
 
-	__raw_writel(tmp|S3C_ROTATOR_CTRLCFG_START_ROTATE, s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
+	__raw_writel(cfg|S3C_ROTATOR_CTRLCFG_START_ROTATE, s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
 }
+
 
 static inline unsigned int s3c_rotator_get_status(void)
 {
-	unsigned int tmp = 0;
+	unsigned int cfg = 0;
 	
-	tmp = __raw_readl(s3c_rotator_base + S3C_ROTATOR_STATCFG);
-	tmp &= S3C_ROTATOR_STATCFG_STATUS_BUSY_MORE;
+	cfg = __raw_readl(s3c_rotator_base + S3C_ROTATOR_STATCFG);
+	cfg &= S3C_ROTATOR_STATCFG_STATUS_BUSY_MORE;
 
-	return tmp;
+	return cfg;
 }
+
 
 static void s3c_rotator_enable_int(void)
 {
-	unsigned int tmp;
+	unsigned int cfg;
 
-	tmp = __raw_readl(s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
-	tmp |= S3C_ROTATOR_CTRLCFG_ENABLE_INT;
+	cfg = __raw_readl(s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
+	cfg |= S3C_ROTATOR_CTRLCFG_ENABLE_INT;
 
-	__raw_writel(tmp, s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
+	__raw_writel(cfg, s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
 }
+
 
 static void s3c_rotator_disable_int(void)
 {
-	unsigned int tmp;
+	unsigned int cfg;
 
-	tmp = __raw_readl(s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
-	tmp &=~ S3C_ROTATOR_CTRLCFG_ENABLE_INT;
+	cfg = __raw_readl(s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
+	cfg &=~ S3C_ROTATOR_CTRLCFG_ENABLE_INT;
 
-	__raw_writel(tmp, s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
+	__raw_writel(cfg, s3c_rotator_base + S3C_ROTATOR_CTRLCFG);
 }
+
 
 irqreturn_t s3c_rotator_irq(int irq, void *dev_id)
 {
-	unsigned int tmp;
+	unsigned int cfg;
 
-	tmp = __raw_readl(s3c_rotator_base + S3C_ROTATOR_STATCFG);
-	tmp |= S3C_ROTATOR_STATCFG_INT_PEND;
-	__raw_writel(tmp, s3c_rotator_base + S3C_ROTATOR_STATCFG);
+	cfg = __raw_readl(s3c_rotator_base + S3C_ROTATOR_STATCFG);
+	cfg |= S3C_ROTATOR_STATCFG_INT_PEND;
+
+	__raw_writel(cfg, s3c_rotator_base + S3C_ROTATOR_STATCFG);
 
 	wake_up_interruptible(&waitq_rotator);
 
 	return IRQ_HANDLED;
 }
+
 
 int s3c_rotator_open(struct inode *inode, struct file *file)
 {
@@ -147,6 +155,7 @@ int s3c_rotator_open(struct inode *inode, struct file *file)
 	return 0;
 }
 
+
 int s3c_rotator_release(struct inode *inode, struct file *file)
 {
 	ro_params	*params;
@@ -158,7 +167,7 @@ int s3c_rotator_release(struct inode *inode, struct file *file)
 	}
 
 	kfree(params);
-	
+
 	return 0;
 }
 
@@ -171,7 +180,6 @@ static int s3c_rotator_ioctl(struct inode *inode, struct file *file, unsigned in
 
 	mutex_lock(h_rot_mutex);
 
-	
 	params	        = (ro_params *)file->private_data;
 	parg	        = (ro_params *)arg;    
 
@@ -196,13 +204,16 @@ static int s3c_rotator_ioctl(struct inode *inode, struct file *file, unsigned in
 	case S3C_ROTATOR_CTRLCFG_INPUT_YUV420:
 		divisor = 8;
 		break;
-	case S3C_ROTATOR_CTRLCFG_INPUT_YUV422:			
+
+	case S3C_ROTATOR_CTRLCFG_INPUT_YUV422:	/* fall through */
 	case S3C_ROTATOR_CTRLCFG_INPUT_RGB565:	
 		divisor = 2;
-		break;			
+		break;
+
 	case S3C_ROTATOR_CTRLCFG_INPUT_RGB888:
 		divisor = 1;
 		break;
+
 	default :
 		printk(KERN_ERR "requested src type is not supported!! plz check src format!!\n");
 		break;
@@ -254,6 +265,7 @@ static int s3c_rotator_ioctl(struct inode *inode, struct file *file, unsigned in
 	return 0;
 }
 
+
 static unsigned int s3c_rotator_poll(struct file *file, poll_table *wait)
 {
 	unsigned int mask = 0;
@@ -267,6 +279,7 @@ static unsigned int s3c_rotator_poll(struct file *file, poll_table *wait)
 	return mask;
 }
 
+
 struct file_operations s3c_rotator_fops = {
 	.owner      = THIS_MODULE,
 	.open       = s3c_rotator_open,
@@ -275,11 +288,13 @@ struct file_operations s3c_rotator_fops = {
 	.poll       = s3c_rotator_poll,
 };
 
+
 static struct miscdevice s3c_rotator_dev = {
 	.minor		= ROTATOR_MINOR,
 	.name		= "s3c-rotator",
 	.fops		= &s3c_rotator_fops,
 };
+
 
 int s3c_rotator_probe(struct platform_device *pdev)
 {
@@ -343,6 +358,7 @@ int s3c_rotator_probe(struct platform_device *pdev)
 	return 0;  
 }
 
+
 static int s3c_rotator_remove(struct platform_device *dev)
 {
 	free_irq(s3c_rotator_irq_num, NULL);
@@ -359,14 +375,18 @@ static int s3c_rotator_remove(struct platform_device *dev)
 	return 0;
 }
 
+
 static int s3c_rotator_suspend(struct platform_device *dev, pm_message_t state)
 {
 	return 0;
 }
+
+
 static int s3c_rotator_resume(struct platform_device *pdev)
 {
 	return 0;
 }
+
 
 static struct platform_driver s3c_rotator_driver = {
        .probe		= s3c_rotator_probe,
@@ -378,6 +398,7 @@ static struct platform_driver s3c_rotator_driver = {
 		    .name	= "s3c-rotator",
 	},
 };
+
 
 static char banner[] __initdata = KERN_INFO "S3C Rotator Driver, (c) 2008 Samsung Electronics\n";
 
@@ -394,6 +415,7 @@ int __init s3c_rotator_init(void)
 
 	return 0;
 }
+
 
 void  s3c_rotator_exit(void)
 {
