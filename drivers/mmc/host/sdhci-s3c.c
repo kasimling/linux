@@ -304,11 +304,15 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
 
 	/* Setup quirks for the controller */
 
+#if defined (CONFIG_MMC_SDHCI_SCATTERGATHER)
+	host->quirks |= SDHCI_CAN_DO_ADMA2;
+#else
 	/* Currently with ADMA enabled we are getting some length
 	 * interrupts that are not being dealt with, do disable
 	 * ADMA until this is sorted out. */
 	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
 	host->quirks |= SDHCI_QUIRK_32BIT_ADMA_SIZE;
+#endif
 
 	/* It seems we do not get an DATA transfer complete on non-busy
 	 * transfers, not sure if this is a problem with this specific
