@@ -472,3 +472,27 @@ struct platform_device s3c_device_g3d = {
 
 EXPORT_SYMBOL(s3c_device_g3d);
 
+/* JPEG controller  */
+static struct resource s3c_jpeg_resource[] = {
+        [0] = {
+                .start = S5PC1XX_PA_JPEG,
+                .end   = S5PC1XX_PA_JPEG + S5PC1XX_SZ_JPEG - 1,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_JPEG,
+                .end   = IRQ_JPEG,
+                .flags = IORESOURCE_IRQ,
+        }
+
+};
+
+struct platform_device s3c_device_jpeg = {
+        .name             = "s3c-jpg",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_jpeg_resource),
+        .resource         = s3c_jpeg_resource,
+};
+EXPORT_SYMBOL(s3c_device_jpeg);
+
+

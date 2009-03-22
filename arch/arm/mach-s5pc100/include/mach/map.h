@@ -156,6 +156,10 @@
 #define S5PC1XX_PA_MFC		(0xF1000000)
 #define S5PC1XX_SZ_MFC		SZ_4K
 
+/* JPEG */
+#define S5PC1XX_PA_JPEG		(0xEE500000)
+#define S5PC1XX_SZ_JPEG		SZ_1M
+
 /* AC97 */
 #define S5PC1XX_PA_AC97         (0xF2300000)
 #define S5PC1XX_SZ_AC97         SZ_1M

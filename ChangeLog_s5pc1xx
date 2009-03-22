@@ -754,3 +754,28 @@ v2.6.28.6-s5pc1xx-r0d10: Seungchull Suh
 	- SMC9115 works correctly. Before, full-duplex mode is not set.
 			M	drivers/net/smc911x.c
 
+v2.6.28.6-s5pc1xx-r0d11: Jaeryul Oh
+	- Support JPEG for s5pc100
+
+	Added files:
+		A	drivers/media/video/samsung/jpeg_v2/jpg_mem.c
+		A	drivers/media/video/samsung/jpeg_v2/jpg_misc.c
+		A	drivers/media/video/samsung/jpeg_v2/s3c-jpeg.c
+		A	drivers/media/video/samsung/jpeg_v2/jpg_opr.c
+		A	drivers/media/video/samsung/jpeg_v2/log_msg.c
+
+		A	drivers/media/video/samsung/jpeg_v2/log_msg.h
+		A	drivers/media/video/samsung/jpeg_v2/jpg_conf.h
+		A	drivers/media/video/samsung/jpeg_v2/jpg_mem.h
+		A	drivers/media/video/samsung/jpeg_v2/jpg_misc.h
+		A	drivers/media/video/samsung/jpeg_v2/regs-jpeg.h
+		A	drivers/media/video/samsung/jpeg_v2/s3c-jpeg.h
+		A	drivers/media/video/samsung/jpeg_v2/jpg_opr.h
+
+	Modified files:
+		M	arch/arm/mach-s5pc100/include/mach/map.h
+		M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s5pc1xx/devs.c
+		M	drivers/media/video/samsung/Kconfig
+		M	drivers/media/video/samsung/Makefile
+
