@@ -41,7 +41,7 @@ static const char name_s5pc100_pop[] = "S5PC100[POP]";
 
 static struct cpu_table cpu_ids[] __initdata = {
 	{
-		.idcode		= 0x43100200,
+		.idcode		= 0x43100000,
 		.idmask		= 0xfffffff0,
 		.map_io		= s5pc100_map_io,
 		.init_clocks    = s5pc100_init_clocks,
