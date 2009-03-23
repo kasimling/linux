@@ -495,4 +495,24 @@ struct platform_device s3c_device_jpeg = {
 };
 EXPORT_SYMBOL(s3c_device_jpeg);
 
+/* rotator interface */
+static struct resource s3c_rotator_resource[] = {
+        [0] = {
+                .start = S5PC1XX_PA_ROTATOR,
+                .end   = S5PC1XX_PA_ROTATOR + S5PC1XX_SZ_ROTATOR - 1,
+                .flags = IORESOURCE_MEM,
+        },
+        [1] = {
+                .start = IRQ_ROTATOR,
+                .end   = IRQ_ROTATOR,
+                .flags = IORESOURCE_IRQ,
+        }
+};
 
+struct platform_device s3c_device_rotator = {
+        .name             = "s3c-rotator",
+        .id               = -1,
+        .num_resources    = ARRAY_SIZE(s3c_rotator_resource),
+        .resource         = s3c_rotator_resource
+};
+EXPORT_SYMBOL(s3c_device_rotator);

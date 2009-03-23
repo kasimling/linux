@@ -168,6 +168,10 @@
 #define S5PC1XX_PA_G3D		(0xEF000000)
 #define S5PC1XX_SZ_G3D		SZ_16M
 
+/* Rotator */
+#define S5PC1XX_PA_ROTATOR	(0xEE100000)
+#define S5PC1XX_SZ_ROTATOR	SZ_1M
+
 /* re-define */
 #define S3C_SZ_HSMMC		S5PC1XX_SZ_HSMMC
 

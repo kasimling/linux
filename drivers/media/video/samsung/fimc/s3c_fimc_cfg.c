@@ -784,8 +784,10 @@ void s3c_fimc_start_dma(struct s3c_fimc_control *ctrl)
 		s3c_fimc_set_output_dma(ctrl);
 	}
 
+	if (!ctrl->scaler.bypass)
+		s3c_fimc_start_scaler(ctrl);
+
 	s3c_fimc_enable_capture(ctrl);
-	s3c_fimc_start_scaler(ctrl);
 
 	if (ctrl->in_type == PATH_IN_DMA)
 		s3c_fimc_start_input_dma(ctrl);

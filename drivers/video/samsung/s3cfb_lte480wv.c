@@ -40,7 +40,7 @@
 #define S3CFB_HRES_OSD		800	/* horizon pixel  x resolition */
 #define S3CFB_VRES_OSD		480	/* line cnt       y resolution */
 
-#define S3CFB_VFRAME_FREQ     	75	/* frame rate freq */
+#define S3CFB_VFRAME_FREQ     	60	/* frame rate freq */
 
 #define S3CFB_PIXEL_CLOCK	(S3CFB_VFRAME_FREQ * (S3CFB_HFP + S3CFB_HSW + S3CFB_HBP + S3CFB_HRES) * (S3CFB_VFP + S3CFB_VSW + S3CFB_VBP + S3CFB_VRES))
 
