@@ -906,3 +906,6 @@ v2.6.28.6-s3c64xx-r4: Jonghun Han
 
 v2.6.28.6-s3c64xx-r4d0: Jonghun Han
 
+v2.6.28.6-s3c64xx-r4d1: Kyoungil Kim
+	- The last tag for s3c64xx branch(09.03.24)
+
