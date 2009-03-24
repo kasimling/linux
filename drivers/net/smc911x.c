@@ -858,21 +858,21 @@ static void smc911x_phy_check_media(struct net_device *dev, int init)
 	if (mii_check_media(&lp->mii, netif_msg_link(lp), init)) {
 		/* duplex state has changed */
 		SMC_GET_PHY_BMCR(lp, phyaddr, bmcr);
-		printk("bmcr: %04x\n", bmcr);
+//		printk("bmcr: %04x\n", bmcr);
 		SMC_GET_MAC_CR(lp, cr);
 		SMC_GET_PHY_MII_ADV(lp, phyaddr, bmcr);
-		printk("adv %04x\n", bmcr);
+//		printk("adv %04x\n", bmcr);
 		SMC_GET_PHY_BMCR(lp, phyaddr, bmcr);
 		printk("bmcr: %04x\n", bmcr);
 		if (lp->mii.full_duplex) {
-			printk("##### full\n");
+//			printk("##### full\n");
 			DBG(SMC_DEBUG_MISC, "%s: Configuring for full-duplex mode\n", dev->name);
 //			bmcr |= BMCR_FULLDPLX;
 //			cr |= MAC_CR_RCVOWN_;
 			cr &= ~MAC_CR_RCVOWN_;
 			cr |= MAC_CR_FDPX_;
 		} else {
-			printk("##### half\n");
+//			printk("##### half\n");
 			DBG(SMC_DEBUG_MISC, "%s: Configuring for half-duplex mode\n", dev->name);
 //			bmcr &= ~BMCR_FULLDPLX;
 			cr &= ~MAC_CR_RCVOWN_;
