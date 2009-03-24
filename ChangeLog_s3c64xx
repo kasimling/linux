@@ -899,3 +899,7 @@ v2.6.28.6-s3c64xx-r3d3: SungJun Bae
 	Modified Files:
 		M	drivers/media/video/samsung/Kconfig
 		M	drivers/media/video/samsung/Makefile
+
+
+v2.6.28.6-s3c64xx-r4: Jonghun Han
+        - Official Release (09.03.24)
