@@ -786,3 +786,7 @@ v2.6.28.6-s5pc1xx-r1d1: Jaeryul Oh
 		M	arch/arm/plat-s5pc1xx/devs.c
 		M	drivers/media/video/samsung/Kconfig
 		M	drivers/media/video/samsung/Makefile
+
+v2.6.28.6-s5pc1xx-r1d2: Kyoungil Kim
+	- The last tag for s5pc1xx branch(09.03.24)
+
