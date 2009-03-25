@@ -2,3 +2,10 @@ v2.6.28.6-samsung: Kyoungil Kim
 	- Merge s3c64xx branch and s5pc1xx branch to master branch(09.03.24)
 
 v2.6.28.6-samsung-r0d0: Kyoungil Kim
+
+v2.6.28.6-samsung-r0d1: Kukjin Kim
+	- Remove swp file
+
+	Removed Files:
+		R	arch/arm/plat-s3c/include/plat/.cpu-freq.h.swp 
+
