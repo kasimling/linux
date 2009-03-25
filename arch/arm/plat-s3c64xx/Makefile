@@ -16,6 +16,7 @@ obj-y				+= dev-uart.o devs.o
 obj-y				+= cpu.o
 obj-y				+= irq.o
 obj-y				+= irq-eint.o
+obj-y				+= irq-eint-group.o
 obj-y				+= clock.o
 obj-y				+= gpiolib.o
 obj-y				+= bootmem.o
