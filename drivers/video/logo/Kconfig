@@ -82,4 +82,9 @@ config LOGO_M32R_CLUT224
 	depends on M32R
 	default y
 
+config LOGO_ARMWORKS_CLUT224
+	bool "Armworks 224-color logo"
+	depends on MACH_MINI2440
+	default y
+
 endif # LOGO
