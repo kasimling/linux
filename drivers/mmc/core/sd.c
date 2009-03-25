@@ -449,6 +449,11 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
 		if (err < 0)
 			goto free_card;
 
+#ifdef CONFIG_MACH_MINI2440
+		/* Prevents the -110 error at startup/insertion */
+		mdelay(10);
+#endif
+
 		/*
 		 * Fetch switch information from card.
 		 */
