@@ -1718,3 +1718,13 @@ v2.6.28.6-samsung-r0d1: Kukjin Kim
 	Removed Files:
 		R	arch/arm/plat-s3c/include/plat/.cpu-freq.h.swp 
 
+v2.6.28.6-samsung-r0d2: Kyoungil Kim
+	- Unified the ChangeLog files
+
+	Modified Files:
+		M       ChangeLog
+
+	Deleted Files:
+		D	ChangeLog_s3c64xx	
+		D	ChangeLog_s5pc1xx
+
