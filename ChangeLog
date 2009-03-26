@@ -1728,3 +1728,9 @@ v2.6.28.6-samsung-r0d2: Kyoungil Kim
 		D	ChangeLog_s3c64xx	
 		D	ChangeLog_s5pc1xx
 
+v2.6.28.6-samsung-r0d3: Kukjin Kim
+	- System Timer initialize modified
+
+	Modified Files:
+		M	arch/arm/plat-s5pc1xx/s5pc1xx-time.c
+
