@@ -8,14 +8,17 @@ config VIDEO_SAMSUNG
 
 source "drivers/media/video/samsung/fimc/Kconfig"
 source "drivers/media/video/samsung/post/Kconfig"
+
 if CPU_S3C6410
 source "drivers/media/video/samsung/mfc10/Kconfig"
 source "drivers/media/video/samsung/jpeg/Kconfig"
 endif
+
 if CPU_S5PC100
 source "drivers/media/video/samsung/mfc40/Kconfig"
 source "drivers/media/video/samsung/jpeg_v2/Kconfig"
 endif
+
 source "drivers/media/video/samsung/tv/Kconfig"
 source "drivers/media/video/samsung/rotator/Kconfig"
 source "drivers/media/video/samsung/g2d/Kconfig"
@@ -68,7 +71,7 @@ config VIDEO_SAMSUNG_MEMSIZE_JPEG
 
 config VIDEO_SAMSUNG_MEMSIZE_CMM
 	int "Memory size in kbytes for CMM"
-	depends on VIDEO_SAMSUNG && CPU_S3C6410
+	depends on VIDEO_CMM && CPU_S3C6410
 	default "0"
 endif
 
