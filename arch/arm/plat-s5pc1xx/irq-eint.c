@@ -141,10 +141,10 @@ static int s3c_irq_eint_set_type(unsigned int irq, unsigned int type)
 	shift = (offs & 0x7) * 4;
 	mask = 0x7 << shift;
 
-	ctrl = __raw_readl(S5PC1XX_EINTFLTCON(eint_conf_reg(irq)));
+	ctrl = __raw_readl(S5PC1XX_EINTCON(eint_conf_reg(irq)));
 	ctrl &= ~mask;
 	ctrl |= newvalue << shift;
-	__raw_writel(ctrl, S5PC1XX_EINTFLTCON(eint_conf_reg(irq)));
+	__raw_writel(ctrl, S5PC1XX_EINTCON(eint_conf_reg(irq)));
 
 	if((0 <= offs) && (offs < 8))
 		s3c_gpio_cfgpin(S5PC1XX_GPH0(offs&0x7), 0x2<<((offs&0x7)*4));
