@@ -665,6 +665,7 @@ extern void s3c_fimc_set_output_path(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_input_address(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_set_output_address(struct s3c_fimc_control *ctrl);
 extern int s3c_fimc_get_frame_count(struct s3c_fimc_control *ctrl);
+extern void s3c_fimc_wait_frame_end(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_change_effect(struct s3c_fimc_control *ctrl);
 extern void s3c_fimc_change_rotate(struct s3c_fimc_control *ctrl);
 

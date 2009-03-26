@@ -800,6 +800,7 @@ void s3c_fimc_stop_dma(struct s3c_fimc_control *ctrl)
 
 	s3c_fimc_stop_scaler(ctrl);
 	s3c_fimc_disable_capture(ctrl);
+	s3c_fimc_wait_frame_end(ctrl);
 }
 
 void s3c_fimc_restart_dma(struct s3c_fimc_control *ctrl)

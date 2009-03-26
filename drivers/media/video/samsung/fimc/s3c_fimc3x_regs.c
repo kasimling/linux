@@ -1110,6 +1110,47 @@ int s3c_fimc_get_frame_count(struct s3c_fimc_control *ctrl)
 	}
 }
 
+void s3c_fimc_wait_frame_end(struct s3c_fimc_control *ctrl)
+{
+        unsigned long timeo = jiffies;
+	unsigned int frame_cnt = 0;
+	u32 cfg;
+
+        timeo += 20;    /* waiting for 100mS */
+
+	if (ctrl->id == 1) {
+		while (time_before(jiffies, timeo)) {
+			cfg = readl(ctrl->regs + S3C_CIPRSTATUS);
+			
+			if (S3C_CIPRSTATUS_GET_FRAME_END(cfg)) {
+				cfg &= ~S3C_CIPRSTATUS_FRAMEEND;
+				writel(cfg, ctrl->regs + S3C_CIPRSTATUS);
+
+				if (frame_cnt == 2)
+					break;
+				else
+					frame_cnt++;
+			}
+			cond_resched();
+		}
+	} else {
+		while (time_before(jiffies, timeo)) {
+			cfg = readl(ctrl->regs + S3C_CICOSTATUS);
+
+			if (S3C_CICOSTATUS_GET_FRAME_END(cfg)) {
+				cfg &= ~S3C_CICOSTATUS_FRAMEEND;
+				writel(cfg, ctrl->regs + S3C_CICOSTATUS);
+				
+				if (frame_cnt == 2)
+					break;
+				else
+					frame_cnt++;
+			}
+			cond_resched();
+		}
+	}
+}
+
 void s3c_fimc_change_effect(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_effect *effect = &ctrl->out_frame.effect;

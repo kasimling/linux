@@ -93,6 +93,7 @@
 #define S3C_CITAREA_TARGET_AREA(x)		((x) << 0)
 
 #define S3C_CISTATUS_GET_FRAME_COUNT(x)		(((x) >> 26) & 0x3)
+#define S3C_CISTATUS_GET_FRAME_END(x)		(((x) >> 17) & 0x1)
 
 #define S3C_CIIMGEFF_PAT_CB(x)			((x) << 13)
 #define S3C_CIIMGEFF_PAT_CR(x)			((x) << 0)

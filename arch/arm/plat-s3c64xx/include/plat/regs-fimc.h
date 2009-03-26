@@ -132,6 +132,7 @@
 #define S3C_CICOTAREA_TARGET_AREA(x)		((x) << 0)
 
 #define S3C_CICOSTATUS_GET_FRAME_COUNT(x)	(((x) >> 26) & 0x3)
+#define S3C_CICOSTATUS_GET_FRAME_END(x)		(((x) >> 17) & 0x1)
 
 #define S3C_CIPRTRGFMT_TARGETHSIZE(x)		((x) << 16)
 #define S3C_CIPRTRGFMT_TARGETVSIZE(x)		((x) << 0)
@@ -154,6 +155,7 @@
 #define S3C_CIPRTAREA_TARGET_AREA(x)		((x) << 0)
 
 #define S3C_CIPRSTATUS_GET_FRAME_COUNT(x)	(((x) >> 26) & 0x3)
+#define S3C_CIPRSTATUS_GET_FRAME_END(x)		(((x) >> 19) & 0x1)
 
 #define S3C_CIIMGEFF_PAT_CB(x)			((x) << 13)
 #define S3C_CIIMGEFF_PAT_CR(x)			((x) << 0)
@@ -311,7 +313,7 @@
 #define S3C_CIPRSTATUS_IMGCPTEN			(1 << 22)
 #define S3C_CIPRSTATUS_IMGCPTENSC		(1 << 21)
 #define S3C_CIPRSTATUS_VSYNC_A			(1 << 20)
-#define S3C_CIPRSTATUS_FRAMEEND			(1 << 17)
+#define S3C_CIPRSTATUS_FRAMEEND			(1 << 19)
 
 /* Image capture enable register */
 #define S3C_CIIMGCPT_IMGCPTEN			(1 << 31)
