@@ -136,6 +136,8 @@ static void s3cfb_unmap_video_memory(s3cfb_info_t *fbi)
  */
 static int s3cfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 {
+	s3cfb_info_t *fbi = (s3cfb_info_t *) info;
+
 	DPRINTK("check_var(var=%p, info=%p)\n", var, info);
 
 	switch (var->bits_per_pixel) {
@@ -163,6 +165,14 @@ static int s3cfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 			s3cfb_fimd.bytes_per_pixel = 4;
 			break;
 
+		case 28:
+			var->red = s3cfb_rgb_28.red;
+			var->green = s3cfb_rgb_28.green;
+			var->blue = s3cfb_rgb_28.blue;
+			var->transp = s3cfb_rgb_28.transp;
+			s3cfb_fimd.bytes_per_pixel = 4;
+			break;
+
 		case 32:
 			var->red = s3cfb_rgb_32.red;
 			var->green = s3cfb_rgb_32.green;
@@ -172,6 +182,11 @@ static int s3cfb_check_var(struct fb_var_screeninfo *var, struct fb_info *info)
 			break;
 	}
 
+	/* WIN0 cannot support alpha channel. */
+	if( (fbi->win_id == 0) && (var->bits_per_pixel == 28) ){
+		var->transp.length = 0;
+	}
+	
 	return 0;
 }
 
@@ -185,7 +200,7 @@ static int s3cfb_set_par(struct fb_info *info)
 	struct fb_var_screeninfo *var = &info->var;
 	s3cfb_info_t *fbi = (s3cfb_info_t *) info;
 
-        if (var->bits_per_pixel == 16 || var->bits_per_pixel == 24)
+        if (var->bits_per_pixel == 16 || var->bits_per_pixel == 24 || var->bits_per_pixel == 28)
 		fbi->fb.fix.visual = FB_VISUAL_TRUECOLOR;
 	else
 		fbi->fb.fix.visual = FB_VISUAL_PSEUDOCOLOR;
@@ -280,7 +295,7 @@ int s3cfb_set_vs_info(s3cfb_vs_info_t vs_info)
 	if (vs_info.width != s3cfb_fimd.width || vs_info.height != s3cfb_fimd.height)
 		return 1;
 
-	if (!(vs_info.bpp == 8 || vs_info.bpp == 16 || vs_info.bpp == 24 || vs_info.bpp == 32))
+	if (!(vs_info.bpp == 8 || vs_info.bpp == 16 || vs_info.bpp == 24 || vs_info.bpp == 28 || vs_info.bpp == 32))
 		return 1;
 
 	if (vs_info.offset < 0)
@@ -357,7 +372,7 @@ int s3cfb_set_color_key_registers(s3cfb_info_t *fbi, s3cfb_color_key_info_t colk
 		compkey  = (((colkey_info.compkey_red & 0x1f) << 19) | 0x70000);
 		compkey |= (((colkey_info.compkey_green & 0x3f) << 10) | 0x300);
 		compkey |= (((colkey_info.compkey_blue  & 0x1f)  << 3 )| 0x7);
-	} else if (fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_24) {
+	} else if (fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_24 || fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_28) {
 		/* currently RGB 8-8-8 mode  */
 		compkey  = ((colkey_info.compkey_red & 0xff) << 16);
 		compkey |= ((colkey_info.compkey_green & 0xff) << 8);
@@ -395,7 +410,7 @@ int s3cfb_set_color_value(s3cfb_info_t *fbi, s3cfb_color_val_info_t colval_info)
 		colval  = (((colval_info.colval_red   & 0x1f) << 19) | 0x70000);
 		colval |= (((colval_info.colval_green & 0x3f) << 10) | 0x300);
 		colval |= (((colval_info.colval_blue  & 0x1f)  << 3 )| 0x7);
-	} else if (fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_24) {
+	} else if (fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_24 || fbi->fb.var.bits_per_pixel == S3CFB_PIXEL_BPP_28) {
 		/* currently RGB 8-8-8 mode  */
 		colval  = ((colval_info.colval_red  & 0xff) << 16);
 		colval |= ((colval_info.colval_green & 0xff) << 8);
@@ -557,28 +572,26 @@ static int s3cfb_setcolreg(unsigned int regno, unsigned int red, unsigned int gr
 	switch (fbi->fb.fix.visual) {
 	case FB_VISUAL_TRUECOLOR:
 		if (regno < 16) {
+			/* Fake palette of 16 colors */ 
 			unsigned int *pal = fbi->fb.pseudo_palette;
 
 			val = s3cfb_chan_to_field(red, fbi->fb.var.red);
 			val |= s3cfb_chan_to_field(green, fbi->fb.var.green);
 			val |= s3cfb_chan_to_field(blue, fbi->fb.var.blue);
+			val |= s3cfb_chan_to_field(transp, fbi->fb.var.transp);			
 
 			pal[regno] = val;
 		}
 
 		break;
 
-	case FB_VISUAL_PSEUDOCOLOR:
+	case FB_VISUAL_PSEUDOCOLOR:	/* This means that the color format isn't 16, 24, 28 bpp. */
+		/* S3C6410 has 256 palette entries */
 		if (regno < 256) {
-//			if (info->var.bits_per_pixel == 16) {
+			/* When var.bits_per_pixel is 8bp, then WIN0's palette is always set as 16 bit */
 				val = ((red >> 0) & 0xf800);
 				val |= ((green >> 5) & 0x07e0);
 				val |= ((blue >> 11) & 0x001f);
-//			} else if (info->var.bits_per_pixel == 24) {
-//				val = ((red << 8) & 0xff0000);
-//				val |= ((green >> 0) & 0xff00);
-//				val |= ((blue >> 8) & 0xff);
-//			}
 
 			DPRINTK("index = %d, val = 0x%08x\n", regno, val);
 			s3cfb_update_palette(fbi, regno, val);
