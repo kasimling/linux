@@ -294,6 +294,8 @@
 #define S3C_WINCONx_BYTSWP_ENABLE			(1<<17)
 #define S3C_WINCONx_HAWSWP_DISABLE			(0<<16)
 #define S3C_WINCONx_HAWSWP_ENABLE			(1<<16)
+#define S3C_WINCONx_WSWP_DISABLE			(0<<15)
+#define S3C_WINCONx_WSWP_ENABLE				(1<<15)
 #define S3C_WINCONx_INRGB_RGB		   		(0<<13)
 #define S3C_WINCONx_INRGB_YUV		 		(1<<13)
 #define S3C_WINCONx_INRGB_MASK				(1<<13)
