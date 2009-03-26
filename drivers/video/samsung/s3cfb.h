@@ -47,7 +47,8 @@ extern int s5pc100_timer_setup (int channel, int usec, unsigned long g_tcnt, uns
 
 #define S3CFB_PIXEL_BPP_8	8
 #define S3CFB_PIXEL_BPP_16	16	/*  RGB 5-6-5 format for SMDK EVAL BOARD */
-#define S3CFB_PIXEL_BPP_24	24	/*  RGB 8-8-8 format for SMDK EVAL BOARD */
+#define S3CFB_PIXEL_BPP_24	24	/*  XRGB 8-8-8 format for SMDK EVAL BOARD */
+#define S3CFB_PIXEL_BPP_28	28	/*  ARGB 4-8-8-8 format for SMDK EVAL BOARD */
 
 #define S3CFB_OUTPUT_RGB	0
 #define S3CFB_OUTPUT_TV		1
@@ -217,6 +218,13 @@ const static s3cfb_rgb_t s3cfb_rgb_24 = {
 	.green  = {.offset = 8,  .length = 8,},
 	.blue   = {.offset = 0,  .length = 8,},
 	.transp = {.offset = 0,  .length = 0,},
+};
+
+const static s3cfb_rgb_t s3cfb_rgb_28 = {
+	.red    = {.offset = 16, .length = 8,},
+	.green  = {.offset = 8,  .length = 8,},
+	.blue   = {.offset = 0,  .length = 8,},
+	.transp = {.offset = 24,  .length = 4,},
 };
 
 const static s3cfb_rgb_t s3cfb_rgb_32 = {

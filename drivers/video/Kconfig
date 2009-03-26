@@ -291,12 +291,18 @@ config FB_S3C_BPP_16
 	TBA
 
 config FB_S3C_BPP_24
-	bool "24 BPP"
+	bool "24 BPP(XRGB888)"
+	---help---
+	TBA
+
+
+config FB_S3C_BPP_28
+	bool "28 BPP(ARGB4888)"
 	---help---
 	TBA
 
 config FB_S3C_BPP_32
-	bool "32 BPP"
+	bool "32 BPP(ARGB8888)"
 	---help---
 	TBA
 endchoice
