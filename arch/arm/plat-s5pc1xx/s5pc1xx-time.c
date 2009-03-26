@@ -164,7 +164,7 @@ static irqreturn_t s5pc1xx_timer_interrupt(int irq, void *dev_id)
 	volatile unsigned int temp_cstat;
 
 #ifdef T32_DEBUG
-	__raw_writel((1<<1), S5PC1XX_GPA1DAT);
+	__raw_writel((__raw_reald(S5PC1XX_GPA1DAT) | (1<<1)), S5PC1XX_GPA1DAT);
 #endif
 
 	temp_cstat = s5pc1xx_systimer_read(S3C_SYSTIMER_INT_CSTAT);
@@ -174,7 +174,7 @@ static irqreturn_t s5pc1xx_timer_interrupt(int irq, void *dev_id)
 	timer_tick();
 
 #ifdef T32_DEBUG
-	__raw_writel((1<<1), S5PC1XX_GPA1DAT);
+	__raw_writel((__raw_reald(S5PC1XX_GPA1DAT) & ~(1<<1)), S5PC1XX_GPA1DAT);
 #endif
 	return IRQ_HANDLED;
 }
@@ -200,7 +200,28 @@ static void s5pc1xx_timer_setup (void)
 	unsigned long pclk;
 	struct clk *clk;
 
+#ifdef T32_DEBUG
+/*
+ * GPIO setting for debugging with T32
+ * connect T32's probe with number 9pin of CON7 on SMDKC100 Base Board.
+ */
+	unsigned long reg;
+
+	reg = __raw_readl(S5PC1XX_GPA1CON);
+	reg &= ~(0xf << 4);
+	
+	/* GPA1CON[1] setting: output */
+	__raw_writel((reg | (0x1 << 4)), S5PC1XX_GPA1CON);
+#endif
 	tcnt = TICK_MAX;  /* default value for tcnt */
+
+	/* initialize system timer clock */
+	tcfg = s5pc1xx_systimer_read(S3C_SYSTIMER_TCFG);
+
+	tcfg &= ~S3C_SYSTIMER_TCLK_MASK;
+	tcfg |= S3C_SYSTIMER_TCLK_PCLK;
+
+	s5pc1xx_systimer_write(S3C_SYSTIMER_TCFG, tcfg);
 
 	/* TCFG must not be changed at run-time. If you want to change TCFG, stop timer(TCON[0] = 0) */
 	s5pc1xx_systimer_write(S3C_SYSTIMER_TCON, 0);
@@ -251,35 +272,10 @@ static void s5pc1xx_timer_setup (void)
 
 	/* Interrupt Start and Enable */
 	s5pc1xx_systimer_write(S3C_SYSTIMER_INT_CSTAT, (S3C_SYSTIMER_INT_ICNTEIE));
-
 }
 
 static void __init s5pc1xx_timer_init(void)
 {
-	unsigned long tcfg;
-
-#ifdef T32_DEBUG
-/*
- * GPIO setting for debugging with T32
- * connect T32's probe with number 9pin of CON7 on SMDKC100 Base Board.
- */
-	unsigned long reg;
-
-	reg = __raw_readl(S5PC1XX_GPA1CON);
-	reg &= ~(0xf << 4);
-	
-	/* GPA1CON[1] setting: output */
-	__raw_writel((reg | (0x1 << 4)), S5PC1XX_GPA1CON);
-#endif
-
-	/* initialize system timer clock */
-	tcfg = s5pc1xx_systimer_read(S3C_SYSTIMER_TCFG);
-
-	tcfg &= ~S3C_SYSTIMER_TCLK_MASK;
-	tcfg |= S3C_SYSTIMER_TCLK_PCLK;
-
-	s5pc1xx_systimer_write(S3C_SYSTIMER_TCFG, tcfg);
-
 	s5pc1xx_timer_setup();
 	setup_irq(IRQ_SYSTIMER, &s5pc1xx_timer_irq);
 }
