@@ -87,10 +87,11 @@ static int s3c_irq_eint_set_type(unsigned int irq, unsigned int type)
 	if (offs > 27)
 		return -EINVAL;
 
+	/* fixed by jsgood */
 	if (offs > 15)
-		reg = S3C64XX_EINT0CON0;
+		reg = S3C64XX_EINT0CON1; /* org: reg = S3C64XX_EINT0CON0; */
 	else
-		reg = S3C64XX_EINT0CON1;
+		reg = S3C64XX_EINT0CON0; /* org: reg = S3C64XX_EINT0CON1; */
 
 	switch (type) {
 	case IRQ_TYPE_NONE:
@@ -122,7 +123,8 @@ static int s3c_irq_eint_set_type(unsigned int irq, unsigned int type)
 		return -1;
 	}
 
-	shift = (offs / 2) * 4;
+	/* fixed by jsgood */
+	shift = ((offs % 16) / 2) * 4;	/* org: shift = (offs / 2) * 4; */
 	mask = 0x7 << shift;
 
 	ctrl = __raw_readl(reg);
