@@ -420,7 +420,7 @@ static void s3cfb_enable_local0(int in_yuv)
 	s3cfb_fimd.wincon0 &= ~S3C_WINCONx_ENWIN_F_ENABLE;
 	writel(s3cfb_fimd.wincon0, S3C_WINCON0);	
 
-	s3cfb_fimd.wincon0 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
+	s3cfb_fimd.wincon0 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK | S3C_WINCONx_WSWP_ENABLE);
 	value = S3C_WINCONx_ENLOCAL | S3C_WINCONx_ENWIN_F_ENABLE;
 
 	if (in_yuv)
@@ -438,7 +438,7 @@ static void s3cfb_enable_local1(int in_yuv, int sel)
 	writel(s3cfb_fimd.wincon1, S3C_WINCON1);
 
 	s3cfb_fimd.wincon1 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
-	s3cfb_fimd.wincon1 &= ~(S3C_WINCON1_LOCALSEL_MASK);
+	s3cfb_fimd.wincon1 &= ~(S3C_WINCON1_LOCALSEL_MASK | S3C_WINCONx_WSWP_ENABLE);
 	value = sel | S3C_WINCONx_ENLOCAL | S3C_WINCONx_ENWIN_F_ENABLE;
 
 	if (in_yuv)
@@ -455,7 +455,7 @@ static void s3cfb_enable_local2(int in_yuv)
 	s3cfb_fimd.wincon2 &= ~S3C_WINCONx_ENWIN_F_ENABLE;
 	writel(s3cfb_fimd.wincon2, S3C_WINCON2);
 
-	s3cfb_fimd.wincon2 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
+	s3cfb_fimd.wincon2 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK | S3C_WINCONx_WSWP_ENABLE);
 	value = S3C_WINCONx_ENLOCAL | S3C_WINCONx_ENWIN_F_ENABLE;
 
 	if (in_yuv)
@@ -469,7 +469,7 @@ static void s3cfb_enable_dma0(void)
 	u32 value;
 
 	s3cfb_fimd.wincon0 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
-	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_ENWIN_F_ENABLE;
+	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_WSWP_ENABLE | S3C_WINCONx_ENWIN_F_ENABLE;
 
 	writel(s3cfb_fimd.wincon0 | value, S3C_WINCON0);
 }
@@ -479,7 +479,7 @@ static void s3cfb_enable_dma1(void)
 	u32 value;
 
 	s3cfb_fimd.wincon1 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
-	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_ENWIN_F_ENABLE;
+	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_WSWP_ENABLE | S3C_WINCONx_ENWIN_F_ENABLE;
 
 	writel(s3cfb_fimd.wincon1 | value, S3C_WINCON1);
 }
@@ -489,7 +489,7 @@ static void s3cfb_enable_dma2(void)
 	u32 value;
 
 	s3cfb_fimd.wincon2 &= ~(S3C_WINCONx_ENLOCAL_MASK | S3C_WINCONx_INRGB_MASK);
-	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_ENWIN_F_ENABLE;
+	value = S3C_WINCONx_ENLOCAL_DMA | S3C_WINCONx_WSWP_ENABLE | S3C_WINCONx_ENWIN_F_ENABLE;
 
 	writel(s3cfb_fimd.wincon2 | value, S3C_WINCON2);
 }
