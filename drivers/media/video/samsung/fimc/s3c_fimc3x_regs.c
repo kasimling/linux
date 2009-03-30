@@ -767,12 +767,13 @@ void s3c_fimc_disable_capture(struct s3c_fimc_control *ctrl)
 {
 	u32 cfg = readl(ctrl->regs + S3C_CIIMGCPT);
 
-	cfg &= ~S3C_CIIMGCPT_IMGCPTEN;
-
 	if (ctrl->id == 1)
 		cfg &= ~S3C_CIIMGCPT_IMGCPTEN_PRSC;
 	else
 		cfg &= ~S3C_CIIMGCPT_IMGCPTEN_COSC;
+
+	if (!(cfg & (S3C_CIIMGCPT_IMGCPTEN_PRSC | S3C_CIIMGCPT_IMGCPTEN_COSC)))
+		cfg &= ~S3C_CIIMGCPT_IMGCPTEN;
 
 	writel(cfg, ctrl->regs + S3C_CIIMGCPT);
 }
