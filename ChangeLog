@@ -1757,3 +1757,9 @@ v2.6.28.6-samsung-r0d6: Jaeryul Oh
 		M   drivers/media/video/samsung/jpeg_v2/s3c-jpeg.c
 		M   drivers/media/video/samsung/jpeg_v2/s3c-jpeg.h
 
+v2.6.28.6-samsung-r0d7: Jae-Cheol Lee
+	- Adopting system timer h/w bug workaround
+
+	Modified files:
+	 	M       arch/arm/plat-s5pc1xx/s5pc1xx-time.c
+
