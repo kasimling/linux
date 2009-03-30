@@ -1746,3 +1746,14 @@ v2.6.28.6-samsung-r0d5: Kukjin Kim
 	Modified Files:
 		M	drivers/mmc/core/mmc.c
 
+v2.6.28.6-samsung-r0d6: Jaeryul Oh
+	- JPEG for c100 is updated
+
+	Modified Files:
+		M   drivers/media/video/samsung/Kconfig
+		M   drivers/media/video/samsung/jpeg_v2/jpg_mem.h
+		M   drivers/media/video/samsung/jpeg_v2/jpg_opr.c
+		M   drivers/media/video/samsung/jpeg_v2/jpg_opr.h
+		M   drivers/media/video/samsung/jpeg_v2/s3c-jpeg.c
+		M   drivers/media/video/samsung/jpeg_v2/s3c-jpeg.h
+
