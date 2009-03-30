@@ -49,12 +49,22 @@ config VIDEO_SAMSUNG_MEMSIZE_MFC
 	int "Memory size in kbytes for MFC"
 	depends on VIDEO_MFC10
 	default "6144"
+
+config VIDEO_SAMSUNG_MEMSIZE_JPEG
+	int "Memory size in kbytes for JPEG"
+	depends on VIDEO_JPEG 
+	default "4096"
 endif
 
 if ARCH_S5PC1XX
 config VIDEO_SAMSUNG_MEMSIZE_MFC
 	int "Memory size in kbytes for MFC"
 	depends on VIDEO_MFC40
+	default "32768"
+
+config VIDEO_SAMSUNG_MEMSIZE_JPEG
+	int "Memory size in kbytes for JPEG"
+	depends on VIDEO_JPEG_V2 
 	default "32768"
 endif
 
@@ -64,10 +74,6 @@ config VIDEO_MFC_MAX_INSTANCE
 	depends on VIDEO_MFC40 && ARCH_S5PC1XX
 	default 1
 
-config VIDEO_SAMSUNG_MEMSIZE_JPEG
-	int "Memory size in kbytes for JPEG"
-	depends on VIDEO_JPEG && CPU_S3C6410
-	default "4096"
 
 config VIDEO_SAMSUNG_MEMSIZE_CMM
 	int "Memory size in kbytes for CMM"
