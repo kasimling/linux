@@ -1734,3 +1734,15 @@ v2.6.28.6-samsung-r0d3: Kukjin Kim
 	Modified Files:
 		M	arch/arm/plat-s5pc1xx/s5pc1xx-time.c
 
+v2.6.28.6-samsung-r0d4: Kukjin Kim
+	- System Timer init and setup function remodified
+
+	Modified Files:
+		M	arch/arm/plat-s5pc1xx/s5pc1xx-time.c
+
+v2.6.28.6-samsung-r0d5: Kukjin Kim
+	- Support extcsd revision 1.3
+
+	Modified Files:
+		M	drivers/mmc/core/mmc.c
+
