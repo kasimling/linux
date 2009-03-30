@@ -25,18 +25,20 @@
 #include <linux/version.h>
 #include <plat/media.h>
 
-#define JPG_REG_BASE_ADDR    (0xEE500000)
-#define jpg_data_base_addr		0xff	//(UINT32)s3c_get_media_memory(S3C_MDEV_JPEG)
+#define JPG_REG_BASE_ADDR    	(0xEE500000)
+#define jpg_data_base_addr	(UINT32)s3c_get_media_memory(S3C_MDEV_JPEG)
 
-#define MAX_JPG_WIDTH        3264
-#define MAX_JPG_HEIGHT       2448
+#define MAX_JPG_WIDTH        3072//3264
+#define MAX_JPG_HEIGHT       2048//2448
 
-#define MAX_JPG_THUMBNAIL_WIDTH	 160
-#define MAX_JPG_THUMBNAIL_HEIGHT 120
+#define MAX_JPG_THUMBNAIL_WIDTH	 320
+#define MAX_JPG_THUMBNAIL_HEIGHT 240
 
 #define MAX_RGB_WIDTH        800
 #define MAX_RGB_HEIGHT       480
-
+      
+/*******************************************************************************/
+// define JPG & image memory 
 // memory area is 4k(PAGE_SIZE) aligned because of VirtualCopyEx()
 #define JPG_STREAM_BUF_SIZE        ((MAX_JPG_WIDTH * MAX_JPG_HEIGHT )/PAGE_SIZE + 1)*PAGE_SIZE
 #define JPG_STREAM_THUMB_BUF_SIZE  ((MAX_JPG_THUMBNAIL_WIDTH * MAX_JPG_THUMBNAIL_HEIGHT )/PAGE_SIZE + 1)*PAGE_SIZE
@@ -47,6 +49,12 @@
 #define JPG_TOTAL_BUF_SIZE			(JPG_STREAM_BUF_SIZE + JPG_STREAM_THUMB_BUF_SIZE \
 			      + JPG_FRAME_BUF_SIZE + JPG_FRAME_THUMB_BUF_SIZE + JPG_RGB_BUF_SIZE)
 
+#define JPG_MAIN_STRART		0x00
+#define JPG_THUMB_START		JPG_STREAM_BUF_SIZE
+#define IMG_MAIN_START		(JPG_STREAM_BUF_SIZE + JPG_STREAM_THUMB_BUF_SIZE)
+#define IMG_THUMB_START		(JPG_STREAM_BUF_SIZE + JPG_STREAM_THUMB_BUF_SIZE + JPG_FRAME_BUF_SIZE)
+
+/*******************************************************************************/
 #define COEF1_RGB_2_YUV         0x4d971e
 #define COEF2_RGB_2_YUV         0x2c5783
 #define COEF3_RGB_2_YUV         0x836e13

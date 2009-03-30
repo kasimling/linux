@@ -169,7 +169,12 @@ static irqreturn_t s5pc1xx_timer_interrupt(int irq, void *dev_id)
 
 	temp_cstat = s5pc1xx_systimer_read(S3C_SYSTIMER_INT_CSTAT);
 	temp_cstat |= S3C_SYSTIMER_INT_STATS;
+
 	s5pc1xx_systimer_write(S3C_SYSTIMER_INT_CSTAT, temp_cstat);
+	do {				
+		if(!(s5pc1xx_systimer_read(S3C_SYSTIMER_INT_CSTAT) & S3C_SYSTIMER_INT_STATS))
+			break;
+	} while(1);
 
 	timer_tick();
 

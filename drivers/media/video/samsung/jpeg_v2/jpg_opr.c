@@ -101,10 +101,10 @@ jpg_return_status decode_jpg(sspc100_jpg_ctx *jpg_ctx,
 	dec_param->sample_mode = sample_mode;
 
 	get_xy(jpg_ctx, &width, &height);
-	log_msg(LOG_TRACE, "decode_jpg", "DD:: width : 0x%x height : 0x%x\n", width, height);
+	log_msg(LOG_TRACE, "decode_jpg", "DD:: width : %d height : %d\n", width, height);
 
 	if (width <= 0 || width > MAX_JPG_WIDTH || height <= 0 || height > MAX_JPG_HEIGHT) {
-		log_msg(LOG_ERROR, "decode_jpg", "DD::JPG has invalid width/height\n");
+		log_msg(LOG_ERROR, "decode_jpg", "DD::JPG has invalid width(%d)/height(%d)\n",width, height);
 		return JPG_FAIL;
 	}
 
@@ -142,7 +142,6 @@ void reset_jpg(sspc100_jpg_ctx *jpg_ctx)
 
 	do {
 		__raw_writel(S3C_JPEG_SW_RESET_REG_ENABLE, s3c_jpeg_base + S3C_JPEG_SW_RESET_REG);
-		mdelay(1000);
 	} while (((readl(s3c_jpeg_base + S3C_JPEG_SW_RESET_REG)) & S3C_JPEG_SW_RESET_REG_ENABLE) == S3C_JPEG_SW_RESET_REG_ENABLE);
 }
 
@@ -166,6 +165,7 @@ void decode_header(sspc100_jpg_ctx *jpg_ctx, jpg_dec_proc_param *dec_param)
 	__raw_writel(__raw_readl(s3c_jpeg_base + S3C_JPEG_OUTFORM_REG) & ~(S3C_JPEG_OUTFORM_REG_YCBCY420), s3c_jpeg_base + S3C_JPEG_OUTFORM_REG);
 	__raw_writel(__raw_readl(s3c_jpeg_base + S3C_JPEG_OUTFORM_REG) | (dec_param->out_format << 0), s3c_jpeg_base + S3C_JPEG_OUTFORM_REG);
 	__raw_writel(__raw_readl(s3c_jpeg_base + S3C_JPEG_DEC_STREAM_SIZE_REG) & ~(S3C_JPEG_DEC_STREAM_SIZE_REG_PROHIBIT), s3c_jpeg_base + S3C_JPEG_DEC_STREAM_SIZE_REG);
+	//__raw_writel(dec_param->file_size, s3c_jpeg_base + S3C_JPEG_DEC_STREAM_SIZE_REG);
 	__raw_writel(__raw_readl(s3c_jpeg_base + S3C_JPEG_JSTART_REG) | S3C_JPEG_JSTART_REG_ENABLE, s3c_jpeg_base + S3C_JPEG_JSTART_REG);
 }
 
@@ -258,7 +258,7 @@ UINT32 get_yuv_size(out_mode_t out_format, UINT32 width, UINT32 height)
 		break;
 	}
 
-	log_msg(LOG_TRACE, "get_yuv_size", "DD::after error correction : width(%d) height(%d)\n", width, height);
+	log_msg(LOG_TRACE, "get_yuv_size", " width(%d) height(%d)\n", width, height);
 
 	switch (out_format) {
 	case YCBCR_422 :
@@ -347,6 +347,7 @@ jpg_return_status encode_jpg(sspc100_jpg_ctx *jpg_ctx,
 	}
 
 	enc_param->file_size = __raw_readl(s3c_jpeg_base + S3C_JPEG_CNT_REG);
+	log_msg(LOG_TRACE, "encode_jpg", "encoded file size : %d\n", enc_param->file_size);
 	return JPG_SUCCESS;
 
 }

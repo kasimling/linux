@@ -47,6 +47,8 @@
 
 #include <linux/version.h>
 #include <plat/regs-clock.h>
+#include <plat/media.h>
+
 
 #include <linux/time.h>
 #include <linux/clk.h>
@@ -222,8 +224,10 @@ static int s3c_jpeg_ioctl(struct inode *inode, struct file *file, unsigned int c
 		log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "IOCTL_JPEG_DECODE\n");
 
 		out = copy_from_user(&param, (jpg_args *)arg, sizeof(jpg_args));
-		jpg_reg_ctx->jpg_data_addr = (UINT32)param.phy_in_buf;
-		jpg_reg_ctx->img_data_addr = (UINT32)param.phy_out_buf;
+
+		jpg_reg_ctx->jpg_data_addr = (UINT32)jpg_data_base_addr;
+		jpg_reg_ctx->img_data_addr = (UINT32)jpg_data_base_addr + JPG_STREAM_BUF_SIZE + JPG_STREAM_THUMB_BUF_SIZE;
+		
 		result = decode_jpg(jpg_reg_ctx, param.dec_param);
 		out = copy_to_user((void *)arg, (void *) & param, sizeof(jpg_args));
 		break;
@@ -238,43 +242,39 @@ static int s3c_jpeg_ioctl(struct inode *inode, struct file *file, unsigned int c
 			param.enc_param->width, param.enc_param->height);
 
 		if (param.enc_param->enc_type == JPG_MAIN) {
-			log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "enc_phy_in_buf=0x%08x, enc_phy_out_buf=0x%08x\n", param.phy_in_buf, param.phy_out_buf);
-			jpg_reg_ctx->img_data_addr = (UINT32)param.phy_in_buf;
-			jpg_reg_ctx->jpg_data_addr = (UINT32)param.phy_out_buf;
+			jpg_reg_ctx->jpg_data_addr = (UINT32)jpg_data_base_addr ;
+			jpg_reg_ctx->img_data_addr = (UINT32)jpg_data_base_addr + JPG_STREAM_BUF_SIZE + JPG_STREAM_THUMB_BUF_SIZE;
+			log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "enc_img_data_addr=0x%08x, enc_jpg_data_addr=0x%08x\n", jpg_reg_ctx->img_data_addr,jpg_reg_ctx->jpg_data_addr);
 
 			result = encode_jpg(jpg_reg_ctx, param.enc_param);
 		} else {
-			log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "thumb_phy_in_buf=0x%08x, thumb_phy_out_buf=0x%08x\n", param.phy_in_thumb_buf, param.phy_out_thumb_buf);
-			jpg_reg_ctx->img_thumb_data_addr = (UINT32)param.phy_in_thumb_buf;
-			jpg_reg_ctx->jpg_thumb_data_addr = (UINT32)param.phy_out_thumb_buf;
+			jpg_reg_ctx->img_thumb_data_addr = (UINT32)jpg_data_base_addr + JPG_STREAM_BUF_SIZE + JPG_STREAM_THUMB_BUF_SIZE + JPG_FRAME_BUF_SIZE;
+			jpg_reg_ctx->jpg_thumb_data_addr = (UINT32)jpg_data_base_addr + JPG_STREAM_BUF_SIZE;
 
 			result = encode_jpg(jpg_reg_ctx, param.thumb_enc_param);
 		}
-
-		log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "encoded file size : %d\n", param.enc_param->file_size);
-
 		out = copy_to_user((void *)arg, (void *) & param,  sizeof(jpg_args));
 		break;
-#if 0
+
 	case IOCTL_JPG_GET_STRBUF:
 		log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "IOCTL_JPG_GET_STRBUF\n");
 		unlock_jpg_mutex();
-		return arg;
+		return arg + JPG_MAIN_STRART;
 
-	case IOCTL_JPG_GET_THUMB_STRBUF:
+	case IOCTL_JPG_GET_THUMB_STRBUF:		
 		log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "IOCTL_JPG_GET_THUMB_STRBUF\n");
 		unlock_jpg_mutex();
-		return arg + JPG_STREAM_BUF_SIZE;
+		return arg + JPG_THUMB_START;
 
 	case IOCTL_JPG_GET_FRMBUF:
 		log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "IOCTL_JPG_GET_FRMBUF\n");
 		unlock_jpg_mutex();
-		return arg + JPG_STREAM_BUF_SIZE + JPG_STREAM_THUMB_BUF_SIZE;
+		return arg + IMG_MAIN_START;
 
 	case IOCTL_JPG_GET_THUMB_FRMBUF:
 		log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "IOCTL_JPG_GET_THUMB_FRMBUF\n");
 		unlock_jpg_mutex();
-		return arg + JPG_STREAM_BUF_SIZE + JPG_STREAM_THUMB_BUF_SIZE + JPG_FRAME_BUF_SIZE;
+		return arg + IMG_THUMB_START;
 
 	case IOCTL_JPG_GET_PHY_FRMBUF:
 		log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "IOCTL_JPG_GET_PHY_FRMBUF\n");
@@ -285,7 +285,7 @@ static int s3c_jpeg_ioctl(struct inode *inode, struct file *file, unsigned int c
 		log_msg(LOG_TRACE, "s3c_jpeg_ioctl", "IOCTL_JPG_GET_PHY_THUMB_FRMBUF\n");
 		unlock_jpg_mutex();
 		return jpg_data_base_addr + JPG_STREAM_BUF_SIZE + JPG_STREAM_THUMB_BUF_SIZE + JPG_FRAME_BUF_SIZE;
-#endif
+	
 	default :
 		log_msg(LOG_ERROR, "s3c_jpeg_ioctl", "DD::JPG Invalid ioctl : 0x%X\n", cmd);
 	}

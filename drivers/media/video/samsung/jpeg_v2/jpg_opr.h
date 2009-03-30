@@ -109,6 +109,7 @@ typedef struct {
 	char			*out_thumb_buf;
 	char			*phy_out_thumb_buf;
 	int			out_thumb_buf_size;
+	char			*mapped_addr;
 	jpg_dec_proc_param	*dec_param;
 	jpg_enc_proc_param	*enc_param;
 	jpg_enc_proc_param	*thumb_enc_param;
