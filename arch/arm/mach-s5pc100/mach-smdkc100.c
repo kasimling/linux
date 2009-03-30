@@ -55,10 +55,10 @@
 #include <plat/gpio-cfg.h>
 #include <plat/regs-gpio.h>
 #include <plat/gpio-bank-k0.h>
+#include <plat/regs-clock.h>
 #if defined(CONFIG_USB_GADGET_S3C_OTGD) || \
 	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
 #include <plat/regs-otg.h>
-#include <plat/regs-clock.h>
 #include <plat/pll.h>
 #include <linux/usb/ch9.h>
 
