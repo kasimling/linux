@@ -244,6 +244,9 @@ static void __init smdkc100_machine_init(void)
 #ifdef CONFIG_VIDEO_FIMC
 	s3c_fimc_reset_camera();
 #endif
+	
+	/* Setting up the HS-MMC clock for 133MHz using doutMpll */
+	writel((readl(S5P_CLK_DIV3) & ~(0xfff << 0)), S5P_CLK_DIV3);
 
 	platform_add_devices(smdkc100_devices, ARRAY_SIZE(smdkc100_devices));
 
