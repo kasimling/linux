@@ -112,7 +112,7 @@ static unsigned long s5pc1xx_clk_doutapll_get_rate(struct clk *clk)
 	return rate;
 }
 
-int s5pc1xx_clk_doutapll_set_rate(struct clk *clk, unsigned int rate)
+int s5pc1xx_clk_doutapll_set_rate(struct clk *clk, unsigned long rate)
 {
 	struct clk *temp_clk = clk;
 	unsigned int div;
@@ -165,13 +165,13 @@ static unsigned long s5pc1xx_doutarm_roundrate(struct clk *clk,
 	return rate;
 }
 
-int s5pc1xx_clk_doutarm_set_rate(struct clk *clk, unsigned int rate)
+int s5pc1xx_clk_doutarm_set_rate(struct clk *clk, unsigned long rate)
 {
 	struct clk *temp_clk = clk;
 	unsigned int div_arm;
-	u32 val,flag;
+	unsigned int val;
 #ifdef PREVENT_BUS_CLOCK_CHANGE
-	unsigned int d0_bus_ratio, arm_ratio_old, ratio, iter;
+	unsigned int d0_bus_ratio, arm_ratio_old, ratio;
 	val = __raw_readl(S5P_CLK_DIV0);
 	d0_bus_ratio = (val & S5P_CLKDIV0_D0_MASK) >> S5P_CLKDIV0_D0_SHIFT;
 	arm_ratio_old = (val & S5P_CLKDIV0_ARM_MASK) >> S5P_CLKDIV0_ARM_SHIFT;
@@ -329,7 +329,7 @@ static unsigned long s5pc1xx_clk_doutmpll_get_rate(struct clk *clk)
 {
 	unsigned long rate = clk_get_rate(clk->parent);
 
-	printk(KERN_DEBUG "%s: parent is %ld\n", __func__, rate);
+	/* printk(KERN_DEBUG "%s: parent is %ld\n", __func__, rate); */
 
 	rate /= (((__raw_readl(S5P_CLK_DIV1) & S5P_CLKDIV1_MPLL_MASK) >> S5P_CLKDIV1_MPLL_SHIFT) + 1);
 
