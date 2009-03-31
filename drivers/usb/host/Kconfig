@@ -324,7 +324,7 @@ config USB_HWA_HCD
 
 config USB_S3C_OTG_HOST
 	tristate "S3C USB OTG Host support"
-	depends on (USB && PLAT_S3C64XX)
+	depends on USB && (PLAT_S3C64XX || PLAT_S5PC1XX)
 	help
 	  Samsung's S3C64XX processors include high speed USB OTG2.0
 	  controller. It has 15 configurable endpoints, as well as

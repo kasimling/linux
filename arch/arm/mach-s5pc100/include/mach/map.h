@@ -86,19 +86,6 @@
 #define S3C_VA_VIC1		(S3C_VA_IRQ + 0x10000)
 #define S3C_VA_VIC2		(S3C_VA_IRQ + 0x20000)
 
-/* compatibiltiy defines. */
-#define S3C_PA_TIMER		S5PC1XX_PA_TIMER
-#define S3C_PA_IIC		S5PC1XX_PA_IIC0
-#define S3C_PA_IIC1		S5PC1XX_PA_IIC1
-
-#define S3C_VA_OTG              S5PC1XX_VA_OTG
-#define S3C_PA_OTG              S5PC1XX_PA_OTG
-#define S3C_SZ_OTG              S5PC1XX_SZ_OTG
-
-#define S3C_VA_OTGSFR           S5PC1XX_VA_OTGSFR
-#define S3C_PA_OTGSFR           S5PC1XX_PA_OTGSFR
-#define S3C_SZ_OTGSFR           S5PC1XX_SZ_OTGSFR
-
 /* USB Host */
 #define S5PC1XX_PA_USBHOST      (0xED400000)
 #define S5PC1XX_SZ_USBHOST      SZ_1M
@@ -172,7 +159,19 @@
 #define S5PC1XX_PA_ROTATOR	(0xEE100000)
 #define S5PC1XX_SZ_ROTATOR	SZ_1M
 
-/* re-define */
+/* compatibiltiy defines. */
 #define S3C_SZ_HSMMC		S5PC1XX_SZ_HSMMC
+
+#define S3C_PA_TIMER		S5PC1XX_PA_TIMER
+#define S3C_PA_IIC		S5PC1XX_PA_IIC0
+#define S3C_PA_IIC1		S5PC1XX_PA_IIC1
+
+#define S3C_VA_OTG              S5PC1XX_VA_OTG
+#define S3C_PA_OTG              S5PC1XX_PA_OTG
+#define S3C_SZ_OTG              S5PC1XX_SZ_OTG
+
+#define S3C_VA_OTGSFR           S5PC1XX_VA_OTGSFR
+#define S3C_PA_OTGSFR           S5PC1XX_PA_OTGSFR
+#define S3C_SZ_OTGSFR           S5PC1XX_SZ_OTGSFR
 
 #endif /* __ASM_ARCH_6400_MAP_H */

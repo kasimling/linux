@@ -107,7 +107,7 @@ int	s3c6410_otghcd_start_port_reset(struct usb_hcd *hcd, unsigned port);
  */
 static const struct hc_driver s3c6410_otg_hc_driver = {
 	.description 		=	"EMSP_OTGHCD",
-	.product_desc		=	"S3C6410 OTGHCD",
+	.product_desc		=	"S3C OTGHCD",
 
 	.irq 			= 	s3c6410_otghcd_irq,
 	.flags			=	HCD_MEMORY | HCD_USB2,

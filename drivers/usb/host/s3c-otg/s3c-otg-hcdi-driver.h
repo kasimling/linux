@@ -48,6 +48,7 @@ extern "C"
 #include <linux/dma-mapping.h> //dma_alloc_coherent
 #include <linux/ioport.h>	//request_mem_request ...
 #include <asm/irq.h>	//for IRQ_OTG
+#include <linux/clk.h>
 
 //#include <asm/io.h> //for ioremap
 

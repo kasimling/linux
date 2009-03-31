@@ -45,14 +45,23 @@
  * then call usb_create_hcd, usb_add_hcd, s3c6410_otghcd_start functions
  */
 
+static struct clk	*otg_clock = NULL;
+
 static int s3c6410_otg_drv_probe (struct platform_device *pdev)
 {
 
 	int ret_val = 0;
 	u32 reg_val = 0;
 	
-	otg_dbg(OTG_DBG_OTGHCDI_DRIVER, "s3c6410_otg_drv_probe \n");
+	otg_dbg(OTG_DBG_OTGHCDI_DRIVER, "s3c_otg_drv_probe \n");
 	
+	otg_clock = clk_get(&pdev->dev, "otg");
+	if (otg_clock == NULL) {
+		printk(KERN_INFO "failed to find otg clock source\n");
+		return -ENOENT;
+	}
+	clk_enable(otg_clock);
+
 ///init for host mode
 /** 
 	Allocate memory for the base HCD &	Initialize the base HCD.
@@ -104,11 +113,11 @@ static int s3c6410_otg_drv_probe (struct platform_device *pdev)
 	reg_val = read_reg_32(0x40); 
 	if ((reg_val & 0xFFFFF000) != 0x4F542000) 
 	{
-		otg_err(OTG_DBG_OTGHCDI_DRIVER, "Bad value for SNPSID: 0x%08x\n", (u16)reg_val);
+		otg_err(OTG_DBG_OTGHCDI_DRIVER, "Bad value for SNPSID: 0x%x\n", reg_val);
 		ret_val = -EINVAL;
 		goto err_out_create_hcd_init;
 	}
-	
+
 	/*
 	 * Finish generic HCD initialization and start the HCD. This function
 	 * allocates the DMA buffer pool, registers the USB bus, requests the
@@ -164,6 +173,13 @@ static int s3c6410_otg_drv_remove (struct platform_device *dev)
 	release_mem_region(g_pUsbHcd->rsrc_start, g_pUsbHcd->rsrc_len);
 
 	usb_put_hcd(g_pUsbHcd);
+
+	if (otg_clock != NULL) {
+		clk_disable(otg_clock);
+		clk_put(otg_clock);
+		otg_clock = NULL;
+	}
+
 	
 	return USB_ERR_SUCCESS;
 } 
@@ -212,7 +228,7 @@ static int __init s3c6410_otg_module_init(void)
 { 
 	int	ret_val = 0;
 	
-	otg_dbg(OTG_DBG_OTGHCDI_DRIVER, "s3c6410_otg_module_init \n");		
+	otg_dbg(OTG_DBG_OTGHCDI_DRIVER, "s3c_otg_module_init \n");		
 
 	ret_val = platform_driver_register(&s3c6410_otg_driver);
 	if (ret_val < 0) 
@@ -235,7 +251,7 @@ static int __init s3c6410_otg_module_init(void)
  */
 static void __exit s3c6410_otg_module_exit(void) 
 {     
-	otg_dbg(OTG_DBG_OTGHCDI_DRIVER, "s3c6410_otg_module_exit \n");	
+	otg_dbg(OTG_DBG_OTGHCDI_DRIVER, "s3c_otg_module_exit \n");	
 	platform_driver_unregister(&s3c6410_otg_driver);
 } 
 //-------------------------------------------------------------------------------

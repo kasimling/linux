@@ -37,17 +37,21 @@ extern "C"
 //#define OTG_DEBUG
 
 #ifdef OTG_DEBUG
-#define OTG_DBG_OTGHCDI_DRIVER	false
+#if 0
+#include <linux/stddef.h>
+#endif
+
+#define OTG_DBG_OTGHCDI_DRIVER	true
 #define OTG_DBG_OTGHCDI_HCD	true
 #define OTG_DBG_OTGHCDI_KAL	false
 #define OTG_DBG_OTGHCDI_LIST	false
 #define OTG_DBG_OTGHCDI_MEM	false
 
-#define OTG_DBG_TRANSFER	true
+#define OTG_DBG_TRANSFER	false
 #define OTG_DBG_SCHEDULE	false
-#define OTG_DBG_OCI		false
+#define OTG_DBG_OCI		true
 #define OTG_DBG_DONETRASF	false
-#define OTG_DBG_ISR		false
+#define OTG_DBG_ISR		true
 #define OTG_DBG_ROOTHUB		false
 
 #if defined(__linux__)
@@ -69,7 +73,6 @@ extern "C"
 			printk("=> " msg); \
 		}\
 	}while(0)
-
 #else
 
 #error Not supported OS

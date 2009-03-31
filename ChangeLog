@@ -1763,3 +1763,21 @@ v2.6.28.6-samsung-r0d7: Jae-Cheol Lee
 	Modified files:
 	 	M       arch/arm/plat-s5pc1xx/s5pc1xx-time.c
 
+v2.6.28.6-samsung-r0d8: Byungjae Lee
+	- Implemented OTG Host role for SMDKC100
+	  OTG Host role support only MassStorage and HID(Keyboard, Mouse)
+
+	Modified Files:
+		M	arch/arm/configs/smdkc100mtd_defconfig
+		M	arch/arm/configs/smdkc100onenand_defconfig
+		M	arch/arm/mach-s3c6410/mach-smdk6410.c
+		M	arch/arm/mach-s5pc100/include/mach/map.h
+		M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s5pc1xx/devs.c
+		M	drivers/usb/host/Kconfig
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-debug.h
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-driver.c
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-driver.h
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-hcd.h
+		M	drivers/usb/host/s3c-otg/s3c-otg-oci.c
+		M	drivers/usb/host/s3c-otg/s3c-otg-oci.h
