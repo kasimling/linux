@@ -55,6 +55,7 @@
 #include <plat/gpio-cfg.h>
 #include <plat/regs-gpio.h>
 #include <plat/gpio-bank-k0.h>
+#include <plat/regs-clock.h>
 
 #ifdef CONFIG_USB_SUPPORT
 #include <plat/regs-otg.h>
