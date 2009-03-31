@@ -28,8 +28,8 @@
 
 /* clock sources for the mmc bus clock, order as for the ctrl2[5..4] */
 char *s3c6410_hsmmc_clksrcs[4] = {
-	[0] = "hsmmc",
-	[1] = "hsmmc",
+	[0] = "mmc_bus",
+	[1] = "mmc_bus",
 	[2] = "hsmmc",
 };
 

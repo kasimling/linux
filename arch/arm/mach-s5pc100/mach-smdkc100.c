@@ -55,10 +55,10 @@
 #include <plat/gpio-cfg.h>
 #include <plat/regs-gpio.h>
 #include <plat/gpio-bank-k0.h>
+#include <plat/regs-clock.h>
 #if defined(CONFIG_USB_GADGET_S3C_OTGD) || \
 	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
 #include <plat/regs-otg.h>
-#include <plat/regs-clock.h>
 #include <plat/pll.h>
 #include <linux/usb/ch9.h>
 
@@ -244,6 +244,9 @@ static void __init smdkc100_machine_init(void)
 #ifdef CONFIG_VIDEO_FIMC
 	s3c_fimc_reset_camera();
 #endif
+	
+	/* Setting up the HS-MMC clock for 133MHz using doutMpll */
+	writel((readl(S5P_CLK_DIV3) & ~(0xfff << 0)), S5P_CLK_DIV3);
 
 	platform_add_devices(smdkc100_devices, ARRAY_SIZE(smdkc100_devices));
 
