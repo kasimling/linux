@@ -1,18 +1,13 @@
-/*
- * Project Name MFC DRIVER 
- * Copyright  2007 Samsung Electronics Co, Ltd. All Rights Reserved. 
+/* linux/drivers/media/video/samsung/jpeg/jpg_msg.c
  *
- * This software is the confidential and proprietary information
- * of Samsung Electronics  ("Confidential Information").   
- * you shall not disclose such Confidential Information and shall use
- * it only in accordance with the terms of the license agreement
- * you entered into with Samsung Electronics 
+ * Driver file for Samsung JPEG Encoder/Decoder
  *
- * This source file is for printing the driver's log messages.
+ * Peter Oh, Copyright (c) 2009 Samsung Electronics
+ * 	http://www.samsungsemi.com/
  *
- * @name MFC DRIVER MODULE Module (log_msg.c)
- * @author Jiun, Yu(jiun.yu@samsung.com)
- * @date 03-28-07
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
  */
 
 #include <stdarg.h>

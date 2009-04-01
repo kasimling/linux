@@ -1,14 +1,13 @@
-/* regs-jpeg.h
+/* linux/drivers/media/video/samsung/jpeg/regs-jpeg.h
  *
- * Driver file for Samsung JPEG
- * Copyright (c) 2009 Samsung Electronics
+ * Register definition file for Samsung JPEG Encoder/Decoder
+ *
+ * Peter Oh, Copyright (c) 2009 Samsung Electronics
  * 	http://www.samsungsemi.com/
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
- * @author modify kwak Hyun Min (hyunmin.kwak@samsung.com) 
- * date 12-03-20 for linux 2.6.28
 */
 
 #ifndef __ASM_ARM_REGS_S3C_JPEG_H

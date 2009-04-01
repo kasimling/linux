@@ -1,6 +1,7 @@
-/* linux/drivers/video/samsung/s3c_fimg3d.c
+/* linux/drivers/video/samsung/g3d/s3c_fimg3d.c
  *
  * Driver file for Samsung 3D Accelerator(FIMG-3D)
+ *
  * Jegeon Jung, Copyright (c) 2009 Samsung Electronics
  * 	http://www.samsungsemi.com/
  *
@@ -8,6 +9,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
 */
+
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/errno.h>

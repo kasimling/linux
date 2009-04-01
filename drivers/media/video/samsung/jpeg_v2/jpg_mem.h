@@ -1,20 +1,13 @@
-/*
- * Project Name JPEG DRIVER IN Linux
- * Copyright  2007 Samsung Electronics Co, Ltd. All Rights Reserved.
+/* linux/drivers/media/video/samsung/jpeg_v2/jpg_mem.h
  *
- * This software is the confidential and proprietary information
- * of Samsung Electronics  ("Confidential Information").
- * you shall not disclose such Confidential Information and shall use
- * it only in accordance with the terms of the license agreement
- * you entered into with Samsung Electronics
+ * Driver header file for Samsung JPEG Encoder/Decoder
  *
- * This file implements JPEG driver.
+ * Peter Oh, Copyright (c) 2009 Samsung Electronics
+ * 	http://www.samsungsemi.com/
  *
- * @name JPEG DRIVER MODULE Module (JPGMem.h)
- * @author Jiun Yu (jiun.yu@samsung.com)
- * @date 04-07-07
- * @author modify kwak Hyun Min (hyunmin.kwak@samsung.com) 
- * date 12-03-20 for linux 2.6.28 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
  */
 
 #ifndef __JPG_MEM_H__

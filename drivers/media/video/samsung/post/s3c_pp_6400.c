@@ -1,15 +1,13 @@
-/*
- * linux/drivers/drivers/media/video/samsung/post/s3c_pp_6400.c
+/* linux/drivers/media/video/samsung/post/s3c_pp_6400.c
  *
- * Revision 3.0
+ * Driver file for Samsung Post processor
  *
+ * Jiun Yu, Copyright (c) 2009 Samsung Electronics
+ * 	http://www.samsungsemi.com/
  *
- * This file is subject to the terms and conditions of the GNU General Public
- * License.  See the file COPYING in the main directory of this archive for
- * more details.
- *
- *	    S3C PostProcessor driver 
- *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
  */
 
 #include <linux/init.h>
@@ -1434,5 +1432,4 @@ module_exit(s3c_pp_exit);
 MODULE_AUTHOR("jiun.yu@samsung.com");
 MODULE_DESCRIPTION("S3C PostProcessor Device Driver");
 MODULE_LICENSE("GPL");
-
 
