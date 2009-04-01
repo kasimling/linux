@@ -1,6 +1,7 @@
-/* linux/drivers/media/video/samsung/s3c_rotator.c
+/* linux/drivers/media/video/samsung/rotator/s3c_rotator.c
  *
  * Driver file for Samsung Image Rotator
+ *
  * Jonghun Han, Copyright (c) 2009 Samsung Electronics
  * 	http://www.samsungsemi.com/
  *
@@ -122,6 +123,16 @@ static void s3c_rotator_disable_int(void)
 }
 
 
+#if defined(CONFIG_CPU_S3C6410)
+irqreturn_t s3c_rotator_irq(int irq, void *dev_id)
+{
+	__raw_readl(s3c_rotator_base + S3C_ROTATOR_STATCFG);
+
+	wake_up_interruptible(&waitq_rotator);
+
+	return IRQ_HANDLED;
+}
+#elif defined(CONFIG_CPU_S5PC100)
 irqreturn_t s3c_rotator_irq(int irq, void *dev_id)
 {
 	unsigned int cfg;
@@ -135,7 +146,7 @@ irqreturn_t s3c_rotator_irq(int irq, void *dev_id)
 
 	return IRQ_HANDLED;
 }
-
+#endif
 
 int s3c_rotator_open(struct inode *inode, struct file *file)
 {
