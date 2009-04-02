@@ -1781,3 +1781,12 @@ v2.6.28.6-samsung-r0d8: Byungjae Lee
 		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-hcd.h
 		M	drivers/usb/host/s3c-otg/s3c-otg-oci.c
 		M	drivers/usb/host/s3c-otg/s3c-otg-oci.h
+
+v2.6.28.6-samsung-r0d9: Jonghun Han
+	- Support YUV422 Interleave output for FIMC
+
+	Modified Files:
+		M	drivers/media/video/samsung/fimc/s3c_fimc.h
+		M	drivers/media/video/samsung/fimc/s3c_fimc3x_regs.c
+		M	drivers/media/video/samsung/fimc/s3c_fimc_cfg.c
+
