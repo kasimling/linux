@@ -1979,7 +1979,7 @@ static int __devinit smc911x_probe(struct net_device *dev)
 
 	/* Set default parameters */
 	lp->msg_enable = NETIF_MSG_LINK;
-	lp->ctl_rfduplx = 1;
+	lp->ctl_rfduplx = 0;
 	lp->ctl_rspeed = 100;
 
 #ifdef SMC_DYNAMIC_BUS_CONFIG
