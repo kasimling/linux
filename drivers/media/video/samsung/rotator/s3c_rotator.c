@@ -48,8 +48,8 @@
 #include <asm/irq.h>
 #include <linux/semaphore.h>	
 #include <asm/div64.h>
+#include <plat/regs-rotator.h>
 
-#include "regs-rotator.h"
 #include "s3c_rotator_common.h"
 
 static int s3c_rotator_irq_num = NO_IRQ;
