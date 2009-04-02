@@ -1796,3 +1796,9 @@ v2.6.28.6-samsung-r0d10: Kyoungil Kim
 	Modified Files:
 		M	drivers/net/smc911x.c
 
+v2.6.28.6-samsung-r0d11: Jae-Cheol Lee
+	- Support SMDK6440 EVT0 board
+
+	Modified Files:
+		M	arch/arm/mach-s5p6440/mach-smdk6440.c
+		M	arch/arm/plat-s5p64xx/include/plat/pll.h
