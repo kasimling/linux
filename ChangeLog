@@ -1802,3 +1802,6 @@ v2.6.28.6-samsung-r0d11: Jae-Cheol Lee
 	Modified Files:
 		M	arch/arm/mach-s5p6440/mach-smdk6440.c
 		M	arch/arm/plat-s5p64xx/include/plat/pll.h
+
+v2.6.28.6-samsung-r0d12: Kyoungil Kim
+	- Prevent for SMDKC100 MM IP
