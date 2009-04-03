@@ -323,7 +323,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 {
 	int direction;
 
-#if 0
+#ifndef CONFIG_MMC_SDHCI_S3C
 	u8 *desc;
 #else
 	struct sdhci_adma2_desc *descriptor;
@@ -331,12 +331,17 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 	u8 *align;
 	dma_addr_t addr;
 	dma_addr_t align_addr;
-	uint len, offset;
+	uint len;
+#ifndef CONFIG_MMC_SDHCI_S3C
+	int offset;
+#endif
 
 	struct scatterlist *sg;
 	int i;
+#ifndef CONFIG_MMC_SDHCI_S3C
 	char *buffer;
 	unsigned long flags;
+#endif
 
 	/*
 	 * The spec does not specify endianness of descriptor table.
@@ -364,7 +369,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 	if (host->sg_count == 0)
 		goto unmap_align;
 
-#if 0
+#ifndef CONFIG_MMC_SDHCI_S3C
 	desc = host->adma_desc;
 #else
 	descriptor = (struct sdhci_adma2_desc *)host->adma_desc;
@@ -377,7 +382,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 		addr = sg_dma_address(sg);
 		len = sg_dma_len(sg);
 
-#if 0
+#ifndef CONFIG_MMC_SDHCI_S3C
 		/*
 		 * The SDHCI specification states that ADMA
 		 * addresses must be 32-bit aligned. If they
@@ -443,7 +448,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 #endif
 	}
 
-#if 0
+#ifndef CONFIG_MMC_SDHCI_S3C
 	/*
 	 * Add a terminating entry.
 	 */
@@ -1451,6 +1456,18 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
 	intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
 
 	if (intmask & SDHCI_INT_CMD_MASK) {
+#ifdef CONFIG_MMC_SDHCI_S3C
+		/* read until all status bit is up. by scsuh */
+		int i;
+		for (i=0; i<0x1000000; i++) {
+			intmask = readl(host->ioaddr + SDHCI_INT_STATUS);
+			if (intmask & SDHCI_INT_RESPONSE)
+				break;
+		}
+		if (0x1000000 == i) {
+			printk("FAIL: waiting for status update.\n");
+		}
+#endif
 		writel(intmask & SDHCI_INT_CMD_MASK,
 			host->ioaddr + SDHCI_INT_STATUS);
 		sdhci_cmd_irq(host, intmask & SDHCI_INT_CMD_MASK);
