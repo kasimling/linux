@@ -618,6 +618,19 @@ void __init_or_cpufreq s3c6400_setup_clocks(void)
 	clk_p.rate = pclk;
 	clk_f.rate = fclk;
 
+	/* mod by scsuh */
+#if 1
+	{
+		u32 tmp;
+
+		tmp = readl(S3C_CLK_SRC);
+		writel(tmp | 0x00540000, S3C_CLK_SRC);
+		tmp = readl(S3C_CLK_DIV1);
+		writel(tmp | 0x00000555, S3C_CLK_DIV1);
+		printk("div1: %08x\n", readl(S3C_CLK_DIV1));
+	}
+#endif
+
 	for (ptr = 0; ptr < ARRAY_SIZE(init_parents); ptr++)
 		s3c6400_set_clksrc(init_parents[ptr]);
 }
@@ -658,6 +671,6 @@ void __init s3c6400_register_clocks(void)
 		}
 	}
 
-	clk_mpll.parent = &clk_mout_mpll.clk;
+//	clk_mpll.parent = &clk_mout_mpll.clk;
 	clk_epll.parent = &clk_mout_epll.clk;
 }
