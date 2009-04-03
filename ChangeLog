@@ -1805,3 +1805,10 @@ v2.6.28.6-samsung-r0d11: Jae-Cheol Lee
 
 v2.6.28.6-samsung-r0d12: Kyoungil Kim
 	- Prevent for SMDKC100 MM IP
+
+v2.6.28.6-samsung-r0d13: Jae-Cheol Lee
+	- Fixed PLL calculation bug in MASK value
+
+	Modified Files:
+		M 	arch/arm/plat-s3c64xx/include/plat/pll.h
+		M	arch/arm/plat-s5pc1xx/include/plat/pll.h
