@@ -91,7 +91,7 @@ static unsigned int sdhci_s3c_get_max_clk(struct sdhci_host *host)
 
 static unsigned int sdhci_s3c_get_timeout_clk(struct sdhci_host *host)
 {
-#if defined (CONFIG_CPU_S5PC100)        
+#if defined (CONFIG_CPU_S5PC100)
         return sdhci_s3c_get_max_clk(host) / 3000000;
 #else
         return sdhci_s3c_get_max_clk(host) / 1000000;
@@ -183,7 +183,7 @@ static void sdhci_s3c_change_clock(struct sdhci_host *host, unsigned int clock)
 
 		ourhost->cur_clk = best_src;
 		host->max_clk = clk_get_rate(clk);
-		host->timeout_clk = host->max_clk / 1000000;
+		host->timeout_clk = host->max_clk / 1000;
 
 		ctrl = readl(host->ioaddr + S3C_SDHCI_CONTROL2);
 		ctrl &= ~S3C_SDHCI_CTRL2_SELBASECLK_MASK;
@@ -304,15 +304,7 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
 
 	/* Setup quirks for the controller */
 
-#if defined (CONFIG_MMC_SDHCI_SCATTERGATHER)
-	host->quirks |= SDHCI_CAN_DO_ADMA2;
-#else
-	/* Currently with ADMA enabled we are getting some length
-	 * interrupts that are not being dealt with, do disable
-	 * ADMA until this is sorted out. */
-	host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-	host->quirks |= SDHCI_QUIRK_32BIT_ADMA_SIZE;
-#endif
+	host->flags = SDHCI_USE_DMA;
 
 	/* It seems we do not get an DATA transfer complete on non-busy
 	 * transfers, not sure if this is a problem with this specific
@@ -328,6 +320,8 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
 		goto err_add_host;
 	}
 
+	/* later we should add MMC_CAP_8_BIT_DATA in relevant h/w */
+	host->mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
 	return 0;
 
  err_add_host:
