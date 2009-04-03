@@ -132,10 +132,7 @@ static void __init smdk6440_map_io(void)
 	s3c_device_nand.name = "s5p6440-nand";
 
 	s5p64xx_init_io(smdk6440_iodesc, ARRAY_SIZE(smdk6440_iodesc));
-	//s3c24xx_init_clocks(12000000);
-	//s3c24xx_init_clocks(33000000);
-	//s3c24xx_init_clocks(20000000);
-	s3c24xx_init_clocks(16000000);
+	s3c24xx_init_clocks(12000000);
 	s3c24xx_init_uarts(smdk6440_uartcfgs, ARRAY_SIZE(smdk6440_uartcfgs));
 }
 

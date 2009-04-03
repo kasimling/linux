@@ -690,7 +690,6 @@ static int s3c_fimc_get_scaler_factor(u32 src, u32 tar, u32 *ratio, u32 *shift)
 int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 {
 	struct s3c_fimc_scaler *sc = &ctrl->scaler;
-	struct s3c_platform_fimc *pdata = to_fimc_plat(ctrl->dev);
 	struct s3c_fimc_window_offset *w_ofs = &ctrl->in_cam->offset;
 	struct s3c_fimc_dma_offset *d_ofs = &ctrl->in_frame.offset;
 	int ret, tx, ty, sx, sy;
@@ -740,7 +739,7 @@ int s3c_fimc_set_scaler_info(struct s3c_fimc_control *ctrl)
 	s3c_fimc_get_scaler_factor(sx, tx, &sc->pre_hratio, &sc->hfactor);
 	s3c_fimc_get_scaler_factor(sy, ty, &sc->pre_vratio, &sc->vfactor);
 
-	if (IS_PREVIEW(ctrl) && (sx / sc->pre_hratio > pdata->line_length))
+	if (IS_PREVIEW(ctrl) && (sx / sc->pre_hratio > sc->line_length))
 		info("line buffer size overflow\n");
 
 	sc->pre_dst_width = sx / sc->pre_hratio;

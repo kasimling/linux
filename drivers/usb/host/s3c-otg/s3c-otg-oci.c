@@ -622,25 +622,7 @@ int oci_channel_dealloc(u8 ch_num)
 
 int oci_sys_init(void)
 {
-	volatile S3C6400_SYSCON_REG	*syscon_reg;
-	volatile OTG_PHY_REG		*otgphy_reg;
-
-	//otg_dbg(OTG_DBG_OCI, "oci_sys_init \n");	
-
-	otgphy_reg = S3C_VA_OTGSFR;
-	syscon_reg = S3C_VA_SYS;
-
-	syscon_reg->HCLK_GATE |= (0x1<<20);
-	syscon_reg->OTHERS |= (0x1<<16);
-	otgphy_reg->OPHYPWR = 0x0;
-	otgphy_reg->OPHYCLK = 0x20;
-
- 	otgphy_reg->ORSTCON = 0x1;
- 	mdelay(80);
-
- 	otgphy_reg->ORSTCON = 0x0;
- 	mdelay(80);
-
+	otg_phy_init();
 	return USB_ERR_SUCCESS;
 }
 

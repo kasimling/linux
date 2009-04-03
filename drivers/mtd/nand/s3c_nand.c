@@ -974,6 +974,7 @@ static void __exit s3c_nand_exit(void)
 	platform_driver_unregister(&s3c2450_nand_driver);
 	platform_driver_unregister(&s3c6400_nand_driver);
 	platform_driver_unregister(&s3c6410_nand_driver);
+	platform_driver_unregister(&s5pc100_nand_driver);
 }
 
 module_init(s3c_nand_init);

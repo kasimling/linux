@@ -1763,3 +1763,52 @@ v2.6.28.6-samsung-r0d7: Jae-Cheol Lee
 	Modified files:
 	 	M       arch/arm/plat-s5pc1xx/s5pc1xx-time.c
 
+v2.6.28.6-samsung-r0d8: Byungjae Lee
+	- Implemented OTG Host role for SMDKC100
+	  OTG Host role support only MassStorage and HID(Keyboard, Mouse)
+
+	Modified Files:
+		M	arch/arm/configs/smdkc100mtd_defconfig
+		M	arch/arm/configs/smdkc100onenand_defconfig
+		M	arch/arm/mach-s3c6410/mach-smdk6410.c
+		M	arch/arm/mach-s5pc100/include/mach/map.h
+		M	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M	arch/arm/plat-s5pc1xx/devs.c
+		M	drivers/usb/host/Kconfig
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-debug.h
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-driver.c
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-driver.h
+		M	drivers/usb/host/s3c-otg/s3c-otg-hcdi-hcd.h
+		M	drivers/usb/host/s3c-otg/s3c-otg-oci.c
+		M	drivers/usb/host/s3c-otg/s3c-otg-oci.h
+
+v2.6.28.6-samsung-r0d9: Jonghun Han
+	- Support YUV422 Interleave output for FIMC
+
+	Modified Files:
+		M	drivers/media/video/samsung/fimc/s3c_fimc.h
+		M	drivers/media/video/samsung/fimc/s3c_fimc3x_regs.c
+		M	drivers/media/video/samsung/fimc/s3c_fimc_cfg.c
+
+v2.6.28.6-samsung-r0d10: Kyoungil Kim
+	- change the smc911 driver from full duplex to half duplex
+
+	Modified Files:
+		M	drivers/net/smc911x.c
+
+v2.6.28.6-samsung-r0d11: Jae-Cheol Lee
+	- Support SMDK6440 EVT0 board
+
+	Modified Files:
+		M	arch/arm/mach-s5p6440/mach-smdk6440.c
+		M	arch/arm/plat-s5p64xx/include/plat/pll.h
+
+v2.6.28.6-samsung-r0d12: Kyoungil Kim
+	- Prevent for SMDKC100 MM IP
+
+v2.6.28.6-samsung-r0d13: Jae-Cheol Lee
+	- Fixed PLL calculation bug in MASK value
+
+	Modified Files:
+		M 	arch/arm/plat-s3c64xx/include/plat/pll.h
+		M	arch/arm/plat-s5pc1xx/include/plat/pll.h

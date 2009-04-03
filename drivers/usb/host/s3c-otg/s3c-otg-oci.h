@@ -46,6 +46,8 @@ extern "C"
 
 #include <mach/map.h>	//virtual address for smdk
 
+extern void otg_phy_init(void);
+#include <plat/regs-clock.h>
 
 ///OCI interace
 int	oci_init(void);

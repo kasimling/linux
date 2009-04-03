@@ -59,8 +59,7 @@
 #include <mach/gpio.h>
 #include <plat/gpio-cfg.h>
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) || \
-	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+#ifdef CONFIG_USB_SUPPORT
 #include <plat/regs-otg.h>
 #include <linux/usb/ch9.h>
 
@@ -230,9 +229,7 @@ MACHINE_START(SMDK6410, "SMDK6410")
 	.timer		= &s3c64xx_timer,
 MACHINE_END
 
-
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) || \
-	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+#ifdef CONFIG_USB_SUPPORT
 /* Initializes OTG Phy. */
 void otg_phy_init(void) {
 
@@ -257,9 +254,7 @@ void otg_phy_off(void) {
 	writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
 }
 EXPORT_SYMBOL(otg_phy_off);
-#endif
 
-#if defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
 void usb_host_clk_en(void) {
 	struct clk *otg_clk;
 

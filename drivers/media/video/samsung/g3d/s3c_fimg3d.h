@@ -1,17 +1,15 @@
-/*
- * Copyright 2008 Samsung Electronics Co, Ltd. All Rights Reserved. 
+/* linux/drivers/video/samsung/g3d/s3c_fimg3d.h
  *
- * This software is the confidential and proprietary information
- * of Samsung Electronics ("Confidential Information"). 
- * you shall not disclose such Confidential Information and shall use
- * it only in accordance with the terms of the license agreement
- * you entered into with Samsung Electronics 
+ * Driver header file for Samsung 3D Accelerator(FIMG-3D)
  *
- * This file implements s3c-g3d driver.
+ * Jegeon Jung, Copyright (c) 2009 Samsung Electronics
+ * 	http://www.samsungsemi.com/
  *
- * @name G2D DRIVER MODULE Module (s3c_g3d.h)
- * @date 2009-03-13
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
  */
+
 #ifndef _S3C_G3D_DRIVER_H_
 #define _S3C_G3D_DRIVER_H_
 

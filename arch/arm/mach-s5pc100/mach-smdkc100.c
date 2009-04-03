@@ -56,8 +56,8 @@
 #include <plat/regs-gpio.h>
 #include <plat/gpio-bank-k0.h>
 #include <plat/regs-clock.h>
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) || \
-	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+
+#ifdef CONFIG_USB_SUPPORT
 #include <plat/regs-otg.h>
 #include <plat/pll.h>
 #include <linux/usb/ch9.h>
@@ -147,6 +147,7 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_i2c1,
         &s3c_device_usb,
 	&s3c_device_usbgadget,
+	&s3c_device_usb_otghcd,
         &s3c_device_hsmmc0,
         &s3c_device_hsmmc1,
         &s3c_device_spi0,
@@ -268,9 +269,7 @@ MACHINE_START(SMDKC100, "SMDKC100")
 MACHINE_END
 
 
-#if	defined(CONFIG_USB_GADGET_S3C_OTGD) || \
-	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
-
+#ifdef CONFIG_USB_SUPPORT
 /* Initializes OTG Phy. */
 void otg_phy_init(void) {
         writel(readl(S5P_OTHERS)|S5P_OTHERS_USB_SIG_MASK, S5P_OTHERS);
@@ -294,9 +293,7 @@ void otg_phy_off(void) {
         writel(readl(S5P_OTHERS)&~S5P_OTHERS_USB_SIG_MASK, S5P_OTHERS);
 }
 EXPORT_SYMBOL(otg_phy_off);
-#endif
 
-#if defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
 void usb_host_clk_en(void) {
 	struct clk *otg_clk;
 

@@ -1,6 +1,7 @@
-/* linux/drivers/video/samsung/s3c_fimg2d2x.c
+/* linux/drivers/media/video/samsung/g2d/s3c_fimg2d2x.c
  *
  * Driver file for Samsung 2D Accelerator(FIMG-2D)
+ *
  * Jonghun Han, Copyright (c) 2009 Samsung Electronics
  * 	http://www.samsungsemi.com/
  *
@@ -605,3 +606,6 @@ void s3c_g2d_exit(void)
 module_init(s3c_g2d_init);
 module_exit(s3c_g2d_exit);
 
+MODULE_AUTHOR("Jonghun Han <jonghun.han@samsung.com>");
+MODULE_DESCRIPTION("S3C FIMG-2D Device Driver");
+MODULE_LICENSE("GPL");

@@ -1,3 +1,14 @@
+/* linux/drivers/media/video/samsung/cmm/s3c-cmm.c
+ *
+ * Driver file for Samsung CMM(Codec Memory Management)
+ *
+ * Jiun Yu, Copyright (c) 2009 Samsung Electronics
+ * 	http://www.samsungsemi.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+*/
 
 #include <linux/version.h>
 #include <linux/module.h>
@@ -799,5 +810,6 @@ static void PrintList()
 module_init(s3c_cmm_init);
 module_exit(s3c_cmm_exit);
 
-MODULE_AUTHOR("Jiun, Yu");
+MODULE_AUTHOR("jiun.yu@samsung.com");
+MODULE_DESCRIPTION("S3C CMM Device Driver");
 MODULE_LICENSE("GPL");

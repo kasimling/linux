@@ -1,16 +1,13 @@
-
-/*
- * linux/drivers/tvenc/s3c-tvscaler.c
+/* linux/drivers/video/samsung/tv/s3c-tvscaler.c
  *
- * Revision 1.0  
+ * Driver file for Samsung TV Controller
  *
+ * Peter Oh, Copyright (c) 2009 Samsung Electronics
+ * 	http://www.samsungsemi.com/
  *
- * This file is subject to the terms and conditions of the GNU General Public
- * License.  See the file COPYING in the main directory of this archive for
- * more details.
- *
- *	    S3C TV Scaler driver 
- *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
  */
 
 #include <linux/init.h>
@@ -791,5 +788,4 @@ module_exit(s3c_tvscaler_exit);
 MODULE_AUTHOR("Peter, Oh");
 MODULE_DESCRIPTION("S3C TV Controller Device Driver");
 MODULE_LICENSE("GPL");
-
 
