@@ -60,13 +60,6 @@ config MMC_SDHCI_S3C
 
 	  If unsure, say N.
 
-config MMC_SDHCI_SCATTERGATHER
-        bool "Support Scatter and Gather on Samsung S3C SoC"
-        depends on MMC_SDHCI_S3C && PLAT_S5PC1XX
-        help
-          Say Y here. This option can support scatter and gather
-          using DMA boundary in HS-MMC DMA engine.
-
 config MMC_RICOH_MMC
 	tristate "Ricoh MMC Controller Disabler  (EXPERIMENTAL)"
 	depends on MMC_SDHCI_PCI
