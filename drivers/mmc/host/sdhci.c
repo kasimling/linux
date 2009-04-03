@@ -129,11 +129,8 @@ static void sdhci_init(struct sdhci_host *host)
 		SDHCI_INT_END_BIT | SDHCI_INT_CRC | SDHCI_INT_TIMEOUT |
 		SDHCI_INT_CARD_REMOVE | SDHCI_INT_CARD_INSERT |
 		SDHCI_INT_DATA_AVAIL | SDHCI_INT_SPACE_AVAIL |
-		SDHCI_INT_DMA_END | SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE; 
-
-#if !defined(CONFIG_MMC_SDHCI_SCATTERGATHER)
-	intmask = intmask | SDHCI_INT_ADMA_ERROR;
-#endif
+		SDHCI_INT_DMA_END | SDHCI_INT_DATA_END | SDHCI_INT_RESPONSE |
+		SDHCI_INT_ADMA_ERROR;
 
 	writel(intmask, host->ioaddr + SDHCI_INT_ENABLE);
 	writel(intmask, host->ioaddr + SDHCI_SIGNAL_ENABLE);
@@ -326,11 +323,15 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 {
 	int direction;
 
+#if 0
 	u8 *desc;
+#else
+	struct sdhci_adma2_desc *descriptor;
+#endif
 	u8 *align;
 	dma_addr_t addr;
 	dma_addr_t align_addr;
-	int len, offset;
+	uint len, offset;
 
 	struct scatterlist *sg;
 	int i;
@@ -363,7 +364,11 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 	if (host->sg_count == 0)
 		goto unmap_align;
 
+#if 0
 	desc = host->adma_desc;
+#else
+	descriptor = (struct sdhci_adma2_desc *)host->adma_desc;
+#endif
 	align = host->align_buffer;
 
 	align_addr = host->align_addr;
@@ -372,6 +377,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 		addr = sg_dma_address(sg);
 		len = sg_dma_len(sg);
 
+#if 0
 		/*
 		 * The SDHCI specification states that ADMA
 		 * addresses must be 32-bit aligned. If they
@@ -430,8 +436,14 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 		 * somewhere. :/
 		 */
 		WARN_ON((desc - host->adma_desc) > (128 * 2 + 1) * 4);
+#else
+		descriptor->dma_addr = addr;
+		descriptor->len_attr = (len << 16) | 0x21;
+		descriptor++;
+#endif
 	}
 
+#if 0
 	/*
 	 * Add a terminating entry.
 	 */
@@ -445,6 +457,10 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 
 	desc[1] = 0x00;
 	desc[0] = 0x03; /* nop, end, valid */
+#else
+	descriptor--;
+	descriptor->len_attr |= 0x2;
+#endif
 
 	/*
 	 * Resync align buffer as we might have changed it.
@@ -706,6 +722,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_data *data)
 		writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
 	}
 
+	/* when using PIO mode sg_miter should be initialized. */
 	if (!(host->flags & SDHCI_REQ_USE_DMA)) {
 		sg_miter_start(&host->sg_miter,
 			data->sg, data->sg_len, SG_MITER_ATOMIC);
@@ -1084,7 +1101,7 @@ static void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 	else
 		ctrl &= ~SDHCI_CTRL_4BITBUS;
 
-	if (ios->timing == MMC_TIMING_SD_HS)
+	if (ios->timing != MMC_TIMING_LEGACY)
 		ctrl |= SDHCI_CTRL_HISPD;
 	else
 		ctrl &= ~SDHCI_CTRL_HISPD;

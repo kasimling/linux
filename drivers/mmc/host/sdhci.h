@@ -267,6 +267,11 @@ struct sdhci_host {
 	unsigned long		private[0] ____cacheline_aligned;
 };
 
+/* For ADMA2 */
+struct sdhci_adma2_desc {
+	u32	len_attr;	/* length + attribute	*/
+	u32	dma_addr;	/* dma address	        */
+};
 
 struct sdhci_ops {
 	int		(*enable_dma)(struct sdhci_host *host);
