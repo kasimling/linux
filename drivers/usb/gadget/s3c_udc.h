@@ -56,11 +56,12 @@
 #define EP0_FIFO_SIZE		8
 #define EP_FIFO_SIZE		64
 #define S3C_MAX_ENDPOINTS	5
-#elif defined(CONFIG_USB_GADGET_S3C_HS)
+#elif defined(CONFIG_USB_GADGET_S3C_HS) || defined(CONFIG_PLAT_S5P64XX)
 #define EP0_FIFO_SIZE		64
 #define EP_FIFO_SIZE		512
 #define EP_FIFO_SIZE2		1024
 #define S3C_MAX_ENDPOINTS	9
+#define DED_TX_FIFO		1	/* Dedicated NPTx fifo for s5p6440 */
 #else
 #define EP0_FIFO_SIZE		64
 #define EP_FIFO_SIZE		512

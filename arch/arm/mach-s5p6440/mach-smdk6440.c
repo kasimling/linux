@@ -55,17 +55,13 @@
 #include <mach/gpio.h>
 #include <plat/gpio-cfg.h>
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) || defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+#ifdef CONFIG_USB_SUPPORT
 #include <plat/regs-otg.h>
+#include <linux/usb/ch9.h>
 
 /* S3C_USB_CLKSRC 0: EPLL 1: CLK_48M */
 #define S3C_USB_CLKSRC	1
-
-#ifdef USB_HOST_PORT2_EN
-#define OTGH_PHY_CLK_VALUE      (0x60)  /* Serial Interface, otg_phy input clk 48Mhz Oscillator */
-#else
-#define OTGH_PHY_CLK_VALUE      (0x20)  /* UTMI Interface, otg_phy input clk 48Mhz Oscillator */
-#endif
+#define OTGH_PHY_CLK_VALUE      (0x02)  /* UTMI Interface, Cristal, 12Mhz clk for PLL */
 #endif
 
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
@@ -105,6 +101,7 @@ static struct platform_device *smdk6440_devices[] __initdata = {
 	&s3c_device_lcd,
 	&s3c_device_nand,
 	&s3c_device_usbgadget,
+	&s3c_device_usb_otghcd,
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
@@ -183,12 +180,11 @@ MACHINE_START(SMDK6440, "SMDK6440")
 	.timer		= &s3c64xx_timer,
 MACHINE_END
 
-#if defined(CONFIG_USB_GADGET_S3C_OTGD) || \
-	defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
+#ifdef CONFIG_USB_SUPPORT
 /* Initializes OTG Phy. */
 void otg_phy_init(void) {
 
-	writel(readl(S3C_OTHERS)|S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
+	writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
 	writel(0x0, S3C_USBOTG_PHYPWR);		/* Power up */
         writel(OTGH_PHY_CLK_VALUE, S3C_USBOTG_PHYCLK);
 	writel(0x1, S3C_USBOTG_RSTCON);
@@ -199,48 +195,15 @@ void otg_phy_init(void) {
 }
 EXPORT_SYMBOL(otg_phy_init);
 
+/* USB Control request data struct must be located here for DMA transfer */
+struct usb_ctrlrequest usb_ctrl __attribute__((aligned(8)));
+EXPORT_SYMBOL(usb_ctrl);
+
 /* OTG PHY Power Off */
 void otg_phy_off(void) {
 	writel(readl(S3C_USBOTG_PHYPWR)|(0x1F<<1), S3C_USBOTG_PHYPWR);
 	writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
 }
 EXPORT_SYMBOL(otg_phy_off);
-#endif
 
-#if defined(CONFIG_USB_OHCI_HCD) || defined(CONFIG_USB_OHCI_HCD_MODULE)
-void usb_host_clk_en(void) {
-	struct clk *otg_clk;
-
-        switch (S3C_USB_CLKSRC) {
-	case 0: /* epll clk */
-		writel((readl(S3C_CLK_SRC)& ~S3C6400_CLKSRC_UHOST_MASK)
-			|S3C_CLKSRC_EPLL_CLKSEL|S3C_CLKSRC_UHOST_EPLL,
-			S3C_CLK_SRC);
-
-		/* USB host colock divider ratio is 2 */
-		writel((readl(S3C_CLK_DIV1)& ~S3C6400_CLKDIV1_UHOST_MASK)
-			|(1<<20), S3C_CLK_DIV1);
-		break;
-	case 1: /* oscillator 48M clk */
-		otg_clk = clk_get(NULL, "otg");
-		clk_enable(otg_clk);
-		writel(readl(S3C_CLK_SRC)& ~S3C6400_CLKSRC_UHOST_MASK, S3C_CLK_SRC);
-		otg_phy_init();
-
-		/* USB host colock divider ratio is 1 */
-		writel(readl(S3C_CLK_DIV1)& ~S3C6400_CLKDIV1_UHOST_MASK, S3C_CLK_DIV1);
-		break;
-	default:
-		printk(KERN_INFO "Unknown USB Host Clock Source\n");
-		BUG();
-		break;
-	}
-
-	writel(readl(S3C_HCLK_GATE)|S3C_CLKCON_HCLK_UHOST|S3C_CLKCON_HCLK_SECUR,
-		S3C_HCLK_GATE);
-	writel(readl(S3C_SCLK_GATE)|S3C_CLKCON_SCLK_UHOST, S3C_SCLK_GATE);
-
-}
-
-EXPORT_SYMBOL(usb_host_clk_en);
 #endif

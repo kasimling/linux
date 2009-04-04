@@ -115,7 +115,7 @@ static const char driver_name[] = "s3c-udc";
 static const char driver_desc[] = DRIVER_DESC;
 static const char ep0name[] = "ep0-control";
 
-// Max packet size
+/* Max packet size*/
 static u32 ep0_fifo_size = 64;
 static u32 ep_fifo_size =  512;
 static u32 ep_fifo_size2 = 1024;
@@ -451,64 +451,72 @@ static void stop_activity(struct s3c_udc *dev,
 
 static void reconfig_usbd(void)
 {
-	// 2. Soft-reset OTG Core and then unreset again.
+	/* 2. Soft-reset OTG Core and then unreset again. */
+	int i;
 	u32 uTemp = writel(CORE_SOFT_RESET, S3C_UDC_OTG_GRSTCTL);
 
-	writel(	0<<15		// PHY Low Power Clock sel
-		|1<<14		// Non-Periodic TxFIFO Rewind Enable
-		|0x5<<10	// Turnaround time
-		|0<<9|0<<8	// [0:HNP disable, 1:HNP enable][ 0:SRP disable, 1:SRP enable] H1= 1,1
-		|0<<7		// Ulpi DDR sel
-		|0<<6		// 0: high speed utmi+, 1: full speed serial
-		|0<<4		// 0: utmi+, 1:ulpi
-		|1<<3		// phy i/f  0:8bit, 1:16bit
-		|0x7<<0,	// HS/FS Timeout*
+	writel(	0<<15		/* PHY Low Power Clock sel*/
+		|1<<14		/* Non-Periodic TxFIFO Rewind Enable*/
+		|0x5<<10	/* Turnaround time*/
+		|0<<9|0<<8	/* [0:HNP disable, 1:HNP enable][ 0:SRP disable, 1:SRP enable] H1= 1,1*/
+		|0<<7		/* Ulpi DDR sel*/
+		|0<<6		/* 0: high speed utmi+, 1: full speed serial*/
+		|0<<4		/* 0: utmi+, 1:ulpi*/
+		|1<<3		/* phy i/f  0:8bit, 1:16bit*/
+		|0x7<<0,	/* HS/FS Timeout**/
 		S3C_UDC_OTG_GUSBCFG);
 
-	// 3. Put the OTG device core in the disconnected state.
+	/* 3. Put the OTG device core in the disconnected state.*/
 	uTemp = readl(S3C_UDC_OTG_DCTL);
 	uTemp |= SOFT_DISCONNECT;
 	writel(uTemp, S3C_UDC_OTG_DCTL);
 
 	udelay(20);
 
-	// 4. Make the OTG device core exit from the disconnected state.
+	/* 4. Make the OTG device core exit from the disconnected state.*/
 	uTemp = readl(S3C_UDC_OTG_DCTL);
 	uTemp = uTemp & ~SOFT_DISCONNECT;
 	writel(uTemp, S3C_UDC_OTG_DCTL);
 
-	// 5. Configure OTG Core to initial settings of device mode.
-	writel(1<<18|0x0<<0, S3C_UDC_OTG_DCFG);		// [][1: full speed(30Mhz) 0:high speed]
+	/* 5. Configure OTG Core to initial settings of device mode.*/
+	writel(1<<18|0x0<<0, S3C_UDC_OTG_DCFG);		/* [][1: full speed(30Mhz) 0:high speed]*/
 
 	mdelay(1);
 
-	// 6. Unmask the core interrupts
+	/* 6. Unmask the core interrupts*/
 	writel(GINTMSK_INIT, S3C_UDC_OTG_GINTMSK);
 
-	// 7. Set NAK bit of EP0, EP1, EP2
+	/* 7. Set NAK bit of EP0, EP1, EP2*/
 	writel(DEPCTL_EPDIS|DEPCTL_SNAK|(0<<0), S3C_UDC_OTG_DOEPCTL(EP0_CON));
 	writel(DEPCTL_EPDIS|DEPCTL_SNAK|(0<<0), S3C_UDC_OTG_DIEPCTL(EP0_CON));
 
-	// 8. Unmask EPO interrupts
+	/* 8. Unmask EPO interrupts*/
 	writel( ((1<<EP0_CON)<<DAINT_OUT_BIT)|(1<<EP0_CON), S3C_UDC_OTG_DAINTMSK);
 
-	// 9. Unmask device OUT EP common interrupts
+	/* 9. Unmask device OUT EP common interrupts*/
 	writel(DOEPMSK_INIT, S3C_UDC_OTG_DOEPMSK);
 
-	// 10. Unmask device IN EP common interrupts
+	/* 10. Unmask device IN EP common interrupts*/
 	writel(DIEPMSK_INIT, S3C_UDC_OTG_DIEPMSK);
 
-	// 11. Set Rx FIFO Size
+	/* 11. Set Rx FIFO Size*/
 	writel(RX_FIFO_SIZE, S3C_UDC_OTG_GRXFSIZ);
 
-	// 12. Set Non Periodic Tx FIFO Size
+	/* 12. Set Non Periodic Tx FIFO Size*/
 	writel(NPTX_FIFO_SIZE<<16| NPTX_FIFO_START_ADDR<<0, S3C_UDC_OTG_GNPTXFSIZ);
 
-	// 13. Clear NAK bit of EP0, EP1, EP2
-	// For Slave mode
+#if DED_TX_FIFO
+	for (i = 1; i < S3C_MAX_ENDPOINTS; i++)
+		writel(NPTX_FIFO_SIZE << 16 |
+			(NPTX_FIFO_START_ADDR + NPTX_FIFO_SIZE + PTX_FIFO_SIZE*(i-1)) << 0,
+			S3C_UDC_OTG_DIEPTXF(i));
+#endif
+
+	/* 13. Clear NAK bit of EP0, EP1, EP2*/
+	/* For Slave mode*/
 	writel(DEPCTL_EPDIS|DEPCTL_CNAK|(0<<0), S3C_UDC_OTG_DOEPCTL(EP0_CON)); /* EP0: Control OUT */
 
-	// 14. Initialize OTG Link Core.
+	/* 14. Initialize OTG Link Core.*/
 	writel(GAHBCFG_INIT, S3C_UDC_OTG_GAHBCFG);
 
 }
@@ -541,19 +549,19 @@ static void set_max_pktsize(struct s3c_udc *dev, enum usb_device_speed speed)
 
 
 	if (speed == USB_SPEED_HIGH) {
-		// EP0 - Control IN (64 bytes)
+		/* EP0 - Control IN (64 bytes)*/
 		ep_ctrl = readl(S3C_UDC_OTG_DIEPCTL(EP0_CON));
 		writel(ep_ctrl|(0<<0), S3C_UDC_OTG_DIEPCTL(EP0_CON));
 
-		// EP0 - Control OUT (64 bytes)
+		/* EP0 - Control OUT (64 bytes)*/
 		ep_ctrl = readl(S3C_UDC_OTG_DOEPCTL(EP0_CON));
 		writel(ep_ctrl|(0<<0), S3C_UDC_OTG_DOEPCTL(EP0_CON));
 	} else {
-		// EP0 - Control IN (8 bytes)
+		/* EP0 - Control IN (8 bytes)*/
 		ep_ctrl = readl(S3C_UDC_OTG_DIEPCTL(EP0_CON));
 		writel(ep_ctrl|(3<<0), S3C_UDC_OTG_DIEPCTL(EP0_CON));
 
-		// EP0 - Control OUT (8 bytes)
+		/* EP0 - Control OUT (8 bytes)*/
 		ep_ctrl = readl(S3C_UDC_OTG_DOEPCTL(EP0_CON));
 		writel(ep_ctrl|(3<<0), S3C_UDC_OTG_DOEPCTL(EP0_CON));
 	}
@@ -837,7 +845,7 @@ static struct s3c_udc memory = {
 		  .fifo = (u32) S3C_UDC_OTG_EP2_FIFO,
 		  },
 
-	.ep[3] = {				// Though NOT USED XXX
+	.ep[3] = {				/* Though NOT USED XXX*/
 		  .ep = {
 			 .name = "ep3-int",
 			 .ops = &s3c_ep_ops,
@@ -851,7 +859,7 @@ static struct s3c_udc memory = {
 		  .ep_type = ep_interrupt,
 		  .fifo = (u32) S3C_UDC_OTG_EP3_FIFO,
 		  },
-	.ep[4] = {				// Though NOT USED XXX
+	.ep[4] = {				/* Though NOT USED XXX*/
 		  .ep = {
 			 .name = "ep4-int",
 			 .ops = &s3c_ep_ops,
@@ -865,7 +873,7 @@ static struct s3c_udc memory = {
 		  .ep_type = ep_interrupt,
 		  .fifo = (u32) S3C_UDC_OTG_EP4_FIFO,
 		  },
-	.ep[5] = {				// Though NOT USED XXX
+	.ep[5] = {				/* Though NOT USED XXX*/
 		  .ep = {
 			 .name = "ep5-int",
 			 .ops = &s3c_ep_ops,
@@ -879,7 +887,7 @@ static struct s3c_udc memory = {
 		  .ep_type = ep_interrupt,
 		  .fifo = (u32) S3C_UDC_OTG_EP5_FIFO,
 		  },
-	.ep[6] = {				// Though NOT USED XXX
+	.ep[6] = {				/* Though NOT USED XXX*/
 		  .ep = {
 			 .name = "ep6-int",
 			 .ops = &s3c_ep_ops,
@@ -893,7 +901,7 @@ static struct s3c_udc memory = {
 		  .ep_type = ep_interrupt,
 		  .fifo = (u32) S3C_UDC_OTG_EP6_FIFO,
 		  },
-	.ep[7] = {				// Though NOT USED XXX
+	.ep[7] = {				/* Though NOT USED XXX*/
 		  .ep = {
 			 .name = "ep7-int",
 			 .ops = &s3c_ep_ops,
@@ -907,7 +915,7 @@ static struct s3c_udc memory = {
 		  .ep_type = ep_interrupt,
 		  .fifo = (u32) S3C_UDC_OTG_EP7_FIFO,
 		  },
-	.ep[8] = {				// Though NOT USED XXX
+	.ep[8] = {				/* Though NOT USED XXX*/
 		  .ep = {
 			 .name = "ep8-int",
 			 .ops = &s3c_ep_ops,
@@ -941,7 +949,7 @@ static int s3c_udc_probe(struct platform_device *pdev)
 	device_initialize(&dev->gadget.dev);
 	dev->gadget.dev.parent = &pdev->dev;
 
-	dev->gadget.is_dualspeed = 1;	// Hack only
+	dev->gadget.is_dualspeed = 1;	/* Hack only*/
 	dev->gadget.is_otg = 0;
 	dev->gadget.is_a_peripheral = 0;
 	dev->gadget.b_hnp_enable = 0;
