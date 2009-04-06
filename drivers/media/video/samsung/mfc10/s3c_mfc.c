@@ -82,11 +82,9 @@ static struct mutex	*s3c_mfc_mutex = NULL;
 unsigned int		s3c_mfc_intr_type = 0;
 
 
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,21)
 #define S3C_MFC_SAVE_START_ADDR 0x100
 #define S3C_MFC_SAVE_END_ADDR	0x200
 static unsigned int s3c_mfc_save[S3C_MFC_SAVE_END_ADDR - S3C_MFC_SAVE_START_ADDR];
-#endif
 
 extern int s3c_mfc_get_config_params(s3c_mfc_instance_context_t  *pMfcInst, s3c_mfc_args_t   *args);
 extern int s3c_mfc_set_config_params(s3c_mfc_instance_context_t  *pMfcInst, s3c_mfc_args_t   *args);
@@ -748,7 +746,6 @@ static int s3c_mfc_remove(struct platform_device *dev)
 static int s3c_mfc_suspend(struct platform_device *dev, pm_message_t state)
 {
 
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,21)
 	int	inst_no;
 	int	is_mfc_on = 0;
 	int	i, index = 0;
@@ -799,7 +796,6 @@ static int s3c_mfc_suspend(struct platform_device *dev, pm_message_t state)
 
 	mutex_unlock(s3c_mfc_mutex);
 
-#endif
 
 	return 0;
 }
@@ -807,7 +803,6 @@ static int s3c_mfc_suspend(struct platform_device *dev, pm_message_t state)
 static int s3c_mfc_resume(struct platform_device *pdev)
 {
 
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,21)
 
 	int 		i, index = 0;
 	int         	inst_no;
@@ -815,6 +810,7 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 	unsigned int	mfc_pwr, dwMfcBase;
 	unsigned int	domain_v_ready;
 	s3c_mfc_instance_context_t 		*mfcinst_ctx;
+	unsigned int mfc_clk;
 
 	mutex_lock(s3c_mfc_mutex);
 
@@ -833,6 +829,11 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 		printk(KERN_DEBUG "\n%s: domain v ready = 0x%X\n", __FUNCTION__, domain_v_ready);
 		msleep(1);
 	} while (!(domain_v_ready & (1 << 1)));
+
+	/* mfc clock set 133 Mhz */
+	mfc_clk = readl(S3C_CLK_DIV0);
+	mfc_clk |= (1 << 28);
+	__raw_writel(mfc_clk, S3C_CLK_DIV0);
 
 	/* 3. Firmware download */
 	s3c_mfc_firmware_into_code_down_reg();
@@ -870,7 +871,6 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 
 	mutex_unlock(s3c_mfc_mutex);
 
-#endif
 
 	return 0;
 }

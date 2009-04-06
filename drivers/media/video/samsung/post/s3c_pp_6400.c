@@ -79,6 +79,10 @@ typedef unsigned int UINT32;
 #define PP_INSTANCE_INUSE_DMA_ONESHOT   2
 #define PP_INSTANCE_INUSE_FIFO_FREERUN  3
 
+#define S3C_PP_SAVE_START_ADDR 0x0
+#define S3C_PP_SAVE_END_ADDR	0xA0
+static unsigned int s3c_pp_save[S3C_PP_SAVE_END_ADDR - S3C_PP_SAVE_START_ADDR];
+
 typedef struct {
     int             running_instance_no;
     int             last_running_instance_no;
@@ -1375,11 +1379,18 @@ static int s3c_pp_probe(struct platform_device *pdev)
 static int s3c_pp_suspend(struct platform_device *dev, pm_message_t state)
 {
 	int	post_state;
-
+	unsigned int	dw_pp_base;
+	int	i, index = 0;
 
 	post_state = post_get_processing_state();
 	while (post_state == POST_BUSY)
 		msleep(1);
+
+	dw_pp_base = s3c_pp_base;
+	for (i = S3C_PP_SAVE_START_ADDR; i <= S3C_PP_SAVE_END_ADDR; i += 4) {
+		s3c_pp_save[index] = readl(dw_pp_base + i);
+		index++;	
+	}
 
 	clk_disable(pp_clock);
 	return 0;
@@ -1387,6 +1398,15 @@ static int s3c_pp_suspend(struct platform_device *dev, pm_message_t state)
 
 static int s3c_pp_resume(struct platform_device *pdev)
 {
+	unsigned int	dw_pp_base;
+	int	i, index = 0;
+
+	dw_pp_base = s3c_pp_base;
+	for (i = S3C_PP_SAVE_START_ADDR; i <= S3C_PP_SAVE_END_ADDR; i += 4) {
+		writel(s3c_pp_save[index], dw_pp_base + i);
+		index++;	
+	}
+	
 	clk_enable(pp_clock);
 	return 0;
 }
