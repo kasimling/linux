@@ -93,6 +93,7 @@ static void s3c_spi_free(struct s3c_spi *spi)
 
 static int s3c_spi_hw_init(struct s3c_spi *spi)
 {
+	unsigned int s3c_spcon;
 
 #ifdef CONFIG_SPICLK_PCLK
 	clk_enable(spi->clk);
@@ -139,6 +140,12 @@ static int s3c_spi_hw_init(struct s3c_spi *spi)
 		s3c_gpio_setpull(S3C64XX_GPC(6), S3C_GPIO_PULL_UP);
 		s3c_gpio_setpull(S3C64XX_GPC(7), S3C_GPIO_PULL_UP);
 	}
+
+	/* SPI Drvier Strength */
+
+	s3c_spcon = readl(S3C64XX_SPC_BASE);
+	writel((s3c_spcon & ~(3<<28)) | (1<<28), S3C64XX_SPC_BASE);
+
 	return 0;
 }
 
@@ -271,8 +278,8 @@ static void s3c_spi_message_start(struct s3c_spi *spi)
 
 	u32 spi_chcfg = 0, spi_slavecfg, spi_inten= 0, spi_packet=0;
 
-	u8 prescaler = 0;		// 44.435 Mhz
-//	u8 prescaler = 1;		// 22.2175 Mhz
+//	u8 prescaler = 0;		// 44.435 Mhz
+	u8 prescaler = 1;		// 22.2175 Mhz
 //	u8 prescaler = 2;		// 14.81 Mhz
 //	u8 prescaler = 3;		// 11.10875 Mhz
 //	u8 prescaler = 4;		// 8.887Mhz
