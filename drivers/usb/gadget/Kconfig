@@ -112,7 +112,7 @@ config	USB_GADGET_SELECTED
 choice
 	prompt "USB Peripheral Controller"
 	depends on USB_GADGET
-	default USB_GADGET_S3C_OTGD if (PLAT_S3C64XX || PLAT_S5PC1XX)
+	default USB_GADGET_S3C_OTGD if (PLAT_S3C64XX || PLAT_S5P64XX || PLAT_S5PC1XX)
 	help
 	   A USB device uses a controller to talk to its host.
 	   Systems should have only one such upstream link.
@@ -294,13 +294,13 @@ config USB_S3C2410_DEBUG
 
 config USB_GADGET_S3C_OTGD
 	boolean "S3C HS USB OTG Device"
-	depends on (PLAT_S3C64XX || PLAT_S5PC1XX) && !(USB_S3C_OTG_HOST) 
+	depends on (PLAT_S3C64XX || PLAT_S5P64XX || PLAT_S5PC1XX) && !(USB_S3C_OTG_HOST) 
 	help
 	  Samsung's S3C64XX processors include high speed USB OTG2.0
 	  controller. It has 15 configurable endpoints, as well as
 	  endpoint zero (for control transfers).
 
-	  This driver has been tested on the S3C6410 processor.
+	  This driver has been tested on the S3C6410, S5P6440, S5PC100 processor.
 
           Say "y" to link the driver statically, or "m" to build a
           dynamically linked module called "s3c-udc-otg" and force all

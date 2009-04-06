@@ -71,7 +71,7 @@ void s3c6410_setup_sdhci0_cfg_card(struct platform_device *dev,
 		  S3C_SDHCI_CTRL2_DFCNT_NONE |
 		  S3C_SDHCI_CTRL2_ENCLKOUTHOLD);
 
-	if (ios->clock < 25 * 1000000)
+	if (ios->clock <= 25 * 1000000)
 		ctrl3 = (S3C_SDHCI_CTRL3_FCSEL3 |
 			 S3C_SDHCI_CTRL3_FCSEL2 |
 			 S3C_SDHCI_CTRL3_FCSEL1 |
@@ -79,7 +79,6 @@ void s3c6410_setup_sdhci0_cfg_card(struct platform_device *dev,
 	else
 		ctrl3 = (S3C_SDHCI_CTRL3_FCSEL1 | S3C_SDHCI_CTRL3_FCSEL0);
 
-	printk(KERN_INFO "%s: CTRL 2=%08x, 3=%08x\n", __func__, ctrl2, ctrl3);
 	writel(ctrl2, r + S3C_SDHCI_CONTROL2);
 	writel(ctrl3, r + S3C_SDHCI_CONTROL3);
 }

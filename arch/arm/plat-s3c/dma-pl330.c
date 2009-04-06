@@ -230,6 +230,7 @@ static inline int s3c_dma_loadbuffer(struct s3c2410_dma_chan *chan,
 	struct s3c_dma_buf *firstbuf;
 	int bwJump = 0;
 
+	memset(&dma_param, 0, sizeof(pl330_DMA_parameters_t));
 	pr_debug("s3c_chan_loadbuffer: loading buffer %p (0x%08lx,0x%06x)\n",
 		 buf, (unsigned long) buf->data, buf->size);
 

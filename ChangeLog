@@ -1812,3 +1812,16 @@ v2.6.28.6-samsung-r0d13: Jae-Cheol Lee
 	Modified Files:
 		M 	arch/arm/plat-s3c64xx/include/plat/pll.h
 		M	arch/arm/plat-s5pc1xx/include/plat/pll.h
+
+v2.6.28.6-samsung-r0d14: Byungjae Lee
+	- Implemented USB OTG Device role for SMDK6440
+
+	Modified Files:
+		M	arch/arm/configs/smdk6440ramdisk_defconfig
+		M	arch/arm/mach-s5p6440/mach-smdk6440.c
+		M	arch/arm/plat-s3c/include/plat/regs-otg.h
+		M	arch/arm/plat-s5p64xx/devs.c
+		M	arch/arm/plat-s5p64xx/include/plat/regs-clock.h
+		M	drivers/usb/gadget/Kconfig
+		M	drivers/usb/gadget/s3c_udc.h
+		M	drivers/usb/gadget/s3c_udc_otg.c
