@@ -1832,7 +1832,7 @@ v2.6.28.6-samsung-r0d15: Jongpill Lee
 	Modified Files
 		M	drivers/spi/hspi-s3c64xx.c
 
-rel-1-0-2: Jaeryul Oh
+v2.6.28.6-samsung-r1: Jaeryul Oh
         - Official Release (09.04.06)
 
 
