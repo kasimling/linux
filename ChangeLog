@@ -1825,3 +1825,10 @@ v2.6.28.6-samsung-r0d14: Byungjae Lee
 		M	drivers/usb/gadget/Kconfig
 		M	drivers/usb/gadget/s3c_udc.h
 		M	drivers/usb/gadget/s3c_udc_otg.c
+
+v2.6.28.6-samsung-r0d15: Jongpill Lee
+	- Modify code for SPi
+
+	Modified Files
+		M	drivers/spi/hspi-s3c64xx.c
+
