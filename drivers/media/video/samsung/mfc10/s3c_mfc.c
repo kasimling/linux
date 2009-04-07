@@ -683,13 +683,24 @@ static struct miscdevice s3c_mfc_miscdev = {
 	fops:		&s3c_mfc_fops
 };
 
+static BOOL s3c_mfc_clock_setup(void)
+{
+	unsigned int	mfc_clk;
+	
+	/* mfc clock set 133 Mhz */
+	mfc_clk = readl(S3C_CLK_DIV0);
+	mfc_clk |= (1 << 28);
+	__raw_writel(mfc_clk, S3C_CLK_DIV0);
+
+	return TRUE;
+
+}
 
 static int s3c_mfc_probe(struct platform_device *pdev)
 {
-	int size;
-	int ret;
-	struct resource *res;
-	unsigned int mfc_clk;
+	int	size;
+	int	ret;
+	struct resource *res;	
 
 	/* mfc clock enable  */
 	s3c_mfc_hclk = clk_get(NULL, "hclk_mfc");
@@ -754,10 +765,9 @@ static int s3c_mfc_probe(struct platform_device *pdev)
 
 	mutex_init(s3c_mfc_mutex);
 
-	/* mfc clock set 133 Mhz */
-	mfc_clk = readl(S3C_CLK_DIV0);
-	mfc_clk |= (1 << 28);
-	__raw_writel(mfc_clk, S3C_CLK_DIV0);
+	/* MFC clock set 133 Mhz */
+	if (s3c_mfc_clock_setup() == FALSE)
+		return -ENODEV;
 
 	/*
 	 * 2. MFC Memory Setup
@@ -884,11 +894,20 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 		msleep(1);
 	} while (!(domain_v_ready & (1 << 1)));
 
+<<<<<<< HEAD:drivers/media/video/samsung/mfc10/s3c_mfc.c
 	/* 3. Firmware download */
 	s3c_mfc_download_boot_firmware();
+=======
+	/* 3. MFC clock set 133 Mhz */
+	if (s3c_mfc_clock_setup() == FALSE)
+		return -ENODEV;
+
+	/* 4. Firmware download */
+	s3c_mfc_firmware_into_code_down_reg();
+>>>>>>> af05378c099b4f1d15fe42339f23c38a2bd17748:drivers/media/video/samsung/mfc10/s3c_mfc.c
 
 	/* 
-	 * 4. Power On state
+	 * 5. Power On state
 	 * Validate all the MFC Instances
 	 */
 	for (inst_no = 0; inst_no < S3C_MFC_NUM_INSTANCES_MAX; inst_no++) {

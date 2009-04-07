@@ -79,9 +79,7 @@ void jpg_mem_free(s3c6400_jpg_ctx *base)
 -----------------------------------------------------------------------------*/
 BOOL jpg_buff_mapping(s3c6400_jpg_ctx *base)
 {    	
-    //jpg_data_base_addr = (UINT32)s3c_get_media_memory(S3C_MDEV_JPEG);
-	printk(">> peter jpg_data_base_addr = 0x%08x <<\n", jpg_data_base_addr);
-	// JPG Data Buffer
+    	// JPG Data Buffer
 	base->v_pJPGData_Buff = (UINT8 *)phy_to_vir_addr(jpg_data_base_addr, JPG_TOTAL_BUF_SIZE);
 
 	if (base->v_pJPGData_Buff == NULL)

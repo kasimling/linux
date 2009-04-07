@@ -79,7 +79,7 @@ extern struct sys_timer s5pc1xx_timer;
 extern void s5pc1xx_reserve_bootmem(void);
 
 static struct s3c24xx_uart_clksrc smdkc100_serial_clocks[] = {
-#if defined(SERIAL_S5PC1XX_HSUART)
+#if defined(CONFIG_SERIAL_S5PC1XX_HSUART)
 /* HS-UART Clock using SCLK */
         [0] = {
                 .name           = "uclk1",

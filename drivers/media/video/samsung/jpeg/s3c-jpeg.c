@@ -320,6 +320,18 @@ minor:		254,
 			fops:		&jpeg_fops
 };
 
+static BOOL s3c_jpeg_clock_setup(void)
+{
+	unsigned int	jpg_clk;
+	
+	// JPEG clock was set as 66 MHz
+	jpg_clk = readl(S3C_CLK_DIV0);
+	jpg_clk = (jpg_clk & ~(0xF << 24)) | (3 << 24);
+	__raw_writel(jpg_clk, S3C_CLK_DIV0);
+
+	return TRUE;
+
+}
 
 static int s3c_jpeg_probe(struct platform_device *pdev)
 {
@@ -385,10 +397,9 @@ static int s3c_jpeg_probe(struct platform_device *pdev)
 	}
 
 	// JPEG clock was set as 66 MHz
-	jpg_clk = readl(S3C_CLK_DIV0);
-	jpg_clk = (jpg_clk & ~(0xF << 24)) | (3 << 24);
-	__raw_writel(jpg_clk, S3C_CLK_DIV0);
-
+	if (s3c_jpeg_clock_setup() == FALSE)
+		return -ENODEV;
+	
 	log_msg(LOG_TRACE, "s3c_jpeg_probe", "JPG_Init\n");
 
 	// Mutex initialization
