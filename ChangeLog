@@ -1847,3 +1847,7 @@ v2.6.28.6-samsung-r1d1: Jaeryul Oh
 		M       drivers/media/video/samsung/jpeg/s3c-jpeg.c
 		M       drivers/media/video/samsung/mfc10/s3c_mfc.c
 
+v2.6.28.6-samsung-r1d2: Jae-Cheol Lee
+	- Modified voltage regulator control code for SMDKC100
+	Modified Files :
+		M	arch/arm/plat-s5pc1xx/ltc3714.c

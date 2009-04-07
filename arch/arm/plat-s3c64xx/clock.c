@@ -247,6 +247,12 @@ static struct clk init_clocks_disable[] = {
 		.enable		= s3c64xx_pclk_ctrl,
 		.ctrlbit	= S3C_CLKCON_PCLK_IIS1,
 	}, {
+		.name		= "iis_v40",
+		.id		= 0,
+		.parent		= &clk_p,
+		.enable		= s3c64xx_pclk_ctrl,
+		.ctrlbit	= S3C6410_CLKCON_PCLK_IIS2,
+	}, {
 		.name		= "spi",
 		.id		= 0,
 		.parent		= &clk_p,

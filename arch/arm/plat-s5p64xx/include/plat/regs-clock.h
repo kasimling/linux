@@ -59,6 +59,16 @@
 #define S3C_INFORM2		S3C_CLKREG(0xA08)
 #define S3C_INFORM3		S3C_CLKREG(0xA0C)
 
+#define S3C_EPLL_CON_M_SHIFT	16
+#define S3C_EPLL_CON_P_SHIFT	8
+#define S3C_EPLL_CON_S_SHIFT	0
+#define S3C_EPLL_CON_K_SHIFT	0
+
+#define S3C_EPLL_CON_M_MASK	(0xff<<S3C_EPLL_CON_M_SHIFT)
+#define S3C_EPLL_CON_P_MASK	(0x3f<<S3C_EPLL_CON_P_SHIFT)
+#define S3C_EPLL_CON_S_MASK	(0x7<<S3C_EPLL_CON_S_SHIFT)
+#define S3C_EPLL_CON_K_MASK	(0xffff<<S3C_EPLL_CON_K_SHIFT)
+
 /* CLKDIV0 */
 #define S3C_CLKDIV0_PCLK_MASK		(0xf << 12)
 #define S3C_CLKDIV0_PCLK_SHIFT		(12)
@@ -189,6 +199,9 @@
 #define S3C_CLKSRC_SPI0_SHIFT		(14)
 #define S3C_CLKSRC_UART_MASK		(0x1 << 13)
 #define S3C_CLKSRC_UART_SHIFT		(13)
+
+#define S3C_CLKSRC1_AUDIO2_MASK		(0x7 << 0)
+#define S3C_CLKSRC1_AUDIO2_SHIFT	(0)
 
 /*CLK SRC BITS*/
 #define S3C_CLKSRC_APLL_CLKSEL          (1<<0)                                           

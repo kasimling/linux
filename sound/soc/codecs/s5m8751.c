@@ -1,18 +1,16 @@
 /*
- * s5m8751.c  --  S5M8751 ALSA Soc Audio driver
+ * s5m8751.c  --  S5M8751 Power-Audio IC ALSA Soc Audio driver
  *
- * Copyright 2008 Samsung Electronics
+ * Copyright 2009 Samsung Electronics.
  *
  *  This program is free software; you can redistribute  it and/or modify it
  *  under  the terms of  the GNU General  Public License as published by the
  *  Free Software Foundation;  either version 2 of the  License, or (at your
  *  option) any later version.
- *
  */
 
 #include <linux/module.h>
 #include <linux/moduleparam.h>
-#include <linux/version.h>
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/delay.h>
@@ -24,231 +22,478 @@
 #include <sound/pcm_params.h>
 #include <sound/soc.h>
 #include <sound/soc-dapm.h>
-#include <sound/initval.h>
 #include <sound/tlv.h>
+#include <sound/initval.h>
 #include <asm/div64.h>
 
 #include "s5m8751.h"
 
-#define AUDIO_NAME "s5m8751"
-#define S5M8751_VERSION "0.1"
+#define S5M8751_VERSION "0.2"
+
+/* S5M8751 is activated only in XXX SLAVE MODE XXX
+ * 8kHz ~ 96kHz sample rate. Auto/Manual ???
+ * I2S, Lj, Rj, PCM short frame sync or PCM long frame sync formats.
+ * Slave addr:- 0xD1-Read, 0xD0-Write
+ * XXX This driver supports only SPEAKER-OUT mode, others are easy to implement XXX
+ * */
+
+static const u16 s5m8751_reg[S5M8751_NUMREGS];
 
 /*
- * Debug
+ * read s5m8751 register cache
  */
-
-#define S5M_DEBUG 1
-
-#ifdef S5M_DEBUG
-#define dbg(format, arg...) \
-	printk(KERN_DEBUG AUDIO_NAME ": " format "\n" , ## arg)
-#else
-#define dbg(format, arg...) do {} while (0)
-#endif
-#define err(format, arg...) \
-	printk(KERN_ERR AUDIO_NAME ": " format "\n" , ## arg)
-#define info(format, arg...) \
-	printk(KERN_INFO AUDIO_NAME ": " format "\n" , ## arg)
-#define warn(format, arg...) \
-	printk(KERN_WARNING AUDIO_NAME ": " format "\n" , ## arg)
-
-/* codec private data */
-struct s5m_priv {
-	unsigned int sysclk;
-	unsigned int pcmclk;
-};
-
-/*
- * s5m register cache
- * We can't read the WM8990 register space when we
- * are using 2 wire for device control, so we cache them instead.
- */
-static const u16 s5m_reg[] = S5M8751_REGISTER_DEFAULTS;
-
-/*
- * read s5m register cache
- */
-static inline unsigned int s5m_read_reg_cache(struct snd_soc_codec *codec,
+static inline unsigned int s5m8751_read_reg_cache(struct snd_soc_codec *codec,
 	unsigned int reg)
 {
 	u16 *cache = codec->reg_cache;
+	BUG_ON(reg < S5M8751_DA_PDB1);
+	BUG_ON(reg > S5M8751_LINE_CTRL);
 	return cache[reg];
 }
 
-/*
- * write s5m register cache
+/* Fills the data in cache and returns only operation status.
+ * 1 for success, -EIO for failure.
  */
-static inline void s5m_write_reg_cache(struct snd_soc_codec *codec,
+static int s5m8751_read(struct snd_soc_codec *codec,
+				       unsigned int reg)
+{
+	u8 data;
+	u16 *cache = codec->reg_cache;
+
+	data = reg;
+
+	if (codec->hw_write(codec->control_data, &data, 1) != 1){
+		return -EIO;
+	}
+
+	if (codec->hw_read(codec->control_data, &data, 1) != 1){
+		return -EIO;
+	}
+
+	cache[reg] = data;	/* Update the cache */
+
+	return 1;
+}
+
+/*
+ * write s5m8751 register cache
+ */
+static inline void s5m8751_write_reg_cache(struct snd_soc_codec *codec,
 	unsigned int reg, unsigned int value)
 {
 	u16 *cache = codec->reg_cache;
+
+	if(reg == S5M8751_IN1_CTRL1)
+		value &= ~(1<<6);	/* Reset is cleared automatically by the codec */
+
 	cache[reg] = value;
 }
 
 /*
- * write to the s5m register space
+ * write to the S5M8751 register space
  */
-static int s5m_write(struct snd_soc_codec *codec, unsigned int reg,
+/* Fills the data in cache and returns only operation status.
+ * 1 for success, 0 for failure.
+ */
+static int s5m8751_write(struct snd_soc_codec *codec, unsigned int reg,
 	unsigned int value)
 {
 	u8 data[2];
 
-	data[0] = reg & 0xFF;
-	data[1] = value & 0xFF;
+	BUG_ON(reg < S5M8751_DA_PDB1);
+	BUG_ON(reg > S5M8751_LINE_CTRL);
 
-	s5m_write_reg_cache (codec, reg, value);
-	if (codec->hw_write(codec->control_data, data, 2) == 2)
+	data[0] = reg & 0xff;
+	data[1] = value & 0xff;
+
+	if (codec->hw_write(codec->control_data, data, 2) == 2){
+		s5m8751_write_reg_cache(codec, reg, value);
 		return 0;
-	else
+	}else{
 		return -EIO;
+	}
 }
 
-#define S5M_RATES (SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_11025 |\
-	SNDRV_PCM_RATE_16000 | SNDRV_PCM_RATE_22050 | SNDRV_PCM_RATE_44100 | \
-	SNDRV_PCM_RATE_48000 | SNDRV_PCM_RATE_88200 | SNDRV_PCM_RATE_96000)
-
-#define S5M_FORMATS (SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S20_3LE |\
-	SNDRV_PCM_FMTBIT_S24_LE)
-
-/*
- * Set's ADC and Voice DAC format.
- */
-static int s5m_set_dai_fmt(struct snd_soc_dai *codec_dai,
-		unsigned int fmt)
-{
-	struct snd_soc_codec *codec = codec_dai->codec;
-
-	printk("%s,%d\n",__FUNCTION__,__LINE__);
-	s5m_write(codec, 0x27, 0x14); // codec off
-	s5m_write(codec, 0x27, 0x94); //sampling rate
-	return 0;
-}
-
-/*
- * The WM8990 supports 2 different and mutually exclusive DAI
- * configurations.
- *
- * 1. ADC/DAC on Primary Interface
- * 2. ADC on Primary Interface/DAC on secondary
- */
-struct snd_soc_dai s5m_dai = {
-/* ADC/DAC on primary */
-	.name = "S5M8751 Primary",
-	.id = 1,
-	.playback = {
-		.stream_name = "Playback",
-		.channels_min = 1,
-		.channels_max = 2,
-		.rates = S5M_RATES,
-		.formats = S5M_FORMATS,},
-	.capture = {
-		.stream_name = "Capture",
-		.channels_min = 1,
-		.channels_max = 2,
-		.rates = S5M_RATES,
-		.formats = S5M_FORMATS,},
-//	.ops = {
-//		.hw_params = wm8990_hw_params,},
-	.dai_ops = {
-//		.set_pll = wm8990_set_dai_pll,
-		.set_fmt = s5m_set_dai_fmt,
-//		.set_sysclk = wm8990_set_dai_sysclk,
-	},
+static const struct snd_kcontrol_new s5m8751_snd_controls[] = {
+	SOC_DOUBLE_R("HeadPhone Volume", S5M8751_HP_VOL1, S5M8751_HP_VOL1, 0, 0x7f, 1),
+	SOC_DOUBLE_R("Line-In Gain", S5M8751_DA_LGAIN, S5M8751_DA_RGAIN, 0, 0x7f, 1),
+	SOC_DOUBLE_R("DAC Volume", S5M8751_DA_VOLL, S5M8751_DA_VOLR, 0, 0xff, 1),
+	SOC_SINGLE("Speaker Slope", S5M8751_SPK_SLOPE, 0, 0xf, 1),
+	SOC_SINGLE("DAC Mute", S5M8751_DA_DIG2, 7, 1, 0),
+	SOC_SINGLE("Mute Dither", S5M8751_DA_DIG2, 6, 1, 0),
+	SOC_SINGLE("Dither Level", S5M8751_DA_DIG2, 3, 7, 0),
+	SOC_SINGLE("Soft Limit", S5M8751_DA_LIM1, 7, 1, 0),
+	SOC_SINGLE("Limit Thrsh", S5M8751_DA_LIM1, 0, 0x7f, 1),
+	SOC_SINGLE("Attack", S5M8751_DA_LIM2, 4, 0xf, 0),
+	SOC_SINGLE("Release", S5M8751_DA_LIM2, 0, 0xf, 0),
 };
-EXPORT_SYMBOL_GPL(s5m_dai);
 
-static int s5m_suspend(struct platform_device *pdev, pm_message_t state)
+/* Add non-DAPM controls */
+static int s5m8751_add_controls(struct snd_soc_codec *codec)
 {
-	struct snd_soc_device *socdev = platform_get_drvdata(pdev);
-	struct snd_soc_codec *codec = socdev->codec;
+	int err, i;
 
-	/* we only need to suspend if we are a valid card */
-	if(!codec->card)
-		return 0;
-
-	//wm8990_set_bias_level(codec, SND_SOC_BIAS_OFF);
+	for (i = 0; i < ARRAY_SIZE(s5m8751_snd_controls); i++) {
+		err = snd_ctl_add(codec->card,
+				  snd_soc_cnew(&s5m8751_snd_controls[i],
+					       codec, NULL));
+		if (err < 0)
+			return err;
+	}
 	return 0;
 }
 
-static int s5m_resume(struct platform_device *pdev)
+static const struct snd_soc_dapm_widget s5m8751_dapm_widgets[] = {
+	SND_SOC_DAPM_DAC("RL-Mute", "Playback", S5M8751_AMP_MUTE, 0, 1),
+	SND_SOC_DAPM_DAC("LL-Mute", "Playback", S5M8751_AMP_MUTE, 1, 1),
+	SND_SOC_DAPM_DAC("RH-Mute", "Playback", S5M8751_AMP_MUTE, 2, 1),
+	SND_SOC_DAPM_DAC("LH-Mute", "Playback", S5M8751_AMP_MUTE, 3, 1),
+	SND_SOC_DAPM_DAC("SPK-Mute", "Playback", S5M8751_AMP_MUTE, 4, 1),
+	SND_SOC_DAPM_OUTPUT("RL"),
+	SND_SOC_DAPM_OUTPUT("LL"),
+	SND_SOC_DAPM_OUTPUT("RH"),
+	SND_SOC_DAPM_OUTPUT("LH"),
+	SND_SOC_DAPM_OUTPUT("SPK"),
+};
+
+static const struct snd_soc_dapm_route audio_map[] = {
+	{ "RL", NULL, "RL-Mute" },
+	{ "LL", NULL, "LL-Mute" },
+	{ "RH", NULL, "RH-Mute" },
+	{ "LH", NULL, "LH-Mute" },
+	{ "SPK", NULL, "SPK-Mute" },
+};
+
+static int s5m8751_add_widgets(struct snd_soc_codec *codec)
 {
-	struct snd_soc_device *socdev = platform_get_drvdata(pdev);
+	snd_soc_dapm_new_controls(codec, s5m8751_dapm_widgets,
+				  ARRAY_SIZE(s5m8751_dapm_widgets));
+	snd_soc_dapm_add_routes(codec, audio_map, ARRAY_SIZE(audio_map));
+	snd_soc_dapm_new_widgets(codec);
+
+	return 0;
+}
+
+/*
+ * Set PCM DAI bit size and sample rate.
+ */
+static int s5m8751_hw_params(struct snd_pcm_substream *substream,
+	struct snd_pcm_hw_params *params)
+{
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_device *socdev = rtd->socdev;
 	struct snd_soc_codec *codec = socdev->codec;
-	int i;
-	u8 data[2];
-	u16 *cache = codec->reg_cache;
+	unsigned int in1_ctrl2, in1_ctrl1;
 
-	/* we only need to resume if we are a valid card */
-	if (!codec->card)
-		return 0;
+	in1_ctrl1 = s5m8751_read_reg_cache(codec, S5M8751_IN1_CTRL1);
+	in1_ctrl1 &= ~(0xf<<2);	/* Sampling Rate field */
 
-	/* Sync reg_cache with the hardware */
-	for (i = 0; i < ARRAY_SIZE(s5m_reg); i++) {
-		if (i + 1 == S5M_RESET)
-			continue;
-		data[0] = ((i + 1) << 1) | ((cache[i] >> 8) & 0x0001);
-		data[1] = cache[i] & 0x00ff;
-		codec->hw_write(codec->control_data, data, 2);
+	in1_ctrl2 = s5m8751_read_reg_cache(codec, S5M8751_IN1_CTRL2);
+	in1_ctrl2 &= ~(0x3<<0);	/* I2S data length field */
+
+	/* bit size */
+	switch (params_format(params)) {
+	case SNDRV_PCM_FORMAT_S16_LE:
+		in1_ctrl2 |= (0x0<<0); break;
+	case SNDRV_PCM_FORMAT_S18_3LE:
+		in1_ctrl2 |= (0x1<<0); break;
+	case SNDRV_PCM_FORMAT_S20_3LE:
+		in1_ctrl2 |= (0x2<<0); break;
+	case SNDRV_PCM_FORMAT_S24_LE:
+		in1_ctrl2 |= (0x3<<0); break;
+	default: /* Doesn't it support SNDRV_PCM_FORMAT_S8 ?! */
+		return -EINVAL;
 	}
 
-	//wm8990_set_bias_level(codec, SND_SOC_BIAS_OFF);
+	/* XXX What about bits in DA_DIG1 ? XXX */
+	switch (params_rate(params)) {
+	case 8000:
+		in1_ctrl1 |= (0x0<<2); break;
+	case 11025:
+		in1_ctrl1 |= (0x1<<2); break;
+	case 16000:
+		in1_ctrl1 |= (0x2<<2); break;
+	case 22050:
+		in1_ctrl1 |= (0x3<<2); break;
+	case 32000:
+		in1_ctrl1 |= (0x4<<2); break;
+	case 44100: 
+		in1_ctrl1 |= (0x5<<2); break;
+	case 48000:
+		in1_ctrl1 |= (0x6<<2); break;
+	case 64000:
+		in1_ctrl1 |= (0x7<<2); break;
+	case 88200:
+		in1_ctrl1 |= (0x8<<2); break;
+	case 96000:
+		in1_ctrl1 |= (0x9<<2); break;
+	default:
+		return -EINVAL;
+	}
+
+	in1_ctrl1 &= ~(1<<7);	/* Power down */
+	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+
+	s5m8751_write(codec, S5M8751_IN1_CTRL2, in1_ctrl2);
+
+	in1_ctrl1 |= (1<<7);	/* Power up */
+	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+
 	return 0;
 }
 
+static int s5m8751_set_dai_fmt(struct snd_soc_dai *codec_dai, unsigned int fmt)
+{
+	struct snd_soc_codec *codec = codec_dai->codec;
+	unsigned int in1_ctrl2, in1_ctrl1;
+
+	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
+	/* S5M8751 works only in SLAVE mode */
+	case SND_SOC_DAIFMT_CBS_CFS: break;	/* Nothing to do, already setup */
+	default:
+		printk("Mst-Slv combo(%d) not supported!\n", fmt & SND_SOC_DAIFMT_MASTER_MASK);
+		return -EINVAL;
+	}
+
+	in1_ctrl2 = s5m8751_read_reg_cache(codec, S5M8751_IN1_CTRL2);
+	in1_ctrl2 &= ~(0x3<<2);
+	switch (fmt & SND_SOC_DAIFMT_FORMAT_MASK) {
+	case SND_SOC_DAIFMT_I2S:
+		in1_ctrl2 |= (0x0<<2); break;
+	case SND_SOC_DAIFMT_LEFT_J:
+		in1_ctrl2 |= (0x1<<2); break;
+	case SND_SOC_DAIFMT_RIGHT_J:
+		in1_ctrl2 |= (0x2<<2); break;
+	default:
+		printk("DAIFmt(%d) not supported!\n", fmt & SND_SOC_DAIFMT_FORMAT_MASK);
+		return -EINVAL;
+	}
+
+	in1_ctrl2 &= ~(0x1<<4); /* LRCLK Polarity */
+	in1_ctrl1 = s5m8751_read_reg_cache(codec, S5M8751_IN1_CTRL1);
+	in1_ctrl1 &= ~(0x1<<1); /* BCLK Polarity */
+	switch (fmt & SND_SOC_DAIFMT_INV_MASK) {
+	case SND_SOC_DAIFMT_NB_NF:
+		in1_ctrl1 |= (0x0<<1);
+		in1_ctrl2 |= (0x0<<4);
+		break;
+
+	case SND_SOC_DAIFMT_IB_IF:
+		in1_ctrl1 |= (0x1<<1);
+		in1_ctrl2 |= (0x1<<4);
+		break;
+
+	case SND_SOC_DAIFMT_IB_NF:
+		in1_ctrl1 |= (0x1<<1);
+		in1_ctrl2 |= (0x0<<4);
+		break;
+
+	case SND_SOC_DAIFMT_NB_IF:
+		in1_ctrl1 |= (0x0<<1);
+		in1_ctrl2 |= (0x1<<4);
+		break;
+
+	default:
+		printk("Inv-combo(%d) not supported!\n", fmt & SND_SOC_DAIFMT_FORMAT_MASK);
+		return -EINVAL;
+	}
+
+	in1_ctrl1 &= ~(1<<7);	/* Power down */
+	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+
+	s5m8751_write(codec, S5M8751_IN1_CTRL2, in1_ctrl2);
+
+	in1_ctrl1 |= (1<<7);	/* Power up */
+	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+	return 0;
+}
+
+static int s5m8751_digital_mute(struct snd_soc_dai *codec_dai, int mute)
+{
+	struct snd_soc_codec *codec = codec_dai->codec;
+	unsigned int da_dig2;
+
+	da_dig2 = s5m8751_read_reg_cache(codec, S5M8751_DA_DIG2);
+
+	if (mute == MUTE_OFF){
+		da_dig2 &= ~((1<<7)|(1<<6));
+	}else{
+		da_dig2 |= ((1<<7)|(1<<6));	// MUTE_DAC|DITHER_EN
+	}
+	s5m8751_write(codec, S5M8751_DA_DIG2, da_dig2);
+
+	return 0;
+}
+
+static int s5m8751_set_clkdiv(struct snd_soc_dai *codec_dai,
+				 int div_id, int val)
+{
+	struct snd_soc_codec *codec = codec_dai->codec;
+	unsigned int in1_ctrl1, in1_ctrl2;
+
+	in1_ctrl2 = s5m8751_read_reg_cache(codec, S5M8751_IN1_CTRL2);
+	in1_ctrl2 &= ~(0x3<<5);	/* XFS field */
+	switch (div_id) {
+	case S5M8751_BCLK:
+		switch(val){
+		case 32: in1_ctrl2 |= (0x0<<5); break;
+		case 48: in1_ctrl2 |= (0x1<<5); break;
+		case 64: in1_ctrl2 |= (0x2<<5); break;
+		default: return -EINVAL;
+		}
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	in1_ctrl1 = s5m8751_read_reg_cache(codec, S5M8751_IN1_CTRL1);
+	in1_ctrl1 &= ~(1<<7);	/* Power down */
+	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+
+	s5m8751_write(codec, S5M8751_IN1_CTRL2, in1_ctrl2);
+
+	in1_ctrl1 |= (1<<7);	/* Power up */
+	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+
+	return 0;
+}
+
+static int s5m8751_set_bias_level(struct snd_soc_codec *codec,
+	enum snd_soc_bias_level level)
+{
+	u16 amp_en, amp_mute_off, in1_ctrl1;
+
+	in1_ctrl1 = s5m8751_read_reg_cache(codec, S5M8751_IN1_CTRL1);
+	amp_en = s5m8751_read_reg_cache(codec, S5M8751_AMP_EN);
+	amp_en &= ~(0x3<<6);	/* Clear AMP and Modltr bits for Speaker */
+	amp_mute_off = s5m8751_read_reg_cache(codec, S5M8751_AMP_MUTE);
+	amp_mute_off &= ~(0x1<<4);
+
+	switch (level) {
+	case SND_SOC_BIAS_ON:
+		amp_mute_off |= (0x1<<4);
+		amp_en |= (0x3<<6);
+		in1_ctrl1 |= (0x1<<7);
+		s5m8751_write(codec, S5M8751_AMP_EN, amp_en);
+		s5m8751_write(codec, S5M8751_AMP_MUTE, amp_mute_off);
+		s5m8751_digital_mute(codec->dai, MUTE_OFF);
+		s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+		break;
+	case SND_SOC_BIAS_PREPARE:
+	case SND_SOC_BIAS_STANDBY:
+//		s5m8751_write(codec, S5M8751_AMP_EN, amp_en);
+//		s5m8751_write(codec, S5M8751_AMP_MUTE, amp_mute_off);
+//		s5m8751_digital_mute(codec->dai, MUTE_ON);
+		break;
+	case SND_SOC_BIAS_OFF:
+		in1_ctrl1 &= ~(1<<7);
+		s5m8751_write(codec, S5M8751_AMP_EN, amp_en);
+		s5m8751_write(codec, S5M8751_AMP_MUTE, amp_mute_off);
+		s5m8751_digital_mute(codec->dai, MUTE_ON);
+		s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+		break;
+	}
+
+	codec->bias_level = level;
+	return 0;
+}
+
+
+/* 
+ * S5M8751 can work only in Slave mode.
+ * S5M8751 supports only Playback, not Capture!
+ * S5M8751 supports two i/f's: I2S and PCM. Only I2S is implemented in this driver.
+ */
+#define S5M8751_FORMATS (SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S18_3LE | \
+				SNDRV_PCM_FMTBIT_S20_3LE | SNDRV_PCM_FMTBIT_S24_LE) 
+struct snd_soc_dai s5m8751_dai = {
+		.name = "S5M8751-I2S",
+		.id = 0,
+		.playback = {
+			.stream_name = "Playback",
+			.channels_min = 1,
+			.channels_max = 2,
+			.rates = SNDRV_PCM_RATE_8000_96000,
+			.formats = S5M8751_FORMATS,
+		},
+		.ops = {
+			 .hw_params = s5m8751_hw_params,
+		},
+		.dai_ops = {
+			 .set_fmt = s5m8751_set_dai_fmt,
+			 .digital_mute = s5m8751_digital_mute,
+			 .set_clkdiv = s5m8751_set_clkdiv,
+		},
+};
+EXPORT_SYMBOL_GPL(s5m8751_dai);
+
 /*
- * initialise the WM8990 driver
+ * initialise the S5M8751 driver
  * register the mixer and dsp interfaces with the kernel
  */
-static int s5m_init(struct snd_soc_device *socdev)
+static int s5m8751_init(struct snd_soc_device *socdev)
 {
+	int ret = 0, val;
+	u16 *cache;
 	struct snd_soc_codec *codec = socdev->codec;
-	int ret = 0;
 
 	codec->name = "S5M8751";
 	codec->owner = THIS_MODULE;
-	codec->read = s5m_read_reg_cache;
-	codec->write = s5m_write;
-	codec->dai = &s5m_dai;
-	codec->num_dai = 2;
-	codec->reg_cache_size = sizeof(s5m_reg);
-	codec->reg_cache = kmemdup(s5m_reg, sizeof(s5m_reg), GFP_KERNEL);
+	codec->read = s5m8751_read_reg_cache;
+	codec->write = s5m8751_write;
+	codec->set_bias_level = s5m8751_set_bias_level;
+	codec->dai = &s5m8751_dai;
+	codec->num_dai = 1;
+	codec->reg_cache_size = ARRAY_SIZE(s5m8751_reg);
+	codec->reg_cache = kmemdup(s5m8751_reg, sizeof(s5m8751_reg), GFP_KERNEL);
 
 	if (codec->reg_cache == NULL)
 		return -ENOMEM;
 
+	/* Fill the reg cache */
+	cache = codec->reg_cache;
+	for(val=S5M8751_DA_PDB1; val<=S5M8751_LINE_CTRL; val++){ /* Don't use Power Mngmnt regs here */
+		while(s5m8751_read(codec, val) == -EIO)
+			printk(KERN_WARNING "Read failed! ");
+		//printk("Reg-0x%x = 0x%x\n", val, cache[val]);
+	}
+
+	val = (0x3f<<0); /* PowerOn all */
+	s5m8751_write(codec, S5M8751_DA_PDB1, val);
+
+	val = (0x3f<<0); /* Enable all */
+	s5m8751_write(codec, S5M8751_DA_AMIX1, val);
+
+	val = 0; /* XXX TODO Disable all for the time being TODO XXX */
+	s5m8751_write(codec, S5M8751_DA_AMIX2, val);
+
+	val = 60;
+	s5m8751_write(codec, S5M8751_DA_VOLL, val);
+	s5m8751_write(codec, S5M8751_DA_VOLR, val);
+
+	val = (15<<0) | (0<<5);	/* Gradual Slope */
+	s5m8751_write(codec, S5M8751_SPK_SLOPE, val);
+	val = (0x1<<0);
+	s5m8751_write(codec, S5M8751_SPK_DT, val);
+	val = (0x1<<4);
+	s5m8751_write(codec, S5M8751_SPK_S2D, val);
+	
+	/* TODO XXX What about DA_ANA, DA_DWA? TODO XXX */
+	codec->bias_level = SND_SOC_BIAS_OFF;
+
 	/* register pcms */
 	ret = snd_soc_new_pcms(socdev, SNDRV_DEFAULT_IDX1, SNDRV_DEFAULT_STR1);
 	if (ret < 0) {
-		printk(KERN_ERR "s5m : failed to create pcms\n");
+		printk(KERN_ERR "s5m8751: failed to create pcms\n");
 		goto pcm_err;
 	}
 
-	/* charge output caps */
-	codec->bias_level = SND_SOC_BIAS_OFF;
-
-	/* s5m8751 codec init */
-	s5m_write(codec, 0x27, 0x14); // codec off
-	//wm8990_set_bias_level(codec, SND_SOC_BIAS_STANDBY);
-	s5m_write(codec, 0x17, 0x3a);
-	s5m_write(codec, 0x18, 0x12);
-	s5m_write(codec, 0x19, 0x00);
-	//s5m_write(codec, 0x1c, 0x18);
-	//s5m_write(codec, 0x1d, 0x18);
-	s5m_write(codec, 0x1c, 0x40);
-	s5m_write(codec, 0x1d, 0x40);
-	s5m_write(codec, 0x24, 0x00);
-	//s5m_write(codec, 0x27, 0x94); //sampling rate
-	//s5m_write(codec, 0x27, 0x14); //sampling rate
-	s5m_write(codec, 0x28, 0x00);
-	s5m_write(codec, 0x37, 0xc0);
-	s5m_write(codec, 0x38, 0x10);
-	s5m_write(codec, 0x39, 0x2a);
-
-	s5m_write(codec, 0x27, 0x94); //sampling rate
+	s5m8751_add_controls(codec);
+	s5m8751_add_widgets(codec);
 
 	ret = snd_soc_register_card(socdev);
 	if (ret < 0) {
-		printk(KERN_ERR "s5m : failed to register card\n");
+		printk(KERN_ERR "s5m8751: failed to register card\n");
 		goto card_err;
 	}
 	return ret;
@@ -263,40 +508,35 @@ pcm_err:
 
 /* If the i2c layer weren't so broken, we could pass this kind of data
    around */
-static struct snd_soc_device *s5m_socdev;
+static struct snd_soc_device *s5m8751_socdev;
 
-#if defined (CONFIG_I2C) || defined (CONFIG_I2C_MODULE)
+#if defined(CONFIG_I2C) || defined(CONFIG_I2C_MODULE)
 
-/*
- * WM8912 wire address is determined by GPIO5
- * state during powerup.
- *    low  = 0x34
- *    high = 0x36
- */
 static unsigned short normal_i2c[] = { 0, I2C_CLIENT_END };
 
 /* Magic definition of all other variables and things */
 I2C_CLIENT_INSMOD;
 
-static struct i2c_driver s5m_i2c_driver;
+static struct i2c_driver s5m8751_i2c_driver;
 static struct i2c_client client_template;
 
-static int s5m_codec_probe(struct i2c_adapter *adap, int addr, int kind)
+static int s5m8751_codec_probe(struct i2c_adapter *adap, int addr, int kind)
 {
-	struct snd_soc_device *socdev = s5m_socdev;
-	struct s5m_setup_data *setup = socdev->codec_data;
+	struct snd_soc_device *socdev = s5m8751_socdev;
+	struct s5m8751_setup_data *setup = socdev->codec_data;
 	struct snd_soc_codec *codec = socdev->codec;
 	struct i2c_client *i2c;
 	int ret;
 
-	if (addr != setup->i2c_address)
+	if (addr != setup->i2c_address){
 		return -ENODEV;
+	}
 
 	client_template.adapter = adap;
 	client_template.addr = addr;
 
 	i2c =  kmemdup(&client_template, sizeof(client_template), GFP_KERNEL);
-	if (i2c == NULL){
+	if (i2c == NULL) {
 		kfree(codec);
 		return -ENOMEM;
 	}
@@ -305,16 +545,16 @@ static int s5m_codec_probe(struct i2c_adapter *adap, int addr, int kind)
 
 	ret = i2c_attach_client(i2c);
 	if (ret < 0) {
-		err("failed to attach codec at addr %x\n", addr);
+		dev_err(&i2c->dev, "failed to attach codec at addr %x\n", addr);
 		goto err;
 	}
 
-	dbg("codec probe ret = %d .\n", ret);
-	ret = s5m_init(socdev);
+	ret = s5m8751_init(socdev);
 	if (ret < 0) {
-		err("failed to initialise WM8990\n");
+		dev_err(&i2c->dev, "failed to initialise S5M8751\n");
 		goto err;
 	}
+
 	return ret;
 
 err:
@@ -323,7 +563,7 @@ err:
 	return ret;
 }
 
-static int s5m_i2c_detach(struct i2c_client *client)
+static int s5m8751_i2c_detach(struct i2c_client *client)
 {
 	struct snd_soc_codec *codec = i2c_get_clientdata(client);
 	i2c_detach_client(client);
@@ -332,97 +572,87 @@ static int s5m_i2c_detach(struct i2c_client *client)
 	return 0;
 }
 
-static int s5m_i2c_attach(struct i2c_adapter *adap)
+static int s5m8751_i2c_attach(struct i2c_adapter *adap)
 {
-	return i2c_probe(adap, &addr_data, s5m_codec_probe);
+	return i2c_probe(adap, &addr_data, s5m8751_codec_probe);
 }
 
-/* corgi i2c codec control layer */
-static struct i2c_driver s5m_i2c_driver = {
+static struct i2c_driver s5m8751_i2c_driver = {
 	.driver = {
 		.name = "S5M8751 I2C Codec",
 		.owner = THIS_MODULE,
 	},
-	.id =             I2C_DRIVERID_WM8753,
-	.attach_adapter = s5m_i2c_attach,
-	.detach_client =  s5m_i2c_detach,
+	.attach_adapter = s5m8751_i2c_attach,
+	.detach_client =  s5m8751_i2c_detach,
 	.command =        NULL,
 };
 
 static struct i2c_client client_template = {
 	.name =   "S5M8751",
-	.driver = &s5m_i2c_driver,
+	.driver = &s5m8751_i2c_driver,
 };
 #endif
 
-static int s5m_probe(struct platform_device *pdev)
+static int s5m8751_probe(struct platform_device *pdev)
 {
 	struct snd_soc_device *socdev = platform_get_drvdata(pdev);
-	struct s5m_setup_data *setup;
+	struct s5m8751_setup_data *setup;
 	struct snd_soc_codec *codec;
-	struct s5m_priv *s5m;
 	int ret = 0;
 
-	info("S5M8751 Audio Codec %s", S5M8751_VERSION);
+	pr_info("S5M8751 Audio Codec %s\n", S5M8751_VERSION);
 
 	setup = socdev->codec_data;
 	codec = kzalloc(sizeof(struct snd_soc_codec), GFP_KERNEL);
 	if (codec == NULL)
 		return -ENOMEM;
 
-	s5m = kzalloc(sizeof(struct s5m_priv), GFP_KERNEL);
-	if (s5m == NULL) {
-		kfree(codec);
-		return -ENOMEM;
-	}
-
-	codec->private_data = s5m;
 	socdev->codec = codec;
 	mutex_init(&codec->mutex);
 	INIT_LIST_HEAD(&codec->dapm_widgets);
 	INIT_LIST_HEAD(&codec->dapm_paths);
-	s5m_socdev = socdev;
+	s5m8751_socdev = socdev;
 
-#if defined (CONFIG_I2C) || defined (CONFIG_I2C_MODULE)
+#if defined(CONFIG_I2C) || defined(CONFIG_I2C_MODULE)
 	if (setup->i2c_address) {
 		normal_i2c[0] = setup->i2c_address;
 		codec->hw_write = (hw_write_t)i2c_master_send;
-		ret = i2c_add_driver(&s5m_i2c_driver);
+		codec->hw_read = (hw_read_t)i2c_master_recv;
+		ret = i2c_add_driver(&s5m8751_i2c_driver);
 		if (ret != 0)
 			printk(KERN_ERR "can't add i2c driver");
 	}
 #else
 		/* Add other interfaces here */
 #endif
+
 	return ret;
 }
 
 /* power down chip */
-static int s5m_remove(struct platform_device *pdev)
+static int s5m8751_remove(struct platform_device *pdev)
 {
 	struct snd_soc_device *socdev = platform_get_drvdata(pdev);
 	struct snd_soc_codec *codec = socdev->codec;
 
+	if (codec->control_data)
+		s5m8751_set_bias_level(codec, SND_SOC_BIAS_OFF);
 	snd_soc_free_pcms(socdev);
 	snd_soc_dapm_free(socdev);
-#if defined (CONFIG_I2C) || defined (CONFIG_I2C_MODULE)
-	i2c_del_driver(&s5m_i2c_driver);
+#if defined(CONFIG_I2C) || defined(CONFIG_I2C_MODULE)
+	i2c_del_driver(&s5m8751_i2c_driver);
 #endif
-	kfree(codec->private_data);
 	kfree(codec);
 
 	return 0;
 }
 
-struct snd_soc_codec_device soc_codec_dev_s5m= {
-	.probe =	s5m_probe,
-	.remove =	s5m_remove,
-	.suspend =	s5m_suspend,
-	.resume =	s5m_resume,
+struct snd_soc_codec_device soc_codec_dev_s5m8751 = {
+	.probe = 	s5m8751_probe,
+	.remove = 	s5m8751_remove,
 };
-
-EXPORT_SYMBOL_GPL(soc_codec_dev_s5m);
+EXPORT_SYMBOL_GPL(soc_codec_dev_s5m8751);
 
 MODULE_DESCRIPTION("ASoC S5M8751 driver");
-MODULE_AUTHOR("Ryu Euiyoul");
+MODULE_AUTHOR("Jaswinder Singh <jassi.brar@samsung.com>");
 MODULE_LICENSE("GPL");

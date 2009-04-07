@@ -62,7 +62,7 @@
 
 #define S5P64XX_PA_ADC		(0xF3000000)
 
-#define S5P64XX_PA_IIS_V40 	(0xF200D000)
+#define S5P64XX_PA_IIS_V40 	(0xF2000000)
 #define S3C_SZ_IIS		SZ_8K
 
 /* place VICs close together */
@@ -78,7 +78,7 @@
 #define S5P64XX_PA_SMC9115	(0x18000000)
 #define S5P64XX_SZ_SMC9115	SZ_512M
 
-#define S5P64XX_PA_IIS	   	(0xF200D000)
+#define S5P64XX_PA_IIS	   	(0xF2000000)
 /* Host I/F Indirect & Direct */
 #define S5P64XX_VA_HOSTIFA	S3C_ADDR(0x00B00000)
 #define S5P64XX_PA_HOSTIFA	(0x74000000)
