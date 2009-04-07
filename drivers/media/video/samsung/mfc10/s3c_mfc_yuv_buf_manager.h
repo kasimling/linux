@@ -15,16 +15,16 @@
 
 #include "s3c_mfc_types.h"
 
-BOOL            s3c_mfc_yuv_buf_mgr_init(unsigned char *pBufBase, int nBufSize);
+BOOL            s3c_mfc_init_yuvbuf_mgr(unsigned char *pBufBase, int nBufSize);
 void            s3c_mfc_yuv_buffer_mgr_final(void);
 
-unsigned char  *s3c_mfc_yuv_buffer_mgr_commit(int idx_commit, int commit_size);
-void            s3c_yuv_buffer_mgr_free(int idx_commit);
+unsigned char  *s3c_mfc_commit_yuv_buffer_mgr(int idx_commit, int commit_size);
+void            s3c_mfc_free_yuv_buffer_mgr(int idx_commit);
 
-unsigned char  *s3c_mfc_yuv_buffer_mgr_get_buffer(int idx_commit);
-int             s3c_mfc_yuv_buffer_mgr_get_buffer_size(int idx_commit);
+unsigned char  *s3c_mfc_get_yuv_buffer(int idx_commit);
+int             s3c_mfc_get_yuv_buffer_size(int idx_commit);
 
-void            s3c_mfc_yuv_buffer_mgr_print_commit_info(void);
+void            s3c_mfc_print_commit_yuv_buffer_info(void);
 
 
 #endif /* _S3C_MFC_YUV_BUF_MANAGER_H */

@@ -25,12 +25,12 @@ static int s3c_mfc_inst_no = 0;
 static int s3c_mfc_inst_status[S3C_MFC_NUM_INSTANCES_MAX] = {0, };
 static int s3c_mfc_num_inst_avail = S3C_MFC_NUM_INSTANCES_MAX;
 
-int s3c_mfc_inst_pool_num_avail(void)
+int s3c_mfc_get_avail_inst_pool_num(void)
 {
 	return s3c_mfc_num_inst_avail;
 }
 
-int s3c_mfc_inst_pool_occupy(void)
+int s3c_mfc_occupy_inst_pool(void)
 {
 	int  i;
 
@@ -51,7 +51,7 @@ int s3c_mfc_inst_pool_occupy(void)
 }
 
 
-int s3c_mfc_inst_pool_release(int instance_no)
+int s3c_mfc_release_inst_pool(int instance_no)
 {
 	if (instance_no >= S3C_MFC_NUM_INSTANCES_MAX || instance_no < 0) {
 		return -1;
@@ -67,7 +67,7 @@ int s3c_mfc_inst_pool_release(int instance_no)
 }
 
 
-void s3c_mfc_inst_pool_occypy_all(void)
+void s3c_mfc_occupy_all_inst_pool(void)
 {
 	int  i;
 
@@ -82,7 +82,7 @@ void s3c_mfc_inst_pool_occypy_all(void)
 	}
 }
 
-void s3c_mfc_inst_pool_release_all(void)
+void s3c_mfc_release_all_inst_pool(void)
 {
 	int  i;
 

@@ -19,9 +19,10 @@
 #include "s3c_mfc_instance.h"
 #include "s3c_mfc_config.h"
 #include "s3c_mfc_sfr.h"
+#include "s3c_mfc.h"
 
 /* Input arguments for S3C_MFC_IOCTL_MFC_SET_CONFIG */
-int s3c_mfc_get_config_params(s3c_mfc_instance_context_t *mfc_inst, s3c_mfc_args_t *args )
+int s3c_mfc_get_config_params(s3c_mfc_inst_context_t *mfc_inst, s3c_mfc_args_t *args )
 {
 	int             ret;
 
@@ -43,7 +44,8 @@ int s3c_mfc_get_config_params(s3c_mfc_instance_context_t *mfc_inst, s3c_mfc_args
 #if (defined(DIVX_ENABLE) && (DIVX_ENABLE == 1))
 	case S3C_MFC_GET_CONFIG_DEC_BYTE_CONSUMED:
 		args->get_config.out_config_value[0] = (int)mfc_inst->RET_DEC_PIC_RUN_BAK_BYTE_CONSUMED; 
-		printk(KERN_DEBUG "\n%s: S3C_MFC_GET_CONFIG_DEC_BYTE_CONSUMED = %d\n", __FUNCTION__, (int)mfc_inst->RET_DEC_PIC_RUN_BAK_BYTE_CONSUMED);
+		mfc_debug("S3C_MFC_GET_CONFIG_DEC_BYTE_CONSUMED = %d\n", \
+			(int)mfc_inst->RET_DEC_PIC_RUN_BAK_BYTE_CONSUMED);
 		ret = S3C_MFC_INST_RET_OK;
 		break;
 
@@ -85,23 +87,19 @@ int s3c_mfc_get_config_params(s3c_mfc_instance_context_t *mfc_inst, s3c_mfc_args
 }
 
 /* Input arguments for S3C_MFC_IOCTL_MFC_SET_CONFIG */
-int s3c_mfc_set_config_params(s3c_mfc_instance_context_t *mfc_inst, s3c_mfc_args_t *args)		
+int s3c_mfc_set_config_params(s3c_mfc_inst_context_t *mfc_inst, s3c_mfc_args_t *args)		
 {
 	int             ret;
 	unsigned int    param_change_enable = 0, param_change_val;
-	unsigned int	start, end;
-
 
 	switch (args->set_config.in_config_param) {
 	case S3C_MFC_SET_CONFIG_DEC_ROTATE:
 #if (S3C_MFC_ROTATE_ENABLE == 1)
 		args->set_config.out_config_value_old[0]
-			= s3c_mfc_instance_set_post_rotate(mfc_inst, args->set_config.in_config_value[0]);
+			= s3c_mfc_inst_set_post_rotate(mfc_inst, args->set_config.in_config_value[0]);
 #else
-		printk(KERN_ERR "\n%s: S3C_MFC_IOCTL_MFC_SET_CONFIG with S3C_MFC_SET_CONFIG_DEC_ROTATE is not supported\n", \
-														__FUNCTION__);
-		printk(KERN_ERR "\n%s: please check if S3C_MFC_ROTATE_ENABLE is defined as 1 in MfcConfig.h file\n", 	    \
-														__FUNCTION__);
+		mfc_err("S3C_MFC_IOCTL_MFC_SET_CONFIG with S3C_MFC_SET_CONFIG_DEC_ROTATE is not supported\n");
+		mfc_err("please check if S3C_MFC_ROTATE_ENABLE is defined as 1 in MfcConfig.h file\n");
 #endif
 		ret = S3C_MFC_INST_RET_OK;
 		break;
@@ -109,7 +107,7 @@ int s3c_mfc_set_config_params(s3c_mfc_instance_context_t *mfc_inst, s3c_mfc_args
 	case S3C_MFC_SET_CONFIG_ENC_H263_PARAM:
 		args->set_config.out_config_value_old[0] = mfc_inst->h263_annex;
 		mfc_inst->h263_annex = args->set_config.in_config_value[0];
-		printk(KERN_DEBUG "\n%s: parameter = 0x%x\n", __FUNCTION__, mfc_inst->h263_annex);		
+		mfc_debug("parameter = 0x%x\n", mfc_inst->h263_annex);
 		ret = S3C_MFC_INST_RET_OK;
 		break;
 
@@ -162,7 +160,7 @@ int s3c_mfc_set_config_params(s3c_mfc_instance_context_t *mfc_inst, s3c_mfc_args
 		}
 
 		param_change_val  = args->set_config.in_config_value[1];
-		ret = s3c_mfc_instance_enc_param_change(mfc_inst, param_change_enable, param_change_val);
+		ret = s3c_mfc_inst_enc_param_change(mfc_inst, param_change_enable, param_change_val);
 
 		break;
 
@@ -189,51 +187,24 @@ int s3c_mfc_set_config_params(s3c_mfc_instance_context_t *mfc_inst, s3c_mfc_args
 		break;
 
 	case S3C_MFC_SET_CACHE_CLEAN:
-		/* 
-		 * in_config_value[0] : start address in user layer
-		 * in_config_value[1] : offset
-		 * in_config_value[2] : start address of stream buffer in user layer
-		 */
-		start = (unsigned int)mfc_inst->stream_buffer + (args->set_config.in_config_value[0] - 		\
-										args->set_config.in_config_value[2]);
-		end   = start + args->set_config.in_config_value[1];
-		dmac_clean_range((unsigned char *)start, (unsigned char *)end);
-
+		cpu_cache.flush_kern_all();
 		ret = S3C_MFC_INST_RET_OK;
 		break;
 
 	case S3C_MFC_SET_CACHE_INVALIDATE:
-		/* 
-		 * in_config_value[0] : start address in user layer
-		 * in_config_value[1] : offset
-		 * in_config_value[2] : start address of stream buffer in user layer
-		 */
-		start = (unsigned int)mfc_inst->stream_buffer + (args->set_config.in_config_value[0] - 		\
-										args->set_config.in_config_value[2]);
-		end   = start + args->set_config.in_config_value[1];
-		dmac_flush_range((unsigned char *)start, (unsigned char *)end);
-
+		cpu_cache.flush_kern_all();
 		ret = S3C_MFC_INST_RET_OK;
 		break;
 
 	case S3C_MFC_SET_CACHE_CLEAN_INVALIDATE:
-		/* 
-		 * in_config_value[0] : start address in user layer
-		 * in_config_value[1] : offset
-		 * in_config_value[2] : start address of stream buffer in user layer
-		 */
-		start = (unsigned int)mfc_inst->stream_buffer + (args->set_config.in_config_value[0] - 		\
-										args->set_config.in_config_value[2]);
-		end   = start + args->set_config.in_config_value[1];
-		dmac_clean_range((unsigned char *)start, (unsigned char *)end);
-		dmac_flush_range((unsigned char *)start, (unsigned char *)end);
-
+		cpu_cache.flush_kern_all();
 		ret = S3C_MFC_INST_RET_OK;
 		break;
 
 #if (defined(DIVX_ENABLE) && (DIVX_ENABLE == 1))
 	case S3C_MFC_SET_PADDING_SIZE:
-		printk(KERN_DEBUG "\n%s: padding size = %d\n", __FUNCTION__, args->set_config.in_config_value[0]);
+		mfc_debug("padding size = %d\n", 		\
+			args->set_config.in_config_value[0]);
 		mfc_inst->padding_size = args->set_config.in_config_value[0];
 		ret = S3C_MFC_INST_RET_OK;
 		break;

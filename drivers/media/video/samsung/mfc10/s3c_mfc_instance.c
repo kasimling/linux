@@ -30,13 +30,14 @@
 #include "s3c_mfc_sfr.h"
 #include "s3c_mfc_bitproc_buf.h"
 #include "s3c_mfc_inst_pool.h"
+#include "s3c_mfc.h"
 
 
 extern void __iomem *s3c_mfc_sfr_base_virt_addr;
-static s3c_mfc_instance_context_t _mfcinst_ctx[S3C_MFC_NUM_INSTANCES_MAX];
+static s3c_mfc_inst_context_t _mfcinst_ctx[S3C_MFC_NUM_INSTANCES_MAX];
 
 
-s3c_mfc_instance_context_t *s3c_mfc_instance_get_context(int inst_no)
+s3c_mfc_inst_context_t *s3c_mfc_inst_get_context(int inst_no)
 {
 	if ((inst_no < 0) || (inst_no >= S3C_MFC_NUM_INSTANCES_MAX))
 		return NULL;
@@ -47,7 +48,7 @@ s3c_mfc_instance_context_t *s3c_mfc_instance_get_context(int inst_no)
 		return NULL;
 }
 
-static void s3c_mfc_get_stream_buffer_addr(s3c_mfc_instance_context_t *ctx)
+static void s3c_mfc_get_stream_buffer_addr(s3c_mfc_inst_context_t *ctx)
 {
 	ctx->stream_buffer = (unsigned char *)(s3c_mfc_get_databuf_virt_addr() + 		\
 						(ctx->inst_no * S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
@@ -55,39 +56,41 @@ static void s3c_mfc_get_stream_buffer_addr(s3c_mfc_instance_context_t *ctx)
 						(ctx->inst_no * S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
 	ctx->stream_buffer_size = S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE;
 
-	printk(KERN_DEBUG "\n%s: ctx->stream_buffer address 0x%08x\n", __FUNCTION__, (unsigned int)ctx->stream_buffer);
-	printk(KERN_DEBUG "\n%s: ctx->phys_addr_stream_buffer address 0x%08x\n", __FUNCTION__, ctx->phys_addr_stream_buffer);
+	mfc_debug("ctx->stream_buffer address 0x%08x\n", \
+			(unsigned int)ctx->stream_buffer);
+	mfc_debug("ctx->phys_addr_stream_buffer address 0x%08x\n", \
+					ctx->phys_addr_stream_buffer);
 }
 
-static BOOL s3c_mfc_get_yuv_buffer_addr(s3c_mfc_instance_context_t *ctx, int buf_size)
+static BOOL s3c_mfc_get_yuv_buffer_addr(s3c_mfc_inst_context_t *ctx, int buf_size)
 {
 	unsigned char	*instance_yuv_buffer;
 
 
-	instance_yuv_buffer = s3c_mfc_yuv_buffer_mgr_commit(ctx->inst_no, buf_size);
+	instance_yuv_buffer = s3c_mfc_commit_yuv_buffer_mgr(ctx->inst_no, buf_size);
 	if (instance_yuv_buffer == NULL) {
-		printk(KERN_ERR "\n%s: fail to allocate frame buffer\n", __FUNCTION__);
+		mfc_err("fail to allocate frame buffer\n");
 		return FALSE;
 	}
 
-	s3c_mfc_yuv_buffer_mgr_print_commit_info();
+	s3c_mfc_print_commit_yuv_buffer_info();
 
 	ctx->yuv_buffer = instance_yuv_buffer; /* virtual address of frame buffer */
 	ctx->phys_addr_yuv_buffer = S3C_MFC_BASEADDR_DATA_BUF +					\
 				((int)instance_yuv_buffer - (int)s3c_mfc_get_databuf_virt_addr());
 	ctx->yuv_buffer_size  = buf_size;
 	
-	printk(KERN_DEBUG "\n%s: ctx->inst_no : %d\n", __FUNCTION__, ctx->inst_no);
-	printk(KERN_DEBUG "\n%s: ctx->yuv_buffer : 0x%x\n", __FUNCTION__, (unsigned int)ctx->yuv_buffer);
-	printk(KERN_DEBUG "\n%s: ctx->phys_addr_yuv_buffer : 0x%x\n", __FUNCTION__, ctx->phys_addr_yuv_buffer);
+	mfc_debug("ctx->inst_no : %d\n", ctx->inst_no);
+	mfc_debug("ctx->yuv_buffer : 0x%x\n", (unsigned int)ctx->yuv_buffer);
+	mfc_debug("ctx->phys_addr_yuv_buffer : 0x%x\n", ctx->phys_addr_yuv_buffer);
 
 	return TRUE;
 }
 
-int s3c_mfc_instance_get_line_buffer(s3c_mfc_instance_context_t *ctx, unsigned char **buffer, int *size)
+int s3c_mfc_inst_get_line_buff(s3c_mfc_inst_context_t *ctx, unsigned char **buffer, int *size)
 {
 	if (S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_DELETED)) {
-		printk(KERN_ERR "\n%s: mfc instance is deleted\n", __FUNCTION__);
+		mfc_err("mfc instance is deleted\n");
 		return S3C_MFC_INST_ERR_STATE_DELETED;
 	}
 
@@ -97,20 +100,20 @@ int s3c_mfc_instance_get_line_buffer(s3c_mfc_instance_context_t *ctx, unsigned c
 	return S3C_MFC_INST_RET_OK;
 }
 
-int s3c_mfc_instance_get_yuv_buffer(s3c_mfc_instance_context_t *ctx, unsigned char **buffer, int *size)
+int s3c_mfc_inst_get_yuv_buff(s3c_mfc_inst_context_t *ctx, unsigned char **buffer, int *size)
 {
 	/* checking state */
 	if (S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_DELETED)) {
-		printk(KERN_ERR "\n%s: mfc instance is deleted\n", __FUNCTION__);
+		mfc_err("mfc instance is deleted\n");
 		return S3C_MFC_INST_ERR_STATE_DELETED;
 	}
 	if (S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_CREATED)) {
-		printk(KERN_ERR "\n%s: mfc instance is not initialized\n", __FUNCTION__);
+		mfc_err("mfc instance is not initialized\n");
 		return S3C_MFC_INST_ERR_STATE_CHK;
 	}
 
 	if (ctx->yuv_buffer == NULL) {
-		printk(KERN_ERR "\n%s: mfc frame buffer is not internally allocated yet\n", __FUNCTION__);
+		mfc_err("mfc frame buffer is not internally allocated yet\n");
 		return S3C_MFC_INST_ERR_ETC;
 	}
 
@@ -131,14 +134,14 @@ int s3c_mfc_instance_get_yuv_buffer(s3c_mfc_instance_context_t *ctx, unsigned ch
 }
 
 /* it returns the instance number of the 6410 mfc instance context */
-int s3c_mfc_get_instance_no(s3c_mfc_instance_context_t *ctx)
+int s3c_mfc_inst_get_no(s3c_mfc_inst_context_t *ctx)
 {
 	return ctx->inst_no;
 }
 
 /* It returns the virtual address of read pointer and write pointer */
-BOOL s3c_mfc_instance_get_stream_buffer_rw_ptrs(s3c_mfc_instance_context_t *ctx, unsigned char **read_ptr, 	\
-											unsigned char **write_ptr)
+BOOL s3c_mfc_inst_get_stream_buff_rw_ptrs(s3c_mfc_inst_context_t *ctx, unsigned char **read_ptr, \
+									unsigned char **write_ptr)
 {
 	int diff_vir_phy;
 	unsigned int read_pointer = 0;
@@ -150,7 +153,7 @@ BOOL s3c_mfc_instance_get_stream_buffer_rw_ptrs(s3c_mfc_instance_context_t *ctx,
 
 	if (S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_CREATED)) {
 		/* 
-		 * if s3c_mfc_instance_context_t is just created and not initialized by s3c_mfc_instance_init,
+		 * if s3c_mfc_inst_context_t is just created and not initialized by s3c_mfc_instance_init,
 		 * then the initial read pointer and write pointer are the start address of stream buffer
 		 */
 		*read_ptr = ctx->stream_buffer;
@@ -201,7 +204,7 @@ BOOL s3c_mfc_instance_get_stream_buffer_rw_ptrs(s3c_mfc_instance_context_t *ctx,
 	return TRUE;
 }
 
-unsigned int s3c_mfc_instance_set_post_rotate(s3c_mfc_instance_context_t *ctx, unsigned int post_rotmode)
+unsigned int s3c_mfc_inst_set_post_rotate(s3c_mfc_inst_context_t *ctx, unsigned int post_rotmode)
 {
 	unsigned int old_post_rotmode;
 
@@ -216,56 +219,55 @@ unsigned int s3c_mfc_instance_set_post_rotate(s3c_mfc_instance_context_t *ctx, u
 	return old_post_rotmode;
 }
 
-s3c_mfc_instance_context_t *s3c_mfc_instance_create(void)
+s3c_mfc_inst_context_t *s3c_mfc_inst_create(void)
 {
 	int inst_no;
-	s3c_mfc_instance_context_t *ctx;
+	s3c_mfc_inst_context_t *ctx;
 
 
 	/* occupy the 'inst_no' */
 	/* if it fails, it returns NULL */
-	inst_no = s3c_mfc_inst_pool_occupy();
+	inst_no = s3c_mfc_occupy_inst_pool();
 	if (inst_no == -1)
 		return NULL;
 
 	ctx = &(_mfcinst_ctx[inst_no]);
 
-	memset(ctx, 0, sizeof(s3c_mfc_instance_context_t));
+	memset(ctx, 0, sizeof(s3c_mfc_inst_context_t));
 
 	ctx->inst_no     = inst_no;
 	S3C_MFC_INST_STATE_TRANSITION(ctx, S3C_MFC_INST_STATE_CREATED);
 
 	s3c_mfc_get_stream_buffer_addr(ctx);
 
-	printk(KERN_DEBUG "\n%s: state = %d\n", __FUNCTION__, ctx->state_var);
-
+	mfc_debug("state = %d\n", ctx->state_var);
 
 	return ctx;
 }
 
 /* it deletes the 6410 mfc instance */
-void s3c_mfc_instance_delete(s3c_mfc_instance_context_t *ctx)
+void s3c_mfc_inst_del(s3c_mfc_inst_context_t *ctx)
 {
 	/* checking state */
 	if (S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_DELETED)) {
-		printk(KERN_ERR "\n%s: mfc instance is already deleted\n", __FUNCTION__);
+		mfc_err("mfc instance is already deleted\n");
 		return;
 	}
 
-	s3c_mfc_inst_pool_release(ctx->inst_no);
-	s3c_yuv_buffer_mgr_free(ctx->inst_no);
+	s3c_mfc_release_inst_pool(ctx->inst_no);
+	s3c_mfc_free_yuv_buffer_mgr(ctx->inst_no);
 
 	S3C_MFC_INST_STATE_TRANSITION(ctx, S3C_MFC_INST_STATE_DELETED);
 }
 
 /* it turns on the flag indicating 6410 mfc's power-off */
-void s3c_mfc_instance_power_off_state(s3c_mfc_instance_context_t *ctx)
+void s3c_mfc_inst_pow_off_state(s3c_mfc_inst_context_t *ctx)
 {
 	S3C_MFC_INST_STATE_PWR_OFF_FLAG_SET(ctx);
 }
 
 /* it turns on the flag indicating 6410 mfc's power-off */
-void s3c_mfc_instance_power_on_state(s3c_mfc_instance_context_t *ctx)
+void s3c_mfc_inst_pow_on_state(s3c_mfc_inst_context_t *ctx)
 {
 	S3C_MFC_INST_STATE_PWR_OFF_FLAG_CLEAR(ctx);
 }
@@ -274,7 +276,7 @@ void s3c_mfc_instance_power_on_state(s3c_mfc_instance_context_t *ctx)
  * it initializes the 6410 mfc instance with the appropriate config stream
  * the config stream must be copied into stream buffer before this function
  */
-int s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mode_t codec_mode, unsigned long strm_leng)
+int s3c_mfc_inst_init_dec(s3c_mfc_inst_context_t *ctx, s3c_mfc_codec_mode_t codec_mode, unsigned long strm_leng)
 {
 	int i;
 	int yuv_buf_size; /* required size in yuv buffer */
@@ -285,7 +287,7 @@ int s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 	
 	/* checking state */
 	if (!S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_CREATED)) {
-		printk(KERN_ERR "\n%s: sequence init function was called at an incorrect point\n", __FUNCTION__);
+		mfc_err("sequence init function was called at an incorrect point\n");
 		return S3C_MFC_INST_ERR_STATE_CHK;
 	}
 
@@ -294,7 +296,7 @@ int s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 
 	/* stream size checking */
 	if (strm_leng > S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE) {
-		printk(KERN_ERR "\n%s: Input buffer size is too small to hold the input stream.\n", __FUNCTION__);
+		mfc_err("Input buffer size is too small to hold the input stream.\n");
 		return S3C_MFC_INST_ERR_ETC;
 	}
 
@@ -305,7 +307,7 @@ int s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 	 * if write pointer is set to [start + config_leng] instead of [end address of stream buffer],
 	 * then mfc is not initialized when MPEG4 decoding.
 	 */
-	printk(KERN_DEBUG "\n%s: strm_leng = %d\n", __FUNCTION__, (int)strm_leng);
+	mfc_debug("strm_leng = %d\n", (int)strm_leng);
 
 	strm_leng = S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE;
 	
@@ -355,16 +357,16 @@ int s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 											S3C_MFC_PARAM_DEC_SEQ_OPTION);
 	writel(0, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_DEC_SEQ_START_BYTE);
 
-	printk(KERN_DEBUG "\n%s: ctx->inst_no = %d\n", __FUNCTION__, ctx->inst_no);
-	printk(KERN_DEBUG "\n%s: ctx->codec_mode = %d\n", __FUNCTION__, ctx->codec_mode);
-	printk(KERN_DEBUG "\n%s: sequece bit buffer size = %d (kb)\n", __FUNCTION__, 			\
-						readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_DEC_SEQ_BIT_BUF_SIZE));
+	mfc_debug("ctx->inst_no = %d\n", ctx->inst_no);
+	mfc_debug("ctx->codec_mode = %d\n", ctx->codec_mode);
+	mfc_debug("sequece bit buffer size = %d (kb)\n",			\
+		readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_DEC_SEQ_BIT_BUF_SIZE));
 
 	s3c_mfc_set_eos(0);
 
 	/* SEQ_INIT command */
 	if (s3c_mfc_issue_command(ctx->inst_no, ctx->codec_mode, SEQ_INIT) == FALSE) {
-		printk(KERN_ERR "\n%s: sequence init failed\n", __FUNCTION__);
+		mfc_err("sequence init failed\n");
 		s3c_mfc_stream_end();
 		return S3C_MFC_INST_ERR_DEC_INIT_CMD_FAIL;
 	}
@@ -372,17 +374,17 @@ int s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 	s3c_mfc_stream_end();
 
 	if (readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SUCCESS) == TRUE) {
-		printk(KERN_DEBUG "\n%s: RET_DEC_SEQ_SRC_SIZE         = %d\n", __FUNCTION__, 		\
-					readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SRC_SIZE));
-		printk(KERN_DEBUG "\n%s: RET_DEC_SEQ_SRC_FRAME_RATE   = %d\n", __FUNCTION__, 		\
-					readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SRC_FRAME_RATE));
-		printk(KERN_DEBUG "\n%s: RET_DEC_SEQ_FRAME_NEED_COUNT = %d\n", __FUNCTION__, 		\
-					readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_FRAME_NEED_COUNT));
-		printk(KERN_DEBUG "\n%s: RET_DEC_SEQ_FRAME_DELAY      = %d\n", __FUNCTION__, 		\
-					readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_FRAME_DELAY));
+		mfc_debug("RET_DEC_SEQ_SRC_SIZE = %d\n", 			\
+			readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SRC_SIZE));
+		mfc_debug("RET_DEC_SEQ_SRC_FRAME_RATE   = %d\n",		\
+			readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SRC_FRAME_RATE));
+		mfc_debug("RET_DEC_SEQ_FRAME_NEED_COUNT = %d\n",		\
+			readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_FRAME_NEED_COUNT));
+		mfc_debug("RET_DEC_SEQ_FRAME_DELAY = %d\n",			\
+			readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_FRAME_DELAY));
 	} else {
-		printk(KERN_ERR "\n%s: sequece init failed = %d\n", __FUNCTION__, 			\
-					readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SUCCESS));
+		mfc_err("sequece init failed = %d\n",				\
+			readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SUCCESS));
 		return S3C_MFC_INST_ERR_DEC_INIT_CMD_FAIL;
 	}
 
@@ -420,9 +422,8 @@ int s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 	ctx->buf_height += 2 * ctx->padding_size;
 	ctx->RET_DEC_SEQ_INIT_BAK_MP4ASP_VOP_TIME_RES = readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_TIME_RES);
 #endif
-
-	printk(KERN_DEBUG "\n%s: width = %d, height = %d, buf_width = %d, buf_height = %d\n", __FUNCTION__, 	\
-								ctx->width, ctx->height, ctx->buf_width, ctx->buf_height);
+	mfc_debug("width = %d, height = %d, buf_width = %d, buf_height = %d\n",	\
+			ctx->width, ctx->height, ctx->buf_width, ctx->buf_height);
 
 	/*
 	 * getting yuv buffer for this instance
@@ -436,8 +437,8 @@ int s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 #endif
 	yuv_buf_size += 60000;
 	if ( s3c_mfc_get_yuv_buffer_addr(ctx, yuv_buf_size) == FALSE ) {
-		printk(KERN_ERR "\n%s: mfc instance init failed (required frame buffer size = %d)\n", __FUNCTION__, 	\
-													yuv_buf_size);
+		mfc_err("mfc instance init failed (required frame buffer size = %d)\n",		\
+										yuv_buf_size);
 		return S3C_MFC_INST_ERR_ETC;
 	}
 	
@@ -492,7 +493,7 @@ int s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 }
 
 
-int s3c_mfc_instance_enc_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mode_t codec_mode, s3c_mfc_enc_info_t *enc_info)
+int s3c_mfc_instance_init_enc(s3c_mfc_inst_context_t *ctx, s3c_mfc_codec_mode_t codec_mode, s3c_mfc_enc_info_t *enc_info)
 {
 	int i;
 	int yuv_buffer_size;	/* required size in yuv buffer */
@@ -504,19 +505,19 @@ int s3c_mfc_instance_enc_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 
 	/* check parameters from user application */
 	if ((enc_info->width & 0x0F) || (enc_info->height & 0x0F)) {
-		printk(KERN_ERR "\n%s: source picture width and height must be a multiple of 16. width : %d, height : %d\n", \
-				__FUNCTION__, enc_info->width, enc_info->height);
+		mfc_err("source picture width and height must be a multiple of 16. width : %d, height : %d\n", \
+										enc_info->width, enc_info->height);
 
 		return S3C_MFC_INST_ERR_INVALID_PARAM;
 	}
 
 	if (codec_mode < 0 || codec_mode > 6) {
-		printk(KERN_ERR "\n%s: mfc encoder supports MPEG4, H.264 and H.263\n", __FUNCTION__);
+		mfc_err("mfc encoder supports MPEG4, H.264 and H.263\n");
 		return S3C_MFC_INST_ERR_INVALID_PARAM;
 	}
 
 	if (enc_info->gop_number > 60) {
-		printk(KERN_ERR "\n%s: maximum gop number is 60.  GOP number = %d\n", __FUNCTION__, enc_info->gop_number);
+		mfc_err("maximum gop number is 60.  GOP number = %d\n", enc_info->gop_number);
 		return S3C_MFC_INST_ERR_INVALID_PARAM;
 	}
 
@@ -545,8 +546,8 @@ int s3c_mfc_instance_enc_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 	/* codec_mode */
 	ctx->codec_mode = codec_mode;
 
-	printk(KERN_DEBUG "\n%s: ctx->inst_no = %d\n", __FUNCTION__, ctx->inst_no);
-	printk(KERN_DEBUG "\n%s: ctx->codec_mode = %d\n", __FUNCTION__, ctx->codec_mode);
+	mfc_debug("ctx->inst_no = %d\n", ctx->inst_no);
+	mfc_debug("ctx->codec_mode = %d\n", ctx->codec_mode);
 
 	/*
 	 * set stream buffer read/write pointer
@@ -666,12 +667,11 @@ int s3c_mfc_instance_enc_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 					((enc_info->width == 352) && (enc_info->height == 288))|| 	\
 					((enc_info->width == 176) && (enc_info->height == 144)) ||	\
 					((enc_info->width == 128) && (enc_info->height == 96))) {
-					printk(KERN_DEBUG "\n%s: ENC_SEQ_263_PARA = 0x%X\n", __FUNCTION__, 	\
-							readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_ENC_SEQ_263_PARA));
+					mfc_debug("ENC_SEQ_263_PARA = 0x%X\n", 	\
+						readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_ENC_SEQ_263_PARA));
 				} else {	
-					printk(KERN_ERR "\n%s: h.263 encoder supports 4cif, cif, qcif and sub-qcif\n",	\
-														__FUNCTION__);
-					printk(KERN_ERR "\n%s: when all Annex were off\n", __FUNCTION__);
+					mfc_err("h.263 encoder supports 4cif, cif, qcif and sub-qcif\n");
+					mfc_err("when all Annex were off\n");
 					return S3C_MFC_INST_ERR_INVALID_PARAM;
 				}
 			}
@@ -695,7 +695,7 @@ int s3c_mfc_instance_enc_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 			break;
 
 		default:
-			printk(KERN_ERR "\n%s: mfc encoder supports mpeg4, h.264 and h.263\n", __FUNCTION__);
+			mfc_err("mfc encoder supports mpeg4, h.264 and h.263\n");
 			return S3C_MFC_INST_ERR_INVALID_PARAM;
 	}
 
@@ -705,17 +705,17 @@ int s3c_mfc_instance_enc_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 	s3c_mfc_issue_command(ctx->inst_no, ctx->codec_mode, SEQ_INIT);
 
 	if (readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_ENC_SEQ_SUCCESS) == TRUE) {
-		printk(KERN_DEBUG "\n%s: encoding sequence init success\n", __FUNCTION__);
+		mfc_debug("encoding sequence init success\n");
 	} else {
-		printk(KERN_ERR "\n%s: fail to encoding sequence init\n", __FUNCTION__);			
+		mfc_err("fail to encoding sequence init\n");
 		return S3C_MFC_INST_ERR_ENC_INIT_CMD_FAIL;
 	}
 
 	yuv_buffer_size = ((ctx->width * ctx->height * 3) >> 1) * (ctx->yuv_buffer_count + 1);
 	if (s3c_mfc_get_yuv_buffer_addr(ctx, yuv_buffer_size) == FALSE) {
-		printk(KERN_ERR "\n%s: fail to Initialization of MFC instance\n", __FUNCTION__);
-		printk(KERN_ERR "\n%s: fail to mfc instance inititialization (required frame buffer size = %d)\n", 	\
-											__FUNCTION__, yuv_buffer_size);
+		mfc_err("fail to Initialization of MFC instance\n");
+		mfc_err("fail to mfc instance inititialization (required frame buffer size = %d)\n", 	\
+											yuv_buffer_size);
 		return S3C_MFC_INST_ERR_ETC;
 	}
 	ctx->yuv_buffer_allocated = 1;
@@ -754,7 +754,7 @@ int s3c_mfc_instance_enc_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mod
 }
 
 /* this function decodes the input stream and put the decoded frame into the yuv buffer */
-int s3c_mfc_instance_decode(s3c_mfc_instance_context_t *ctx, unsigned long strm_leng)
+int s3c_mfc_inst_dec(s3c_mfc_inst_context_t *ctx, unsigned long strm_leng)
 {
 #if (S3C_MFC_ROTATE_ENABLE == 1)
 	int frame_size;	// width * height
@@ -763,15 +763,15 @@ int s3c_mfc_instance_decode(s3c_mfc_instance_context_t *ctx, unsigned long strm_
 
 	/* checking state */
 	if (S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_DELETED)) {
-		printk(KERN_ERR "\n%s: mfc instance is deleted\n", __FUNCTION__);
+		mfc_err("mfc instance is deleted\n");
 		return S3C_MFC_INST_ERR_STATE_DELETED;
 	}
 	if (S3C_MFC_INST_STATE_PWR_OFF_FLAG_CHECK(ctx)) {
-		printk(KERN_ERR "\n%s: mfc instance is in Power-Off state.\n", __FUNCTION__);
+		mfc_err("mfc instance is in Power-Off state.\n");
 		return S3C_MFC_INST_ERR_STATE_POWER_OFF;
 	}
 	if (S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_CREATED)) {
-		printk(KERN_ERR "\n%s: mfc instance is not initialized\n", __FUNCTION__);
+		mfc_err("mfc instance is not initialized\n");
 		return S3C_MFC_INST_ERR_STATE_CHK;
 	}
 
@@ -870,19 +870,20 @@ int s3c_mfc_instance_decode(s3c_mfc_instance_context_t *ctx, unsigned long strm_
 	}
 	
 	if (readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_PIC_SUCCESS) != 1) {
-		printk(KERN_WARNING "\n%s: RET_DEC_PIC_SUCCESS is not value of 1(=SUCCESS) value is %d\n", __FUNCTION__, \
-						readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_PIC_SUCCESS));
+		mfc_warn("RET_DEC_PIC_SUCCESS is not value of 1(=SUCCESS) value is %d\n", \
+			readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_PIC_SUCCESS));
+		
 	}
 	ctx->run_index = readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_PIC_IDX);
 
 	if (ctx->run_index > 30) {
 		if (ctx->run_index == 0xFFFFFFFF) {		/* RET_DEC_PIC_IDX == -1 */
-			printk(KERN_WARNING "\n%s: end of stream\n", __FUNCTION__);
+			mfc_warn("end of stream\n");
 			return S3C_MFC_INST_ERR_DEC_EOS;
 		} else if (ctx->run_index == 0xFFFFFFFD) {	/* RET_DEC_PIC_IDX == -3 */
-			printk(KERN_DEBUG "\n%s: no picture to be displayed\n", __FUNCTION__);
+			mfc_debug("no picture to be displayed\n");
 		} else {
-			printk(KERN_ERR "\n%s: fail to decoding, ret = %d\n", __FUNCTION__, ctx->run_index);
+			mfc_err("fail to decoding, ret = %d\n", ctx->run_index);
 			return S3C_MFC_INST_ERR_DEC_DECODE_FAIL_ETC;
 		}
 	}
@@ -897,10 +898,6 @@ int s3c_mfc_instance_decode(s3c_mfc_instance_context_t *ctx, unsigned long strm_
 	ctx->RET_DEC_PIC_RUN_BAK_MP4ASP_MP4ASP_TRD = readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_PIC_TRD);
 #endif
 
-	if (readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_PIC_ERR_MB_NUM) > 0)
-        	printk(KERN_ERR "\n%s: report mb error number = %d\n", __FUNCTION__, 	\
-					readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_PIC_ERR_MB_NUM) );
-
 	/* 
 	 * changing state 
 	 * state change to S3C_MFC_INST_STATE_DEC_PIC_RUN_LINE_BUF
@@ -910,54 +907,74 @@ int s3c_mfc_instance_decode(s3c_mfc_instance_context_t *ctx, unsigned long strm_
 	return S3C_MFC_INST_RET_OK;
 }
 
-int s3c_mfc_instance_encode(s3c_mfc_instance_context_t *ctx, int *enc_data_size, int *header_size)
+int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *header_size)
 {
 	int hdr_size, hdr_size2;
 	unsigned int bits_wr_ptr_value = 0;
 	unsigned char *hdr_buf_tmp=NULL;
-
+	unsigned char	*start, *end;
 
 	/* checking state */
 	if (!S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_ENC_INITIALIZED) && 	\
 					!S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_ENC_PIC_RUN_LINE_BUF)) {
-		printk(KERN_ERR "\n%s: mfc encoder instance is not initialized or not using the line buffer\n", __FUNCTION__);
+		mfc_err("mfc encoder instance is not initialized or not using the line buffer\n");
 		return S3C_MFC_INST_ERR_STATE_CHK;
 	}
 
-	/* the 1st call of this function (s3c_mfc_instance_encode) will generate the stream header (mpeg4:VOL, h264:SPS/PPS) */
+	/* the 1st call of this function (s3c_mfc_inst_enc) will generate the stream header (mpeg4:VOL, h264:SPS/PPS) */
 	if (S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_ENC_INITIALIZED)) {
 		if (ctx->codec_mode == MP4_ENC) {
 			/*  ENC_HEADER command  */
-			s3c_mfc_instance_enc_header(ctx, 0, 0, ctx->phys_addr_stream_buffer, ctx->stream_buffer_size, \
+			s3c_mfc_inst_enc_header(ctx, 0, 0, ctx->phys_addr_stream_buffer, ctx->stream_buffer_size, \
 												&hdr_size);	// VOL
 
 			/* Backup the stream header in the temporary header buffer */
 			hdr_buf_tmp = (unsigned char *)kmalloc(hdr_size, GFP_KERNEL);
 			if (hdr_buf_tmp) {
 				memcpy(hdr_buf_tmp, ctx->stream_buffer, hdr_size);
-				dmac_clean_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
-				dmac_flush_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
+				
+				start = ctx->stream_buffer;
+				end = start + hdr_size;
+				dmac_flush_range(start, end);
+
+				start = ctx->phys_addr_stream_buffer;
+				end = start + hdr_size;
+				outer_flush_range(start, end);
 			} else {
 				return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;
 			}
 		} else if (ctx->codec_mode == AVC_ENC) {
 			/*  ENC_HEADER command  */
-			s3c_mfc_instance_enc_header(ctx, 0, 0, ctx->phys_addr_stream_buffer, ctx->stream_buffer_size,	\
+			s3c_mfc_inst_enc_header(ctx, 0, 0, ctx->phys_addr_stream_buffer, ctx->stream_buffer_size,	\
 								&hdr_size); /* SPS */
-			s3c_mfc_instance_enc_header(ctx, 1, 0, ctx->phys_addr_stream_buffer + (hdr_size + 3), 		\
+			s3c_mfc_inst_enc_header(ctx, 1, 0, ctx->phys_addr_stream_buffer + (hdr_size + 3), 		\
 								ctx->stream_buffer_size-(hdr_size+3), &hdr_size2); /* PPS */
 
 			/* backup the stream header in the temporary header buffer */
 			hdr_buf_tmp = (unsigned char *)kmalloc(hdr_size + 3 + hdr_size2, GFP_KERNEL);
 			if (hdr_buf_tmp) {
 				memcpy(hdr_buf_tmp, ctx->stream_buffer, hdr_size);
-				dmac_clean_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
-				dmac_flush_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
+
+				start = ctx->stream_buffer;
+				end = start + hdr_size;
+				dmac_flush_range(start, end);
+
+				start = ctx->phys_addr_stream_buffer;
+				end = start + hdr_size;
+				outer_flush_range(start, end);
+				
 				memcpy(hdr_buf_tmp + hdr_size, (unsigned char *)((unsigned int)(ctx->stream_buffer + 	\
 								(hdr_size + 3)) & 0xFFFFFFFC), hdr_size2);
-				hdr_size = hdr_size + hdr_size2;
-				dmac_clean_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
-				dmac_flush_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));	
+
+				start = (unsigned char *)((unsigned int)(ctx->stream_buffer + (hdr_size + 3)) & 0xFFFFFFFC);
+				end = start + hdr_size2;
+				dmac_flush_range(start, end);
+
+				start = (unsigned char *)((ctx->phys_addr_stream_buffer + (hdr_size + 3)) & 0xFFFFFFFC);
+				end = start + hdr_size2;
+				outer_flush_range(start, end);
+				
+				hdr_size += hdr_size2;
 			} else {
                 		return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;
             		}
@@ -969,16 +986,22 @@ int s3c_mfc_instance_encode(s3c_mfc_instance_context_t *ctx, int *enc_data_size,
 		S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_ENC_PIC_RUN_LINE_BUF) &&
 		(ctx->enc_change_framerate == 1) ) { 
 			
-            		//  ENC_HEADER command  //
-            		s3c_mfc_instance_enc_header(ctx, 0, 0, ctx->phys_addr_stream_buffer, ctx->stream_buffer_size, \
-												&hdr_size);	// VOL
+    		//  ENC_HEADER command  //
+    		s3c_mfc_inst_enc_header(ctx, 0, 0, ctx->phys_addr_stream_buffer, ctx->stream_buffer_size, \
+											&hdr_size);	// VOL
 
-            		// Backup the stream header in the temporary header buffer.
-            		hdr_buf_tmp = (unsigned char *)kmalloc(hdr_size, GFP_KERNEL);
-            		if (hdr_buf_tmp) {
+    		// Backup the stream header in the temporary header buffer.
+    		hdr_buf_tmp = (unsigned char *)kmalloc(hdr_size, GFP_KERNEL);
+    		if (hdr_buf_tmp) {
 			memcpy(hdr_buf_tmp, ctx->stream_buffer, hdr_size);
-			dmac_clean_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
-			dmac_flush_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
+
+			start = ctx->stream_buffer;
+			end = start + hdr_size;
+			dmac_flush_range(start, end);
+
+			start = ctx->phys_addr_stream_buffer;
+			end = start + hdr_size;
+			outer_flush_range(start, end);
 		} else 
 			return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;            							
     	}
@@ -986,14 +1009,21 @@ int s3c_mfc_instance_encode(s3c_mfc_instance_context_t *ctx, int *enc_data_size,
 	/* SEI message with recovery point */
 	if ((ctx->enc_pic_option & 0x0F000000) && (ctx->codec_mode == AVC_ENC)) {
 		/* ENC_HEADER command */
-		s3c_mfc_instance_enc_header(ctx, 4, ((ctx->enc_pic_option & 0x0F000000) >> 24), 	\
+		s3c_mfc_inst_enc_header(ctx, 4, ((ctx->enc_pic_option & 0x0F000000) >> 24), 	\
 						ctx->phys_addr_stream_buffer, ctx->stream_buffer_size, &hdr_size); /* SEI */
 		/* Backup the stream header in the temporary header buffer */
 		hdr_buf_tmp = (unsigned char *)kmalloc(hdr_size, GFP_KERNEL);
 		if (hdr_buf_tmp) {
 			memcpy(hdr_buf_tmp, ctx->stream_buffer, hdr_size);
-			dmac_clean_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
-			dmac_flush_range(ctx->stream_buffer, (ctx->stream_buffer + hdr_size));
+
+			start = ctx->stream_buffer;
+			end = start + hdr_size;
+			dmac_flush_range(start, end);
+
+			start = ctx->phys_addr_stream_buffer;
+			end = start + hdr_size;
+			outer_flush_range(start, end);
+				
 		} else {
 			return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;
 		}
@@ -1050,11 +1080,25 @@ int s3c_mfc_instance_encode(s3c_mfc_instance_context_t *ctx, int *enc_data_size,
 
 	if (hdr_buf_tmp) {
 		memmove(ctx->stream_buffer + hdr_size, ctx->stream_buffer, *enc_data_size);
-		dmac_clean_range(ctx->stream_buffer, (ctx->stream_buffer + *enc_data_size));
-		dmac_flush_range(ctx->stream_buffer, (ctx->stream_buffer + *enc_data_size));
+
+		start = ctx->stream_buffer;
+		end = start + hdr_size + (*enc_data_size);
+		dmac_flush_range(start, end);
+
+		start = ctx->phys_addr_stream_buffer;
+		end = start + hdr_size + (*enc_data_size);
+		outer_flush_range(start, end);
+		
 		memcpy(ctx->stream_buffer, hdr_buf_tmp, hdr_size);
-		dmac_clean_range(ctx->stream_buffer, (ctx->stream_buffer + *enc_data_size));
-		dmac_flush_range(ctx->stream_buffer, (ctx->stream_buffer + *enc_data_size));
+
+		start = ctx->stream_buffer;
+		end = start + hdr_size;
+		dmac_flush_range(start, end);
+
+		start = ctx->phys_addr_stream_buffer;
+		end = start + hdr_size;
+		outer_flush_range(start, end);
+				
 		kfree(hdr_buf_tmp);
 
 		*enc_data_size += hdr_size;
@@ -1072,7 +1116,7 @@ int s3c_mfc_instance_encode(s3c_mfc_instance_context_t *ctx, int *enc_data_size,
 /* hdr_code == 0: SPS */
 /* hdr_code == 1: PPS */
 /* hdr_code == 4: SEI */
-int s3c_mfc_instance_enc_header(s3c_mfc_instance_context_t *ctx, int hdr_code, int hdr_num, unsigned int outbuf_physical_addr,\
+int s3c_mfc_inst_enc_header(s3c_mfc_inst_context_t *ctx, int hdr_code, int hdr_num, unsigned int outbuf_physical_addr,\
 												int outbuf_size, int *hdr_size)
 {
 	unsigned int bit_wr_ptr_value = 0;
@@ -1080,7 +1124,7 @@ int s3c_mfc_instance_enc_header(s3c_mfc_instance_context_t *ctx, int hdr_code, i
 
 	if (!S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_ENC_INITIALIZED) && 		\
 						!S3C_MFC_INST_STATE_CHECK(ctx, S3C_MFC_INST_STATE_ENC_PIC_RUN_LINE_BUF)) {
-		printk(KERN_ERR "\n%s: mfc encoder instance is not initialized or not using the line buffer\n", __FUNCTION__);
+		mfc_err("mfc encoder instance is not initialized or not using the line buffer\n");
 		return S3C_MFC_INST_ERR_STATE_CHK;
 	}
 
@@ -1134,7 +1178,7 @@ int s3c_mfc_instance_enc_header(s3c_mfc_instance_context_t *ctx, int hdr_code, i
 }
 
 
-int s3c_mfc_instance_enc_param_change(s3c_mfc_instance_context_t *ctx, unsigned int param_change_enable, 	\
+int s3c_mfc_inst_enc_param_change(s3c_mfc_inst_context_t *ctx, unsigned int param_change_enable, 	\
 											unsigned int param_change_val)
 {
 	int num_mbs; /* number of MBs */
@@ -1162,7 +1206,7 @@ int s3c_mfc_instance_enc_param_change(s3c_mfc_instance_context_t *ctx, unsigned 
 
 	if (param_change_enable == (1 << 0)) { /* gop number */
 		if (param_change_val > 60) {
-			printk(KERN_ERR "\n%s: mfc encoder parameter change value is invalid\n", __FUNCTION__);
+			mfc_err("mfc encoder parameter change value is invalid\n");
 			return S3C_MFC_INST_ERR_ENC_PARAM_CHANGE_INVALID_VALUE;
 		}
 		writel(param_change_val, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_ENC_CHANGE_GOP_NUM);
@@ -1170,13 +1214,13 @@ int s3c_mfc_instance_enc_param_change(s3c_mfc_instance_context_t *ctx, unsigned 
 		if (((ctx->codec_mode == MP4_DEC || ctx->codec_mode == H263_DEC) && 		\
 					(param_change_val == 0 || param_change_val > 31))	\
 					|| (ctx->codec_mode == AVC_DEC && param_change_val > 51)) {
-			printk(KERN_ERR "\n%s: mfc encoder parameter change value is invalid\n", __FUNCTION__);
+			mfc_err("mfc encoder parameter change value is invalid\n");
 			return S3C_MFC_INST_ERR_ENC_PARAM_CHANGE_INVALID_VALUE;
 		}
 		writel(param_change_val, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_ENC_CHANGE_INTRA_QP);
 	} else if (param_change_enable == (1 << 2)) { /* bitrate */
 		if (param_change_val > 0x07FFF) {
-			printk(KERN_ERR "\n%s: mfc encoder parameter change value is invalid\n", __FUNCTION__);
+			mfc_err("mfc encoder parameter change value is invalid\n");
 			return S3C_MFC_INST_ERR_ENC_PARAM_CHANGE_INVALID_VALUE;
 		}
 		writel(param_change_val, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_ENC_CHANGE_BITRATE);
@@ -1185,7 +1229,7 @@ int s3c_mfc_instance_enc_param_change(s3c_mfc_instance_context_t *ctx, unsigned 
 		ctx->enc_change_framerate = 1;	
 	} else if (param_change_enable == (1 << 4)) { /* intra refresh */
 		if (param_change_val > ((ctx->width * ctx->height) >> 8)) {
-			printk(KERN_ERR "\n%s: mfc encoder parameter change value is invalid\n", __FUNCTION__);
+			mfc_err("mfc encoder parameter change value is invalid\n");
 			return S3C_MFC_INST_ERR_ENC_PARAM_CHANGE_INVALID_VALUE;
 		}
 		writel(param_change_val, s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_ENC_CHANGE_INTRA_REFRESH);
@@ -1197,7 +1241,7 @@ int s3c_mfc_instance_enc_param_change(s3c_mfc_instance_context_t *ctx, unsigned 
 		num_mbs = (ctx->width >> 4) * (ctx->height >> 4);
 
 		if (param_change_val > 256 || param_change_val > num_mbs) {
-			printk(KERN_ERR "\n%s: mfc encoder parameter change value is invalid\n", __FUNCTION__);
+			mfc_err("mfc encoder parameter change value is invalid\n");
 			return S3C_MFC_INST_ERR_ENC_PARAM_CHANGE_INVALID_VALUE;
 		}
 

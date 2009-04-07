@@ -3,6 +3,6 @@ obj-$(CONFIG_VIDEO_MFC10) += prism_s_v137.o s3c_mfc_bitproc_buf.o s3c_mfc.o s3c_
 EXTRA_CFLAGS += -DLINUX
 EXTRA_CFLAGS += -DDIVX_ENABLE
 
-ifeq ($(CONFIG_VIDEO_MFC10_DEBUG),y)
+ifeq ($(CONFIG_VIDEO_MFC_DEBUG),y)
 EXTRA_CFLAGS += -DDEBUG
 endif

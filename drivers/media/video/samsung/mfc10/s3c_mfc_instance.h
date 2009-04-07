@@ -109,7 +109,7 @@ typedef struct
 	unsigned int	RET_DEC_PIC_RUN_BAK_MP4ASP_NONB_TIME_LAST;
 	unsigned int	RET_DEC_PIC_RUN_BAK_MP4ASP_MP4ASP_TRD;
 #endif
-} s3c_mfc_instance_context_t;
+} s3c_mfc_inst_context_t;
 
 
 typedef struct {
@@ -131,28 +131,28 @@ typedef struct {
 #define MFCINST_GAMMA_FACTEE	32768
 */
 
-s3c_mfc_instance_context_t *s3c_mfc_instance_get_context(int inst_no);
-int  s3c_mfc_get_instance_no(s3c_mfc_instance_context_t *ctx);
-BOOL s3c_mfc_instance_get_stream_buffer_rw_ptrs(s3c_mfc_instance_context_t *ctx, unsigned char **read_ptr, unsigned char **write_ptr);
+s3c_mfc_inst_context_t *s3c_mfc_inst_get_context(int inst_no);
+int  s3c_mfc_inst_get_no(s3c_mfc_inst_context_t *ctx);
+BOOL s3c_mfc_inst_get_stream_buff_rw_ptrs(s3c_mfc_inst_context_t *ctx, unsigned char **read_ptr, unsigned char **write_ptr);
 
-s3c_mfc_instance_context_t *s3c_mfc_instance_create(void);
-void s3c_mfc_instance_delete(s3c_mfc_instance_context_t *ctx);
+s3c_mfc_inst_context_t *s3c_mfc_inst_create(void);
+void s3c_mfc_inst_del(s3c_mfc_inst_context_t *ctx);
 
-void s3c_mfc_instance_power_off_state(s3c_mfc_instance_context_t *ctx);
-void s3c_mfc_instance_power_on_state(s3c_mfc_instance_context_t *ctx);
+void s3c_mfc_inst_pow_off_state(s3c_mfc_inst_context_t *ctx);
+void s3c_mfc_inst_pow_on_state(s3c_mfc_inst_context_t *ctx);
 
-int  s3c_mfc_instance_dec_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mode_t codec_mode, unsigned long strm_leng);
-int  s3c_mfc_instance_decode(s3c_mfc_instance_context_t *ctx, unsigned long arg);
+int  s3c_mfc_inst_init_dec(s3c_mfc_inst_context_t *ctx, s3c_mfc_codec_mode_t codec_mode, unsigned long strm_leng);
+int  s3c_mfc_inst_dec(s3c_mfc_inst_context_t *ctx, unsigned long arg);
 
-int  s3c_mfc_instance_enc_init(s3c_mfc_instance_context_t *ctx, s3c_mfc_codec_mode_t codec_mode, s3c_mfc_enc_info_t *enc_info);
-int  s3c_mfc_instance_encode(s3c_mfc_instance_context_t *ctx, int *enc_data_size, int *header_size);
-int  s3c_mfc_instance_enc_header(s3c_mfc_instance_context_t *ctx, int hdr_code, int hdr_num, unsigned int outbuf_physical_addr, int outbuf_size, int *hdr_size);
-int  s3c_mfc_instance_enc_param_change(s3c_mfc_instance_context_t *ctx, unsigned int param_change_enable, unsigned int param_change_val);
+int  s3c_mfc_instance_init_enc(s3c_mfc_inst_context_t *ctx, s3c_mfc_codec_mode_t codec_mode, s3c_mfc_enc_info_t *enc_info);
+int  s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *header_size);
+int  s3c_mfc_inst_enc_header(s3c_mfc_inst_context_t *ctx, int hdr_code, int hdr_num, unsigned int outbuf_physical_addr, int outbuf_size, int *hdr_size);
+int  s3c_mfc_inst_enc_param_change(s3c_mfc_inst_context_t *ctx, unsigned int param_change_enable, unsigned int param_change_val);
 
-unsigned int s3c_mfc_instance_set_post_rotate(s3c_mfc_instance_context_t *ctx, unsigned int post_rotmode);
+unsigned int s3c_mfc_inst_set_post_rotate(s3c_mfc_inst_context_t *ctx, unsigned int post_rotmode);
 
-int  s3c_mfc_instance_get_line_buffer(s3c_mfc_instance_context_t *ctx, unsigned char **buffer, int *size);
-int  s3c_mfc_instance_get_yuv_buffer(s3c_mfc_instance_context_t *ctx, unsigned char **buffer, int *size);
+int  s3c_mfc_inst_get_line_buff(s3c_mfc_inst_context_t *ctx, unsigned char **buffer, int *size);
+int  s3c_mfc_inst_get_yuv_buff(s3c_mfc_inst_context_t *ctx, unsigned char **buffer, int *size);
 
 #define S3C_MFC_INST_RET_OK				(0)
 

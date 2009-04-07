@@ -17,23 +17,28 @@
 #include "s3c_mfc_types.h"
 #include "s3c_mfc_databuf.h"
 #include "s3c_mfc_config.h"
+#include "s3c_mfc.h"
 
 static volatile unsigned char     *s3c_mfc_virt_data_buf = NULL;
 static unsigned int                s3c_mfc_phys_data_buf = 0;
 
 
-BOOL s3c_mfc_databuf_memmapping()
+BOOL s3c_mfc_memmap_databuf()
 {
 	BOOL	ret = FALSE;
 
 	/* STREAM BUFFER, FRAME BUFFER  <-- virtual data buffer address mapping */
-	s3c_mfc_virt_data_buf = (volatile unsigned char *)ioremap_nocache(S3C_MFC_BASEADDR_DATA_BUF, S3C_MFC_DATA_BUF_SIZE);
+	//s3c_mfc_virt_data_buf = (volatile unsigned char *)ioremap_nocache(S3C_MFC_BASEADDR_DATA_BUF, S3C_MFC_DATA_BUF_SIZE);
+	//s3c_mfc_virt_data_buf = (volatile unsigned char *)ioremap(S3C_MFC_BASEADDR_DATA_BUF, S3C_MFC_DATA_BUF_SIZE);
+	s3c_mfc_virt_data_buf = phys_to_virt(s3c_mfc_phys_buffer + S3C_MFC_BITPROC_BUF_SIZE);
 	if (s3c_mfc_virt_data_buf == NULL) {
-		printk(KERN_ERR "\n%s: fail to mapping data buffer\n", __FUNCTION__);
+		mfc_err("fail to mapping data buffer\n");
 		return ret;
 	}
 
-	printk(KERN_DEBUG "\n%s: virtual address of data buffer = 0x%x\n", __FUNCTION__, (unsigned int)s3c_mfc_virt_data_buf);
+	mfc_debug("virtual address of data buffer = 0x%x\n", \
+			(unsigned int)s3c_mfc_virt_data_buf);
+	
 
 	/* Physical register address mapping */
 	s3c_mfc_phys_data_buf = S3C_MFC_BASEADDR_DATA_BUF;
@@ -52,7 +57,7 @@ volatile unsigned char *s3c_mfc_get_databuf_virt_addr()
 	return data_buf;	
 }
 
-volatile unsigned char *s3c_mfc_get_yuv_buff_virt_addr()
+volatile unsigned char *s3c_mfc_get_yuvbuff_virt_addr()
 {
 	volatile unsigned char	*yuv_buff;
 
@@ -70,7 +75,7 @@ unsigned int s3c_mfc_get_databuf_phys_addr()
 	return phys_data_buf;
 }
 
-unsigned int s3c_mfc_get_yuv_buff_phys_addr()
+unsigned int s3c_mfc_get_yuvbuff_phys_addr()
 {
 	unsigned int	phys_yuv_buff;
 
