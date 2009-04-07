@@ -1835,4 +1835,9 @@ v2.6.28.6-samsung-r0d15: Jongpill Lee
 v2.6.28.6-samsung-r1: Jaeryul Oh
         - Official Release (09.04.06)
 
+v2.6.28.6-samsung-r1d0: Jae-Cheol Lee
+	- Modified default configuration for SMDK6440
+
+	Modified Files:
+		M	arch/arm/configs/smdk6440ramdisk_defconfig
 
