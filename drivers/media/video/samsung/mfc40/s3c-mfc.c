@@ -482,6 +482,7 @@ static void __exit s3c_mfc_exit(void)
 module_init( s3c_mfc_init );
 module_exit( s3c_mfc_exit );
 
+MODULE_AUTHOR("Jiun, Yu");
 MODULE_AUTHOR("PyoungJae, Jung");
 MODULE_DESCRIPTION("S3C MFC (Multi Function Codec - FIMV) Device Driver");
 MODULE_LICENSE("GPL");
