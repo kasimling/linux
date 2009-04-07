@@ -131,7 +131,7 @@ s3c24xx_console_init(&s5p_serial_drv, &s5p_uart_inf);
 
 static int __init s5p_serial_init(void)
 {
-	return s5pc1xx_serial_init(&s5p_serial_drv, &s5p_uart_inf);
+	return s3c24xx_serial_init(&s5p_serial_drv, &s5p_uart_inf);
 }
 
 static void __exit s5p_serial_exit(void)
