@@ -24,6 +24,7 @@
 #define RCLK_INT_BIT 	3
 #define VID_CTRL_BIT 	4
 
+unsigned int step_curr;
 
 enum PMIC_VOLTAGE {
 	VOUT_1_00, 
@@ -50,8 +51,8 @@ static const unsigned int voltage_table[11] = {
 static const unsigned int frequency_match[][3] = {
 /* frequency, Mathced VDD ARM voltage , Matched VDD INT*/
 	{666000, VOUT_1_20, VOUT_1_20},
-	{333000, VOUT_1_20, VOUT_1_20},
-	{166500, VOUT_1_20, VOUT_1_20},
+	{333000, VOUT_1_10, VOUT_1_20},
+	{166500, VOUT_1_05, VOUT_1_20},
 };
 
 /* LTC3714 Setting Routine */
@@ -91,11 +92,8 @@ static int set_ltc3714(unsigned int pwr, unsigned int index)
 	int iter = 0;
 	int voltage;
 	int gpio_val;
-	int pwr_out;
 	
 	if(pwr == PMIC_ARM) {
-		pwr_out = RCLK_ARM_BIT;
-		gpio_set_value(S5PC1XX_GPH0(pwr_out), 0);
 		voltage = frequency_match[index][pwr + 1];
 		gpio_val = voltage_table[voltage];
 		gpio_set_value(S5PC1XX_GPH0(RCLK_ARM_BIT), 0);
@@ -103,32 +101,25 @@ static int set_ltc3714(unsigned int pwr, unsigned int index)
 
 		udelay(10);
 		
-		gpio_set_value(S5PC1XX_GPH0(RCLK_ARM_BIT), 0);
-
 	} else if(pwr == PMIC_INT) {
-		pwr_out = RCLK_INT_BIT;
-		gpio_set_value(S5PC1XX_GPH0(pwr_out), 0);
 		voltage = frequency_match[index][pwr + 1];
 		gpio_val = voltage_table[voltage];
 		gpio_set_value(S5PC1XX_GPH0(RCLK_INT_BIT), 0);
+		gpio_set_value(S5PC1XX_GPH0(SRCLK_BIT), 0);
 		gpio_set_value(S5PC1XX_GPH0(VID_CTRL_BIT), 1);
 
 		udelay(10);
-		
+
 		gpio_set_value(S5PC1XX_GPH0(RCLK_INT_BIT), 0);
-	
+		
 	} else if(pwr == PMIC_BOTH) {
-		voltage = frequency_match[index][2];
+		voltage = frequency_match[index][1];
 		gpio_val = voltage_table[voltage];
 		gpio_set_value(S5PC1XX_GPH0(RCLK_ARM_BIT), 0);
 		gpio_set_value(S5PC1XX_GPH0(RCLK_INT_BIT), 0);
 		gpio_set_value(S5PC1XX_GPH0(VID_CTRL_BIT), 1);
 
 		udelay(10);
-		
-		gpio_set_value(S5PC1XX_GPH0(RCLK_ARM_BIT), 0);
-
-		gpio_set_value(S5PC1XX_GPH0(RCLK_INT_BIT), 0);
 
 	}else {
 		printk("[error]: set_power, check mode [pwr] value\n");
@@ -147,12 +138,14 @@ static int set_ltc3714(unsigned int pwr, unsigned int index)
 	gpio_set_value(S5PC1XX_GPH0(SRCLK_BIT), 0);
 	gpio_set_value(S5PC1XX_GPH0(SER_BIT), 0);
 
+	udelay(10);
+	
 	gpio_set_value(S5PC1XX_GPH0(VID_CTRL_BIT), 0);
 
 	switch(pwr) {
 		case PMIC_ARM:
 			gpio_set_value(S5PC1XX_GPH0(RCLK_ARM_BIT), 1);
-			udelay(10);
+			udelay(10);		
 			gpio_set_value(S5PC1XX_GPH0(RCLK_ARM_BIT), 0);
 			break;
 		case PMIC_INT:
@@ -163,8 +156,7 @@ static int set_ltc3714(unsigned int pwr, unsigned int index)
 		case PMIC_BOTH:
 			gpio_set_value(S5PC1XX_GPH0(RCLK_ARM_BIT), 1);
 			gpio_set_value(S5PC1XX_GPH0(RCLK_INT_BIT), 1);
-			udelay(10);
-			
+			udelay(10);			
 			gpio_set_value(S5PC1XX_GPH0(RCLK_ARM_BIT), 0);
 			gpio_set_value(S5PC1XX_GPH0(RCLK_INT_BIT), 0);
 			break;
@@ -203,10 +195,13 @@ int set_power(unsigned int freq)
 
 	index = find_voltage(freq);
 
-	//printk("%s : index = %d\n", __FUNCTION__, index);
+	printk("%s : index = %d\n", __FUNCTION__, index);
+	if(step_curr != index) {
+		set_ltc3714(PMIC_ARM, index);
+		set_ltc3714(PMIC_INT, index);
 
-	set_ltc3714(PMIC_BOTH, index);
-
+		step_curr = index;
+	}
 	return 0;
 }
 
@@ -214,6 +209,7 @@ EXPORT_SYMBOL(set_power);
 
 void ltc3714_init(void)
 {
+	step_curr = 0;
 	ltc3714_gpio_setting();
 	set_power(666000);
 }
