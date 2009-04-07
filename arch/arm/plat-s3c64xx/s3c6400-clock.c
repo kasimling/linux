@@ -88,10 +88,146 @@ struct clksrc_clk clk_mout_apll = {
 	.sources	= &clk_src_apll,
 };
 
+static inline struct clksrc_clk *to_clksrc(struct clk *clk)
+{
+	return container_of(clk, struct clksrc_clk, clk);
+}
+
+int fout_enable(struct clk *clk, int enable)
+{
+	unsigned int ctrlbit = clk->ctrlbit;
+	unsigned int epll_con0 = __raw_readl(S3C_EPLL_CON0) & ~ ctrlbit;
+
+	if(enable)
+	   __raw_writel(epll_con0 | ctrlbit, S3C_EPLL_CON0);
+	else
+	   __raw_writel(epll_con0, S3C_EPLL_CON0);
+
+	return 0;
+}
+
+unsigned long fout_get_rate(struct clk *clk)
+{
+	return clk->rate;
+}
+
+int fout_set_rate(struct clk *clk, unsigned long rate)
+{
+	unsigned int epll_con0, epll_con1;
+
+	if(clk->rate == rate)	/* Return if nothing changed */
+		return 0;
+
+	epll_con0 = __raw_readl(S3C_EPLL_CON0);
+	epll_con1 = __raw_readl(S3C_EPLL_CON1);
+
+	epll_con0 &= ~(S3C64XX_EPLL_CON0_M_MASK | S3C64XX_EPLL_CON0_P_MASK | S3C64XX_EPLL_CON0_S_MASK);
+	epll_con1 &= ~(S3C64XX_EPLL_CON1_K_MASK);
+
+	switch(rate){
+	case 36000000:
+			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (48 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (4 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 48000000:
+			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (32 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 60000000:
+			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (40 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 72000000:
+			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (48 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 84000000:
+			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (28 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (2 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 96000000:
+			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (32 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (2 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 32768000:
+			epll_con1 |= (45264 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (43 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (4 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 45158000:
+			epll_con1 |= (6903 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (30 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 49152000:
+			epll_con1 |= (50332 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (32 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 67738000:
+			epll_con1 |= (10398 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (45 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	case 73728000:
+			epll_con1 |= (9961 << S3C64XX_EPLL_CON1_K_SHIFT);
+			epll_con0 |= (49 << S3C64XX_EPLL_CON0_M_SHIFT) | 
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			break;
+	default:
+			printk(KERN_ERR "Invalid Clock Freq!\n");
+			return -EINVAL;
+	}
+
+	__raw_writel(epll_con0, S3C_EPLL_CON0);
+	__raw_writel(epll_con1, S3C_EPLL_CON1);
+
+	clk->rate = rate;
+
+	return 0;
+}
+
 struct clk clk_fout_epll = {
 	.name		= "fout_epll",
 	.id		= -1,
+	.ctrlbit	= (1<<31),
+	.enable		= fout_enable,
+	.get_rate	= fout_get_rate,
+	.set_rate	= fout_set_rate,
 };
+
+int mout_set_parent(struct clk *clk, struct clk *parent)
+{
+	int src_nr = -1;
+	int ptr;
+	u32 clksrc;
+	struct clksrc_clk *sclk = to_clksrc(clk);
+	struct clk_sources *srcs = sclk->sources;
+
+	clksrc = __raw_readl(S3C_CLK_SRC);
+
+	for (ptr = 0; ptr < srcs->nr_sources; ptr++)
+		if (srcs->sources[ptr] == parent) {
+			src_nr = ptr;
+			break;
+		}
+
+	if (src_nr >= 0) {
+		clksrc &= ~sclk->mask;
+		clksrc |= src_nr << sclk->shift;
+		__raw_writel(clksrc, S3C_CLK_SRC);
+		clk->parent = parent;
+		return 0;
+	}
+
+	return -EINVAL;
+}
 
 static struct clk *clk_src_epll_list[] = {
 	[0] = &clk_fin_epll,
@@ -107,6 +243,7 @@ struct clksrc_clk clk_mout_epll = {
 	.clk	= {
 		.name		= "mout_epll",
 		.id		= -1,
+		.set_parent	= mout_set_parent,
 	},
 	.shift		= S3C6400_CLKSRC_EPLL_MOUT_SHIFT,
 	.mask		= S3C6400_CLKSRC_EPLL_MOUT,
@@ -211,11 +348,6 @@ static struct clk_sources clkset_uhost = {
  * have a common parent divisor so are not included here.
  */
 
-static inline struct clksrc_clk *to_clksrc(struct clk *clk)
-{
-	return container_of(clk, struct clksrc_clk, clk);
-}
-
 static unsigned long s3c64xx_getrate_clksrc(struct clk *clk)
 {
 	struct clksrc_clk *sclk = to_clksrc(clk);
@@ -241,20 +373,29 @@ static int s3c64xx_setrate_clksrc(struct clk *clk, unsigned long rate)
 	div = clk_get_rate(clk->parent) / rate;
 
 	val = __raw_readl(reg);
-	val &= ~sclk->mask;
-	val |= (rate - 1) << sclk->shift;
+	val &= ~(0xf << sclk->divider_shift);
+	val |= ((div - 1) << sclk->divider_shift);
 	__raw_writel(val, reg);
 
 	return 0;
 }
 
+static struct clksrc_clk clk_audio2;
+
 static int s3c64xx_setparent_clksrc(struct clk *clk, struct clk *parent)
 {
-	struct clksrc_clk *sclk = to_clksrc(clk);
-	struct clk_sources *srcs = sclk->sources;
-	u32 clksrc = __raw_readl(S3C_CLK_SRC);
 	int src_nr = -1;
 	int ptr;
+	u32 clksrc;
+	struct clksrc_clk *sclk = to_clksrc(clk);
+	struct clk_sources *srcs = sclk->sources;
+
+#ifdef CONFIG_CPU_S3C6410
+	if(sclk == &clk_audio2)
+	   clksrc = __raw_readl(S3C_CLK_SRC2);
+	else
+#endif
+	   clksrc = __raw_readl(S3C_CLK_SRC);
 
 	for (ptr = 0; ptr < srcs->nr_sources; ptr++)
 		if (srcs->sources[ptr] == parent) {
@@ -266,7 +407,14 @@ static int s3c64xx_setparent_clksrc(struct clk *clk, struct clk *parent)
 		clksrc &= ~sclk->mask;
 		clksrc |= src_nr << sclk->shift;
 
-		__raw_writel(clksrc, S3C_CLK_SRC);
+#ifdef CONFIG_CPU_S3C6410
+		if(sclk == &clk_audio2)
+		   __raw_writel(clksrc, S3C_CLK_SRC2);
+		else
+#endif
+		   __raw_writel(clksrc, S3C_CLK_SRC);
+
+		clk->parent = parent;
 		return 0;
 	}
 
@@ -433,17 +581,29 @@ static struct clk clk_iis_cd1 = {
 	.id		= -1,
 };
 
-static struct clk clk_pcm_cd = {
-	.name		= "pcm_cdclk",
+static struct clk clk_iis_cd_v40 = {
+	.name		= "iis_cdclk_v40",
 	.id		= -1,
 };
+
+static struct clk clk_pcm_cd0 = {
+	.name		= "pcm_cdclk0",
+	.id		= -1,
+};
+
+#ifdef CONFIG_CPU_S3C6410
+static struct clk clk_pcm_cd1 = {
+	.name		= "pcm_cdclk1",
+	.id		= -1,
+};
+#endif
 
 static struct clk *clkset_audio0_list[] = {
 	[0] = &clk_mout_epll.clk,
 	[1] = &clk_dout_mpll,
 	[2] = &clk_fin_epll,
 	[3] = &clk_iis_cd0,
-	[4] = &clk_pcm_cd,
+	[4] = &clk_pcm_cd0,
 };
 
 static struct clk_sources clkset_audio0 = {
@@ -453,8 +613,8 @@ static struct clk_sources clkset_audio0 = {
 
 static struct clksrc_clk clk_audio0 = {
 	.clk	= {
-		.name		= "audio-bus",
-		.id		= 0,
+		.name		= "audio-bus0",
+		.id		= -1,
 		.ctrlbit        = S3C_CLKCON_SCLK_AUDIO0,
 		.enable		= s3c64xx_sclk_ctrl,
 		.set_parent	= s3c64xx_setparent_clksrc,
@@ -474,7 +634,11 @@ static struct clk *clkset_audio1_list[] = {
 	[1] = &clk_dout_mpll,
 	[2] = &clk_fin_epll,
 	[3] = &clk_iis_cd1,
-	[4] = &clk_pcm_cd,
+#ifdef CONFIG_CPU_S3C6410
+	[4] = &clk_pcm_cd1,
+#else
+	[4] = &clk_pcm_cd0,
+#endif
 };
 
 static struct clk_sources clkset_audio1 = {
@@ -484,8 +648,8 @@ static struct clk_sources clkset_audio1 = {
 
 static struct clksrc_clk clk_audio1 = {
 	.clk	= {
-		.name		= "audio-bus",
-		.id		= 1,
+		.name		= "audio-bus1",
+		.id		= -1,
 		.ctrlbit        = S3C_CLKCON_SCLK_AUDIO1,
 		.enable		= s3c64xx_sclk_ctrl,
 		.set_parent	= s3c64xx_setparent_clksrc,
@@ -499,6 +663,39 @@ static struct clksrc_clk clk_audio1 = {
 	.divider_shift	= S3C6400_CLKDIV2_AUDIO1_SHIFT,
 	.reg_divider	= S3C_CLK_DIV2,
 };
+
+#ifdef CONFIG_CPU_S3C6410
+static struct clk *clkset_audio2_list[] = {
+	[0] = &clk_mout_epll.clk,
+	[1] = &clk_dout_mpll,
+	[2] = &clk_fin_epll,
+	[3] = &clk_iis_cd_v40,
+	[4] = &clk_pcm_cd1,
+};
+
+static struct clk_sources clkset_audio2 = {
+	.sources	= clkset_audio2_list,
+	.nr_sources	= ARRAY_SIZE(clkset_audio2_list),
+};
+
+static struct clksrc_clk clk_audio2 = {
+	.clk	= {
+		.name		= "audio-bus2",
+		.id		= -1,
+		.ctrlbit        = S3C6410_CLKCON_SCLK_AUDIO2,
+		.enable		= s3c64xx_sclk_ctrl,
+		.set_parent	= s3c64xx_setparent_clksrc,
+		.get_rate	= s3c64xx_getrate_clksrc,
+		.set_rate	= s3c64xx_setrate_clksrc,
+		.round_rate	= s3c64xx_roundrate_clksrc,
+	},
+	.shift		= S3C6410_CLKSRC2_AUDIO2_SHIFT,
+	.mask		= S3C6410_CLKSRC2_AUDIO2_MASK,
+	.sources	= &clkset_audio2,
+	.divider_shift	= S3C6410_CLKDIV2_AUDIO2_SHIFT,
+	.reg_divider	= S3C_CLK_DIV2,
+};
+#endif
 
 static struct clksrc_clk clk_irda = {
 	.clk	= {
@@ -533,13 +730,24 @@ static struct clksrc_clk *init_parents[] = {
 	&clk_spi1,
 	&clk_audio0,
 	&clk_audio1,
+#ifdef CONFIG_CPU_S3C6410
+	&clk_audio2,
+#endif
 	&clk_irda,
 };
 
 static void __init_or_cpufreq s3c6400_set_clksrc(struct clksrc_clk *clk)
 {
 	struct clk_sources *srcs = clk->sources;
-	u32 clksrc = __raw_readl(S3C_CLK_SRC);
+	u32 clksrc;
+
+#ifdef CONFIG_CPU_S3C6410
+	if(clk == &clk_audio2)
+	   clksrc = __raw_readl(S3C_CLK_SRC2);
+	else
+#endif
+	   clksrc = __raw_readl(S3C_CLK_SRC);
+
 
 	clksrc &= clk->mask;
 	clksrc >>= clk->shift;
@@ -639,7 +847,11 @@ static struct clk *clks[] __initdata = {
 	&clk_ext_xtal_mux,
 	&clk_iis_cd0,
 	&clk_iis_cd1,
-	&clk_pcm_cd,
+	&clk_iis_cd_v40,
+	&clk_pcm_cd0,
+#ifdef CONFIG_CPU_S3C6410
+	&clk_pcm_cd1,
+#endif
 	&clk_mout_epll.clk,
 	&clk_fout_epll,
 	&clk_mout_mpll.clk,
@@ -653,6 +865,9 @@ static struct clk *clks[] __initdata = {
 	&clk_spi1.clk,
 	&clk_audio0.clk,
 	&clk_audio1.clk,
+#ifdef CONFIG_CPU_S3C6410
+	&clk_audio2.clk,
+#endif
 	&clk_irda.clk,
 };
 

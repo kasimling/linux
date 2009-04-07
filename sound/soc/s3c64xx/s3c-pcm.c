@@ -144,7 +144,7 @@ static void s3c24xx_audio_buffdone(struct s3c2410_dma_chan *channel,
 
 		spin_lock(&prtd->lock);
 		if (prtd->state & ST_RUNNING) {
-		//	prtd->dma_loaded--;
+			prtd->dma_loaded--;
 			s3c24xx_pcm_enqueue(substream);
 		}
 
@@ -341,7 +341,7 @@ static int s3c24xx_pcm_trigger(struct snd_pcm_substream *substream, int cmd)
 	case SNDRV_PCM_TRIGGER_PAUSE_RELEASE:
 		prtd->state |= ST_RUNNING;
 		s3c2410_dma_ctrl(prtd->params->channel, S3C2410_DMAOP_START);
-#if !defined (CONFIG_CPU_S3C6400) && !defined (CONFIG_CPU_S3C6410) 
+#if !defined (CONFIG_CPU_S3C6400) && !defined (CONFIG_CPU_S3C6410) && !defined (CONFIG_CPU_S5P6440)
 		s3c2410_dma_ctrl(prtd->params->channel, S3C2410_DMAOP_STARTED);
 #endif		
 		break;
