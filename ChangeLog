@@ -1835,9 +1835,13 @@ v2.6.28.6-samsung-r0d15: Jongpill Lee
 v2.6.28.6-samsung-r1: Jaeryul Oh
         - Official Release (09.04.06)
 
-v2.6.28.6-samsung-r1d0: Jaeryul Oh
-	- MFC, JPEG suspend/resume related code changed
+v2.6.28.6-samsung-r1d0: Jae-Cheol Lee
+	- Modified default configuration for SMDK6440
+	Modified Files:
+		M	arch/arm/configs/smdk6440ramdisk_defconfig
 
+v2.6.28.6-samsung-r1d1: Jaeryul Oh
+	- MFC, JPEG suspend/resume related code for SMDK6410 changed
 	Modified Files :
 		M       drivers/media/video/samsung/jpeg/jpg_mem.c
 		M       drivers/media/video/samsung/jpeg/s3c-jpeg.c

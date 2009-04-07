@@ -707,6 +707,9 @@ void s3cfb_activate_var(s3cfb_info_t *fbi, struct fb_var_screeninfo *var)
 	}
 
 	/* write new registers */
+
+/* FIXME: temporary fixing for pm by jsgood */
+#if 0
 	writel(s3cfb_fimd.wincon0, S3C_WINCON0);
 	writel(s3cfb_fimd.wincon1, S3C_WINCON1);
 	writel(s3cfb_fimd.wincon2, S3C_WINCON2);
@@ -715,6 +718,10 @@ void s3cfb_activate_var(s3cfb_info_t *fbi, struct fb_var_screeninfo *var)
 	writel(s3cfb_fimd.wpalcon, S3C_WPALCON);
 	writel(s3cfb_fimd.wincon0 | S3C_WINCONx_ENWIN_F_ENABLE, S3C_WINCON0);
 	writel(s3cfb_fimd.vidcon0 | S3C_VIDCON0_ENVID_ENABLE | S3C_VIDCON0_ENVID_F_ENABLE, S3C_VIDCON0);
+#else
+	writel(readl(S3C_WINCON0) | S3C_WINCONx_ENWIN_F_ENABLE, S3C_WINCON0);
+	writel(readl(S3C_VIDCON0) | S3C_VIDCON0_ENVID_ENABLE | S3C_VIDCON0_ENVID_F_ENABLE, S3C_VIDCON0);
+#endif
 }
 
 /* JJNAHM comment.
@@ -1427,7 +1434,7 @@ int s3cfb_resume(struct platform_device *dev)
 	clk_enable(info->clk);
 	s3c6410_pm_do_restore(s3c_lcd_save, ARRAY_SIZE(s3c_lcd_save));
 
-	s3cfb_init_hw();
+	s3cfb_set_gpio();
 	s3cfb_start_lcd();
 
 	return 0;

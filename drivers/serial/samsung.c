@@ -1208,36 +1208,7 @@ static int s3c24xx_serial_resume(struct platform_device *dev)
 
 	return 0;
 }
-
-static int s5pc1xx_serial_suspend(struct platform_device *dev)
-{
-	struct uart_port *port = s3c24xx_dev_to_port(&dev->dev);
-
-	return 0;
-}
-
-static int s5pc1xx_serial_resume(struct platform_device *dev)
-{
-	struct uart_port *port = s3c24xx_dev_to_port(&dev->dev);
-	struct s3c24xx_uart_port *ourport = to_ourport(port);
-
-	return 0;
-}
 #endif
-
-int s5pc1xx_serial_init(struct platform_driver *drv,
-			struct s3c24xx_uart_info *info)
-{
-	dbg("s3c24xx_serial_init(%p,%p)\n", drv, info);
-
-#ifdef CONFIG_PM
-	drv->suspend = s5pc1xx_serial_suspend;
-	drv->resume = s5pc1xx_serial_resume;
-#endif
-
-	return platform_driver_register(drv);
-}
-
 
 int s3c24xx_serial_init(struct platform_driver *drv,
 			struct s3c24xx_uart_info *info)
