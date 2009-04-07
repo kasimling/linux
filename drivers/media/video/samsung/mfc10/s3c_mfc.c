@@ -683,31 +683,11 @@ static struct miscdevice s3c_mfc_miscdev = {
 	fops:		&s3c_mfc_fops
 };
 
-static BOOL s3c_mfc_clock_setup(void)
-{
-	unsigned int	mfc_clk;
-	
-	/* mfc clock set 133 Mhz */
-	mfc_clk = readl(S3C_CLK_DIV0);
-	mfc_clk |= (1 << 28);
-	__raw_writel(mfc_clk, S3C_CLK_DIV0);
-
-	return TRUE;
-
-}
-
 static int s3c_mfc_probe(struct platform_device *pdev)
 {
-<<<<<<< HEAD:drivers/media/video/samsung/mfc10/s3c_mfc.c
-	int size;
-	int ret;
-	struct resource *res;
-	unsigned int mfc_clk;
-=======
 	int	size;
 	int	ret;
 	struct resource *res;	
->>>>>>> af05378c099b4f1d15fe42339f23c38a2bd17748:drivers/media/video/samsung/mfc10/s3c_mfc.c
 
 	/* mfc clock enable  */
 	s3c_mfc_hclk = clk_get(NULL, "hclk_mfc");
@@ -772,9 +752,10 @@ static int s3c_mfc_probe(struct platform_device *pdev)
 
 	mutex_init(s3c_mfc_mutex);
 
-	/* MFC clock set 133 Mhz */
-	if (s3c_mfc_clock_setup() == FALSE)
-		return -ENODEV;
+	/* mfc clock set 133 Mhz */
+	mfc_clk = readl(S3C_CLK_DIV0);
+	mfc_clk |= (1 << 28);
+	__raw_writel(mfc_clk, S3C_CLK_DIV0);
 
 	/*
 	 * 2. MFC Memory Setup
