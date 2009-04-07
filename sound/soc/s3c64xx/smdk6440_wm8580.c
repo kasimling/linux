@@ -1,9 +1,7 @@
 /*
- * smdk6400_wm8580.c
+ * smdk6440_wm8580.c
  *
- * Copyright 2007, 2008 Wolfson Microelectronics PLC.
- *
- * Copyright (C) 2007, Ryu Euiyoul <ryu.real@gmail.com>
+ * Copyright (C) 2009, Samsung Elect. Ltd. - Jaswinder Singh <jassisinghbrar@gmail.com>
  *
  *  This program is free software; you can redistribute  it and/or modify it
  *  under  the terms of  the GNU General  Public License as published by the
@@ -11,193 +9,147 @@
  *  option) any later version.
  */
 
-#include <linux/module.h>
-#include <linux/moduleparam.h>
-#include <linux/timer.h>
+//#define USE_GPR
+
 #include <linux/interrupt.h>
 #include <linux/platform_device.h>
-#include <linux/i2c.h>
 #include <sound/core.h>
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
 #include <sound/soc.h>
 #include <sound/soc-dapm.h>
 
-#include <asm/mach-types.h>
-
-#include <plat/regs-iis.h>
-#include <plat/map-base.h>
+#include <asm/io.h>
 #include <asm/gpio.h> 
+#include <mach/map.h>
+#include <plat/regs-gpio.h> 
 #include <plat/gpio-cfg.h> 
-#include <plat/regs-gpio.h>
+
+#ifdef USE_GPR
+#include <plat/gpio-bank-r.h>
+#else
 #include <plat/gpio-bank-h.h>
 #include <plat/gpio-bank-c.h>
-#include <plat/gpio-bank-r.h>
+#endif
 
-#include <mach/hardware.h>
-#include <mach/audio.h>
-#include <asm/io.h>
+#include <plat/map-base.h>
 #include <plat/regs-clock.h>
 
 #include "../codecs/wm8580.h"
 #include "s3c-pcm.h"
-#include "s3c-i2s.h"
 
-#ifdef CONFIG_SND_DEBUG
-#define s3cdbg(x...) printk(x)
-#else
-#define s3cdbg(x...)
-#endif
+#include "s5p6440-i2s.h"
 
-static int smdk6440_hifi_hw_params(struct snd_pcm_substream *substream,
+#define SRC_CLK	s5p6440_i2s_get_clockrate()
+
+/* XXX BLC(bits-per-channel) --> BFS(bit clock shud be >= FS*(Bit-per-channel)*2) XXX */
+/* XXX BFS --> RFS(must be a multiple of BFS)                                 XXX */
+/* XXX RFS & SRC_CLK --> Prescalar Value(SRC_CLK / RFS_VAL / fs - 1)          XXX */
+static int smdk6440_hw_params(struct snd_pcm_substream *substream,
 	struct snd_pcm_hw_params *params)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
-	//struct snd_soc_codec_dai *codec_dai = rtd->dai->codec_dai;
 	struct snd_soc_dai *cpu_dai = rtd->dai->cpu_dai;
-	unsigned int pll_out = 0; /*bclk = 0; */
-	int ret = 0;
-	unsigned int prescaler;
+	struct snd_soc_dai *codec_dai = rtd->dai->codec_dai;
+	int bfs, rfs, psr, ret;
 
-	s3cdbg("Entered %s, rate = %d\n", __FUNCTION__, params_rate(params));
-
-	/*PCLK & SCLK gating enable*/
-	writel(readl(S3C_CLK_GATE_PCLK)|S3C_CLKCON_PCLK_IIS2, S3C_CLK_GATE_PCLK);
-	writel(readl(S3C_CLK_GATE_SCLK0)|S3C_CLKCON_SCLK0_AUDIO2, S3C_CLK_GATE_SCLK0);
-	writel(readl(S3C_CLK_GATE_SCLK0)|S3C_CLKCON_SCLK0_MMC1, S3C_CLK_GATE_SCLK0);
-
-	/*HCLK Gating Enable*/
-	writel(readl(S3C_CLK_GATE_HCLK0)|S3C_CLKCON_HCLK0_HSMMC1, S3C_CLK_GATE_HCLK0);
-
-	/*Clear I2S prescaler value [13:8] and disable prescaler*/
-	/* set prescaler division for sample rate */
-	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S3C24XX_DIV_PRESCALER, 0);
-	if (ret < 0)
-		return ret;
-	
-	s3cdbg("%s: %d , params = %d\n", __FUNCTION__, __LINE__, params_rate(params));
-
-	switch (params_rate(params)) {
-	case 8000:
-	case 16000:
-	case 32000:
-	case 64100:
-		writel(50332, S3C_EPLL_CON);
-		writel((1<<31)|(32<<16)|(1<<8)|(3<<0) ,S3C_EPLL_CON);
-		break;
-	case 11025:
-	case 22050:
-	case 44100:
-	case 88200:
-		/* K=10398, M=45, P=1, S=3 -- Fout=67.738 */
-		writel(10398, S3C_EPLL_CON);
-		writel((1<<31)|(45<<16)|(1<<8)|(3<<0) ,S3C_EPLL_CON);
-		break;
-	case 48000:
-	case 96000:
-		/* K=9961, M=49, P=1, S=3 -- Fin=12, Fout=73.728; r=1536 */
-		writel(9961, S3C_EPLL_CON);
-		writel((1<<31)|(49<<16)|(1<<8)|(3<<0) ,S3C_EPLL_CON);
-		break;
-	default:
-		writel(0, S3C_EPLL_CON);
-		writel((1<<31)|(128<<16)|(25<<8)|(0<<0) ,S3C_EPLL_CON);
-		break;
-	}
-
-//	while(!(__raw_readl(S3C_EPLL_CON0)&(1<<30)));
-
-	/* MUXepll : FOUTepll */
-	writel(readl(S3C_CLK_SRC0)|S3C_CLKSRC_MPLL_MOUT, S3C_CLK_SRC0);
-
-	/* AUDIO2 sel : FOUTepll */
-	//writel((readl(S3C_CLK_SRC1)&~(0x7<<0))|(0<<0), S3C_CLK_SRC1);
-	writel((readl(S3C_CLK_SRC1)&~(0x7<<0))|(3<<0), S3C_CLK_SRC1);
-
-	/* CLK_DIV2 setting */
-	//writel(0x0,S3C_CLK_DIV2);
-	writel(0x2,S3C_CLK_DIV2);
-
-	switch (params_rate(params)) {
-	case 8000:
-		pll_out = 2048000;
-		prescaler = 8;
-		break;
-	case 11025:
-		pll_out = 2822400;
-		prescaler = 8; 
-		break;
-	case 16000:
-		pll_out = 4096000;
-		prescaler = 4; 
-		break;
-	case 22050:
-		pll_out = 5644800;
-		prescaler = 4; 
-		break;
-	case 32000:
-		pll_out = 8192000;
-		prescaler = 2; 
-		break;
-	case 44100:
-		/* Fout=73.728 */
-		pll_out = 11289600;
-		prescaler = 2;
-		break;
-	case 48000:
-		/* Fout=67.738 */
-		pll_out = 12288000;
-		prescaler = 2; 
-		break;
-	case 88200:
-		pll_out = 22579200;
-		prescaler = 1; 
-		break;
-	case 96000:
-		pll_out = 24576000;
-		prescaler = 1;
-		break;
-	default:
-		/* somtimes 32000 rate comes to 96000 
-		   default values are same as 32000 */
-		prescaler = 4;
-		pll_out = 12288000;
-		break;
-	}
-
-	/* set MCLK division for sample rate */
+	/* Choose BFS and RFS values combination that is supported by
+	 * both the WM8580 codec as well as the S5P6440 AP
+	 *
+	 * WM8580 codec supports only S16_LE, S20_3LE, S24_LE & S32_LE.
+	 * S5P6440 AP supports only S8, S16_LE & S24_LE.
+	 * We implement all for completeness but only S16_LE & S24_LE bit-lengths 
+	 * are possible for this AP-Codec combination.
+	 */
 	switch (params_format(params)) {
 	case SNDRV_PCM_FORMAT_S8:
-	case SNDRV_PCM_FORMAT_S16_LE:
-		prescaler *= 3;
-		break;
-	case SNDRV_PCM_FORMAT_S24_3LE:
-		prescaler *= 2;
-		break;
-	case SNDRV_PCM_FORMAT_S24_LE:
-		prescaler *= 2;
+		bfs = 16;
+		rfs = 256;		/* Can take any RFS value for AP */
+ 		break;
+ 	case SNDRV_PCM_FORMAT_S16_LE:
+		bfs = 32;
+		rfs = 256;		/* Can take any RFS value for AP */
+ 		break;
+	case SNDRV_PCM_FORMAT_S18_3LE:
+	case SNDRV_PCM_FORMAT_S20_3LE:
+		bfs = 48;
+		rfs = 384;		/* Can take only 384fs or 768fs RFS value for AP */
+ 		break;
+ 	case SNDRV_PCM_FORMAT_S24_LE:
+		bfs = 48;
+		rfs = 512;		/* See Table 41-1,2 of S5P6440 UserManual */
+ 		break;
+ 	case SNDRV_PCM_FORMAT_S32_LE:	/* Impossible, as the AP doesn't support 64fs or more BFS */
+	default:
+		return -EINVAL;
+ 	}
+ 
+	/* Select the AP Sysclk */
+#ifdef USE_CLKAUDIO
+	ret = snd_soc_dai_set_sysclk(cpu_dai, S5P6440_CLKSRC_CLKAUDIO, params_rate(params), SND_SOC_CLOCK_OUT);
+#else
+	ret = snd_soc_dai_set_sysclk(cpu_dai, S5P6440_CLKSRC_PCLK, 0, SND_SOC_CLOCK_OUT);
+#endif
+	if (ret < 0)
+		return ret;
+
+	/* Set the AP DAI configuration */
+	ret = snd_soc_dai_set_fmt(cpu_dai, SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBS_CFS);
+	if (ret < 0)
+		return ret;
+
+	/* Set the AP RFS */
+	ret = snd_soc_dai_set_clkdiv(cpu_dai, S5P64XX_DIV_MCLK, rfs);
+	if (ret < 0)
+		return ret;
+
+	/* Set the AP BFS */
+	ret = snd_soc_dai_set_clkdiv(cpu_dai, S5P64XX_DIV_BCLK, bfs);
+	if (ret < 0)
+		return ret;
+
+	switch (params_rate(params)) {
+	case 8000:
+	case 11025:
+	case 16000:
+	case 22050:
+	case 32000:
+	case 44100: 
+	case 48000:
+	case 64000:
+	case 88200:
+	case 96000:
+		psr = SRC_CLK / rfs / params_rate(params);
+		ret = SRC_CLK / rfs - psr * params_rate(params);
+		if(ret >= params_rate(params)/2)	// round off
+		   psr += 1;
+		psr -= 1;
 		break;
 	default:
 		return -EINVAL;
 	}
 
-	prescaler = prescaler - 1; 
+	//printk("SRC_CLK=%d PSR=%d RFS=%d BFS=%d\n", SRC_CLK, psr, rfs, bfs);
 
-	/* set cpu DAI configuration */
-	ret = cpu_dai->dai_ops.set_fmt(cpu_dai,
-		SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF |
-		SND_SOC_DAIFMT_CBS_CFS); 
+	/* Set the AP Prescalar */
+	ret = snd_soc_dai_set_clkdiv(cpu_dai, S5P64XX_DIV_PRESCALER, psr);
 	if (ret < 0)
 		return ret;
 
-	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S3C24XX_DIV_BCLK,
-		S3C64XX_IIS0MOD_256FS);
+	/* Set the Codec DAI configuration */
+	ret = snd_soc_dai_set_fmt(codec_dai, SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBS_CFS);
 	if (ret < 0)
 		return ret;
 
-	/* set prescaler division for sample rate */
-	ret = cpu_dai->dai_ops.set_clkdiv(cpu_dai, S3C24XX_DIV_PRESCALER,
-		(prescaler << 0x8));
+	/* Set the Codec BCLK(no option to set the MCLK) */
+	/* See page 2 and 53 of Wm8580 Manual */
+	ret = snd_soc_dai_set_clkdiv(codec_dai, WM8580_MCLK, WM8580_CLKSRC_MCLK); /* Use MCLK provided by CPU i/f */
+	if (ret < 0)
+		return ret;
+	ret = snd_soc_dai_set_clkdiv(codec_dai, WM8580_DAC_CLKSEL, WM8580_CLKSRC_MCLK); /* Fig-26 Pg-43 */
+	if (ret < 0)
+		return ret;
+	ret = snd_soc_dai_set_clkdiv(codec_dai, WM8580_CLKOUTSRC, WM8580_CLKSRC_NONE); /* Pg-58 */
 	if (ret < 0)
 		return ret;
 
@@ -205,10 +157,10 @@ static int smdk6440_hifi_hw_params(struct snd_pcm_substream *substream,
 }
 
 /*
- * WM8580 HiFi DAI opserations.
+ * WM8580 DAI operations.
  */
-static struct snd_soc_ops smdk6440_hifi_ops = {
-	.hw_params = smdk6440_hifi_hw_params,
+static struct snd_soc_ops smdk6440_ops = {
+	.hw_params = smdk6440_hw_params,
 };
 
 static const struct snd_soc_dapm_widget wm8580_dapm_widgets[] = {
@@ -240,10 +192,10 @@ static int smdk6440_wm8580_init(struct snd_soc_codec *codec)
 	int i;
 
 	/* Add smdk6440 specific widgets */
-		snd_soc_dapm_new_controls(codec, wm8580_dapm_widgets,ARRAY_SIZE(wm8580_dapm_widgets));
+	snd_soc_dapm_new_controls(codec, wm8580_dapm_widgets,ARRAY_SIZE(wm8580_dapm_widgets));
 
 	/* set up smdk6440 specific audio paths */
-		snd_soc_dapm_add_routes(codec, audio_map,ARRAY_SIZE(audio_map));
+	snd_soc_dapm_add_routes(codec, audio_map,ARRAY_SIZE(audio_map));
 
 	/* No jack detect - mark all jacks as enabled */
 	for (i = 0; i < ARRAY_SIZE(wm8580_dapm_widgets); i++)
@@ -259,10 +211,10 @@ static struct snd_soc_dai_link smdk6440_dai[] = {
 {
 	.name = "WM8580",
 	.stream_name = "WM8580 HiFi Playback",
-	.cpu_dai = &s5p_i2s_v40_dai,
+	.cpu_dai = &s5p6440_i2s_v40_dai,
 	.codec_dai = &wm8580_dai[WM8580_DAI_PAIFRX],
 	.init = smdk6440_wm8580_init,
-	.ops = &smdk6440_hifi_ops,
+	.ops = &smdk6440_ops,
 },
 };
 
@@ -273,8 +225,7 @@ static struct snd_soc_machine smdk6440 = {
 };
 
 static struct wm8580_setup_data smdk6440_wm8580_setup = {
-	//.i2c_address = 0x1b,
-	.i2c_address = 0x1a,
+	.i2c_address = 0x1b,
 };
 
 static struct snd_soc_device smdk6440_snd_devdata = {
@@ -286,47 +237,60 @@ static struct snd_soc_device smdk6440_snd_devdata = {
 
 static struct platform_device *smdk6440_snd_device;
 
-static int __init smdk6440_init(void)
+static int __init vega_audio_init(void)
 {
 	int ret;
-/*
-	s3c_gpio_cfgpin(S5P64XX_GPH(6), S5P64XX_GPH6_I2S_V40_BCLK);
-	s3c_gpio_cfgpin(S5P64XX_GPH(7), S5P64XX_GPH7_I2S_V40_CDCLK);
-	s3c_gpio_cfgpin(S5P64XX_GPH(8), S5P64XX_GPH8_I2S_V40_LRCLK);
-	s3c_gpio_cfgpin(S5P64XX_GPH(9), S5P64XX_GPH9_I2S_V40_DI);
+	u32 val;
 
-	s3c_gpio_cfgpin(S5P64XX_GPC(4), S5P64XX_GPC4_I2S_V40_DO0);
-	s3c_gpio_cfgpin(S5P64XX_GPC(5), S5P64XX_GPC5_I2S_V40_DO1);
-	s3c_gpio_cfgpin(S5P64XX_GPC(7), S5P64XX_GPC7_I2S_V40_DO2);
-	*/
+#ifdef USE_GPR
+	val = __raw_readl(S5P64XX_GPRPUD);
+	val &= ~((3<<8) | (3<<10) | (3<<14) | (3<<16) | (3<<18) | (3<<28) | (3<<30));
+	val |= ((0<<8) | (0<<10) | (0<<14) | (0<<16) | (0<<18) | (0<<28) | (1<<30));
+	__raw_writel(val, S5P64XX_GPRPUD);
 
-	s3c_gpio_cfgpin(S5P64XX_GPR(4), S5P64XX_GPR4_I2S_V40_DO0);
-	s3c_gpio_cfgpin(S5P64XX_GPR(5), S5P64XX_GPR5_I2S_V40_DO1);
-	s3c_gpio_cfgpin(S5P64XX_GPR(7), S5P64XX_GPR6_I2S_V40_DO2);
-	s3c_gpio_cfgpin(S5P64XX_GPR(8), S5P64XX_GPR7_I2S_V40_LRCLK); /* DO2 */
-	s3c_gpio_cfgpin(S5P64XX_GPR(9), S5P64XX_GPR8_I2S_V40_DI); /* I2SLRCLK */
-	s3c_gpio_cfgpin(S5P64XX_GPR(14), S5P64XX_GPR13_I2S_V40_BCLK); /* I2SLBCLK */
-	s3c_gpio_cfgpin(S5P64XX_GPR(15), S5P64XX_GPR14_I2S_V40_CDCLK); /* I2SLBCLK */
+	val = __raw_readl(S5P64XX_GPRCON0);
+	val &= ~((0xf<<16) | (0xf<<20) | (0xf<<28));
+	val |= (5<<16) | (5<<20) | (5<<28);
+	__raw_writel(val, S5P64XX_GPRCON0);
 
-	/* pull-up-enable, pull-down-disable*/
-	/*
-	s3c_gpio_setpull(S5P64XX_GPH(6), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPH(7), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPH(8), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPH(9), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPC(4), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPC(5), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPC(7), S3C_GPIO_PULL_UP);
-	*/
-	s3c_gpio_setpull(S5P64XX_GPR(4), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPR(5), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPR(7), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPR(8), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPR(9), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPR(14), S3C_GPIO_PULL_UP);
-	s3c_gpio_setpull(S5P64XX_GPR(15), S3C_GPIO_PULL_UP);
+	val = __raw_readl(S5P64XX_GPRCON1);
+	val &= ~((0xf<<0) | (0xf<<4) | (0xf<<24) | (0xf<<28));
+	val |= (5<<0) | (5<<4) | (5<<24) | (5<<28);
+	__raw_writel(val, S5P64XX_GPRCON1);
 
-	smdk6440_snd_device = platform_device_alloc("soc-audio", -1);
+#else
+	val = __raw_readl(S5P64XX_GPCPUD);
+	val &= ~((3<<8) | (3<<10) | (3<<14));
+	val |= ((0<<8) | (0<<10) | (0<<14));
+	__raw_writel(val, S5P64XX_GPCPUD);
+
+	val = __raw_readl(S5P64XX_GPCCON);
+	val &= ~((0xf<<16) | (0xf<<20) | (0xf<<28));
+	val |= (5<<16) | (5<<20) | (5<<28);
+	__raw_writel(val, S5P64XX_GPCCON);
+
+	val = __raw_readl(S5P64XX_GPHPUD);
+	val &= ~((3<<12) | (3<<14) | (3<<16) | (3<<18));
+	val |= ((0<<12) | (1<<14) | (0<<16) | (0<18));
+	__raw_writel(val, S5P64XX_GPHPUD);
+
+	val = __raw_readl(S5P64XX_GPHCON0);
+	val &= ~((0xf<<24) | (0xf<<28));
+	val |= (5<<24) | (5<<28);
+	__raw_writel(val, S5P64XX_GPHCON0);
+
+	val = __raw_readl(S5P64XX_GPHCON1);
+	val &= ~((0xf<<0) | (0xf<<4));
+	val |= (5<<0) | (5<<4);
+	__raw_writel(val, S5P64XX_GPHCON1);
+
+	val = __raw_readl(S3C_CLK_OUT);
+	val &= ~(0xff << 12);
+	val |= (0x1<<12) | (0<<16);
+	__raw_writel(val, S3C_CLK_OUT);
+#endif
+
+	smdk6440_snd_device = platform_device_alloc("soc-audio", 0);
 	if (!smdk6440_snd_device)
 		return -ENOMEM;
 
@@ -340,15 +304,14 @@ static int __init smdk6440_init(void)
 	return ret;
 }
 
-static void __exit smdk6440_exit(void)
+static void __exit vega_audio_exit(void)
 {
 	platform_device_unregister(smdk6440_snd_device);
 }
 
-module_init(smdk6440_init);
-module_exit(smdk6440_exit);
+module_init(vega_audio_init);
+module_exit(vega_audio_exit);
 
 /* Module information */
-MODULE_AUTHOR("Mark Brown");
 MODULE_DESCRIPTION("ALSA SoC SMDK6440 WM8580");
 MODULE_LICENSE("GPL");
