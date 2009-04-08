@@ -50,10 +50,10 @@ s3c_mfc_inst_context_t *s3c_mfc_inst_get_context(int inst_no)
 
 static void s3c_mfc_get_stream_buffer_addr(s3c_mfc_inst_context_t *ctx)
 {
-	ctx->stream_buffer = (unsigned char *)(s3c_mfc_get_databuf_virt_addr() + 		\
-						(ctx->inst_no * S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
-	ctx->phys_addr_stream_buffer = (unsigned int)(s3c_mfc_get_databuf_phys_addr() + 	\
-						(ctx->inst_no * S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
+	ctx->stream_buffer = (unsigned char *)(s3c_mfc_get_databuf_virt_addr() + 	\
+				(ctx->inst_no * S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
+	ctx->phys_addr_stream_buffer = (unsigned int)(s3c_mfc_get_databuf_phys_addr() +	\
+					(ctx->inst_no * S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE));
 	ctx->stream_buffer_size = S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE;
 
 	mfc_debug("ctx->stream_buffer address 0x%08x\n", \
@@ -937,9 +937,9 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 				end = start + hdr_size;
 				dmac_flush_range(start, end);
 
-				start = ctx->phys_addr_stream_buffer;
+				start = (unsigned char*)ctx->phys_addr_stream_buffer;
 				end = start + hdr_size;
-				outer_flush_range(start, end);
+				outer_flush_range((unsigned long)start, (unsigned long)end);
 			} else {
 				return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;
 			}
@@ -959,20 +959,20 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 				end = start + hdr_size;
 				dmac_flush_range(start, end);
 
-				start = ctx->phys_addr_stream_buffer;
+				start = (unsigned char *)ctx->phys_addr_stream_buffer;
 				end = start + hdr_size;
-				outer_flush_range(start, end);
+				outer_flush_range((unsigned long)start, (unsigned long)end);
 				
 				memcpy(hdr_buf_tmp + hdr_size, (unsigned char *)((unsigned int)(ctx->stream_buffer + 	\
 								(hdr_size + 3)) & 0xFFFFFFFC), hdr_size2);
 
-				start = (unsigned char *)((unsigned int)(ctx->stream_buffer + (hdr_size + 3)) & 0xFFFFFFFC);
+				start = ((unsigned int)(ctx->stream_buffer + (hdr_size + 3)) & 0xFFFFFFFC);
 				end = start + hdr_size2;
 				dmac_flush_range(start, end);
 
 				start = (unsigned char *)((ctx->phys_addr_stream_buffer + (hdr_size + 3)) & 0xFFFFFFFC);
 				end = start + hdr_size2;
-				outer_flush_range(start, end);
+				outer_flush_range((unsigned long)start, (unsigned long)end);
 				
 				hdr_size += hdr_size2;
 			} else {
@@ -999,9 +999,9 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 			end = start + hdr_size;
 			dmac_flush_range(start, end);
 
-			start = ctx->phys_addr_stream_buffer;
+			start = (unsigned char *)ctx->phys_addr_stream_buffer;
 			end = start + hdr_size;
-			outer_flush_range(start, end);
+			outer_flush_range((unsigned long)start, (unsigned long)end);
 		} else 
 			return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;            							
     	}
@@ -1020,9 +1020,9 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 			end = start + hdr_size;
 			dmac_flush_range(start, end);
 
-			start = ctx->phys_addr_stream_buffer;
+			start = (unsigned char *)ctx->phys_addr_stream_buffer;
 			end = start + hdr_size;
-			outer_flush_range(start, end);
+			outer_flush_range((unsigned long)start, (unsigned long)end);
 				
 		} else {
 			return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;
@@ -1085,9 +1085,9 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 		end = start + hdr_size + (*enc_data_size);
 		dmac_flush_range(start, end);
 
-		start = ctx->phys_addr_stream_buffer;
+		start = (unsigned char *)ctx->phys_addr_stream_buffer;
 		end = start + hdr_size + (*enc_data_size);
-		outer_flush_range(start, end);
+		outer_flush_range((unsigned long)start, (unsigned long)end);
 		
 		memcpy(ctx->stream_buffer, hdr_buf_tmp, hdr_size);
 
@@ -1095,9 +1095,9 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 		end = start + hdr_size;
 		dmac_flush_range(start, end);
 
-		start = ctx->phys_addr_stream_buffer;
+		start = (unsigned char *)ctx->phys_addr_stream_buffer;
 		end = start + hdr_size;
-		outer_flush_range(start, end);
+		outer_flush_range((unsigned long)start, (unsigned long)end);
 				
 		kfree(hdr_buf_tmp);
 

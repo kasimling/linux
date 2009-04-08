@@ -1,4 +1,4 @@
-/* linux/driver/media/video/mfc/s3c_mfc_hw_init.h
+/* linux/driver/media/video/mfc/s3c_mfc_init_hw.h
  *
  * Header file for Samsung MFC (Multi Function Codec - FIMV) driver 
  *

@@ -61,7 +61,7 @@
 
 #include "s3c_mfc_base.h"
 #include "s3c_mfc_config.h"
-#include "s3c_mfc_hw_init.h"
+#include "s3c_mfc_init_hw.h"
 #include "s3c_mfc_instance.h"
 #include "s3c_mfc_inst_pool.h"
 #include "s3c_mfc.h"
@@ -348,9 +348,9 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		end = start + tmp * pMfcInst->yuv_buffer_count;
 		dmac_flush_range(start, end);
 
-		start = pMfcInst->phys_addr_yuv_buffer;
+		start = (unsigned char *)pMfcInst->phys_addr_yuv_buffer;
 		end = start + tmp * pMfcInst->yuv_buffer_count;
-		outer_flush_range(start, end);
+		outer_flush_range((unsigned long)start, (unsigned long)end);
 		
 		/* 
 		 * Decode MFC Instance
@@ -361,9 +361,9 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		end = start + pMfcInst->stream_buffer_size;
 		dmac_flush_range(start, end);
 
-		start = pMfcInst->phys_addr_stream_buffer;
+		start = (unsigned char *)pMfcInst->phys_addr_stream_buffer;
 		end = start + pMfcInst->stream_buffer_size;
-		outer_flush_range(start, end);
+		outer_flush_range((unsigned long)start, (unsigned long)end);
 
 		args.enc_exe.ret_code	= ret;
 		if (ret == S3C_MFC_INST_RET_OK) {
@@ -430,9 +430,9 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		end = start + pMfcInst->stream_buffer_size;
 		dmac_flush_range(start, end);
 
-		start = pMfcInst->phys_addr_stream_buffer;
+		start = (unsigned char *)pMfcInst->phys_addr_stream_buffer;
 		end = start + pMfcInst->stream_buffer_size;
-		outer_flush_range(start, end);
+		outer_flush_range((unsigned long)start, (unsigned long)end);
 		
 		ret = s3c_mfc_inst_dec(pMfcInst, args.dec_exe.in_strmSize);
 		
@@ -440,9 +440,9 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		end = start + tmp * pMfcInst->yuv_buffer_count;
 		dmac_flush_range(start, end);
 
-		start = pMfcInst->phys_addr_yuv_buffer;
+		start = (unsigned char *)pMfcInst->phys_addr_yuv_buffer;
 		end = start + tmp * pMfcInst->yuv_buffer_count;
-		outer_flush_range(start, end);
+		outer_flush_range((unsigned long)start, (unsigned long)end);
 		
 		args.dec_exe.ret_code = ret;
 		out = copy_to_user((s3c_mfc_dec_exe_arg_t *)arg, &args.dec_exe,
@@ -538,14 +538,13 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 			sizeof(s3c_mfc_get_buf_addr_arg_t));
 
 		yuv_size = (pMfcInst->buf_width * pMfcInst->buf_height * 3) >> 1;
+		args.get_buf_addr.out_buf_size = yuv_size;
 		yuv_buffer = (unsigned int)pMfcInst->yuv_buffer;
 		run_index = pMfcInst->run_index;
 		out_buf_size = args.get_buf_addr.out_buf_size;
 		databuf_vaddr = (unsigned int)s3c_mfc_get_databuf_virt_addr();
 		databuf_paddr = (unsigned int)S3C_MFC_BASEADDR_DATA_BUF;
-		offset = yuv_buffer + run_index * out_buf_size - databuf_vaddr;
-		
-		args.get_buf_addr.out_buf_size = yuv_size;
+		offset = yuv_buffer + run_index * out_buf_size - databuf_vaddr;		
 		
 #if (S3C_MFC_ROTATE_ENABLE == 1)
 		if ((pMfcInst->codec_mode != VC1_DEC) && (pMfcInst->post_rotation_mode & 0x0010)) {
@@ -688,6 +687,7 @@ static int s3c_mfc_probe(struct platform_device *pdev)
 	int	size;
 	int	ret;
 	struct resource *res;	
+	unsigned int mfc_clk;
 
 	/* mfc clock enable  */
 	s3c_mfc_hclk = clk_get(NULL, "hclk_mfc");
