@@ -452,7 +452,9 @@ static void stop_activity(struct s3c_udc *dev,
 static void reconfig_usbd(void)
 {
 	/* 2. Soft-reset OTG Core and then unreset again. */
+#ifdef DED_TX_FIFO
 	int i;
+#endif
 	u32 uTemp = writel(CORE_SOFT_RESET, S3C_UDC_OTG_GRSTCTL);
 
 	writel(	0<<15		/* PHY Low Power Clock sel*/
@@ -505,7 +507,7 @@ static void reconfig_usbd(void)
 	/* 12. Set Non Periodic Tx FIFO Size*/
 	writel(NPTX_FIFO_SIZE<<16| NPTX_FIFO_START_ADDR<<0, S3C_UDC_OTG_GNPTXFSIZ);
 
-#if DED_TX_FIFO
+#ifdef DED_TX_FIFO
 	for (i = 1; i < S3C_MAX_ENDPOINTS; i++)
 		writel(NPTX_FIFO_SIZE << 16 |
 			(NPTX_FIFO_START_ADDR + NPTX_FIFO_SIZE + PTX_FIFO_SIZE*(i-1)) << 0,
