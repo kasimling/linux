@@ -1856,3 +1856,8 @@ v2.6.28.6-samsung-r1d3: Jae-Cheol Lee
 	- Support CHIPID for S5P6440
 	Modified Files:
 		M	arch/arm/plat-s5pc1xx/cpu.c
+
+v2.6.28.6-samsung-r1d4: Jae-Cheol Lee
+	- Change Console UART port 0 -> 1 for SMDK6440
+	Modified Files:
+		M	arch/arm/configs/smdk6440ramdisk_defconfig
