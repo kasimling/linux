@@ -1851,3 +1851,8 @@ v2.6.28.6-samsung-r1d2: Jae-Cheol Lee
 	- Modified voltage regulator control code for SMDKC100
 	Modified Files :
 		M	arch/arm/plat-s5pc1xx/ltc3714.c
+
+v2.6.28.6-samsung-r1d3: Jae-Cheol Lee
+	- Support CHIPID for S5P6440
+	Modified Files:
+		M	arch/arm/plat-s5pc1xx/cpu.c

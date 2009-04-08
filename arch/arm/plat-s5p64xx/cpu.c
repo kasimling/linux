@@ -42,7 +42,7 @@ static const char name_s5p6440[] = "S5P6440";
 
 static struct cpu_table cpu_ids[] __initdata = {
 	{
-		.idcode		= 0x36410200,
+		.idcode		= 0x56440100,
 		.idmask		= 0xffffff00,
 		.map_io		= s5p6440_map_io,
 		.init_clocks	= s5p6440_init_clocks,
@@ -101,7 +101,6 @@ void __init s5p64xx_init_io(struct map_desc *mach_desc, int size)
 	iotable_init(s3c_iodesc, ARRAY_SIZE(s3c_iodesc));
 	iotable_init(mach_desc, size);
 
-	//idcode = __raw_readl(S3C_SYS_ID);
-	idcode = 0x36410200;
+	idcode = __raw_readl(S3C_SYS_ID);
 	s3c_init_cpu(idcode, cpu_ids, ARRAY_SIZE(cpu_ids));
 }
