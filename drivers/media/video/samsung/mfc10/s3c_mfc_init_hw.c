@@ -1,4 +1,4 @@
-/* linux/driver/media/video/mfc/s3c_mfc_hw_init.c
+/* linux/driver/media/video/mfc/s3c_mfc_init_hw.c
  *
  * C file for Samsung MFC (Multi Function Codec - FIMV) driver 
  * This source file is for initializing the MFC's H/W setting.
@@ -20,8 +20,9 @@
 #include "s3c_mfc_types.h"
 #include "s3c_mfc_config.h"
 #include "s3c_mfc_yuv_buf_manager.h"
+#include "s3c_mfc.h"
 
-BOOL s3c_mfc_memory_setup(void)
+BOOL s3c_mfc_setup_memory(void)
 {
 	BOOL ret_bit, ret_dat;
 	unsigned char *pDataBuf;
@@ -31,28 +32,28 @@ BOOL s3c_mfc_memory_setup(void)
 	 * physical address 를 virtual address로 mapping 한다 
 	 */
 
-	ret_bit = s3c_mfc_bitproc_buff_mem_mapping();
+	ret_bit = s3c_mfc_memmap_bitproc_buff();
 	if (ret_bit == FALSE) {
-		printk(KERN_ERR "\n%s: fail to mapping bitprocessor buffer memory\n", __FUNCTION__);
+		mfc_err("fail to mapping bitprocessor buffer memory\n");
 		return FALSE;
 	}
 
-	ret_dat	= s3c_mfc_databuf_memmapping();
+	ret_dat	= s3c_mfc_memmap_databuf();
 	if (ret_dat == FALSE) {
-		printk(KERN_ERR "\n%s: fail to mapping data buffer memory \n", __FUNCTION__);
+		mfc_err("fail to mapping data buffer memory \n");
 		return FALSE;
 	}
 
 	/* FramBufMgr Module Initialization */
 	pDataBuf = (unsigned char *)s3c_mfc_get_databuf_virt_addr();
-	s3c_mfc_yuv_buf_mgr_init(pDataBuf + S3C_MFC_STREAM_BUF_SIZE, S3C_MFC_YUV_BUF_SIZE);
+	s3c_mfc_init_yuvbuf_mgr(pDataBuf + S3C_MFC_STREAM_BUF_SIZE, S3C_MFC_YUV_BUF_SIZE);
 
 
 	return TRUE;
 }
 
 
-BOOL s3c_mfc_hw_init(void)
+BOOL s3c_mfc_init_hw(void)
 {
 	/* 
 	 * 1. Reset the MFC IP
@@ -62,9 +63,9 @@ BOOL s3c_mfc_hw_init(void)
 	/*
 	 * 2. Download Firmware code into MFC
 	 */
-	s3c_mfc_firmware_into_codebuff();
-	s3c_mfc_firmware_into_code_down_reg();
-	printk(KERN_DEBUG "\n%s: downloading firmware into bitprocessor\n", __FUNCTION__);
+	s3c_mfc_put_firmware_into_codebuff();
+	s3c_mfc_download_boot_firmware();
+	mfc_debug("downloading firmware into bitprocessor\n");
 
 	/* 
 	 * 3. Start Bit Processor
@@ -86,7 +87,7 @@ BOOL s3c_mfc_hw_init(void)
 	 */
 	s3c_mfc_config_sfr_ctrl_opts();
 
-	s3c_mfc_get_firmware_version();
+	s3c_mfc_get_firmware_ver();
 
 	return TRUE;
 }

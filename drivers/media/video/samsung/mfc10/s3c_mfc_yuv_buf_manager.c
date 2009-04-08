@@ -16,6 +16,7 @@
 
 #include "s3c_mfc_yuv_buf_manager.h"
 #include "s3c_mfc_types.h"
+#include "s3c_mfc.h"
 
 /* 
  * The size in bytes of the BUF_SEGMENT. 
@@ -45,7 +46,7 @@ static int            s3c_mfc_num_segments		= 0;
 
 
 /* 
- * int s3c_mfc_yuv_buf_mgr_init(unsigned char *pBufBase, int nBufSize) 
+ * int s3c_mfc_init_yuvbuf_mgr(unsigned char *pBufBase, int nBufSize) 
  *
  * Description 
  * 		This function initializes the MfcFramBufMgr(Buffer Segment Manager)
@@ -56,7 +57,7 @@ static int            s3c_mfc_num_segments		= 0;
  * 		1 : Success
  * 		0 : Fail
  */
-BOOL s3c_mfc_yuv_buf_mgr_init(unsigned char *buffer_base, int buffer_size)
+BOOL s3c_mfc_init_yuvbuf_mgr(unsigned char *buffer_base, int buffer_size)
 {
 	int   i;
 
@@ -110,7 +111,7 @@ void s3c_mfc_yuv_buffer_mgr_final()
 }
 
 /* 
- * unsigned char *s3c_mfc_yuv_buffer_mgr_commit(int idx_commit, int commit_size)
+ * unsigned char *s3c_mfc_commit_yuv_buffer_mgr(int idx_commit, int commit_size)
  *
  * Description
  * 	This function requests the commit for commit_size buffer to be reserved.
@@ -121,7 +122,7 @@ void s3c_mfc_yuv_buffer_mgr_final()
  * 	NULL : Failed to commit (Wrong parameters, commit_size too big, and so on.)
  * 	Otherwise it returns the pointer which was committed.
  */
-unsigned char *s3c_mfc_yuv_buffer_mgr_commit(int idx_commit, int commit_size)
+unsigned char *s3c_mfc_commit_yuv_buffer_mgr(int idx_commit, int commit_size)
 {
 	int  i, j;
 	int  num_yuv_buf_seg;
@@ -174,7 +175,7 @@ unsigned char *s3c_mfc_yuv_buffer_mgr_commit(int idx_commit, int commit_size)
 
 
 /*
- * void s3c_yuv_buffer_mgr_free(int idx_commit)
+ * void s3c_mfc_free_yuv_buffer_mgr(int idx_commit)
  *
  * Description
  * 	This function frees the committed region of buffer.
@@ -183,7 +184,7 @@ unsigned char *s3c_mfc_yuv_buffer_mgr_commit(int idx_commit, int commit_size)
  * Return Value
  * 	None
  */
-void s3c_yuv_buffer_mgr_free(int idx_commit)
+void s3c_mfc_free_yuv_buffer_mgr(int idx_commit)
 {
 	int  i;
 
@@ -214,7 +215,7 @@ void s3c_yuv_buffer_mgr_free(int idx_commit)
 }
 
 /* 
- * unsigned char *s3c_mfc_yuv_buffer_mgr_get_buffer(int idx_commit)
+ * unsigned char *s3c_mfc_get_yuv_buffer(int idx_commit)
  *
  * Description
  * 	This function obtains the committed buffer of 'idx_commit'.
@@ -224,7 +225,7 @@ void s3c_yuv_buffer_mgr_free(int idx_commit)
  * 	NULL : Failed to get the indicated buffer (Wrong parameters, not committed, and so on.)
  * 	Otherwise it returns the pointer which was committed.
  */
-unsigned char *s3c_mfc_yuv_buffer_mgr_get_buffer(int idx_commit)
+unsigned char *s3c_mfc_get_yuv_buffer(int idx_commit)
 {
 	int index_base_seg;
 
@@ -243,7 +244,7 @@ unsigned char *s3c_mfc_yuv_buffer_mgr_get_buffer(int idx_commit)
 }
 
 /* 
- * int s3c_mfc_yuv_buffer_mgr_get_buffer_size(int idx_commit)
+ * int s3c_mfc_get_yuv_buffer_size(int idx_commit)
  *
  * Description
  * 	This function obtains the size of the committed buffer of 'idx_commit'.
@@ -254,7 +255,7 @@ unsigned char *s3c_mfc_yuv_buffer_mgr_get_buffer(int idx_commit)
  * 	Otherwise it returns the size of the buffer.
  * 	Note that the size is multiples of the S3C_MFC_BUF_SEGMENT_SIZE.
  */
-int s3c_mfc_yuv_buffer_mgr_get_buffer_size(int idx_commit)
+int s3c_mfc_get_yuv_buffer_size(int idx_commit)
 {
 	if (s3c_mfc_segment_info == NULL || s3c_mfc_commit_info == NULL)
 		return 0;
@@ -269,7 +270,7 @@ int s3c_mfc_yuv_buffer_mgr_get_buffer_size(int idx_commit)
 }
 
 /*
- * void s3c_mfc_yuv_buffer_mgr_print_commit_info()
+ * void s3c_mfc_print_commit_yuv_buffer_info()
  *
  * Description
  * 	This function prints the commited information on the console screen.
@@ -278,22 +279,22 @@ int s3c_mfc_yuv_buffer_mgr_get_buffer_size(int idx_commit)
  * Return Value
  * 	None
  */
-void s3c_mfc_yuv_buffer_mgr_print_commit_info()
+void s3c_mfc_print_commit_yuv_buffer_info()
 {
 	int  i;
 
 	if (s3c_mfc_segment_info == NULL || s3c_mfc_commit_info == NULL) {
-		printk(KERN_ERR "\n%s: fram buffer manager is not initialized\n", __FUNCTION__);
+		mfc_err("fram buffer manager is not initialized\n");
 		return;
 	}
 
 
 	for (i = 0; i < s3c_mfc_num_segments; i++) {
 		if (s3c_mfc_commit_info[i].index_base_seg != -1)  {
-			printk(KERN_DEBUG "\n%s: commit index = %03d, base segment index = %d\n", __FUNCTION__, i, 	\
-										s3c_mfc_commit_info[i].index_base_seg);
-			printk(KERN_DEBUG "\n%s: commit index = %03d, number of segment = %d\n", __FUNCTION__, i, 	\
-										s3c_mfc_commit_info[i].num_segs);		
+			mfc_debug("commit index = %03d, base segment index = %d\n",	\
+						i, s3c_mfc_commit_info[i].index_base_seg);
+			mfc_debug("commit index = %03d, number of segment = %d\n", \
+						i, s3c_mfc_commit_info[i].num_segs);
 		}
 	}
 }

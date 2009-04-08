@@ -17,12 +17,13 @@
 #include "s3c_mfc_bitproc_buf.h"
 #include "s3c_mfc_config.h"
 #include "prism_s.h"
+#include "s3c_mfc.h"
 
 static volatile unsigned char     *s3c_mfc_virt_bitproc_buff  = NULL;
 static unsigned int                s3c_mfc_phys_bitproc_buff  = 0;
 
 
-BOOL s3c_mfc_bitproc_buff_mem_mapping()
+BOOL s3c_mfc_memmap_bitproc_buff()
 {
 	BOOL	ret = FALSE;
 
@@ -30,7 +31,7 @@ BOOL s3c_mfc_bitproc_buff_mem_mapping()
 	s3c_mfc_virt_bitproc_buff = (volatile unsigned char *)ioremap_nocache(S3C_MFC_BASEADDR_BITPROC_BUF, 	\
 												S3C_MFC_BITPROC_BUF_SIZE);
 	if (s3c_mfc_virt_bitproc_buff == NULL) {
-		printk(KERN_ERR "\n%s: fail to mapping bitprocessor buffer\n", __FUNCTION__);
+		mfc_err("fail to mapping bitprocessor buffer\n");
 		return ret;
 	}
 
@@ -55,12 +56,13 @@ unsigned char *s3c_mfc_get_param_buff_virt_addr()
 {
 	unsigned char	*pParamBuf;
 
-	pParamBuf = (unsigned char *)(s3c_mfc_virt_bitproc_buff + S3C_MFC_CODE_BUF_SIZE + S3C_MFC_WORK_BUF_SIZE);
+	pParamBuf = (unsigned char *)(s3c_mfc_virt_bitproc_buff +
+			S3C_MFC_CODE_BUF_SIZE + S3C_MFC_WORK_BUF_SIZE);
 
 	return pParamBuf;
 }
 
-void s3c_mfc_firmware_into_codebuff()
+void s3c_mfc_put_firmware_into_codebuff()
 {
 	unsigned int  i, j;
 	unsigned int  data;

@@ -1857,7 +1857,11 @@ v2.6.28.6-samsung-r1d3: Jae-Cheol Lee
 	Modified Files:
 		M	arch/arm/plat-s5pc1xx/cpu.c
 
-v2.6.28.6-samsung-r1d4: Jae-Cheol Lee
+v2.6.28.6-samsung-r1d4: Jiun Yu, PyoungJae Jung
+	- fixed cache issue in MFC driver
+
+v2.6.28.6-samsung-r1d5: Jae-Cheol Lee
 	- Change Console UART port 0 -> 1 for SMDK6440
 	Modified Files:
 		M	arch/arm/configs/smdk6440ramdisk_defconfig
+

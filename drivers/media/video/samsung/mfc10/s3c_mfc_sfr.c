@@ -21,6 +21,7 @@
 #include "s3c_mfc_config.h"
 #include "prism_s.h"
 #include "s3c_mfc_intr_noti.h"
+#include "s3c_mfc.h"
 
 extern wait_queue_head_t	s3c_mfc_wait_queue;
 extern unsigned int		s3c_mfc_intr_type;
@@ -106,14 +107,13 @@ static int s3c_mfc_wait_for_ready(void)
 		udelay(100);	/* 1/1000 second */
 	}
 
-	printk(KERN_DEBUG "\n%s: timeout in waiting for the bitprocessor available\n", __FUNCTION__);
-
+	mfc_debug("timeout in waiting for the bitprocessor available\n");
 
 	return FALSE;
 }
 
 
-int s3c_mfc_get_firmware_version(void)
+int s3c_mfc_get_firmware_ver(void)
 {
 	unsigned int prd_no, ver_no;
 
@@ -121,15 +121,16 @@ int s3c_mfc_get_firmware_version(void)
 
 	writel(GET_FW_VER, s3c_mfc_sfr_base_virt_addr + S3C_MFC_RUN_CMD);
 
-	printk(KERN_DEBUG "\n%s: GET_FW_VER command was issued\n", __FUNCTION__);
+	mfc_debug("GET_FW_VER command was issued\n");
 
 	s3c_mfc_wait_for_ready();
 
 	prd_no = readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SUCCESS) >> 16;
 	ver_no = readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SUCCESS) & 0x00FFFF;
 
-	printk(KERN_DEBUG "\n%s: GET_FW_VER => 0x%x, 0x%x\n", __FUNCTION__, prd_no, ver_no);
-	printk(KERN_DEBUG "\n%s: BUSY_FLAG => %d\n", __FUNCTION__, readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_BUSY_FLAG));
+	mfc_debug("GET_FW_VER => 0x%x, 0x%x\n", prd_no, ver_no);
+	mfc_debug("BUSY_FLAG => %d\n", 					\
+		readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_BUSY_FLAG));
 
 	return readl(s3c_mfc_sfr_base_virt_addr + S3C_MFC_PARAM_RET_DEC_SEQ_SUCCESS);
 }
@@ -163,21 +164,21 @@ BOOL s3c_mfc_issue_command(int inst_no, s3c_mfc_codec_mode_t codec_mode, s3c_mfc
 		intr_reason = s3c_mfc_intr_type;
 
 		if (intr_reason == S3C_MFC_INTR_REASON_INTRNOTI_TIMEOUT) {
-			printk(KERN_ERR "\n%s: command = %s, WaitInterruptNotification returns TIMEOUT\n", __FUNCTION__,  \
-											s3c_mfc_get_cmd_string(mfc_cmd));
+			mfc_err("command = %s, WaitInterruptNotification returns TIMEOUT\n", \
+								s3c_mfc_get_cmd_string(mfc_cmd));
 			return FALSE;
 		}
 		if (intr_reason & S3C_MFC_INTR_REASON_BUFFER_EMPTY) {
-			printk(KERN_ERR "\n%s: command = %s, BUFFER EMPTY interrupt was raised\n", __FUNCTION__, 	  \
-											s3c_mfc_get_cmd_string(mfc_cmd));
+			mfc_err("command = %s, BUFFER EMPTY interrupt was raised\n", \
+							s3c_mfc_get_cmd_string(mfc_cmd));
 			return FALSE;
 		}
 		break;
 
 	default:
 		if (s3c_mfc_wait_for_ready() == FALSE) {
-			printk(KERN_ERR "\n%s: command = %s, bitprocessor is busy before issuing the command\n", 	  \
-										__FUNCTION__, s3c_mfc_get_cmd_string(mfc_cmd));
+			mfc_err("command = %s, bitprocessor is busy before issuing the command\n",	\
+									s3c_mfc_get_cmd_string(mfc_cmd));
 			return FALSE;
 		}
 
@@ -238,7 +239,7 @@ void s3c_mfc_stream_end()
 	writel(0, s3c_mfc_sfr_base_virt_addr + S3C_MFC_DEC_FUNC_CTRL);
 }
 
-void s3c_mfc_firmware_into_code_down_reg(void)
+void s3c_mfc_download_boot_firmware(void)
 {
 	unsigned int  i;
 	unsigned int  data;

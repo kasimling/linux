@@ -91,16 +91,17 @@ typedef union {
 	s3c_mfc_enc_exe_arg_t		enc_exe;
 	s3c_mfc_dec_init_arg_t		dec_init;
 	s3c_mfc_dec_exe_arg_t		dec_exe;
-	s3c_mfc_get_buf_addr_arg_t	get_buf_addr;
-	s3c_mfc_get_config_arg_t	get_config;
-	s3c_mfc_set_config_arg_t	set_config;
-	s3c_mfc_get_mpeg4asp_arg_t	mpeg4_asp_param;
+	s3c_mfc_get_buf_addr_arg_t		get_buf_addr;
+	s3c_mfc_get_config_arg_t		get_config;
+	s3c_mfc_set_config_arg_t		set_config;
+	s3c_mfc_get_mpeg4asp_arg_t		mpeg4_asp_param;
 } s3c_mfc_args_t;
 
 
 #define S3C_MFC_GET_CONFIG_DEC_YUV_NEED_COUNT           (0x0AA0C001)
 #define S3C_MFC_GET_CONFIG_DEC_MP4ASP_MV                (0x0AA0C002)
 #define S3C_MFC_GET_CONFIG_DEC_MP4ASP_MBTYPE            (0x0AA0C003)
+
 #if (defined(DIVX_ENABLE) && (DIVX_ENABLE == 1))
 #define S3C_MFC_GET_CONFIG_DEC_MP4ASP_FCODE             (0x0AA0C011)
 #define S3C_MFC_GET_CONFIG_DEC_MP4ASP_VOP_TIME_RES      (0x0AA0C012)
@@ -139,5 +140,4 @@ typedef union {
 
 
 #endif /* _S3C_MFC_PARAMS_H */
-
 
