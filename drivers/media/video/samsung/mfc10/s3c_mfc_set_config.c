@@ -202,11 +202,6 @@ int s3c_mfc_set_config_params(s3c_mfc_inst_context_t *mfc_inst, s3c_mfc_args_t *
 		end   = start + args->set_config.in_config_value[1];
 		outer_clean_range((unsigned long)start, (unsigned long)end);
 
-		/*
-		 * or.... may be
-		 * outer_clean_range(virt_to_phys(start), virt_to_phys(end));
-		 */
-
 		ret = S3C_MFC_INST_RET_OK;
 		break;
 
