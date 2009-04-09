@@ -1881,3 +1881,7 @@ v2.6.28.6-samsung-r1d7: Jongpill LEe
 		M       arch/arm/plat-s5p64xx/devs.c
 		M       drivers/rtc/Kconfig
 		M       drivers/rtc/rtc-s3c.c
+
+v2.6.28.6-samsung-r2: Kyoungil Kim
+	- Official Release for SMDK6410(09.04.09)
+
