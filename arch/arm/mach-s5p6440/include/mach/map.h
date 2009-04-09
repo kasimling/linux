@@ -65,6 +65,8 @@
 #define S5P64XX_PA_IIS_V40 	(0xF2000000)
 #define S3C_SZ_IIS		SZ_8K
 
+#define S5P64XX_PA_RTC	   	(0xEA100000)
+
 /* place VICs close together */
 #define S3C_VA_VIC0		(S3C_VA_IRQ + 0x00)
 #define S3C_VA_VIC1		(S3C_VA_IRQ + 0x10000)
@@ -113,6 +115,8 @@
 
 #define S3C_PA_IIC		S5P64XX_PA_IIC0
 #define S3C_PA_IIC1		S5P64XX_PA_IIC1
+
+#define S3C_PA_RTC		S5P64XX_PA_RTC
 
 #define S3C_PA_IIS		S5P64XX_PA_IIS
 #define S3C_PA_ADC		S5P64XX_PA_ADC

@@ -96,6 +96,29 @@ void s3c6410_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
 	}
 
-	s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
-	s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(3));
+//	s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
+//	s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(3));
 }
+
+void s3c6410_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
+{
+	unsigned int gpio;
+	unsigned int end;
+
+	/* CMD */
+	s3c_gpio_cfgpin(S3C64XX_GPC(4), S3C_GPIO_SFN(3));
+	s3c_gpio_setpull(S3C64XX_GPC(4), S3C_GPIO_PULL_NONE);
+
+	/* CLK */
+	s3c_gpio_cfgpin(S3C64XX_GPC(5), S3C_GPIO_SFN(3));
+	s3c_gpio_setpull(S3C64XX_GPC(5), S3C_GPIO_PULL_NONE);
+
+	end = S3C64XX_GPH(6+width);
+
+	/* Set all the necessary GPG pins to special-function 0 */
+	for (gpio = S3C64XX_GPH(6); gpio < end; gpio++) {
+		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(3));
+		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+	}
+}
+

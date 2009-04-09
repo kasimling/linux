@@ -316,14 +316,26 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
 	host->quirks |= (SDHCI_QUIRK_32BIT_DMA_ADDR |
 			 SDHCI_QUIRK_32BIT_DMA_SIZE);
 
+	host->mmc->caps = 0;
+	if (pdata->host_caps & MMC_CAP_NEEDS_POLL)
+		host->mmc->caps |= MMC_CAP_NEEDS_POLL;
+
+	if (pdata->host_caps & MMC_CAP_ON_BOARD)
+		host->mmc->caps |= MMC_CAP_ON_BOARD;
+
+	if (pdata->host_caps & MMC_CAP_BOOT_ONTHEFLY)
+		host->mmc->caps |= MMC_CAP_BOOT_ONTHEFLY;
+
+	/* later we should add MMC_CAP_8_BIT_DATA in relevant h/w */
+	if (pdata->host_caps & MMC_CAP_MMC_HIGHSPEED)
+		host->mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
+
 	ret = sdhci_add_host(host);
 	if (ret) {
 		dev_err(dev, "sdhci_add_host() failed\n");
 		goto err_add_host;
 	}
 
-	/* later we should add MMC_CAP_8_BIT_DATA in relevant h/w */
-	host->mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
 	return 0;
 
  err_add_host:

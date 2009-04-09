@@ -172,6 +172,12 @@ config S3C_DEV_HSMMC1
 	help
 	  Compile in platform device definitions for HSMMC channel 1
 
+config S3C_DEV_HSMMC2
+	bool
+	depends on PLAT_S3C
+	help
+	  Compile in platform device definitions for HSMMC channel 2
+
 config S3C_DEV_I2C1
 	bool
 	depends on PLAT_S3C
