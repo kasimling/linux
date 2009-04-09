@@ -91,7 +91,8 @@ int s3c_mfc_set_config_params(s3c_mfc_inst_context_t *mfc_inst, s3c_mfc_args_t *
 {
 	int             ret;
 	unsigned int    param_change_enable = 0, param_change_val;
-
+	unsigned int	start, end, offset;
+	
 	switch (args->set_config.in_config_param) {
 	case S3C_MFC_SET_CONFIG_DEC_ROTATE:
 #if (S3C_MFC_ROTATE_ENABLE == 1)
@@ -187,17 +188,61 @@ int s3c_mfc_set_config_params(s3c_mfc_inst_context_t *mfc_inst, s3c_mfc_args_t *
 		break;
 
 	case S3C_MFC_SET_CACHE_CLEAN:
-		cpu_cache.flush_kern_all();
+		/* 
+		 * in_config_value[0] : start address in user layer 
+		 * in_config_value[1] : offset 
+		 * in_config_value[2] : start address of stream buffer in user layer
+		 */
+		offset = args->set_config.in_config_value[0] - args->set_config.in_config_value[2];
+		start = (unsigned int)mfc_inst->stream_buffer + offset;
+		end   = start + args->set_config.in_config_value[1];
+		dmac_clean_range((void *)start, (void *)end);
+
+		start = (unsigned int)mfc_inst->phys_addr_stream_buffer + offset;
+		end   = start + args->set_config.in_config_value[1];
+		outer_clean_range((unsigned long)start, (unsigned long)end);
+
+		/*
+		 * or.... may be
+		 * outer_clean_range(virt_to_phys(start), virt_to_phys(end));
+		 */
+
 		ret = S3C_MFC_INST_RET_OK;
 		break;
 
 	case S3C_MFC_SET_CACHE_INVALIDATE:
-		cpu_cache.flush_kern_all();
+		/* 
+		 * in_config_value[0] : start address in user layer 
+		 * in_config_value[1] : offset 
+		 * in_config_value[2] : start address of stream buffer in user layer
+		 */
+		offset = args->set_config.in_config_value[0] - args->set_config.in_config_value[2];
+		start = (unsigned int)mfc_inst->stream_buffer + offset;
+		end   = start + args->set_config.in_config_value[1];
+		dmac_inv_range((void *)start, (void *)end);
+
+		start = (unsigned int)mfc_inst->phys_addr_stream_buffer + offset;
+		end = start + args->set_config.in_config_value[1];
+		outer_inv_range((unsigned long)start, (unsigned long)end);
+		
 		ret = S3C_MFC_INST_RET_OK;
 		break;
 
 	case S3C_MFC_SET_CACHE_CLEAN_INVALIDATE:
-		cpu_cache.flush_kern_all();
+		/* 
+		 * in_config_value[0] : start address in user layer 
+		 * in_config_value[1] : offset 
+		 * in_config_value[2] : start address of stream buffer in user layer
+		 */
+		offset = args->set_config.in_config_value[0] - args->set_config.in_config_value[2];
+		start = (unsigned int)mfc_inst->stream_buffer + offset;
+		end   = start + args->set_config.in_config_value[1];
+		dmac_flush_range((void *)start, (void *)end);
+
+		start = (unsigned int)mfc_inst->phys_addr_stream_buffer + offset;
+		end = start + args->set_config.in_config_value[1];
+		outer_flush_range((unsigned long)start, (unsigned long)end);
+		
 		ret = S3C_MFC_INST_RET_OK;
 		break;
 
