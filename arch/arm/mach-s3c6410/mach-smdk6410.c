@@ -106,6 +106,9 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 #ifdef CONFIG_SMDK6410_SD_CH1
 	&s3c_device_hsmmc1,
 #endif
+#ifdef CONFIG_SMDK6410_SD_CH2
+	&s3c_device_hsmmc2,
+#endif
 	&s3c_device_wdt,
 	&s3c_device_rtc,
 	&s3c_device_i2c0,
@@ -130,7 +133,7 @@ static struct platform_device *smdk6410_devices[] __initdata = {
 	&s3c_device_fimc0,
 	&s3c_device_fimc1,
 	&s3c_device_g2d,
-	&s3c_device_g3d,	
+	&s3c_device_g3d,
 
 #ifdef CONFIG_S3C64XX_ADC
 	&s3c_device_adc,
@@ -387,3 +390,14 @@ void s3c_setup_keypad_cfg_gpio(int rows, int columns)
 
 EXPORT_SYMBOL(s3c_setup_keypad_cfg_gpio);
 #endif
+
+#ifdef CONFIG_MMC_SDHCI_S3C
+void s3c_setup_hsmmc_clock(void)
+{
+	struct clk *clk;
+
+	clk = clk_get(NULL, "mmc_bus");
+}
+EXPORT_SYMBOL(s3c_setup_hsmmc_clock);
+#endif
+
