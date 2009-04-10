@@ -27,6 +27,29 @@
 #include <plat/devs.h>
 #include <plat/clock.h>
 
+/* definition for cpu freq */
+
+#define ARM_PLL_CON 	S3C_APLL_CON
+#define ARM_CLK_DIV	S3C_CLK_DIV0
+
+#define ARM_DIV_RATIO_BIT		0
+#define ARM_DIV_MASK			(0xf<<ARM_DIV_RATIO_BIT)
+#define HCLK_DIV_RATIO_BIT		8
+#define HCLK_DIV_MASK			(0xf<<HCLK_DIV_RATIO_BIT)
+
+#define READ_ARM_DIV    		((__raw_readl(ARM_CLK_DIV)&ARM_DIV_MASK) + 1)
+#define PLL_CALC_VAL(MDIV,PDIV,SDIV)	((1<<31)|(MDIV)<<16 |(PDIV)<<8 |(SDIV))
+#define GET_ARM_CLOCK(baseclk)		s3c6400_get_pll(__raw_readl(S3C_APLL_CON),baseclk)
+
+#define INIT_XTAL			12 * MHZ
+
+static const u32 s3c_cpu_clock_table[][3] = {
+	{532*MHZ, 0, 3},
+	{266*MHZ, 1, 1},
+	{133*MHZ, 3, 0},
+	//{APLL, DIVarm, DIVhclk}	
+};
+
 struct clk clk_27m = {
 	.name		= "clk_27m",
 	.id		= -1,
@@ -58,6 +81,95 @@ struct clk clk_48m = {
 	.id		= -1,
 	.rate		= 48000000,
 	.enable		= clk_48m_ctrl,
+};
+
+unsigned long s3c_fclk_get_rate(void)
+{
+	unsigned long apll_con;
+	unsigned long clk_div0_tmp;
+	unsigned long m = 0;
+	unsigned long p = 0;
+	unsigned long s = 0;
+	unsigned long ret;
+
+	apll_con = __raw_readl(S3C_APLL_CON);
+	clk_div0_tmp = __raw_readl(S3C_CLK_DIV0) & 0xf;
+
+	m = (apll_con >> 16) & 0x3ff;
+	p = (apll_con >> 8) & 0x3f;
+	s = apll_con & 0x3;
+
+	ret = (m * (INIT_XTAL / (p * (1 << s))));
+
+	return (ret / (clk_div0_tmp + 1));
+}
+
+unsigned long s3c_fclk_round_rate(struct clk *clk, unsigned long rate)
+{
+	u32 iter;
+
+	for(iter = 1 ; iter < ARRAY_SIZE(s3c_cpu_clock_table) ; iter++){
+		if(rate > s3c_cpu_clock_table[iter][0])
+			return s3c_cpu_clock_table[iter-1][0];
+	}
+
+	return s3c_cpu_clock_table[ARRAY_SIZE(s3c_cpu_clock_table) - 1][0];
+}
+
+int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
+{
+	u32 round_tmp;
+	u32 iter;
+	u32 clk_div0_tmp;
+	u32 cur_clk = s3c_fclk_get_rate();
+
+	round_tmp = s3c_fclk_round_rate(clk,rate);
+
+	if(round_tmp == cur_clk)
+		return 0;
+
+
+	for (iter = 0 ; iter < ARRAY_SIZE(s3c_cpu_clock_table) ; iter++){
+		if(round_tmp == s3c_cpu_clock_table[iter][0])
+			break;
+	}
+
+	if(iter >= ARRAY_SIZE(s3c_cpu_clock_table))
+		iter = ARRAY_SIZE(s3c_cpu_clock_table) - 1;
+
+	if(cur_clk > round_tmp) {
+		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
+		clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
+
+		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+
+		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(HCLK_DIV_MASK);
+		clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
+		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+	} else {
+		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(HCLK_DIV_MASK);
+		clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
+		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+		
+		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
+		clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
+
+		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);		
+	}
+
+	clk->rate = s3c_cpu_clock_table[iter][0];
+
+	return 0;
+}
+
+struct clk clk_cpu = {
+	.name		= "clk_cpu",
+	.id		= -1,
+	.rate		= 0,
+	.parent		= &clk_mpll,
+	.ctrlbit	= 0,
+	.set_rate	= s3c_fclk_set_rate,
+	.round_rate	= s3c_fclk_round_rate,
 };
 
 static int inline s5p64xx_gate(void __iomem *reg,
@@ -236,6 +348,7 @@ static struct clk *clks[] __initdata = {
 	&clk_epll,
 	&clk_27m,
 	&clk_48m,
+	&clk_cpu,
 };
 
 void __init s5p64xx_register_clocks(void)
