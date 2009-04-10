@@ -261,6 +261,7 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 	int nStrmLen, nHdrLen;
 	int out;
 	int yuv_size;
+	int size;
 	
 	void		*temp;
 	unsigned int	vir_mv_addr;
@@ -340,30 +341,18 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 
 		tmp = (pMfcInst->width * pMfcInst->height * 3) >> 1;
 
-		//cpu_cache.flush_kern_all();
-		//dma_cache_maint(pMfcInst->yuv_buffer, tmp, DMA_BIDIRECTIONAL);
-		//dmac_flush_range(pMfcInst->yuv_buffer, pMfcInst->yuv_buffer + tmp);
-		//outer_flush_range(pMfcInst->phys_addr_yuv_buffer, pMfcInst->phys_addr_yuv_buffer + tmp);
 		start = pMfcInst->yuv_buffer;
-		end = start + tmp * pMfcInst->yuv_buffer_count;
-		dmac_flush_range(start, end);
+		size = tmp * pMfcInst->yuv_buffer_count; 
+		dma_cache_maint(start, size, DMA_TO_DEVICE);
 
-		start = (unsigned char *)pMfcInst->phys_addr_yuv_buffer;
-		end = start + tmp * pMfcInst->yuv_buffer_count;
-		outer_flush_range((unsigned long)start, (unsigned long)end);
-		
 		/* 
 		 * Decode MFC Instance
 		 */
 		ret = s3c_mfc_inst_enc(pMfcInst, &nStrmLen, &nHdrLen);
 
 		start = pMfcInst->stream_buffer;
-		end = start + pMfcInst->stream_buffer_size;
-		dmac_flush_range(start, end);
-
-		start = (unsigned char *)pMfcInst->phys_addr_stream_buffer;
-		end = start + pMfcInst->stream_buffer_size;
-		outer_flush_range((unsigned long)start, (unsigned long)end);
+		size = pMfcInst->stream_buffer_size;
+		dma_cache_maint(start, size, DMA_FROM_DEVICE);
 
 		args.enc_exe.ret_code	= ret;
 		if (ret == S3C_MFC_INST_RET_OK) {
@@ -424,26 +413,17 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 							sizeof(s3c_mfc_dec_exe_arg_t));
 
 		tmp = (pMfcInst->width * pMfcInst->height * 3) >> 1;
-		
-		//cpu_cache.flush_kern_all();
+
 		start = pMfcInst->stream_buffer;
-		end = start + pMfcInst->stream_buffer_size;
-		dmac_flush_range(start, end);
+		size = pMfcInst->stream_buffer_size;
+		dma_cache_maint(start, size, DMA_TO_DEVICE);
 
-		start = (unsigned char *)pMfcInst->phys_addr_stream_buffer;
-		end = start + pMfcInst->stream_buffer_size;
-		outer_flush_range((unsigned long)start, (unsigned long)end);
-		
 		ret = s3c_mfc_inst_dec(pMfcInst, args.dec_exe.in_strmSize);
-		
-		start = pMfcInst->yuv_buffer;
-		end = start + tmp * pMfcInst->yuv_buffer_count;
-		dmac_flush_range(start, end);
 
-		start = (unsigned char *)pMfcInst->phys_addr_yuv_buffer;
-		end = start + tmp * pMfcInst->yuv_buffer_count;
-		outer_flush_range((unsigned long)start, (unsigned long)end);
-		
+		start = pMfcInst->yuv_buffer;
+		size = tmp * pMfcInst->yuv_buffer_count;
+		dma_cache_maint(start, size, DMA_FROM_DEVICE);	
+
 		args.dec_exe.ret_code = ret;
 		out = copy_to_user((s3c_mfc_dec_exe_arg_t *)arg, &args.dec_exe,
 						 sizeof(s3c_mfc_dec_exe_arg_t));
@@ -743,7 +723,6 @@ static int s3c_mfc_probe(struct platform_device *pdev)
 	}
 
 	s3c_mfc_phys_buffer = s3c_get_media_memory(S3C_MDEV_MFC);
-	//s3c_mfc_virt_buffer = ioremap_nocache(s3c_mfc_phys_buffer, s3c_get_media_memsize(S3C_MDEV_MFC))
 
 	/* mutex creation and initialization */
 	s3c_mfc_mutex = (struct mutex *)kmalloc(sizeof(struct mutex), GFP_KERNEL);
