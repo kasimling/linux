@@ -1910,3 +1910,14 @@ v2.6.28.6-samsung-r2d2: Jiun, Yu, PyoungJae Jung
 
 	Modified Files :
 		M	drivers/media/video/samsung/mfc10/s3c_mfc_set_config.c
+
+v2.6.28.6-samsung-r2d3: Jiun, Yu, PyoungJae Jung
+	- fixed cache issue in MFC1.0(6410) driver
+	- changed cache update way to dma_cache_maint
+
+	Modified Files :
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_set_config.c
+		M	drivers/media/video/samsung/mfc10/s3c_mfc.c
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_databuf.c
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_instance.c
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_set_config.c
