@@ -1891,3 +1891,13 @@ v2.6.28.6-samsung-r1d8: Jongpill LEe
 		M       arch/arm/plat-s5p64xx/devs.c
 		M       drivers/rtc/rtc-s3c.c
 		M       drivers/watchdog/Kconfig
+
+v2.6.28.6-samsung-r1d9: Jongpill Lee
+	- Support ADC Driver for S5P6440
+
+	Modified Files:
+		M       arch/arm/mach-s5p6440/include/mach/map.h
+		M       arch/arm/mach-s5p6440/mach-smdk6440.c
+		M       arch/arm/plat-s3c64xx/adc.c
+		M       arch/arm/plat-s5p64xx/Kconfig
+		M       arch/arm/plat-s5p64xx/devs.c
