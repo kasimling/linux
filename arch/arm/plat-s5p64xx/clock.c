@@ -44,9 +44,9 @@
 #define INIT_XTAL			12 * MHZ
 
 static const u32 s3c_cpu_clock_table[][3] = {
-	{532*MHZ, 0, 3},
-	{266*MHZ, 1, 1},
-	{133*MHZ, 3, 0},
+	{532*MHZ, (0<<ARM_DIV_RATIO_BIT), (3<<HCLK_DIV_RATIO_BIT)},
+	{266*MHZ, (1<<ARM_DIV_RATIO_BIT), (1<<HCLK_DIV_RATIO_BIT)},
+	{133*MHZ, (3<<ARM_DIV_RATIO_BIT), (0<<HCLK_DIV_RATIO_BIT)},
 	//{APLL, DIVarm, DIVhclk}	
 };
 
@@ -120,7 +120,7 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 {
 	u32 round_tmp;
 	u32 iter;
-	u32 clk_div0_tmp;
+	u32 clk_div0_tmp, flag, tmp;
 	u32 cur_clk = s3c_fclk_get_rate();
 
 	round_tmp = s3c_fclk_round_rate(clk,rate);
@@ -137,15 +137,18 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 	if(iter >= ARRAY_SIZE(s3c_cpu_clock_table))
 		iter = ARRAY_SIZE(s3c_cpu_clock_table) - 1;
 
+	
 	if(cur_clk > round_tmp) {
-		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
+		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);		
 		clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
 
 		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
 
 		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(HCLK_DIV_MASK);
 		clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
+
 		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+	
 	} else {
 		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(HCLK_DIV_MASK);
 		clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
@@ -154,7 +157,7 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
 		clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
 
-		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);		
+		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
 	}
 
 	clk->rate = s3c_cpu_clock_table[iter][0];

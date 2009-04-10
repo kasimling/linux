@@ -19,9 +19,15 @@
 #include <linux/init.h>
 #include <linux/err.h>
 #include <linux/clk.h>
+#include <linux/io.h>
 
 //#include <mach/hardware.h>
 #include <asm/system.h>
+
+#include <mach/map.h>
+#include <plat/regs-clock.h>
+#include <plat/regs-gpio.h>
+#include <plat/gpio-bank-f.h>
 
 #define USE_FREQ_TABLE
 #define USE_DVS
@@ -37,6 +43,8 @@ extern void ltc3714_init(void);
 
 #define ARM_LE	0
 #define INT_LE	1
+
+//#define CLK_PROBING
 
 /* frequency */
 static struct cpufreq_frequency_table s5p6440_freq_table[] = {
@@ -159,6 +167,11 @@ static int __init s5p6440_cpu_init(struct cpufreq_policy *policy)
 
 #ifdef USE_DVS
 	ltc3714_init();
+#endif
+
+#ifdef CLK_PROBING
+	__raw_writel((__raw_readl(S5P64XX_GPFCON)&~(0x3<<28))|(0x3<<28), S5P64XX_GPFCON);
+	__raw_writel((__raw_readl(S3C_CLK_OUT)&~(0xf<<12)), S3C_CLK_OUT);
 #endif
 	mpu_clk = clk_get(NULL, MPU_CLK);
 	if (IS_ERR(mpu_clk))
