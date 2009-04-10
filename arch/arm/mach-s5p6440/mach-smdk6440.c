@@ -96,6 +96,7 @@ static struct platform_device *smdk6440_devices[] __initdata = {
 #ifdef CONFIG_SMDK6440_SD_CH1
 	&s3c_device_hsmmc1,
 #endif
+	&s3c_device_wdt,
 	&s3c_device_rtc,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
@@ -105,6 +106,10 @@ static struct platform_device *smdk6440_devices[] __initdata = {
 	&s3c_device_nand,
 	&s3c_device_usbgadget,
 	&s3c_device_usb_otghcd,
+
+#ifdef CONFIG_S5P64XX_ADC
+	&s3c_device_adc,
+#endif
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
@@ -125,6 +130,13 @@ static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
 	.oversampling_shift	= 2,
 	.resol_bit 		= 12,
 	.s3c_adc_con		= ADC_TYPE_2,
+};
+
+static struct s3c_adc_mach_info s3c_adc_platform = {
+	/* s3c6410 support 12-bit resolution */
+	.delay	= 	10000,
+	.presc 	= 	49,
+	.resolution = 	12,
 };
 
 static void __init smdk6440_map_io(void)
@@ -164,6 +176,7 @@ static void __init smdk6440_machine_init(void)
 	s3c_i2c1_set_platdata(NULL);
 
 	s3c_ts_set_platdata(&s3c_ts_platform);
+	s3c_adc_set_platdata(&s3c_adc_platform);
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));

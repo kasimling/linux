@@ -51,4 +51,9 @@ config S5P64XX_SETUP_I2C1
 	help
 	  Common setup code for i2c bus 1.
 
+config S5P64XX_ADC
+        bool "S5P64XX ADC D/D support"
+        help
+         Analog to Digital conversion(ADC) D/D for S5P64XX support
+
 endif

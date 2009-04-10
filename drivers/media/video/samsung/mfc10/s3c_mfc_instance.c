@@ -910,6 +910,7 @@ int s3c_mfc_inst_dec(s3c_mfc_inst_context_t *ctx, unsigned long strm_leng)
 int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *header_size)
 {
 	int hdr_size, hdr_size2;
+	int size;
 	unsigned int bits_wr_ptr_value = 0;
 	unsigned char *hdr_buf_tmp=NULL;
 	unsigned char	*start, *end;
@@ -932,14 +933,10 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 			hdr_buf_tmp = (unsigned char *)kmalloc(hdr_size, GFP_KERNEL);
 			if (hdr_buf_tmp) {
 				memcpy(hdr_buf_tmp, ctx->stream_buffer, hdr_size);
-				
-				start = ctx->stream_buffer;
-				end = start + hdr_size;
-				dmac_flush_range(start, end);
 
-				start = (unsigned char*)ctx->phys_addr_stream_buffer;
-				end = start + hdr_size;
-				outer_flush_range((unsigned long)start, (unsigned long)end);
+				start = ctx->stream_buffer;
+				size = hdr_size;
+				dma_cache_maint(start, size, DMA_FROM_DEVICE);
 			} else {
 				return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;
 			}
@@ -956,24 +953,16 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 				memcpy(hdr_buf_tmp, ctx->stream_buffer, hdr_size);
 
 				start = ctx->stream_buffer;
-				end = start + hdr_size;
-				dmac_flush_range(start, end);
-
-				start = (unsigned char *)ctx->phys_addr_stream_buffer;
-				end = start + hdr_size;
-				outer_flush_range((unsigned long)start, (unsigned long)end);
-				
+				size = hdr_size;
+				dma_cache_maint(start, size, DMA_FROM_DEVICE);				
+			
 				memcpy(hdr_buf_tmp + hdr_size, (unsigned char *)((unsigned int)(ctx->stream_buffer + 	\
 								(hdr_size + 3)) & 0xFFFFFFFC), hdr_size2);
 
 				start = ((unsigned int)(ctx->stream_buffer + (hdr_size + 3)) & 0xFFFFFFFC);
-				end = start + hdr_size2;
-				dmac_flush_range(start, end);
-
-				start = (unsigned char *)((ctx->phys_addr_stream_buffer + (hdr_size + 3)) & 0xFFFFFFFC);
-				end = start + hdr_size2;
-				outer_flush_range((unsigned long)start, (unsigned long)end);
-				
+				size = hdr_size2;
+				dma_cache_maint(start, size, DMA_FROM_DEVICE);				
+	
 				hdr_size += hdr_size2;
 			} else {
                 		return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;
@@ -996,12 +985,8 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 			memcpy(hdr_buf_tmp, ctx->stream_buffer, hdr_size);
 
 			start = ctx->stream_buffer;
-			end = start + hdr_size;
-			dmac_flush_range(start, end);
-
-			start = (unsigned char *)ctx->phys_addr_stream_buffer;
-			end = start + hdr_size;
-			outer_flush_range((unsigned long)start, (unsigned long)end);
+			size = hdr_size;
+			dma_cache_maint(start, size, DMA_FROM_DEVICE);	
 		} else 
 			return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;            							
     	}
@@ -1017,13 +1002,9 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 			memcpy(hdr_buf_tmp, ctx->stream_buffer, hdr_size);
 
 			start = ctx->stream_buffer;
-			end = start + hdr_size;
-			dmac_flush_range(start, end);
-
-			start = (unsigned char *)ctx->phys_addr_stream_buffer;
-			end = start + hdr_size;
-			outer_flush_range((unsigned long)start, (unsigned long)end);
-				
+			size = hdr_size;
+			dma_cache_maint(start, size, DMA_FROM_DEVICE);
+		
 		} else {
 			return S3C_MFC_INST_ERR_MEMORY_ALLOCATION_FAIL;
 		}
@@ -1082,23 +1063,15 @@ int s3c_mfc_inst_enc(s3c_mfc_inst_context_t *ctx, int *enc_data_size, int *heade
 		memmove(ctx->stream_buffer + hdr_size, ctx->stream_buffer, *enc_data_size);
 
 		start = ctx->stream_buffer;
-		end = start + hdr_size + (*enc_data_size);
-		dmac_flush_range(start, end);
-
-		start = (unsigned char *)ctx->phys_addr_stream_buffer;
-		end = start + hdr_size + (*enc_data_size);
-		outer_flush_range((unsigned long)start, (unsigned long)end);
+		size = hdr_size + (*enc_data_size);
+		dma_cache_maint(start, size, DMA_TO_DEVICE);
 		
 		memcpy(ctx->stream_buffer, hdr_buf_tmp, hdr_size);
 
 		start = ctx->stream_buffer;
-		end = start + hdr_size;
-		dmac_flush_range(start, end);
+		size = hdr_size;
+		dma_cache_maint(start, size, DMA_TO_DEVICE);		
 
-		start = (unsigned char *)ctx->phys_addr_stream_buffer;
-		end = start + hdr_size;
-		outer_flush_range((unsigned long)start, (unsigned long)end);
-				
 		kfree(hdr_buf_tmp);
 
 		*enc_data_size += hdr_size;

@@ -27,9 +27,6 @@ BOOL s3c_mfc_memmap_databuf()
 {
 	BOOL	ret = FALSE;
 
-	/* STREAM BUFFER, FRAME BUFFER  <-- virtual data buffer address mapping */
-	//s3c_mfc_virt_data_buf = (volatile unsigned char *)ioremap_nocache(S3C_MFC_BASEADDR_DATA_BUF, S3C_MFC_DATA_BUF_SIZE);
-	//s3c_mfc_virt_data_buf = (volatile unsigned char *)ioremap(S3C_MFC_BASEADDR_DATA_BUF, S3C_MFC_DATA_BUF_SIZE);
 	s3c_mfc_virt_data_buf = phys_to_virt(s3c_mfc_phys_buffer + S3C_MFC_BITPROC_BUF_SIZE);
 	if (s3c_mfc_virt_data_buf == NULL) {
 		mfc_err("fail to mapping data buffer\n");
