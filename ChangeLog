@@ -1921,3 +1921,13 @@ v2.6.28.6-samsung-r2d3: Jiun, Yu, PyoungJae Jung
 		M	drivers/media/video/samsung/mfc10/s3c_mfc_databuf.c
 		M	drivers/media/video/samsung/mfc10/s3c_mfc_instance.c
 		M	drivers/media/video/samsung/mfc10/s3c_mfc_set_config.c
+
+v2.6.28.6-samsung-r2d4: Jae-Cheol Lee
+	- Support DVFS on SMDK6440 board
+
+	Modified Files :
+		M	arch/arm/Kconfig
+		M	arch/arm/plat-s5p64xx/Makefile
+		M	arch/arm/plat-s5p64xx/clock.c
+		M 	arch/arm/plat-s5p64xx/ltc3714.c
+		M 	arch/arm/plat-s5p64xx/s5p64xx-cpufreq.c
