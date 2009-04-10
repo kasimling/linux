@@ -1885,3 +1885,7 @@ v2.6.28.6-samsung-r1d7: Jongpill LEe
 v2.6.28.6-samsung-r2: Kyoungil Kim
 	- Official Release for SMDK6410(09.04.09)
 
+v2.6.28.6-samsung-r2d0: Jiun, Yu, PyoungJae Jung
+	- added cache issue in MFC1.0(6410) driver
+	Modified Files :
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_set_config.c
