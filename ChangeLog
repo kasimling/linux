@@ -1906,6 +1906,7 @@ v2.6.28.6-samsung-r2d1: Jongpill Lee
 		M       arch/arm/plat-s5p64xx/devs.c
 
 v2.6.28.6-samsung-r2d2: Jiun, Yu, PyoungJae Jung
-	- added cache issue in MFC1.0(6410) driver
+	- fixed cache issue in MFC1.0(6410) driver
+
 	Modified Files :
 		M	drivers/media/video/samsung/mfc10/s3c_mfc_set_config.c
