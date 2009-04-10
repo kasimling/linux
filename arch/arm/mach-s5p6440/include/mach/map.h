@@ -92,6 +92,10 @@
 
 ///////////////////////////////////////////////////
 
+/* Watchdog */
+#define S5P64XX_PA_WATCHDOG 	(0xEA200000)
+#define S5P64XX_SZ_WATCHDOG 	SZ_4K
+
 /* NAND flash controller */
 #define S5P64XX_PA_NAND	   	(0xE7100000)
 #define S5P64XX_SZ_NAND	   	SZ_1M
