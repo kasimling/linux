@@ -281,7 +281,7 @@ static int __init s3c_adc_probe(struct platform_device *pdev)
 		goto err_clk;
 	}
 
-	printk(KERN_INFO "S3C64XX ADC driver successfully probed\n");
+	printk(KERN_INFO "S5P64XX ADC driver successfully probed\n");
 
 	return 0;
 
