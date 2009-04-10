@@ -1882,8 +1882,11 @@ v2.6.28.6-samsung-r1d7: Jongpill LEe
 		M       drivers/rtc/Kconfig
 		M       drivers/rtc/rtc-s3c.c
 
-v2.6.28.6-samsung-r1d8: Jongpill LEe
-	- Support Watchdog timer for S5P6440
+v2.6.28.6-samsung-r2: Kyoungil Kim
+	- Official Release for SMDK6410(09.04.09)
+
+v2.6.28.6-samsung-r2d0: Jongpill LEe
+        - Support Watchdog timer for S5P6440
 
 	Modified Files:
 		M       arch/arm/mach-s5p6440/include/mach/map.h
@@ -1892,7 +1895,7 @@ v2.6.28.6-samsung-r1d8: Jongpill LEe
 		M       drivers/rtc/rtc-s3c.c
 		M       drivers/watchdog/Kconfig
 
-v2.6.28.6-samsung-r1d9: Jongpill Lee
+v2.6.28.6-samsung-r2d1: Jongpill Lee
 	- Support ADC Driver for S5P6440
 
 	Modified Files:
