@@ -1938,3 +1938,22 @@ v2.6.28.6-samsung-r2d5: Jongpill Lee
 	Modified Files :
 		M       arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
 		M       arch/arm/plat-s5pc1xx/include/plat/regs-power.h
+
+v2.6.28.6-samsung-r2d6: Jae-Cheol Lee
+	- Support backlight class by PWM on SMDK6440 board
+
+	Added Files :
+		A	arch/arm/plat-s5p64xx/pwm.c
+	
+	Modified Files :
+		M	arch/arm/configs/smdk6440ramdisk_defconfig
+		M	arch/arm/mach-s5p6440/cpu.c
+		M	arch/arm/mach-s5p6440/mach-smdk6440.c
+		M	arch/arm/plat-s3c/include/plat/clock.h
+		M	arch/arm/plat-s3c/pwm-clock.c
+		M	arch/arm/plat-s5p64xx/Kconfig
+		M	arch/arm/plat-s5p64xx/Makefile
+		M	arch/arm/plat-s5p64xx/clock.c
+		M	arch/arm/plat-s5p64xx/pwm.c
+		M	drivers/video/samsung/s3cfb_fimd5x.c
+
