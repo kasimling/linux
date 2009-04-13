@@ -29,7 +29,7 @@
 
 static struct s3c_csis_info *s3c_csis;
 
- struct s3c_platform_csis *to_csis_plat(struct device *dev)
+static struct s3c_platform_csis *to_csis_plat(struct device *dev)
 {
 	struct platform_device *pdev = to_platform_device(dev);
 
@@ -166,10 +166,16 @@ static void s3c_csis_stop(struct platform_device *pdev)
 
 static irqreturn_t s3c_csis_irq(int irq, void *dev_id)
 {
+	u32 cfg;
+
+	/* just clearing the pends */
+	cfg = readl(s3c_csis->regs + S3C_CSIS_INTSRC);
+	writel(cfg, s3c_csis->regs + S3C_CSIS_INTSRC);
+
 	return IRQ_HANDLED;
 }
 
- int s3c_csis_probe(struct platform_device *pdev)
+static int s3c_csis_probe(struct platform_device *pdev)
 {
 	struct s3c_platform_csis *pdata;
 	struct resource *res;
@@ -202,7 +208,6 @@ static irqreturn_t s3c_csis_irq(int irq, void *dev_id)
 
 	/* ioremap for register block */
 	s3c_csis->regs = ioremap(res->start, res->end - res->start + 1);
-
 	if (!s3c_csis->regs) {
 		err("failed to remap io region\n");
 		return -EINVAL;
