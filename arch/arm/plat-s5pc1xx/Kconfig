@@ -102,5 +102,18 @@ config S5PC1XX_SETUP_FIMC2
 	default y
 	help
 	  Common setup code for FIMC controller 2.
-endif
 
+# MIPI-CSIS part
+config S5PC1XX_DEV_CSIS
+	bool
+	default y
+	help
+	  Compile in platform device definitions for MIPI-CSIS
+
+config S5PC1XX_SETUP_CSIS
+	bool
+	default y
+	help
+	  Common setup code for MIPI-CSIS
+
+endif

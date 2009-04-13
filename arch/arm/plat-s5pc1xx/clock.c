@@ -168,15 +168,15 @@ int s5pc1xx_sclk1_ctrl(struct clk *clk, int enable)
 
 static struct clk init_clocks_disable[] = {
 	{
-		.name		= "dsi",
+		.name		= "mipi-dsim",
 		.id		= -1,
-		.parent		= &clk_p,
+		.parent		= &clk_27m,
 		.enable		= s5pc1xx_clk_d11_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D11_DSI,
 	}, {
-		.name		= "csi",
+		.name		= "mipi-csis",
 		.id		= -1,
-		.parent		= &clk_h,
+		.parent		= &clk_27m,
 		.enable		= s5pc1xx_clk_d11_ctrl,
 		.ctrlbit	= S5P_CLKGATE_D11_CSI,
 	}, {

@@ -43,6 +43,7 @@
 #include <plat/regs-rtc.h>
 #include <plat/iic.h>
 #include <plat/fimc.h>
+#include <plat/csis.h>
 
 #include <plat/nand.h>
 #include <plat/partition.h>
@@ -161,7 +162,8 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_wdt,
 	&s3c_device_g3d,
 	&s3c_device_g2d,
-	&s3c_device_rotator,	
+	&s3c_device_rotator,
+	&s3c_device_csis,
 };
 
 
@@ -241,6 +243,9 @@ static void __init smdkc100_machine_init(void)
 	s3c_fimc0_set_platdata(NULL);
 	s3c_fimc1_set_platdata(NULL);
 	s3c_fimc2_set_platdata(NULL);
+
+	/* mipi-csi2 */
+	s3c_csis_set_platdata(NULL);
 
 #ifdef CONFIG_VIDEO_FIMC
 	s3c_fimc_reset_camera();
