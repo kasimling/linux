@@ -1930,4 +1930,11 @@ v2.6.28.6-samsung-r2d4: Jae-Cheol Lee
 		M	arch/arm/plat-s5p64xx/Makefile
 		M	arch/arm/plat-s5p64xx/clock.c
 		M 	arch/arm/plat-s5p64xx/ltc3714.c
-		M 	arch/arm/plat-s5p64xx/s5p64xx-cpufreq.c
+		M 	arch/arm/plat-s5p64xx/s5p64xx-cpufreq
+
+v2.6.28.6-samsung-r2d5: Jongpill Lee
+	- Modify some code for S5PC100
+
+	Modified Files :
+		M       arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
+		M       arch/arm/plat-s5pc1xx/include/plat/regs-power.h
