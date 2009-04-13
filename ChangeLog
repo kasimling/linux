@@ -1957,3 +1957,9 @@ v2.6.28.6-samsung-r2d6: Jae-Cheol Lee
 		M	arch/arm/plat-s5p64xx/pwm.c
 		M	drivers/video/samsung/s3cfb_fimd5x.c
 
+v2.6.28.6-samsung-r2d7: Jaeryul Oh
+	- MFC suspend/resume related code for SMDK6410 updated
+	Modified Files :
+		M       drivers/media/video/samsung/mfc10/s3c_mfc.c
+		M       drivers/media/video/samsung/mfc10/s3c_mfc_config.h
+
