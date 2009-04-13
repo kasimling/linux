@@ -106,3 +106,7 @@ extern void s5pc1xx_register_clocks(void);
 extern int s5pc1xx_sclk0_ctrl(struct clk *clk, int enable);
 extern int s5pc1xx_sclk1_ctrl(struct clk *clk, int enable);
 #endif
+
+#ifdef CONFIG_HAVE_PWM
+extern int s3c24xx_pwmclk_init(void);
+#endif
