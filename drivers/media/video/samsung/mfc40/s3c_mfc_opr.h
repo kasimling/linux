@@ -42,13 +42,14 @@
 
 BOOL s3c_mfc_load_firmware(void);
 MFC_ERROR_CODE s3c_mfc_init_hw(void);
-MFC_ERROR_CODE s3c_mfc_init_encode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args);
-MFC_ERROR_CODE s3c_mfc_exe_encode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args);
-MFC_ERROR_CODE s3c_mfc_init_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args);
-MFC_ERROR_CODE s3c_mfc_exe_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args);
-MFC_ERROR_CODE s3c_mfc_get_config(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args);
-MFC_ERROR_CODE s3c_mfc_set_config(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args);
-MFC_ERROR_CODE s3c_mfc_deinit_hw(s3c_mfc_inst_ctx  *MfcCtx);
+MFC_ERROR_CODE s3c_mfc_init_encode(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
+MFC_ERROR_CODE s3c_mfc_exe_encode(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
+MFC_ERROR_CODE s3c_mfc_init_decode(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
+MFC_ERROR_CODE s3c_mfc_start_decode_seq(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
+MFC_ERROR_CODE s3c_mfc_exe_decode(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
+MFC_ERROR_CODE s3c_mfc_get_config(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
+MFC_ERROR_CODE s3c_mfc_set_config(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
+MFC_ERROR_CODE s3c_mfc_deinit_hw(s3c_mfc_inst_ctx *MfcCtx);
 
 #endif /* _S3C_MFC_OPR_H_ */
 

@@ -25,11 +25,20 @@ typedef enum
 {
 	MFCINST_STATE_NULL = 0,
 
-	MFCINST_STATE_OPENED = 10,    /* Instance is created but not initialized */
-	MFCINST_STATE_DEC_INITIALIZE = 20,    /* Instance is initialized for decoding */
-	MFCINST_STATE_DEC_EXE,
+	/* Instance is created */
+	MFCINST_STATE_OPENED = 10,
 
-	MFCINST_STATE_ENC_INITIALIZE = 30,    /* Instance is initialized for decoding */
+	/* channel_set and init_codec is completed */
+	MFCINST_STATE_DEC_INITIALIZE = 20,
+
+	/* seq_start is completed */
+	MFCINST_STATE_DEC_SEQ_START  = 30,
+	
+	MFCINST_STATE_DEC_EXE,
+	
+	/* Instance is initialized for encoding */
+	MFCINST_STATE_ENC_INITIALIZE = 40, 
+
 	MFCINST_STATE_ENC_EXE
 } s3c_mfc_inst_state;
 
@@ -71,8 +80,10 @@ typedef struct tag_mfc_inst_ctx
 	unsigned int totalDPBCnt;
 	unsigned int extraDPB;
 	unsigned int displayDelay;
+	unsigned int postEnable;
+	unsigned int endOfFrame;
+	unsigned int forceSetFrameType;
 	unsigned int phyFWBufAddr;
-	unsigned int isFirstFrame;
 	unsigned int img_width;
 	unsigned int img_height;
 } s3c_mfc_inst_ctx;
