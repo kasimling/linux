@@ -330,9 +330,6 @@
 #define	S5P_CLKGATE_SCLK1_SPDIF		(1<<11)
 #define	S5P_CLKGATE_SCLK1_CAM		(1<<12)
 
-/*OTHERS Resgister */
-#define S5P_OTHERS_USB_SIG_MASK (1 << 16)
-
 /* register for power management */
 #define S5P_PWR_CFG 		S5P_CLKREG(0x8000)
 #define S5P_EINT_WAKEUP_MASK 	S5P_CLKREG(0x8004)
@@ -384,6 +381,7 @@
 #define S5P_CLKDIV_IEM_L2 	S5P_CLKREG(0x8718)
 #define S5P_CLKDIV_IEM_L1 	S5P_CLKREG(0x871C)
 #define S5P_IEM_HPMCLK_DIV 	S5P_CLKREG(0x8724)
+#define S5P_MIPI_PHY_CON0	S5P_CLKREG(0x100400)
 
 #define S5P_CFG_WFI_CLEAN	~(3<<5)
 #define S5P_CFG_WFI_IDLE	(1<<5)
@@ -401,5 +399,13 @@
 #define S5P_PWR_STABLE_COUNT	85500
 
 #define S5P_SLEEP_CFG_OSC_EN	0
+
+/* OTHERS Resgister */
+#define S5P_OTHERS_USB_SIG_MASK 	(1 << 16)
+#define S5P_OTHERS_MIPI_DPHY_EN		(1 << 28)
+
+/* MIPI D-PHY Control Register 0 */
+#define S5P_MIPI_PHY_CON0_M_RESETN	(1 << 1)
+#define S5P_MIPI_PHY_CON0_S_RESETN	(1 << 0)
 
 #endif /* _PLAT_REGS_CLOCK_H */

@@ -80,6 +80,10 @@ static int s3c_mfc_openhandle_count = 0;
 static struct mutex *s3c_mfc_mutex = NULL;
 unsigned int s3c_mfc_intr_type = 0;
 
+#define S3C_MFC_SAVE_START_ADDR 0x100
+#define S3C_MFC_SAVE_END_ADDR	0x200
+static unsigned int s3c_mfc_save[S3C_MFC_SAVE_END_ADDR - S3C_MFC_SAVE_START_ADDR];
+
 extern int s3c_mfc_get_config_params(s3c_mfc_inst_context_t *pMfcInst, s3c_mfc_args_t *args);
 extern int s3c_mfc_set_config_params(s3c_mfc_inst_context_t *pMfcInst, s3c_mfc_args_t *args);
 
@@ -662,6 +666,19 @@ static struct miscdevice s3c_mfc_miscdev = {
 	fops:		&s3c_mfc_fops
 };
 
+static BOOL s3c_mfc_setup_clock(void)
+{
+	unsigned int	mfc_clk;
+	
+	/* mfc clock set 133 Mhz */
+	mfc_clk = readl(S3C_CLK_DIV0);
+	mfc_clk |= (1 << 28);
+	__raw_writel(mfc_clk, S3C_CLK_DIV0);
+
+	return TRUE;
+
+}
+
 static int s3c_mfc_probe(struct platform_device *pdev)
 {
 	int	size;
@@ -732,10 +749,9 @@ static int s3c_mfc_probe(struct platform_device *pdev)
 	mutex_init(s3c_mfc_mutex);
 
 	/* mfc clock set 133 Mhz */
-	mfc_clk = readl(S3C_CLK_DIV0);
-	mfc_clk |= (1 << 28);
-	__raw_writel(mfc_clk, S3C_CLK_DIV0);
-
+	if (s3c_mfc_setup_clock() == FALSE)
+		return -ENODEV;
+	
 	/*
 	 * 2. MFC Memory Setup
 	 */
@@ -774,7 +790,6 @@ static int s3c_mfc_remove(struct platform_device *dev)
 static int s3c_mfc_suspend(struct platform_device *dev, pm_message_t state)
 {
 
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,21)
 	int	inst_no;
 	int	is_mfc_on = 0;
 	int	i, index = 0;
@@ -825,15 +840,11 @@ static int s3c_mfc_suspend(struct platform_device *dev, pm_message_t state)
 
 	mutex_unlock(s3c_mfc_mutex);
 
-#endif
-
 	return 0;
 }
 
 static int s3c_mfc_resume(struct platform_device *pdev)
 {
-
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,21)
 
 	int 		i, index = 0;
 	int         	inst_no;
@@ -861,11 +872,15 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 		msleep(1);
 	} while (!(domain_v_ready & (1 << 1)));
 
-	/* 3. Firmware download */
+	/* 3. MFC clock set 133 Mhz */
+	if (s3c_mfc_setup_clock() == FALSE)
+		return -ENODEV;
+
+	/* 4. Firmware download */
 	s3c_mfc_download_boot_firmware();
 
 	/* 
-	 * 4. Power On state
+	 * 5. Power On state
 	 * Validate all the MFC Instances
 	 */
 	for (inst_no = 0; inst_no < S3C_MFC_NUM_INSTANCES_MAX; inst_no++) {
@@ -882,7 +897,6 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 		}
 	}
 
-
 	if (is_mfc_on) {
 		/* 5. Restore MFC SFR */
 		dwMfcBase = s3c_mfc_sfr_base_virt_addr;
@@ -896,8 +910,6 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 	}
 
 	mutex_unlock(s3c_mfc_mutex);
-
-#endif
 
 	return 0;
 }

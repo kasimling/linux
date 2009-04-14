@@ -52,6 +52,7 @@
 #include <plat/cpu.h>
 #include <plat/ts.h>
 #include <plat/adc.h>
+#include <plat/pm.h>
 
 #include <plat/regs-rtc.h>
 
@@ -215,7 +216,10 @@ static void __init smdk6440_machine_init(void)
 
 	platform_add_devices(smdk6440_devices, ARRAY_SIZE(smdk6440_devices));
 
+	s5p6440_pm_init();
+
 	smdk_backlight_register();
+
 }
 
 MACHINE_START(SMDK6440, "SMDK6440")

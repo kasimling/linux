@@ -1957,3 +1957,49 @@ v2.6.28.6-samsung-r2d6: Jae-Cheol Lee
 		M	arch/arm/plat-s5p64xx/pwm.c
 		M	drivers/video/samsung/s3cfb_fimd5x.c
 
+v2.6.28.6-samsung-r2d7: Jaeryul Oh
+	- MFC suspend/resume related code for SMDK6410 updated
+	Modified Files :
+		M       drivers/media/video/samsung/mfc10/s3c_mfc.c
+		M       drivers/media/video/samsung/mfc10/s3c_mfc_config.h
+
+v2.6.28.6-samsung-r2d8: Jinsung Yang
+	- The 1st phase of MIPI-CSI support
+
+	Addes files:
+		A       arch/arm/plat-s5pc1xx/dev-csis.c
+		A	arch/arm/plat-s5pc1xx/include/plat/csis.h
+		A	arch/arm/plat-s5pc1xx/include/plat/regs-csis.h
+		A	arch/arm/plat-s5pc1xx/setup-csis.c
+		A	drivers/media/video/samsung/fimc/s3c_csis.c
+		A	drivers/media/video/samsung/fimc/s3c_csis.h
+	
+	Modified files:
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+		M       arch/arm/mach-s5pc100/mach-smdkc100.c
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s5pc1xx/Kconfig
+		M       arch/arm/plat-s5pc1xx/Makefile
+		M       arch/arm/plat-s5pc1xx/clock.c
+		M       arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
+		M       drivers/media/video/samsung/fimc/Kconfig
+		M       drivers/media/video/samsung/fimc/Makefile
+		M       drivers/media/video/samsung/fimc/s3c_fimc.h
+
+v2.6.28.6-samsung-r2d9: Jongpill Lee
+	- Temporary support APM for S5P6440
+
+	Added Files:
+		A       arch/arm/mach-s5p6440/pm.c
+		A       arch/arm/plat-s5p64xx/include/plat/pm.h
+		A       arch/arm/plat-s5p64xx/pm.c
+		A       arch/arm/plat-s5p64xx/sleep.S
+
+	Modified Files:
+		M       arch/arm/mach-s5p6440/Makefile
+		M       arch/arm/mach-s5p6440/include/mach/gpio.h
+		M       arch/arm/mach-s5p6440/include/mach/regs-irq.h
+		M       arch/arm/mach-s5p6440/mach-smdk6440.c
+		M       arch/arm/plat-s5p64xx/Makefile
+		M       arch/arm/plat-s5p64xx/include/plat/regs-gpio.h
+		M       drivers/video/samsung/s3cfb_fimd5x.c
