@@ -1986,3 +1986,20 @@ v2.6.28.6-samsung-r2d8: Jinsung Yang
 		M       drivers/media/video/samsung/fimc/Makefile
 		M       drivers/media/video/samsung/fimc/s3c_fimc.h
 
+v2.6.28.6-samsung-r2d9: Jongpill Lee
+	- Temporary support APM for S5P6440
+
+	Added Files:
+		A       arch/arm/mach-s5p6440/pm.c
+		A       arch/arm/plat-s5p64xx/include/plat/pm.h
+		A       arch/arm/plat-s5p64xx/pm.c
+		A       arch/arm/plat-s5p64xx/sleep.S
+
+	Modified Files:
+		M       arch/arm/mach-s5p6440/Makefile
+		M       arch/arm/mach-s5p6440/include/mach/gpio.h
+		M       arch/arm/mach-s5p6440/include/mach/regs-irq.h
+		M       arch/arm/mach-s5p6440/mach-smdk6440.c
+		M       arch/arm/plat-s5p64xx/Makefile
+		M       arch/arm/plat-s5p64xx/include/plat/regs-gpio.h
+		M       drivers/video/samsung/s3cfb_fimd5x.c
