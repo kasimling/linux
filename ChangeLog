@@ -2003,3 +2003,9 @@ v2.6.28.6-samsung-r2d9: Jongpill Lee
 		M       arch/arm/plat-s5p64xx/Makefile
 		M       arch/arm/plat-s5p64xx/include/plat/regs-gpio.h
 		M       drivers/video/samsung/s3cfb_fimd5x.c
+
+v2.6.28.6-samsung-r2d10: Jongpill Lee
+	- GPIO Bug fix
+
+	Modified Files:
+		M	arch/arm/mach-s5p6440/include/mach/gpio.h
