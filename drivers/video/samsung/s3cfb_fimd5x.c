@@ -1462,7 +1462,11 @@ int s3cfb_suspend(struct platform_device *dev, pm_message_t state)
 	s3cfb_info_t *info = fbinfo->par;
 
 	s3cfb_stop_lcd();
+#if defined(CONFIG_CPU_S5P6440)
+	s5p6440_pm_do_save(s3c_lcd_save, ARRAY_SIZE(s3c_lcd_save));
+#else
 	s5pc1xx_pm_do_save(s3c_lcd_save, ARRAY_SIZE(s3c_lcd_save));
+#endif
 
 	/* sleep before disabling the clock, we need to ensure
 	 * the LCD DMA engine is not going to get back on the bus
@@ -1484,7 +1488,11 @@ int s3cfb_resume(struct platform_device *dev)
 
 	clk_enable(info->clk);
 	msleep(1);
+#if defined(CONFIG_CPU_S5P6440)
+	s5p6440_pm_do_restore(s3c_lcd_save, ARRAY_SIZE(s3c_lcd_save));
+#else
 	s5pc1xx_pm_do_restore(s3c_lcd_save, ARRAY_SIZE(s3c_lcd_save));
+#endif
 
 	s3cfb_init_hw();
 	s3cfb_start_lcd();
