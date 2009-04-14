@@ -2003,3 +2003,15 @@ v2.6.28.6-samsung-r2d9: Jongpill Lee
 		M       arch/arm/plat-s5p64xx/Makefile
 		M       arch/arm/plat-s5p64xx/include/plat/regs-gpio.h
 		M       drivers/video/samsung/s3cfb_fimd5x.c
+
+v2.6.28.6-samsung-r2d10: Jae-Cheol Lee
+	- Support backlight class driver by PWM on SMDK6410
+
+	Added Files:
+		A 	arch/arm/plat-s3c64xx/pwm.c
+
+	Modified Files:
+		M   	arch/arm/mach-s3c6410/cpu.c
+		M   	arch/arm/mach-s3c6410/mach-smdk6410.c
+		M   	arch/arm/plat-s3c64xx/Kconfig
+		M   	arch/arm/plat-s3c64xx/Makefile
