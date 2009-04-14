@@ -2022,3 +2022,9 @@ v2.6.28.6-samsung-r2d11: jongpill Lee
 
 	MOdified Files:
 		M	arch/arm/mach-s5p6440/include/mach/gpio.h	
+
+v2.6.28.6-samsung-r2d12: jongpill Lee
+	- APM Support for S5P6440
+
+	Modified Files:
+		M       arch/arm/plat-s3c64xx/sleep.S
