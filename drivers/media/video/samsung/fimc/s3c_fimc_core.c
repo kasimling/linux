@@ -229,7 +229,6 @@ struct s3c_fimc_control *s3c_fimc_register_controller(struct platform_device *pd
 
 	/* irq */
 	ctrl->irq = platform_get_irq(pdev, 0);
-
 	if (request_irq(ctrl->irq, s3c_fimc_irq, IRQF_DISABLED, ctrl->name, ctrl))
 		err("request_irq failed\n");
 

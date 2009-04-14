@@ -709,7 +709,7 @@ void s3cfb_activate_var(s3cfb_info_t *fbi, struct fb_var_screeninfo *var)
 	/* write new registers */
 
 /* FIXME: temporary fixing for pm by jsgood */
-#if 0
+#if 1
 	writel(s3cfb_fimd.wincon0, S3C_WINCON0);
 	writel(s3cfb_fimd.wincon1, S3C_WINCON1);
 	writel(s3cfb_fimd.wincon2, S3C_WINCON2);

@@ -141,14 +141,12 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 	if(cur_clk > round_tmp) {
 		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);		
 		clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
-
 		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
 
 		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(HCLK_DIV_MASK);
 		clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
-
 		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
-	
+
 	} else {
 		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(HCLK_DIV_MASK);
 		clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
@@ -156,9 +154,10 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 		
 		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
 		clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
-
 		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
 	}
+
+	printk("ARM_CLK:%d, iter:%d\n",round_tmp,iter);
 
 	clk->rate = s3c_cpu_clock_table[iter][0];
 

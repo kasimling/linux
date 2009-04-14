@@ -97,6 +97,9 @@ void __init s5p6440_init_clocks(int xtal)
 	s5p64xx_register_clocks();
 	s5p6440_register_clocks();
 	s5p6440_setup_clocks();
+#ifdef CONFIG_HAVE_PWM
+	s3c24xx_pwmclk_init();
+#endif
 }
 
 void __init s5p6440_init_irq(void)

@@ -34,7 +34,7 @@
 
 #define S5PC1XX_PA_SYSCON	(0xE0100000)
 #define S5PC1XX_VA_SYSCON       S3C_VA_SYS
-#define S5PC1XX_SZ_SYSCON       SZ_1M  
+#define S5PC1XX_SZ_SYSCON       SZ_2M  
 
 #define S5PC1XX_PA_TIMER	(0xEA000000)
 #define S5PC1XX_PA_IIC0		(0xEC100000)
@@ -158,6 +158,10 @@
 /* Rotator */
 #define S5PC1XX_PA_ROTATOR	(0xEE100000)
 #define S5PC1XX_SZ_ROTATOR	SZ_1M
+
+/* MIPI CSIS */
+#define S5PC1XX_PA_CSIS		(0xECC00000)
+#define S5PC1XX_SZ_CSIS		SZ_1M
 
 /* compatibiltiy defines. */
 #define S3C_SZ_HSMMC		S5PC1XX_SZ_HSMMC

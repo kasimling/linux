@@ -71,6 +71,7 @@ extern dma_addr_t s3c_mfc_phys_buffer;
  * If it is enabled, the memory size of SD YUV420(720x576x1.5 bytes) is required more.
  * In case of linux driver, reserved buffer size will be changed.
  */
+	
 #define S3C_MFC_ROTATE_ENABLE		0
 
 /*
