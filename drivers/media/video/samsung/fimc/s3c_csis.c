@@ -141,8 +141,8 @@ static void s3c_csis_start(struct platform_device *pdev)
 	struct s3c_platform_csis *plat;
 
 	plat = to_csis_plat(&pdev->dev);
-	if (plat->cfg_phy)
-		plat->cfg_phy(pdev, 1);
+	if (plat->cfg_phy_global)
+		plat->cfg_phy_global(pdev, 1);
 
 	s3c_csis_reset();
 	s3c_csis_set_nr_lanes(S3C_CSIS_NR_LANES);
@@ -160,8 +160,8 @@ static void s3c_csis_stop(struct platform_device *pdev)
 	s3c_csis_phy_off();
 
 	plat = to_csis_plat(&pdev->dev);
-	if (plat->cfg_phy)
-		plat->cfg_phy(pdev, 0);
+	if (plat->cfg_phy_global)
+		plat->cfg_phy_global(pdev, 0);
 }
 
 static irqreturn_t s3c_csis_irq(int irq, void *dev_id)

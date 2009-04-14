@@ -24,7 +24,7 @@ void s3c_csis_cfg_gpio(struct platform_device *dev)
 	return;
 }
 
-void s3c_csis_cfg_phy(struct platform_device *dev, int on)
+void s3c_csis_cfg_phy_global(struct platform_device *dev, int on)
 {
 	u32 cfg;
 
