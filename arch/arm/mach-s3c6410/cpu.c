@@ -99,6 +99,9 @@ void __init s3c6410_init_clocks(int xtal)
 	s3c64xx_register_clocks();
 	s3c6400_register_clocks();
 	s3c6400_setup_clocks();
+#ifdef CONFIG_HAVE_PWM
+	s3c24xx_pwmclk_init();
+#endif
 }
 
 void __init s3c6410_init_irq(void)
