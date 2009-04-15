@@ -16,7 +16,7 @@ config VIDEO_FIMC_DEBUG
 
 config VIDEO_FIMC_MIPI
 	bool "FIMC works with MIPI-CSI2 (Rx)"
-	depends on VIDEO_FIMC
+	depends on VIDEO_FIMC && ARCH_S5PC1XX
 
 source "drivers/media/video/samsung/fimc/Kconfig-camera"
 
