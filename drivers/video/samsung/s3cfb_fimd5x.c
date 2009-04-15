@@ -1289,6 +1289,7 @@ int s3cfb_set_gpio(void)
 	for (i = 0; i < 12; i++)
 		s3c_gpio_cfgpin(S5P64XX_GPJ(i), S3C_GPIO_SFN(2));
 
+#ifndef CONFIG_BACKLIGHT_PWM
 	/* backlight ON */
 	if (gpio_is_valid(S5P64XX_GPF(15))) {
 		err = gpio_request(S5P64XX_GPF(15), "GPF");
@@ -1301,7 +1302,7 @@ int s3cfb_set_gpio(void)
 
 		gpio_direction_output(S5P64XX_GPF(15), 1);
 	}
-
+#endif
 	/* module reset */
 	if (gpio_is_valid(S5P64XX_GPN(5))) {
 		err = gpio_request(S5P64XX_GPN(5), "GPN");
@@ -1462,7 +1463,11 @@ int s3cfb_suspend(struct platform_device *dev, pm_message_t state)
 	s3cfb_info_t *info = fbinfo->par;
 
 	s3cfb_stop_lcd();
+#if defined(CONFIG_CPU_S5P6440)
+	s5p6440_pm_do_save(s3c_lcd_save, ARRAY_SIZE(s3c_lcd_save));
+#else
 	s5pc1xx_pm_do_save(s3c_lcd_save, ARRAY_SIZE(s3c_lcd_save));
+#endif
 
 	/* sleep before disabling the clock, we need to ensure
 	 * the LCD DMA engine is not going to get back on the bus
@@ -1484,7 +1489,11 @@ int s3cfb_resume(struct platform_device *dev)
 
 	clk_enable(info->clk);
 	msleep(1);
+#if defined(CONFIG_CPU_S5P6440)
+	s5p6440_pm_do_restore(s3c_lcd_save, ARRAY_SIZE(s3c_lcd_save));
+#else
 	s5pc1xx_pm_do_restore(s3c_lcd_save, ARRAY_SIZE(s3c_lcd_save));
+#endif
 
 	s3cfb_init_hw();
 	s3cfb_start_lcd();

@@ -16,13 +16,7 @@
 #include <asm/assembler.h>
 #include <mach/map.h>
 
-#undef S3C64XX_VA_GPIO
-#define S3C64XX_VA_GPIO (0x0)
-
 #include <plat/regs-gpio.h>
-#include <plat/gpio-bank-n.h>
-
-#define LL_UART (S3C_PA_UART + (0x400 * CONFIG_S3C_LOWLEVEL_UART_PORT))
 
 	.text
 
@@ -38,7 +32,7 @@
 	 *			0 => resumed from sleep
 	*/
 
-ENTRY(s3c6410_cpu_save)
+ENTRY(s5p6440_cpu_save)
 	stmfd	sp!, { r4 - r12, lr }
 
 	mrc	p15, 0, r4, c13, c0, 0	@ FCSE/PID
@@ -57,7 +51,6 @@ ENTRY(s3c6410_cpu_save)
 	@@ return to the caller, after the MMU is turned on.
 	@@ restore the last bits of the stack and return.
 resume_with_mmu:
-	b	.
 	mov	r0, #1
 	ldmfd	sp!, { r4 - r12, pc }	@ return, from sp from s3c_cpu_save
 
@@ -69,8 +62,8 @@ resume_with_mmu:
 	 * the value can be written to (the .text segment is RO).
 	*/
 
-	.global	s3c6410_sleep_save_phys
-s3c6410_sleep_save_phys:
+	.global	s5p6440_sleep_save_phys
+s5p6440_sleep_save_phys:
 	.word	0
 
 	/* Sleep magic, the word before the resume entry point so that the
@@ -87,29 +80,8 @@ s3c6410_sleep_save_phys:
 	 * the kernel C code to finish the resume code.
 	*/
 
-ENTRY(s3c6410_cpu_resume)
+ENTRY(s5p6440_cpu_resume)
 	msr	cpsr_c, #PSR_I_BIT | PSR_F_BIT | SVC_MODE
-	ldr	r2, =LL_UART		/* for debug */
-
-#ifdef CONFIG_S3C_PM_DEBUG_LED_SMDK
-	/* Initialise the GPIO state if we are debugging via the SMDK LEDs,
-	 * as the uboot version supplied resets these to inputs during the
-	 * resume checks.
-	*/
-
-	ldr	r3, =S3C64XX_PA_GPIO
-	ldr	r0, [ r3, #S3C64XX_GPNCON ]
-	bic	r0, r0, #(S3C64XX_GPN_CONMASK(12) | S3C64XX_GPN_CONMASK(13) | \
-			  S3C64XX_GPN_CONMASK(14) | S3C64XX_GPN_CONMASK(15))
-	orr	r0, r0, #(S3C64XX_GPN_OUTPUT(12) | S3C64XX_GPN_OUTPUT(13) | \
-			  S3C64XX_GPN_OUTPUT(14) | S3C64XX_GPN_OUTPUT(15))
-	str	r0, [ r3, #S3C64XX_GPNCON ]
-
-	ldr	r0, [ r3, #S3C64XX_GPNDAT ]
-	bic	r0, r0, #0xf << 12			@ GPN12..15
-	orr	r0, r0, #1 << 15			@ GPN15
-	str	r0, [ r3, #S3C64XX_GPNDAT ]
-#endif
 
 	/* __v6_setup from arch/arm/mm/proc-v6.S, ensure that the caches
 	 * are thoroughly cleaned just in case the bootloader didn't do it
@@ -122,7 +94,7 @@ ENTRY(s3c6410_cpu_resume)
 	@@mcr	p15, 0, r0, c8, c7, 0		@ invalidate I + D TLBs
 	@@mcr	p15, 0, r0, c7, c7, 0		@ Invalidate I + D caches
 
-	ldr	r0, s3c6410_sleep_save_phys
+	ldr	r0, s5p6440_sleep_save_phys
 	ldmia	r0, { r4 - r13 }
 
 	mcr	p15, 0, r4, c13, c0, 0	@ FCSE/PID

@@ -80,6 +80,10 @@ static int s3c_mfc_openhandle_count = 0;
 static struct mutex *s3c_mfc_mutex = NULL;
 unsigned int s3c_mfc_intr_type = 0;
 
+#define S3C_MFC_SAVE_START_ADDR 0x100
+#define S3C_MFC_SAVE_END_ADDR	0x200
+static unsigned int s3c_mfc_save[S3C_MFC_SAVE_END_ADDR - S3C_MFC_SAVE_START_ADDR];
+
 extern int s3c_mfc_get_config_params(s3c_mfc_inst_context_t *pMfcInst, s3c_mfc_args_t *args);
 extern int s3c_mfc_set_config_params(s3c_mfc_inst_context_t *pMfcInst, s3c_mfc_args_t *args);
 
@@ -261,6 +265,7 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 	int nStrmLen, nHdrLen;
 	int out;
 	int yuv_size;
+	int size;
 	
 	void		*temp;
 	unsigned int	vir_mv_addr;
@@ -340,30 +345,18 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 
 		tmp = (pMfcInst->width * pMfcInst->height * 3) >> 1;
 
-		//cpu_cache.flush_kern_all();
-		//dma_cache_maint(pMfcInst->yuv_buffer, tmp, DMA_BIDIRECTIONAL);
-		//dmac_flush_range(pMfcInst->yuv_buffer, pMfcInst->yuv_buffer + tmp);
-		//outer_flush_range(pMfcInst->phys_addr_yuv_buffer, pMfcInst->phys_addr_yuv_buffer + tmp);
 		start = pMfcInst->yuv_buffer;
-		end = start + tmp * pMfcInst->yuv_buffer_count;
-		dmac_flush_range(start, end);
+		size = tmp * pMfcInst->yuv_buffer_count; 
+		dma_cache_maint(start, size, DMA_TO_DEVICE);
 
-		start = (unsigned char *)pMfcInst->phys_addr_yuv_buffer;
-		end = start + tmp * pMfcInst->yuv_buffer_count;
-		outer_flush_range((unsigned long)start, (unsigned long)end);
-		
 		/* 
 		 * Decode MFC Instance
 		 */
 		ret = s3c_mfc_inst_enc(pMfcInst, &nStrmLen, &nHdrLen);
 
 		start = pMfcInst->stream_buffer;
-		end = start + pMfcInst->stream_buffer_size;
-		dmac_flush_range(start, end);
-
-		start = (unsigned char *)pMfcInst->phys_addr_stream_buffer;
-		end = start + pMfcInst->stream_buffer_size;
-		outer_flush_range((unsigned long)start, (unsigned long)end);
+		size = pMfcInst->stream_buffer_size;
+		dma_cache_maint(start, size, DMA_FROM_DEVICE);
 
 		args.enc_exe.ret_code	= ret;
 		if (ret == S3C_MFC_INST_RET_OK) {
@@ -424,26 +417,17 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 							sizeof(s3c_mfc_dec_exe_arg_t));
 
 		tmp = (pMfcInst->width * pMfcInst->height * 3) >> 1;
-		
-		//cpu_cache.flush_kern_all();
+
 		start = pMfcInst->stream_buffer;
-		end = start + pMfcInst->stream_buffer_size;
-		dmac_flush_range(start, end);
+		size = pMfcInst->stream_buffer_size;
+		dma_cache_maint(start, size, DMA_TO_DEVICE);
 
-		start = (unsigned char *)pMfcInst->phys_addr_stream_buffer;
-		end = start + pMfcInst->stream_buffer_size;
-		outer_flush_range((unsigned long)start, (unsigned long)end);
-		
 		ret = s3c_mfc_inst_dec(pMfcInst, args.dec_exe.in_strmSize);
-		
-		start = pMfcInst->yuv_buffer;
-		end = start + tmp * pMfcInst->yuv_buffer_count;
-		dmac_flush_range(start, end);
 
-		start = (unsigned char *)pMfcInst->phys_addr_yuv_buffer;
-		end = start + tmp * pMfcInst->yuv_buffer_count;
-		outer_flush_range((unsigned long)start, (unsigned long)end);
-		
+		start = pMfcInst->yuv_buffer;
+		size = tmp * pMfcInst->yuv_buffer_count;
+		dma_cache_maint(start, size, DMA_FROM_DEVICE);	
+
 		args.dec_exe.ret_code = ret;
 		out = copy_to_user((s3c_mfc_dec_exe_arg_t *)arg, &args.dec_exe,
 						 sizeof(s3c_mfc_dec_exe_arg_t));
@@ -682,6 +666,19 @@ static struct miscdevice s3c_mfc_miscdev = {
 	fops:		&s3c_mfc_fops
 };
 
+static BOOL s3c_mfc_setup_clock(void)
+{
+	unsigned int	mfc_clk;
+	
+	/* mfc clock set 133 Mhz */
+	mfc_clk = readl(S3C_CLK_DIV0);
+	mfc_clk |= (1 << 28);
+	__raw_writel(mfc_clk, S3C_CLK_DIV0);
+
+	return TRUE;
+
+}
+
 static int s3c_mfc_probe(struct platform_device *pdev)
 {
 	int	size;
@@ -743,7 +740,6 @@ static int s3c_mfc_probe(struct platform_device *pdev)
 	}
 
 	s3c_mfc_phys_buffer = s3c_get_media_memory(S3C_MDEV_MFC);
-	//s3c_mfc_virt_buffer = ioremap_nocache(s3c_mfc_phys_buffer, s3c_get_media_memsize(S3C_MDEV_MFC))
 
 	/* mutex creation and initialization */
 	s3c_mfc_mutex = (struct mutex *)kmalloc(sizeof(struct mutex), GFP_KERNEL);
@@ -753,10 +749,9 @@ static int s3c_mfc_probe(struct platform_device *pdev)
 	mutex_init(s3c_mfc_mutex);
 
 	/* mfc clock set 133 Mhz */
-	mfc_clk = readl(S3C_CLK_DIV0);
-	mfc_clk |= (1 << 28);
-	__raw_writel(mfc_clk, S3C_CLK_DIV0);
-
+	if (s3c_mfc_setup_clock() == FALSE)
+		return -ENODEV;
+	
 	/*
 	 * 2. MFC Memory Setup
 	 */
@@ -795,7 +790,6 @@ static int s3c_mfc_remove(struct platform_device *dev)
 static int s3c_mfc_suspend(struct platform_device *dev, pm_message_t state)
 {
 
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,21)
 	int	inst_no;
 	int	is_mfc_on = 0;
 	int	i, index = 0;
@@ -846,15 +840,11 @@ static int s3c_mfc_suspend(struct platform_device *dev, pm_message_t state)
 
 	mutex_unlock(s3c_mfc_mutex);
 
-#endif
-
 	return 0;
 }
 
 static int s3c_mfc_resume(struct platform_device *pdev)
 {
-
-#if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,21)
 
 	int 		i, index = 0;
 	int         	inst_no;
@@ -882,11 +872,15 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 		msleep(1);
 	} while (!(domain_v_ready & (1 << 1)));
 
-	/* 3. Firmware download */
+	/* 3. MFC clock set 133 Mhz */
+	if (s3c_mfc_setup_clock() == FALSE)
+		return -ENODEV;
+
+	/* 4. Firmware download */
 	s3c_mfc_download_boot_firmware();
 
 	/* 
-	 * 4. Power On state
+	 * 5. Power On state
 	 * Validate all the MFC Instances
 	 */
 	for (inst_no = 0; inst_no < S3C_MFC_NUM_INSTANCES_MAX; inst_no++) {
@@ -903,7 +897,6 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 		}
 	}
 
-
 	if (is_mfc_on) {
 		/* 5. Restore MFC SFR */
 		dwMfcBase = s3c_mfc_sfr_base_virt_addr;
@@ -917,8 +910,6 @@ static int s3c_mfc_resume(struct platform_device *pdev)
 	}
 
 	mutex_unlock(s3c_mfc_mutex);
-
-#endif
 
 	return 0;
 }

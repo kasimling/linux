@@ -381,7 +381,7 @@ static __init int clk_pwm_tin_register(struct clk *pwm)
 	return clk_set_parent(pwm, parent);
 }
 
-static __init int s3c24xx_pwmclk_init(void)
+int __init s3c24xx_pwmclk_init(void)
 {
 	struct clk *clk_timers;
 	unsigned int clk;
@@ -432,4 +432,4 @@ static __init int s3c24xx_pwmclk_init(void)
 	return ret;
 }
 
-arch_initcall(s3c24xx_pwmclk_init);
+

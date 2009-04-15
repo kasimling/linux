@@ -19,6 +19,8 @@ obj-$(CONFIG_CPU_S5P6440)	+= dma.o
 
 obj-$(CONFIG_S5P6440_SETUP_SDHCI)	+= setup-sdhci.o
 
+obj-$(CONFIG_PM)    += pm.o
+
 # machine support
 
 obj-$(CONFIG_MACH_SMDK6440)	+= mach-smdk6440.o

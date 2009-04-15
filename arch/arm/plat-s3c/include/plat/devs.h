@@ -70,6 +70,8 @@ extern struct platform_device s3c_device_fimc0;
 extern struct platform_device s3c_device_fimc1;
 extern struct platform_device s3c_device_fimc2;
 
+extern struct platform_device s3c_device_csis;
+
 /* s3c2440 specific devices */
 
 #ifdef CONFIG_CPU_S3C2440

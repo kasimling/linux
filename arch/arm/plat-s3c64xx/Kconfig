@@ -83,4 +83,12 @@ config S3C64XX_SETUP_FIMC1
 	help
 	  Common setup code for FIMC controller 1
 
+config S3C64XX_PWM
+	bool "PWM device support"
+	default n
+  select HAVE_PWM
+	help
+	  Support for exporting the PWM timer blocks via the pwm device
+	  system.
+
 endif

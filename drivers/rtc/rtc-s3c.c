@@ -501,21 +501,16 @@ static int s3c_rtc_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, rtc);
 
-	printk("############################\n");
-
 	return 0;
 
  err_nortc:
- 	printk("######## err_nortc #######\n");
 	s3c_rtc_enable(pdev, 0);
 	iounmap(s3c_rtc_base);
 
  err_nomap:
- 	printk("######## err_nomap #######\n");
 	release_resource(s3c_rtc_mem);
 
  err_nores:
- 	printk("######## err_nores #######\n");
 	return ret;
 }
 

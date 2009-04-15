@@ -51,4 +51,18 @@ config S5P64XX_SETUP_I2C1
 	help
 	  Common setup code for i2c bus 1.
 
+config S5P64XX_ADC
+        bool "S5P64XX ADC D/D support"
+        help
+         Analog to Digital conversion(ADC) D/D for S5P64XX support
+
+config S5P64XX_PWM
+	bool "PWM device support"
+  default n
+  select HAVE_PWM
+	help
+	  Support for exporting the PWM timer blocks via the pwm device
+	  system.
+
+
 endif

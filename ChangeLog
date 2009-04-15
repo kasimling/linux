@@ -1881,3 +1881,150 @@ v2.6.28.6-samsung-r1d7: Jongpill LEe
 		M       arch/arm/plat-s5p64xx/devs.c
 		M       drivers/rtc/Kconfig
 		M       drivers/rtc/rtc-s3c.c
+
+v2.6.28.6-samsung-r2: Kyoungil Kim
+	- Official Release for SMDK6410(09.04.09)
+
+v2.6.28.6-samsung-r2d0: Jongpill LEe
+        - Support Watchdog timer for S5P6440
+
+	Modified Files:
+		M       arch/arm/mach-s5p6440/include/mach/map.h
+		M       arch/arm/mach-s5p6440/mach-smdk6440.c
+		M       arch/arm/plat-s5p64xx/devs.c
+		M       drivers/rtc/rtc-s3c.c
+		M       drivers/watchdog/Kconfig
+
+v2.6.28.6-samsung-r2d1: Jongpill Lee
+	- Support ADC Driver for S5P6440
+
+	Modified Files:
+		M       arch/arm/mach-s5p6440/include/mach/map.h
+		M       arch/arm/mach-s5p6440/mach-smdk6440.c
+		M       arch/arm/plat-s3c64xx/adc.c
+		M       arch/arm/plat-s5p64xx/Kconfig
+		M       arch/arm/plat-s5p64xx/devs.c
+
+v2.6.28.6-samsung-r2d2: Jiun, Yu, PyoungJae Jung
+	- fixed cache issue in MFC1.0(6410) driver
+
+	Modified Files :
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_set_config.c
+
+v2.6.28.6-samsung-r2d3: Jiun, Yu, PyoungJae Jung
+	- fixed cache issue in MFC1.0(6410) driver
+	- changed cache update way to dma_cache_maint
+
+	Modified Files :
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_set_config.c
+		M	drivers/media/video/samsung/mfc10/s3c_mfc.c
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_databuf.c
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_instance.c
+		M	drivers/media/video/samsung/mfc10/s3c_mfc_set_config.c
+
+v2.6.28.6-samsung-r2d4: Jae-Cheol Lee
+	- Support DVFS on SMDK6440 board
+
+	Modified Files :
+		M	arch/arm/Kconfig
+		M	arch/arm/plat-s5p64xx/Makefile
+		M	arch/arm/plat-s5p64xx/clock.c
+		M 	arch/arm/plat-s5p64xx/ltc3714.c
+		M 	arch/arm/plat-s5p64xx/s5p64xx-cpufreq
+
+v2.6.28.6-samsung-r2d5: Jongpill Lee
+	- Modify some code for S5PC100
+
+	Modified Files :
+		M       arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
+		M       arch/arm/plat-s5pc1xx/include/plat/regs-power.h
+
+v2.6.28.6-samsung-r2d6: Jae-Cheol Lee
+	- Support backlight class by PWM on SMDK6440 board
+
+	Added Files :
+		A	arch/arm/plat-s5p64xx/pwm.c
+	
+	Modified Files :
+		M	arch/arm/configs/smdk6440ramdisk_defconfig
+		M	arch/arm/mach-s5p6440/cpu.c
+		M	arch/arm/mach-s5p6440/mach-smdk6440.c
+		M	arch/arm/plat-s3c/include/plat/clock.h
+		M	arch/arm/plat-s3c/pwm-clock.c
+		M	arch/arm/plat-s5p64xx/Kconfig
+		M	arch/arm/plat-s5p64xx/Makefile
+		M	arch/arm/plat-s5p64xx/clock.c
+		M	arch/arm/plat-s5p64xx/pwm.c
+		M	drivers/video/samsung/s3cfb_fimd5x.c
+
+v2.6.28.6-samsung-r2d7: Jaeryul Oh
+	- MFC suspend/resume related code for SMDK6410 updated
+	Modified Files :
+		M       drivers/media/video/samsung/mfc10/s3c_mfc.c
+		M       drivers/media/video/samsung/mfc10/s3c_mfc_config.h
+
+v2.6.28.6-samsung-r2d8: Jinsung Yang
+	- The 1st phase of MIPI-CSI support
+
+	Addes files:
+		A       arch/arm/plat-s5pc1xx/dev-csis.c
+		A	arch/arm/plat-s5pc1xx/include/plat/csis.h
+		A	arch/arm/plat-s5pc1xx/include/plat/regs-csis.h
+		A	arch/arm/plat-s5pc1xx/setup-csis.c
+		A	drivers/media/video/samsung/fimc/s3c_csis.c
+		A	drivers/media/video/samsung/fimc/s3c_csis.h
+	
+	Modified files:
+		M       arch/arm/mach-s5pc100/include/mach/map.h
+		M       arch/arm/mach-s5pc100/mach-smdkc100.c
+		M       arch/arm/plat-s3c/include/plat/devs.h
+		M       arch/arm/plat-s5pc1xx/Kconfig
+		M       arch/arm/plat-s5pc1xx/Makefile
+		M       arch/arm/plat-s5pc1xx/clock.c
+		M       arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
+		M       drivers/media/video/samsung/fimc/Kconfig
+		M       drivers/media/video/samsung/fimc/Makefile
+		M       drivers/media/video/samsung/fimc/s3c_fimc.h
+
+v2.6.28.6-samsung-r2d9: Jongpill Lee
+	- Temporary support APM for S5P6440
+
+	Added Files:
+		A       arch/arm/mach-s5p6440/pm.c
+		A       arch/arm/plat-s5p64xx/include/plat/pm.h
+		A       arch/arm/plat-s5p64xx/pm.c
+		A       arch/arm/plat-s5p64xx/sleep.S
+
+	Modified Files:
+		M       arch/arm/mach-s5p6440/Makefile
+		M       arch/arm/mach-s5p6440/include/mach/gpio.h
+		M       arch/arm/mach-s5p6440/include/mach/regs-irq.h
+		M       arch/arm/mach-s5p6440/mach-smdk6440.c
+		M       arch/arm/plat-s5p64xx/Makefile
+		M       arch/arm/plat-s5p64xx/include/plat/regs-gpio.h
+		M       drivers/video/samsung/s3cfb_fimd5x.c
+
+v2.6.28.6-samsung-r2d10: Jae-Cheol Lee
+	- Support backlight class driver by PWM on SMDK6410
+
+	Added Files:
+		A 	arch/arm/plat-s3c64xx/pwm.c
+
+	Modified Files:
+		M	arch/arm/mach-s5p6440/include/mach/gpio.h
+		M   	arch/arm/mach-s3c6410/cpu.c
+		M   	arch/arm/mach-s3c6410/mach-smdk6410.c
+		M   	arch/arm/plat-s3c64xx/Kconfig
+		M   	arch/arm/plat-s3c64xx/Makefile
+
+v2.6.28.6-samsung-r2d11: jongpill Lee
+	- bug fix on GPIO for S5P6440
+
+	MOdified Files:
+		M	arch/arm/mach-s5p6440/include/mach/gpio.h	
+
+v2.6.28.6-samsung-r2d12: jongpill Lee
+	- APM Support for S5P6440
+
+	Modified Files:
+		M       arch/arm/plat-s3c64xx/sleep.S

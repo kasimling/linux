@@ -27,6 +27,7 @@
 #include <linux/mtd/partitions.h>
 #include <linux/module.h>
 #include <linux/clk.h>
+#include <linux/pwm_backlight.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -51,6 +52,7 @@
 #include <plat/cpu.h>
 #include <plat/ts.h>
 #include <plat/adc.h>
+#include <plat/pm.h>
 
 #include <plat/regs-rtc.h>
 
@@ -96,6 +98,7 @@ static struct platform_device *smdk6440_devices[] __initdata = {
 #ifdef CONFIG_SMDK6440_SD_CH1
 	&s3c_device_hsmmc1,
 #endif
+	&s3c_device_wdt,
 	&s3c_device_rtc,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
@@ -105,6 +108,15 @@ static struct platform_device *smdk6440_devices[] __initdata = {
 	&s3c_device_nand,
 	&s3c_device_usbgadget,
 	&s3c_device_usb_otghcd,
+
+#ifdef CONFIG_S5P64XX_ADC
+	&s3c_device_adc,
+#endif
+
+#ifdef CONFIG_HAVE_PWM
+	&s3c_device_timer[0],
+	&s3c_device_timer[1],
+#endif
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
@@ -126,6 +138,39 @@ static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
 	.resol_bit 		= 12,
 	.s3c_adc_con		= ADC_TYPE_2,
 };
+
+static struct s3c_adc_mach_info s3c_adc_platform = {
+	/* s3c6410 support 12-bit resolution */
+	.delay	= 	10000,
+	.presc 	= 	49,
+	.resolution = 	12,
+};
+
+#if defined(CONFIG_HAVE_PWM)
+static struct platform_pwm_backlight_data smdk_backlight_data = {
+	.pwm_id		= 1,
+	.max_brightness	= 255,
+	.dft_brightness	= 255,
+	.pwm_period_ns	= 78770,
+};
+
+static struct platform_device smdk_backlight_device = {
+	.name		= "pwm-backlight",
+	.dev		= {
+		.parent = &s3c_device_timer[1].dev,
+		.platform_data = &smdk_backlight_data,
+	},
+};
+
+static void __init smdk_backlight_register(void)
+{
+	int ret = platform_device_register(&smdk_backlight_device);
+	if (ret)
+		printk(KERN_ERR "smdk: failed to register backlight device: %d\n", ret);
+}
+#else
+#define smdk_backlight_register()	do { } while (0)
+#endif
 
 static void __init smdk6440_map_io(void)
 {
@@ -164,11 +209,17 @@ static void __init smdk6440_machine_init(void)
 	s3c_i2c1_set_platdata(NULL);
 
 	s3c_ts_set_platdata(&s3c_ts_platform);
+	s3c_adc_set_platdata(&s3c_adc_platform);
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
 
 	platform_add_devices(smdk6440_devices, ARRAY_SIZE(smdk6440_devices));
+
+	s5p6440_pm_init();
+
+	smdk_backlight_register();
+
 }
 
 MACHINE_START(SMDK6440, "SMDK6440")

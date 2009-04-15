@@ -14,6 +14,10 @@ config VIDEO_FIMC_DEBUG
 	bool "FIMC driver debug messages"
 	depends on VIDEO_FIMC
 
+config VIDEO_FIMC_MIPI
+	bool "FIMC works with MIPI-CSI2 (Rx)"
+	depends on VIDEO_FIMC
+
 source "drivers/media/video/samsung/fimc/Kconfig-camera"
 
 config VIDEO_FIMC_CAM_CH
