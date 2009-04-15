@@ -25,6 +25,10 @@
 #include <plat/gpio-cfg.h>
 #include <plat/regs-sdhci.h>
 #include <plat/sdhci.h>
+#include <mach/map.h>
+#include <plat/regs-gpio.h>
+#include <plat/gpio-bank-g2.h>
+
 
 /* clock sources for the mmc bus clock, order as for the ctrl2[5..4] */
 char *s3c6410_hsmmc_clksrcs[4] = {
@@ -57,7 +61,7 @@ void s3c6410_setup_sdhci0_cfg_card(struct platform_device *dev,
 				    struct mmc_ios *ios,
 				    struct mmc_card *card)
 {
-	u32 ctrl2, ctrl3;
+	u32 ctrl2, ctrl3 = 0;
 
 	/* don't need to alter anything acording to card-type */
 
@@ -67,9 +71,11 @@ void s3c6410_setup_sdhci0_cfg_card(struct platform_device *dev,
 	ctrl2 &= S3C_SDHCI_CTRL2_SELBASECLK_MASK;
 	ctrl2 |= (S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR |
 		  S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK |
-		  S3C_SDHCI_CTRL2_ENFBCLKRX |
 		  S3C_SDHCI_CTRL2_DFCNT_NONE |
 		  S3C_SDHCI_CTRL2_ENCLKOUTHOLD);
+
+#if 0
+//		  S3C_SDHCI_CTRL2_ENFBCLKRX |
 
 	if (ios->clock < 25 * 1000000)
 		ctrl3 = (S3C_SDHCI_CTRL3_FCSEL3 |
@@ -78,6 +84,7 @@ void s3c6410_setup_sdhci0_cfg_card(struct platform_device *dev,
 			 S3C_SDHCI_CTRL3_FCSEL0);
 	else
 		ctrl3 = (S3C_SDHCI_CTRL3_FCSEL1 | S3C_SDHCI_CTRL3_FCSEL0);
+#endif
 
 	/*printk(KERN_INFO "%s: CTRL 2=%08x, 3=%08x\n", __func__, ctrl2, ctrl3);*/
 	writel(ctrl2, r + S3C_SDHCI_CONTROL2);
@@ -88,17 +95,21 @@ void s3c6410_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
 {
 	unsigned int gpio;
 	unsigned int end;
-        
+
+	printk("s3c6410_setup_sdhci1_cfg_gpio()\n");
 	/* Channel 1 supports 1 and 4-bit bus width */
-        end = S5PC1XX_GPG2(2 + width);
+	end = S5PC1XX_GPG2(2 + width);
 
-        /* Set all the necessary GPG2 pins to special-function 2 */
-        for (gpio = S5PC1XX_GPG2(0); gpio < end; gpio++) {
-                s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
-                s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
-        }
+	/* Set all the necessary GPG2 pins to special-function 2 */
+	for (gpio = S5PC1XX_GPG2(0); gpio < end; gpio++) {
+		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
+		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+	}
 
-        /* GPG2 chip Detect */
-        s3c_gpio_setpull(S5PC1XX_GPG2(6), S3C_GPIO_PULL_UP);
-        s3c_gpio_cfgpin(S5PC1XX_GPG2(6), S3C_GPIO_SFN(2));
+	/* GPG2 chip Detect */
+	s3c_gpio_setpull(S5PC1XX_GPG2(6), S3C_GPIO_PULL_UP);
+	s3c_gpio_cfgpin(S5PC1XX_GPG2(6), S3C_GPIO_SFN(2));
+
+	printk("GPIO for ch1: %08x, %08x\n",
+			readl(S5PC1XX_GPG2CON), readl(S5PC1XX_GPG2PUD));
 }

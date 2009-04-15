@@ -1986,3 +1986,45 @@ v2.6.28.6-samsung-r2d8: Jinsung Yang
 		M       drivers/media/video/samsung/fimc/Makefile
 		M       drivers/media/video/samsung/fimc/s3c_fimc.h
 
+v2.6.28.6-samsung-r2d9: Jongpill Lee
+	- Temporary support APM for S5P6440
+
+	Added Files:
+		A       arch/arm/mach-s5p6440/pm.c
+		A       arch/arm/plat-s5p64xx/include/plat/pm.h
+		A       arch/arm/plat-s5p64xx/pm.c
+		A       arch/arm/plat-s5p64xx/sleep.S
+
+	Modified Files:
+		M       arch/arm/mach-s5p6440/Makefile
+		M       arch/arm/mach-s5p6440/include/mach/gpio.h
+		M       arch/arm/mach-s5p6440/include/mach/regs-irq.h
+		M       arch/arm/mach-s5p6440/mach-smdk6440.c
+		M       arch/arm/plat-s5p64xx/Makefile
+		M       arch/arm/plat-s5p64xx/include/plat/regs-gpio.h
+		M       drivers/video/samsung/s3cfb_fimd5x.c
+
+v2.6.28.6-samsung-r2d10: Jae-Cheol Lee
+	- Support backlight class driver by PWM on SMDK6410
+
+	Added Files:
+		A 	arch/arm/plat-s3c64xx/pwm.c
+
+	Modified Files:
+		M	arch/arm/mach-s5p6440/include/mach/gpio.h
+		M   	arch/arm/mach-s3c6410/cpu.c
+		M   	arch/arm/mach-s3c6410/mach-smdk6410.c
+		M   	arch/arm/plat-s3c64xx/Kconfig
+		M   	arch/arm/plat-s3c64xx/Makefile
+
+v2.6.28.6-samsung-r2d11: jongpill Lee
+	- bug fix on GPIO for S5P6440
+
+	MOdified Files:
+		M	arch/arm/mach-s5p6440/include/mach/gpio.h	
+
+v2.6.28.6-samsung-r2d12: jongpill Lee
+	- APM Support for S5P6440
+
+	Modified Files:
+		M       arch/arm/plat-s3c64xx/sleep.S

@@ -24,6 +24,8 @@ obj-y				+= gpiolib.o
 obj-$(CONFIG_CPU_S5P6440_INIT)	+= s5p6440-init.o
 obj-$(CONFIG_CPU_S5P6440_CLOCK)	+= s5p6440-clock.o
 obj-$(CONFIG_CPU_FREQ)		+= s5p64xx-cpufreq.o ltc3714.o
+obj-$(CONFIG_PM)                += pm.o
+obj-$(CONFIG_PM)                += sleep.o
 
 # Device setup
 
