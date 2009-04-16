@@ -21,6 +21,7 @@
 #include <linux/init.h>
 #include <linux/input.h>
 #include <linux/io.h>
+#include <linux/fb.h>
 #include <linux/serial_core.h>
 #include <linux/dm9000.h>
 #include <linux/i2c/at24.h>
@@ -204,6 +205,18 @@ static struct s3c2410_ts_mach_info mini2440_ts_cfg = {
 
 /* LCD driver info */
 
+/*
+ * Cut the power to the LCD backlight if needed
+ */
+static void mini2440_backlight_blank_notify(int blank_mode)
+{
+	if (blank_mode == FB_BLANK_UNBLANK) {
+		s3c2410_gpio_setpin(S3C2410_GPG4, 1);
+	} else {
+		s3c2410_gpio_setpin(S3C2410_GPG4, 0);
+	}
+}
+
 /* LCD timing and setup */
 
 /*
@@ -310,6 +323,9 @@ struct s3c2410fb_mach_info mini2440_fb_info __initdata = {
 			   S3C2410_GPDCON_MASK(10) | S3C2410_GPDCON_MASK(11)|
 			   S3C2410_GPDCON_MASK(12) | S3C2410_GPDCON_MASK(13)|
 			   S3C2410_GPDCON_MASK(14) | S3C2410_GPDCON_MASK(15)),
+
+	.blank_notify = mini2440_backlight_blank_notify,
+	
 };
 
 /* MMC/SD  */
@@ -401,46 +417,6 @@ static struct platform_device mini2440_device_eth __initdata = {
 	},
 };
 
-/* backlight */
-
-static int mini2440_backlight_init(struct device *dev)
-{
-	return 0;
-}
-/*
- * Cut the power to the LCD if brightness reaches 0
- */
-static int mini2440_backlight_notify(int brightness)
-{
-	if (brightness) {
-		s3c2410_gpio_setpin(S3C2410_GPB1, 1);
-		s3c2410_gpio_cfgpin(S3C2410_GPB1, S3C2410_GPB1_TOUT1);
-		s3c2410_gpio_setpin(S3C2410_GPG4, 1);
-		s3c2410_gpio_cfgpin(S3C2410_GPG4, S3C2410_GPG4_LCDPWREN);
-	} else {
-		s3c2410_gpio_setpin(S3C2410_GPB1, 0);
-		s3c2410_gpio_cfgpin(S3C2410_GPB1, S3C2410_GPB1_OUTP);
-		s3c2410_gpio_setpin(S3C2410_GPG4, 0);
-		s3c2410_gpio_cfgpin(S3C2410_GPG4, S3C2410_GPG4_OUTP);
-	}
-	return brightness;
-}
-
-static struct platform_pwm_backlight_data mini2440_backlight_data __initdata = {
-	.pwm_id		= 1,
-	.max_brightness	= 1023,
-	.dft_brightness	= 900,
-	.pwm_period_ns	= 4000000,	/* Fl = 250Hz PWM */
-	.init		= mini2440_backlight_init,
-	.notify		= mini2440_backlight_notify,
-};
-
-static struct platform_device mini2440_backlight_device __initdata = {
-	.name		= "pwm-backlight",
-	.dev		= {
-		.platform_data = &mini2440_backlight_data,
-	},
-};
 
 /*  CON5
  *	+--+	 /-----\
@@ -653,7 +629,6 @@ static void __init mini2440_map_io(void)
  * mini2440_features string
  * 
  * t = Touchscreen present
- * b = PWM backlight control
  * c = camera [TODO]
  * 0-9 LCD configuration
  * 
@@ -670,9 +645,8 @@ static int __init mini2440_features_setup(char *str)
 __setup("mini2440=", mini2440_features_setup);
 
 #define FEATURE_SCREEN (1 << 0)
-#define FEATURE_BACKLIGHT (1 << 1)
+#define FEATURE_CAMERA (1 << 1)
 #define FEATURE_TOUCH (1 << 2)
-#define FEATURE_CAMERA (1 << 3)
 
 struct mini2440_features_t {
 	int count;
@@ -711,19 +685,6 @@ static void mini2440_parse_features(
 				}
 			}
 			features->done |= FEATURE_SCREEN;
-			break;
-		case 'b':
-			if (features->done & FEATURE_BACKLIGHT)
-				printk(KERN_INFO "MINI2440: '%c' ignored, "
-					"backlight already set\n", f);
-			else {
-				/* need this timer for the backlight */
-				features->optional[features->count++] = 
-						&s3c_device_timer[1];
-				features->optional[features->count++] = 
-						&mini2440_backlight_device;
-			}
-			features->done |= FEATURE_BACKLIGHT;
 			break;
 		case 't':
 #ifdef CONFIG_TOUCHSCREEN_S3C2410
@@ -765,11 +726,9 @@ static void __init mini2440_init(void)
 	
 	/* turn LCD on */
 	s3c2410_gpio_cfgpin(S3C2410_GPC0, S3C2410_GPC0_LEND);
-
-	/* remove pullup on PWM backlight */
-	s3c2410_gpio_pullup(S3C2410_GPB1, 0);
-	s3c2410_gpio_setpin(S3C2410_GPB1, 0);
-	s3c2410_gpio_cfgpin(S3C2410_GPB1, S3C2410_GPB1_TOUT1);
+	/* PWREN LCD pin */
+	s3c2410_gpio_setpin(S3C2410_GPG4, 1);
+	s3c2410_gpio_cfgpin(S3C2410_GPG4, S3C2410_GPG4_OUTP);
 
 	/* Make sure the D+ pullup pin is output */
 	s3c2410_gpio_cfgpin(S3C2410_GPC5, S3C2410_GPIO_OUTPUT);
