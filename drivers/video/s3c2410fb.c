@@ -557,6 +557,7 @@ static void s3c2410fb_lcd_enable(struct s3c2410fb_info *fbi, int enable)
 static int s3c2410fb_blank(int blank_mode, struct fb_info *info)
 {
 	struct s3c2410fb_info *fbi = info->par;
+	struct s3c2410fb_mach_info *mach_info = fbi->dev->platform_data;
 	void __iomem *tpal_reg = fbi->io;
 
 	dprintk("blank(mode=%d, info=%p)\n", blank_mode, info);
@@ -576,6 +577,10 @@ static int s3c2410fb_blank(int blank_mode, struct fb_info *info)
 		writel(S3C2410_TPAL_EN, tpal_reg);
 	}
 
+	/* Call the machine notification callback, if provided */
+	if (mach_info->blank_notify)
+		mach_info->blank_notify(blank_mode);
+	
 	return 0;
 }
 
