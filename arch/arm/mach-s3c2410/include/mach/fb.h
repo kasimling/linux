@@ -67,6 +67,15 @@ struct s3c2410fb_mach_info {
 
 	/* lpc3600 control register */
 	unsigned long	lpcsel;
+
+	/* blank_notify
+	 * @blank_mode: FB_BLANK_POWERDOWN, FB_BLANK_UNBLANK etc
+	 * 
+	 * This optional callback allows the machine code to supplement the
+	 * default driver blanking mechanism. Some boards (mini2440) have a
+	 * separate GPIO to enable/disable the backlight of the screen
+	 */
+	void (*blank_notify)(int blank_mode);
 };
 
 extern void __init s3c24xx_fb_set_platdata(struct s3c2410fb_mach_info *);
