@@ -116,9 +116,9 @@ static const char driver_desc[] = DRIVER_DESC;
 static const char ep0name[] = "ep0-control";
 
 /* Max packet size*/
-static u32 ep0_fifo_size = 64;
-static u32 ep_fifo_size =  512;
-static u32 ep_fifo_size2 = 1024;
+static unsigned int ep0_fifo_size = 64;
+static unsigned int ep_fifo_size =  512;
+static unsigned int ep_fifo_size2 = 1024;
 static int reset_available = 1;
 
 extern void otg_phy_init(void);
@@ -242,7 +242,7 @@ static void udc_disable(struct s3c_udc *dev)
  */
 static void udc_reinit(struct s3c_udc *dev)
 {
-	u32 i;
+	unsigned int i;
 
 	DEBUG_SETUP("%s: %p\n", __FUNCTION__, dev);
 
@@ -376,7 +376,7 @@ EXPORT_SYMBOL(usb_gadget_unregister_driver);
  */
 static void done(struct s3c_ep *ep, struct s3c_request *req, int status)
 {
-	u32 stopped = ep->stopped;
+	unsigned int stopped = ep->stopped;
 
 	DEBUG("%s: %s %p, req = %p, stopped = %d\n",
 		__FUNCTION__, ep->ep.name, ep, &req->req, stopped);
@@ -455,7 +455,7 @@ static void reconfig_usbd(void)
 #ifdef DED_TX_FIFO
 	int i;
 #endif
-	u32 uTemp = writel(CORE_SOFT_RESET, S3C_UDC_OTG_GRSTCTL);
+	unsigned int uTemp = writel(CORE_SOFT_RESET, S3C_UDC_OTG_GRSTCTL);
 
 	writel(	0<<15		/* PHY Low Power Clock sel*/
 		|1<<14		/* Non-Periodic TxFIFO Rewind Enable*/
@@ -525,7 +525,7 @@ static void reconfig_usbd(void)
 
 static void set_max_pktsize(struct s3c_udc *dev, enum usb_device_speed speed)
 {
-	u32 ep_ctrl;
+	unsigned int ep_ctrl;
 
 	if (speed == USB_SPEED_HIGH) {
 		ep0_fifo_size = 64;
@@ -764,7 +764,7 @@ static void s3c_fifo_flush(struct usb_ep *_ep)
 static int s3c_udc_get_frame(struct usb_gadget *_gadget)
 {
 	/*fram count number [21:8]*/
-	u32 frame = readl(S3C_UDC_OTG_DSTS);
+	unsigned int frame = readl(S3C_UDC_OTG_DSTS);
 
 	DEBUG("%s: %p\n", __FUNCTION__, _gadget);
 	return (frame & 0x3ff00);
@@ -813,7 +813,7 @@ static struct s3c_udc memory = {
 		  .bmAttributes = 0,
 
 		  .ep_type = ep_control,
-		  .fifo = (u32) S3C_UDC_OTG_EP0_FIFO,
+		  .fifo = (unsigned int) S3C_UDC_OTG_EP0_FIFO,
 		  },
 
 	/* first group of endpoints */
@@ -829,7 +829,7 @@ static struct s3c_udc memory = {
 		  .bmAttributes = USB_ENDPOINT_XFER_BULK,
 
 		  .ep_type = ep_bulk_out,
-		  .fifo = (u32) S3C_UDC_OTG_EP1_FIFO,
+		  .fifo = (unsigned int) S3C_UDC_OTG_EP1_FIFO,
 		  },
 
 	.ep[2] = {
@@ -844,7 +844,7 @@ static struct s3c_udc memory = {
 		  .bmAttributes = USB_ENDPOINT_XFER_BULK,
 
 		  .ep_type = ep_bulk_in,
-		  .fifo = (u32) S3C_UDC_OTG_EP2_FIFO,
+		  .fifo = (unsigned int) S3C_UDC_OTG_EP2_FIFO,
 		  },
 
 	.ep[3] = {				/* Though NOT USED XXX*/
@@ -859,7 +859,7 @@ static struct s3c_udc memory = {
 		  .bmAttributes = USB_ENDPOINT_XFER_INT,
 
 		  .ep_type = ep_interrupt,
-		  .fifo = (u32) S3C_UDC_OTG_EP3_FIFO,
+		  .fifo = (unsigned int) S3C_UDC_OTG_EP3_FIFO,
 		  },
 	.ep[4] = {				/* Though NOT USED XXX*/
 		  .ep = {
@@ -873,7 +873,7 @@ static struct s3c_udc memory = {
 		  .bmAttributes = USB_ENDPOINT_XFER_INT,
 
 		  .ep_type = ep_interrupt,
-		  .fifo = (u32) S3C_UDC_OTG_EP4_FIFO,
+		  .fifo = (unsigned int) S3C_UDC_OTG_EP4_FIFO,
 		  },
 	.ep[5] = {				/* Though NOT USED XXX*/
 		  .ep = {
@@ -887,7 +887,7 @@ static struct s3c_udc memory = {
 		  .bmAttributes = USB_ENDPOINT_XFER_INT,
 
 		  .ep_type = ep_interrupt,
-		  .fifo = (u32) S3C_UDC_OTG_EP5_FIFO,
+		  .fifo = (unsigned int) S3C_UDC_OTG_EP5_FIFO,
 		  },
 	.ep[6] = {				/* Though NOT USED XXX*/
 		  .ep = {
@@ -901,7 +901,7 @@ static struct s3c_udc memory = {
 		  .bmAttributes = USB_ENDPOINT_XFER_INT,
 
 		  .ep_type = ep_interrupt,
-		  .fifo = (u32) S3C_UDC_OTG_EP6_FIFO,
+		  .fifo = (unsigned int) S3C_UDC_OTG_EP6_FIFO,
 		  },
 	.ep[7] = {				/* Though NOT USED XXX*/
 		  .ep = {
@@ -915,7 +915,7 @@ static struct s3c_udc memory = {
 		  .bmAttributes = USB_ENDPOINT_XFER_INT,
 
 		  .ep_type = ep_interrupt,
-		  .fifo = (u32) S3C_UDC_OTG_EP7_FIFO,
+		  .fifo = (unsigned int) S3C_UDC_OTG_EP7_FIFO,
 		  },
 	.ep[8] = {				/* Though NOT USED XXX*/
 		  .ep = {
@@ -929,7 +929,7 @@ static struct s3c_udc memory = {
 		  .bmAttributes = USB_ENDPOINT_XFER_INT,
 
 		  .ep_type = ep_interrupt,
-		  .fifo = (u32) S3C_UDC_OTG_EP8_FIFO,
+		  .fifo = (unsigned int) S3C_UDC_OTG_EP8_FIFO,
 		  },
 };
 

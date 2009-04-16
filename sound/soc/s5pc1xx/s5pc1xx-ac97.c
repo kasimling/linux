@@ -1,7 +1,9 @@
 /*
- * s3c6400-ac97.c  --  ALSA Soc Audio Layer
+ * s5pc1xx-ac97.c  --  ALSA Soc Audio Layer
  *
  *  Copyright (C) 2007, Ryu Euiyoul <ryu.real@gmail.com>
+ *  Copyright (C) 2008 Samsung Electronics Co. Ltd.
+ *
  *
  * (c) 2007 Wolfson Microelectronics PLC.
  * Graeme Gregory graeme.gregory@wolfsonmicro.com or linux@wolfsonmicro.com
@@ -16,6 +18,7 @@
  *  Revision history
  *	21st Mar 2007   Initial Version
  *	20th Sep 2007   Apply at s3c6400
+ *	16th Mar 2009   Ported for s5pc100
  */
 
 #include <linux/init.h>
@@ -65,16 +68,16 @@ struct s3c24xx_ac97_info {
 };
 static struct s3c24xx_ac97_info s3c24xx_ac97;
 
-static u32 codec_ready;
+static unsigned int codec_ready;
 static DEFINE_MUTEX(ac97_mutex);
 static DECLARE_WAIT_QUEUE_HEAD(gsr_wq);
 
 static unsigned short s3c6400_ac97_read(struct snd_ac97 *ac97,
 	unsigned short reg)
 {
-	u32 ac_glbctrl;
-	u32 ac_codec_cmd;
-	u32 stat, addr, data;
+	unsigned int ac_glbctrl;
+	unsigned int ac_codec_cmd;
+	unsigned int stat, addr, data;
 
 	s3cdbg("Entered %s: reg=0x%x\n", __FUNCTION__, reg);
 
@@ -108,9 +111,9 @@ out:	mutex_unlock(&ac97_mutex);
 static void s3c6400_ac97_write(struct snd_ac97 *ac97, unsigned short reg,
 	unsigned short val)
 {
-	u32 ac_glbctrl;
-	u32 ac_codec_cmd;
-	u32 stat, data;
+	unsigned int ac_glbctrl;
+	unsigned int ac_codec_cmd;
+	unsigned int stat, data;
 
 	s3cdbg("Entered %s: reg=0x%x, val=0x%x\n", __FUNCTION__,reg,val);
 
@@ -143,7 +146,7 @@ static void s3c6400_ac97_write(struct snd_ac97 *ac97, unsigned short reg,
 
 static void s3c6400_ac97_warm_reset(struct snd_ac97 *ac97)
 {
-	u32 ac_glbctrl;
+	unsigned int ac_glbctrl;
 
 	s3cdbg("Entered %s\n", __FUNCTION__);
 
@@ -176,7 +179,7 @@ static void s3c6400_ac97_warm_reset(struct snd_ac97 *ac97)
 
 static void s3c6400_ac97_cold_reset(struct snd_ac97 *ac97)
 {
-	u32 ac_glbctrl;
+	unsigned int ac_glbctrl;
 
 	s3cdbg("Entered %s\n", __FUNCTION__);
 
@@ -200,7 +203,7 @@ static void s3c6400_ac97_cold_reset(struct snd_ac97 *ac97)
 static irqreturn_t s3c6400_ac97_irq(int irq, void *dev_id)
 {
 	int status;
-	u32 ac_glbctrl, ac_glbstat;
+	unsigned int ac_glbctrl, ac_glbstat;
 
 	ac_glbstat = readl(s3c24xx_ac97.regs + S3C_AC97_GLBSTAT);
 
@@ -357,7 +360,7 @@ static int s3c6400_ac97_hifi_prepare(struct snd_pcm_substream *substream)
 
 static int s3c6400_ac97_trigger(struct snd_pcm_substream *substream, int cmd)
 {
-	u32 ac_glbctrl;
+	unsigned int ac_glbctrl;
 
 	s3cdbg("Entered %s: cmd = %d\n", __FUNCTION__, cmd);
 
