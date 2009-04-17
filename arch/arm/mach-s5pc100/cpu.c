@@ -72,7 +72,7 @@ static struct map_desc s5pc100_iodesc[] __initdata = {
 
 static void s5pc100_idle(void)
 {
-#if !defined(CONFIG_MMC_SDHCI_S3C)
+#if !defined(CONFIG_MMC_SDHCI_S3C) && !defined(CONFIG_MMC_SDHCI_MODULE)
 	unsigned int tmp;
 
 #if defined(T32_PROBE_DEBUGGING)

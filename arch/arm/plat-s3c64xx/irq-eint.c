@@ -27,21 +27,7 @@
 #include <mach/gpio.h>
 #include <plat/gpio-cfg.h>
 #include <plat/gpio-bank-n.h>
-
-
-/* GPIO is 0x7F008xxx, */
-#define S3C64XX_GPIOREG(x)	(S3C64XX_VA_GPIO + (x))
-
-#define S3C64XX_EINT0CON0	S3C64XX_GPIOREG(0x900)
-#define S3C64XX_EINT0CON1	S3C64XX_GPIOREG(0x904)
-#define S3C64XX_EINT0FLTCON0	S3C64XX_GPIOREG(0x910)
-#define S3C64XX_EINT0FLTCON1	S3C64XX_GPIOREG(0x914)
-#define S3C64XX_EINT0FLTCON2	S3C64XX_GPIOREG(0x918)
-#define S3C64XX_EINT0FLTCON3	S3C64XX_GPIOREG(0x91C)
-
-#define S3C64XX_EINT0MASK	S3C64XX_GPIOREG(0x920)
-#define S3C64XX_EINT0PEND	S3C64XX_GPIOREG(0x924)
-
+#include <plat/regs-gpio.h>
 
 #define eint_offset(irq)	((irq) - IRQ_EINT(0))
 #define eint_irq_to_bit(irq)	(1 << eint_offset(irq))
@@ -132,7 +118,12 @@ static int s3c_irq_eint_set_type(unsigned int irq, unsigned int type)
 	ctrl |= newvalue << shift;
 	__raw_writel(ctrl, reg);
 
-	s3c_gpio_cfgpin(S3C64XX_GPN(offs), 0x2 << (offs * 2));
+	if (offs < 16)
+		s3c_gpio_cfgpin(S3C64XX_GPN(offs), 0x2 << (offs * 2));
+	else if (offs < 23)
+		s3c_gpio_cfgpin(S3C64XX_GPL(offs - 8), S3C_GPIO_SFN(3));
+	else
+		s3c_gpio_cfgpin(S3C64XX_GPM(offs - 23), S3C_GPIO_SFN(3));
 
 	return 0;
 }

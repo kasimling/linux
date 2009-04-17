@@ -323,7 +323,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 {
 	int direction;
 
-#ifndef CONFIG_MMC_SDHCI_S3C
+#if !defined(CONFIG_MMC_SDHCI_S3C) && !defined(CONFIG_MMC_SDHCI_MODULE)
 	u8 *desc;
 #else
 	struct sdhci_adma2_desc *descriptor;
@@ -332,13 +332,13 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 	dma_addr_t addr;
 	dma_addr_t align_addr;
 	uint len;
-#ifndef CONFIG_MMC_SDHCI_S3C
+#if !defined(CONFIG_MMC_SDHCI_S3C) && !defined(CONFIG_MMC_SDHCI_MODULE)
 	int offset;
 #endif
 
 	struct scatterlist *sg;
 	int i;
-#ifndef CONFIG_MMC_SDHCI_S3C
+#if !defined(CONFIG_MMC_SDHCI_S3C) && !defined(CONFIG_MMC_SDHCI_MODULE)
 	char *buffer;
 	unsigned long flags;
 #endif
@@ -369,7 +369,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 	if (host->sg_count == 0)
 		goto unmap_align;
 
-#ifndef CONFIG_MMC_SDHCI_S3C
+#if !defined(CONFIG_MMC_SDHCI_S3C) && !defined(CONFIG_MMC_SDHCI_MODULE)
 	desc = host->adma_desc;
 #else
 	descriptor = (struct sdhci_adma2_desc *)host->adma_desc;
@@ -382,7 +382,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 		addr = sg_dma_address(sg);
 		len = sg_dma_len(sg);
 
-#ifndef CONFIG_MMC_SDHCI_S3C
+#if !defined(CONFIG_MMC_SDHCI_S3C) && !defined(CONFIG_MMC_SDHCI_MODULE)
 		/*
 		 * The SDHCI specification states that ADMA
 		 * addresses must be 32-bit aligned. If they
@@ -448,7 +448,7 @@ static int sdhci_adma_table_pre(struct sdhci_host *host,
 #endif
 	}
 
-#ifndef CONFIG_MMC_SDHCI_S3C
+#if !defined(CONFIG_MMC_SDHCI_S3C) && !defined(CONFIG_MMC_SDHCI_MODULE)
 	/*
 	 * Add a terminating entry.
 	 */
@@ -980,7 +980,7 @@ out:
 	host->clock = clock;
 }
 
-EXPORT_SYMBOL_GPL(sdhci_set_clock);
+EXPORT_SYMBOL_GPL(sdhci_change_clock);
 
 static void sdhci_set_power(struct sdhci_host *host, unsigned short power)
 {
@@ -1459,7 +1459,7 @@ static irqreturn_t sdhci_irq(int irq, void *dev_id)
 	intmask &= ~(SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE);
 
 	if (intmask & SDHCI_INT_CMD_MASK) {
-#ifdef CONFIG_MMC_SDHCI_S3C
+#if defined(CONFIG_MMC_SDHCI_S3C) || defined(CONFIG_MMC_SDHCI_MODULE)
 		/* read until all status bit is up. by scsuh */
 		int i;
 		for (i=0; i<0x1000000; i++) {
@@ -1722,7 +1722,7 @@ int sdhci_add_host(struct sdhci_host *host)
 	mmc->ops = &sdhci_ops;
 	mmc->f_min = host->max_clk / 256;
 	mmc->f_max = host->max_clk;
-#ifdef CONFIG_MMC_SDHCI_S3C
+#if defined(CONFIG_MMC_SDHCI_S3C) || defined(CONFIG_MMC_SDHCI_MODULE)
 	mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;
 #else
 	mmc->caps = MMC_CAP_4_BIT_DATA | MMC_CAP_SDIO_IRQ;

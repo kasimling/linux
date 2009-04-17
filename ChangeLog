@@ -2028,3 +2028,13 @@ v2.6.28.6-samsung-r2d12: jongpill Lee
 
 	Modified Files:
 		M       arch/arm/plat-s3c64xx/sleep.S
+
+v2.6.28.6-samsung-r2d13: Jae-Cheol Lee
+	- Support old style PWM driver for SMDK6410
+
+	Modified Files:
+		M   	arch/arm/plat-s3c64xx/Kconfig
+		M   	arch/arm/plat-s3c64xx/Makefile
+		M   	arch/arm/plat-s3c64xx/pwm-s3c6410.c
+		M   	arch/arm/plat-s3c64xx/pwm-s3c6410.h
+		M   	drivers/video/samsung/s3cfb_fimd4x.c
