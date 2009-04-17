@@ -11,6 +11,10 @@
 #ifndef __ASM_ARCH_SYSTEM_H
 #define __ASM_ARCH_SYSTEM_H __FILE__
 
+#include <linux/io.h>
+#include <mach/map.h>
+#include <plat/regs-watchdog.h>
+
 void (*s3c64xx_idle)(void);
 void (*s3c64xx_reset_hook)(void);
 
@@ -29,7 +33,16 @@ static void arch_idle(void)
 
 static void arch_reset(char mode)
 {
+	void __iomem	*wdt_reg;
+
+	wdt_reg = ioremap(S3C64XX_PA_WATCHDOG,S3C64XX_SZ_WATCHDOG);
+
 	/* nothing here yet */
+
+	writel(S3C2410_WTCNT_CNT, wdt_reg + S3C2410_WTCNT_OFFSET);	/* Watchdog Count Register*/
+	writel(S3C2410_WTCNT_CON, wdt_reg + S3C2410_WTCON_OFFSET);	/* Watchdog Controller Register*/
+	writel(S3C2410_WTCNT_DAT, wdt_reg + S3C2410_WTDAT_OFFSET);	/* Watchdog Data Register*/
+	
 }
 
 #endif /* __ASM_ARCH_IRQ_H */
