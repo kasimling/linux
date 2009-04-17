@@ -65,7 +65,7 @@ void print_reg(struct s3c_spi *spi)
 }
 #else
 #define DEBUG
-#define DBG(x...)       do { } while (0)
+#define DBG(x...)
 void print_reg(struct s3c_spi *spi)
 {
 }
@@ -140,7 +140,7 @@ static int s3c_spi_dma_init(struct s3c_spi *spi, int mode)
 
 static inline void s3c_spi_write_fifo(struct s3c_spi *spi)
 {
-	u32 wdata = 0;
+	unsigned int wdata = 0;
 
 	if (spi->msg->wbuf){
 		wdata = spi->msg->wbuf[spi->msg_ptr++];
@@ -178,7 +178,7 @@ static inline void s3c_spi_master_complete(struct s3c_spi *spi, int ret)
 
 static int s3c_spi_done(struct s3c_spi *spi)
 {
-	u32 spi_clkcfg;
+	unsigned int spi_clkcfg;
         unsigned int gpio;
 
 	/* Done with the gpio */
@@ -244,11 +244,11 @@ static void s3c_spi_message_start(struct s3c_spi *spi)
 {
 	struct spi_msg *msg = spi->msg;
 
-	u32 spi_chcfg = 0, spi_slavecfg, spi_inten= 0, spi_packet=0;
+	unsigned int spi_chcfg = 0, spi_slavecfg, spi_inten= 0, spi_packet=0;
 
 	u8 prescaler = 1;		/* 66/(2*(prescaler+1)) ~ 16 MHz */
 
-	u32 spi_clkcfg = 0, spi_modecfg = 0 ;
+	unsigned int spi_clkcfg = 0, spi_modecfg = 0 ;
 
 	/* initialise the spi controller */
 	s3c_spi_hw_init(spi);
@@ -527,7 +527,7 @@ static int s3c_spi_xfer(struct spi_dev *spi_dev,
 static int s3c_spi_close(struct spi_dev *spi_dev)
 {
 	struct s3c_spi *spi = (struct s3c_spi *)spi_dev->algo_data;
-	u32 spi_clkcfg;
+	unsigned int spi_clkcfg;
 
 	s3c2410_dma_free(spi->dma, &s3cspi_dma_client);
 
