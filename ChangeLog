@@ -2038,3 +2038,11 @@ v2.6.28.6-samsung-r2d13: Jae-Cheol Lee
 		M   	arch/arm/plat-s3c64xx/pwm-s3c6410.c
 		M   	arch/arm/plat-s3c64xx/pwm-s3c6410.h
 		M   	drivers/video/samsung/s3cfb_fimd4x.c
+
+v2.6.28.6-samsung-r2d14: Jongpill Lee
+	- Support reboot command
+
+	Modified Files:
+		M       arch/arm/mach-s3c6400/include/mach/system.h
+		M       arch/arm/mach-s5p6440/include/mach/system.h
+		M       arch/arm/plat-s3c/include/plat/regs-watchdog.h
