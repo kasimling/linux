@@ -124,61 +124,72 @@ int fout_set_rate(struct clk *clk, unsigned long rate)
 	epll_con0 &= ~(S3C64XX_EPLL_CON0_M_MASK | S3C64XX_EPLL_CON0_P_MASK | S3C64XX_EPLL_CON0_S_MASK);
 	epll_con1 &= ~(S3C64XX_EPLL_CON1_K_MASK);
 
-	switch(rate){
+	switch (rate){
 	case 36000000:
 			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (48 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (4 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (48 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(4 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 48000000:
 			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (32 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (32 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(3 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 60000000:
 			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (40 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (40 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(3 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 72000000:
 			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (48 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (48 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(3 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 84000000:
 			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (28 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (2 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (28 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(2 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 96000000:
 			epll_con1 |= (0 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (32 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (2 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (32 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(2 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 32768000:
 			epll_con1 |= (45264 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (43 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (4 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (43 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(4 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 45158000:
 			epll_con1 |= (6903 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (30 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (30 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(3 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 49152000:
 			epll_con1 |= (50332 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (32 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (32 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(3 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 67738000:
 			epll_con1 |= (10398 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (45 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (45 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(3 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	case 73728000:
 			epll_con1 |= (9961 << S3C64XX_EPLL_CON1_K_SHIFT);
-			epll_con0 |= (49 << S3C64XX_EPLL_CON0_M_SHIFT) | 
-					(1 << S3C64XX_EPLL_CON0_P_SHIFT) | (3 << S3C64XX_EPLL_CON0_S_SHIFT);
+			epll_con0 |= (49 << S3C64XX_EPLL_CON0_M_SHIFT) |
+					(1 << S3C64XX_EPLL_CON0_P_SHIFT) |
+					(3 << S3C64XX_EPLL_CON0_S_SHIFT);
 			break;
 	default:
 			printk(KERN_ERR "Invalid Clock Freq!\n");
@@ -391,11 +402,11 @@ static int s3c64xx_setparent_clksrc(struct clk *clk, struct clk *parent)
 	struct clk_sources *srcs = sclk->sources;
 
 #ifdef CONFIG_CPU_S3C6410
-	if(sclk == &clk_audio2)
-	   clksrc = __raw_readl(S3C_CLK_SRC2);
+	if (sclk == &clk_audio2)
+		clksrc = __raw_readl(S3C_CLK_SRC2);
 	else
 #endif
-	   clksrc = __raw_readl(S3C_CLK_SRC);
+	clksrc = __raw_readl(S3C_CLK_SRC);
 
 	for (ptr = 0; ptr < srcs->nr_sources; ptr++)
 		if (srcs->sources[ptr] == parent) {
@@ -408,11 +419,11 @@ static int s3c64xx_setparent_clksrc(struct clk *clk, struct clk *parent)
 		clksrc |= src_nr << sclk->shift;
 
 #ifdef CONFIG_CPU_S3C6410
-		if(sclk == &clk_audio2)
-		   __raw_writel(clksrc, S3C_CLK_SRC2);
+		if (sclk == &clk_audio2)
+			__raw_writel(clksrc, S3C_CLK_SRC2);
 		else
 #endif
-		   __raw_writel(clksrc, S3C_CLK_SRC);
+		__raw_writel(clksrc, S3C_CLK_SRC);
 
 		clk->parent = parent;
 		return 0;
