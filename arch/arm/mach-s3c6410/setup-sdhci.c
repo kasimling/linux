@@ -57,27 +57,21 @@ void s3c6410_setup_sdhci0_cfg_card(struct platform_device *dev,
 				    struct mmc_ios *ios,
 				    struct mmc_card *card)
 {
-	u32 ctrl2, ctrl3;
+	u32 ctrl2, ctrl3 = 0;
 
 	/* don't need to alter anything acording to card-type */
 
 	writel(S3C64XX_SDHCI_CONTROL4_DRIVE_9mA, r + S3C64XX_SDHCI_CONTROL4);
 
+	/* finally, we don't need to add delay values in HS-MMC interface.
+	 * all delay values are removed. by scsuh.
+	 */
 	ctrl2 = readl(r + S3C_SDHCI_CONTROL2);
 	ctrl2 &= S3C_SDHCI_CTRL2_SELBASECLK_MASK;
 	ctrl2 |= (S3C64XX_SDHCI_CTRL2_ENSTAASYNCCLR |
 		  S3C64XX_SDHCI_CTRL2_ENCMDCNFMSK |
-		  S3C_SDHCI_CTRL2_ENFBCLKRX |
 		  S3C_SDHCI_CTRL2_DFCNT_NONE |
 		  S3C_SDHCI_CTRL2_ENCLKOUTHOLD);
-
-	if (ios->clock <= 25 * 1000000)
-		ctrl3 = (S3C_SDHCI_CTRL3_FCSEL3 |
-			 S3C_SDHCI_CTRL3_FCSEL2 |
-			 S3C_SDHCI_CTRL3_FCSEL1 |
-			 S3C_SDHCI_CTRL3_FCSEL0);
-	else
-		ctrl3 = (S3C_SDHCI_CTRL3_FCSEL1 | S3C_SDHCI_CTRL3_FCSEL0);
 
 	writel(ctrl2, r + S3C_SDHCI_CONTROL2);
 	writel(ctrl3, r + S3C_SDHCI_CONTROL3);
@@ -96,8 +90,10 @@ void s3c6410_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
 		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
 	}
 
-//	s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
-//	s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(3));
+#if 0 /* only ch0 will have card detection pin. by scsuh. */
+	s3c_gpio_setpull(S3C64XX_GPG(6), S3C_GPIO_PULL_UP);
+	s3c_gpio_cfgpin(S3C64XX_GPG(6), S3C_GPIO_SFN(3));
+#endif
 }
 
 void s3c6410_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
