@@ -24,7 +24,7 @@ struct s3c_platform_fimd {
 
 	void		(*cfg_gpio)(struct platform_device *dev);
 	int		(*backlight_on)(struct platform_device *dev);
-	int		(*reset_panel)(struct platform_device *dev);
+	int		(*reset_lcd)(struct platform_device *dev);
 };
 
 extern void s3c_fimd_set_platdata(struct s3c_platform_fimd *fimd);
@@ -32,7 +32,7 @@ extern void s3c_fimd_set_platdata(struct s3c_platform_fimd *fimd);
 /* defined by architecture to configure gpio */
 extern void s3c_fimd_cfg_gpio(struct platform_device *dev);
 extern int s3c_fimd_backlight_on(struct platform_device *dev);
-extern int s3c_fimd_reset_panel(struct platform_device *dev);
+extern int s3c_fimd_reset_lcd(struct platform_device *dev);
 
 #endif /* _FIMD_H */
 

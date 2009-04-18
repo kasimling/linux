@@ -55,7 +55,7 @@ int s3c_fimd_backlight_on(struct platform_device *dev)
 	return 0;
 }
 
-int s3c_fimd_reset_panel(struct platform_device *dev)
+int s3c_fimd_reset_lcd(struct platform_device *dev)
 {
 	int err;
 

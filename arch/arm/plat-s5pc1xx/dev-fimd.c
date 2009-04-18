@@ -61,7 +61,7 @@ void __init s3c_fimd_set_platdata(struct s3c_platform_fimd *pd)
 
 	npd->cfg_gpio = s3c_fimd_cfg_gpio;
 	npd->backlight_on = s3c_fimd_backlight_on;
-	npd->reset_panel = s3c_fimd_reset_panel;
+	npd->reset_lcd = s3c_fimd_reset_lcd;
 
 	s3c_device_fimd.dev.platform_data = npd;
 }
