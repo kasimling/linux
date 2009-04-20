@@ -1986,3 +1986,28 @@ v2.6.28.6-samsung-r2d8: Jinsung Yang
 		M       drivers/media/video/samsung/fimc/Makefile
 		M       drivers/media/video/samsung/fimc/s3c_fimc.h
 
+v2.6.28.6-samsung-mfc-r0: PyoungJae Jung, Jiun Yu
+	- first initial version of MFC branch
+	- upgraded MFC40 driver
+	- updated FW
+	- supported multi-instance
+	- unstable version
+
+	Addeds files:
+		A	drivers/media/video/samsung/mfc40/s3c_mfc_msg.h
+
+	Modified files:
+		A	drivers/media/video/samsung/Kconfig
+		A	drivers/media/video/samsung/mfc40/Kconfig
+		A	drivers/media/video/samsung/mfc40/s3c-mfc.c
+		A	drivers/media/video/samsung/mfc40/s3c_mfc_buffer_manager.c
+		A	drivers/media/video/samsung/mfc40/s3c_mfc_common.c
+		A	drivers/media/video/samsung/mfc40/s3c_mfc_interface.h
+		A	drivers/media/video/samsung/mfc40/s3c_mfc_intr.c
+		A	drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.c
+		A	drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.h
+		A	drivers/media/video/samsung/mfc40/s3c_mfc_opr.c
+
+	Deleted files:
+		D	drivers/media/video/samsung/mfc40/s3c-mfc.h
+
