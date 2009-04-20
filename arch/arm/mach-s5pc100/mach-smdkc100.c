@@ -26,6 +26,7 @@
 #include <linux/mtd/partitions.h>
 #include <linux/clk.h>
 #include <linux/mm.h>
+#include <linux/pwm_backlight.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -164,6 +165,10 @@ static struct platform_device *smdkc100_devices[] __initdata = {
 	&s3c_device_g2d,
 	&s3c_device_rotator,
 	&s3c_device_csis,
+#if defined(CONFIG_TIMER_PWM)
+        &s3c_device_timer[0],
+        &s3c_device_timer[1],
+#endif
 };
 
 
@@ -189,6 +194,32 @@ static struct i2c_board_info i2c_devs0[] __initdata = {
 static struct i2c_board_info i2c_devs1[] __initdata = {
 	{ I2C_BOARD_INFO("24c128", 0x57), },
 };
+
+#if defined(CONFIG_TIMER_PWM)
+static struct platform_pwm_backlight_data smdk_backlight_data = {
+        .pwm_id         = 0,
+        .max_brightness = 255,
+        .dft_brightness = 255,
+        .pwm_period_ns  = 78770,
+};
+
+static struct platform_device smdk_backlight_device = {
+        .name           = "pwm-backlight",
+        .dev            = {
+                .parent = &s3c_device_timer[0].dev,
+                .platform_data = &smdk_backlight_data,
+        },
+};
+
+static void __init smdk_backlight_register(void)
+{
+        int ret = platform_device_register(&smdk_backlight_device);
+        if (ret)
+                printk(KERN_ERR "smdk: failed to register backlight device: %d\n", ret);
+}
+#else
+#define smdk_backlight_register()       do { } while (0)
+#endif
 
 static void __init smdkc100_map_io(void)
 {
@@ -259,6 +290,7 @@ static void __init smdkc100_machine_init(void)
 #if defined(CONFIG_PM)
 	s5pc1xx_pm_init();
 #endif
+        smdk_backlight_register();
 }
 
 MACHINE_START(SMDKC100, "SMDKC100")

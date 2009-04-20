@@ -1232,6 +1232,7 @@ int s3cfb_set_gpio(void)
 	for (i = 0; i < 4; i++)
 		s3c_gpio_cfgpin(S5PC1XX_GPF3(i), S3C_GPIO_SFN(2));
 
+#ifndef CONFIG_BACKLIGHT_PWM
 	/* backlight ON */
 	if (gpio_is_valid(S5PC1XX_GPD(0))) {
 		err = gpio_request(S5PC1XX_GPD(0), "GPD");
@@ -1244,6 +1245,7 @@ int s3cfb_set_gpio(void)
 
 		gpio_direction_output(S5PC1XX_GPD(0), 1);
 	}
+#endif
 
 	/* module reset */
 	if (gpio_is_valid(S5PC1XX_GPH0(6))) {
@@ -1267,7 +1269,9 @@ int s3cfb_set_gpio(void)
 	mdelay(10);
 
 	gpio_free(S5PC1XX_GPH0(6));
+#ifndef CONFIG_BACKLIGHT_PWM
 	gpio_free(S5PC1XX_GPD(0));
+#endif
 
 	return 0;
 }

@@ -107,6 +107,6 @@ extern int s5pc1xx_sclk0_ctrl(struct clk *clk, int enable);
 extern int s5pc1xx_sclk1_ctrl(struct clk *clk, int enable);
 #endif
 
-#ifdef CONFIG_HAVE_PWM
+#if defined(CONFIG_HAVE_PWM) || defined(CONFIG_TIMER_PWM)
 extern int s3c24xx_pwmclk_init(void);
 #endif

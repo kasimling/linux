@@ -28,6 +28,7 @@
 #include <linux/miscdevice.h>
 #include <linux/clk.h>
 #include <linux/mutex.h>
+#include <linux/gpio.h>
 
 #include <asm/io.h>
 #include <asm/irq.h>
@@ -35,10 +36,8 @@
 
 #include <mach/hardware.h>
 #include <mach/irqs.h>
-#include <mach/gpio.h>
 #include <plat/map.h>
 #include <plat/regs-timer.h>
-#include <plat/regs-gpio.h>
 #include <plat/gpio-cfg.h>
 #include <plat/gpio-bank-d.h>
 #include "pwm-s5pc100.h"

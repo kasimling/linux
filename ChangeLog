@@ -2051,3 +2051,18 @@ v2.6.28.6-samsung-r2d15: Jaeryul Oh
 	- MFC memory buffer size is changed
 	Modified Files :
 		M       drivers/media/video/samsung/mfc10/s3c_mfc_config.h
+
+v2.6.28.6-samsung-r2d16: Abhilash Kesavan
+	- Support backlight class driver by PWM on SMDKC100
+
+	Added Files:
+		A 	arch/arm/plat-s5pc1xx/pwm.c
+
+	Modified Files:
+		M   	arch/arm/mach-s5pc100/cpu.c
+		M   	arch/arm/mach-s5pc100/mach-smdkc100.c
+		M   	arch/arm/plat-s5pc1xx/Kconfig
+		M   	arch/arm/plat-s5pc1xx/Makefile
+		M	arch/arm/plat-s3c/include/plat/clock.h
+		M	drivers/video/samsung/s3cfb_fimd5x.c
+		M	drivers/video/backlight/Kconfig

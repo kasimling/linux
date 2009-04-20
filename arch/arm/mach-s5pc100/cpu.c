@@ -43,6 +43,7 @@
 #include <plat/s5pc100.h>
 
 #include <plat/regs-power.h>
+#include <plat/regs-clock.h>
 
 #undef T32_PROBE_DEBUGGING
 
@@ -126,6 +127,9 @@ void __init s5pc100_init_clocks(int xtal)
 	s5pc1xx_register_clocks();
 	s5pc100_register_clocks();
 	s5pc100_setup_clocks();
+#if defined(CONFIG_TIMER_PWM)
+        s3c24xx_pwmclk_init();
+#endif
 }
 
 void __init s5pc100_init_irq(void)
