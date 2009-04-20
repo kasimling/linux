@@ -2046,3 +2046,8 @@ v2.6.28.6-samsung-r2d14: Jongpill Lee
 		M       arch/arm/mach-s3c6400/include/mach/system.h
 		M       arch/arm/mach-s5p6440/include/mach/system.h
 		M       arch/arm/plat-s3c/include/plat/regs-watchdog.h
+
+v2.6.28.6-samsung-r2d15: Jaeryul Oh
+	- MFC memory buffer size is changed
+	Modified Files :
+		M       drivers/media/video/samsung/mfc10/s3c_mfc_config.h
