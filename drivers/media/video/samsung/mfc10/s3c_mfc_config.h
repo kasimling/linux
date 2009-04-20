@@ -64,7 +64,7 @@ extern dma_addr_t s3c_mfc_phys_buffer;
 /* 
  * MFC DATA_BUF
  */
-#define S3C_MFC_NUM_INSTANCES_MAX	4	/* MFC Driver supports 4 instances MAX. */
+#define S3C_MFC_NUM_INSTANCES_MAX	2	/* MFC Driver supports 4 instances MAX. */
 
 /* 
  * Determine if 'Post Rotate Mode' is enabled.
@@ -79,7 +79,7 @@ extern dma_addr_t s3c_mfc_phys_buffer;
  * becasue minimun data transfer unit between stream buffer and internal bitstream handling block 
  * in MFC core is 512bytes
  */
-#define S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE		(204800)
+#define S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE		(614400)
 
 
 #define S3C_MFC_LINE_BUF_SIZE		(S3C_MFC_NUM_INSTANCES_MAX * S3C_MFC_LINE_BUF_SIZE_PER_INSTANCE)

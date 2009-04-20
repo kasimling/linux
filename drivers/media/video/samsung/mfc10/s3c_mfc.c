@@ -350,7 +350,7 @@ static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		dma_cache_maint(start, size, DMA_TO_DEVICE);
 
 		/* 
-		 * Decode MFC Instance
+		 * Encode MFC Instance
 		 */
 		ret = s3c_mfc_inst_enc(pMfcInst, &nStrmLen, &nHdrLen);
 
