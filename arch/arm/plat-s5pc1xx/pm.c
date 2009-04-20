@@ -214,6 +214,15 @@ static struct sleep_save sromc_save[] = {
 	SAVE_ITEM(S5PC1XX_SROM_BC5),
 };
 
+/* NAND control registers */
+#define PM_NFCONF             (S3C_VA_NAND + 0x00)        
+#define PM_NFCONT             (S3C_VA_NAND + 0x04)        
+
+static struct sleep_save nand_save[] = {
+        SAVE_ITEM(PM_NFCONF),
+        SAVE_ITEM(PM_NFCONT),
+};
+
 #define SAVE_UART(va) \
 	SAVE_ITEM((va) + S3C2410_ULCON), \
 	SAVE_ITEM((va) + S3C2410_UCON), \
@@ -420,7 +429,6 @@ static int s5pc1xx_pm_clk(enum PLL_TYPE pm_pll,u32 mdiv, u32 pdiv, u32 sdiv)
 {
 	u32 pll_value;
 	u32 pll_addr;
-	u32 tmp;
 
 	pll_value = (1 << 31) | (mdiv << 16) | (pdiv << 8) | (sdiv << 0);
 
@@ -469,6 +477,7 @@ static int s5pc1xx_pm_enter(suspend_state_t state)
 	s5pc1xx_pm_do_save(irq_save, ARRAY_SIZE(irq_save));
 	s5pc1xx_pm_do_save(core_save, ARRAY_SIZE(core_save));
 	s5pc1xx_pm_do_save(sromc_save, ARRAY_SIZE(sromc_save));
+	s5pc1xx_pm_do_save(nand_save, ARRAY_SIZE(nand_save));
 	s5pc1xx_pm_do_save(uart_save, ARRAY_SIZE(uart_save));
 
 	/* ensure INF_REG0  has the resume address */
@@ -550,6 +559,7 @@ static int s5pc1xx_pm_enter(suspend_state_t state)
 	s5pc1xx_pm_do_restore(irq_save, ARRAY_SIZE(irq_save));
 	s5pc1xx_pm_do_restore(core_save, ARRAY_SIZE(core_save));
 	s5pc1xx_pm_do_restore(sromc_save, ARRAY_SIZE(sromc_save));
+	s5pc1xx_pm_do_restore(nand_save, ARRAY_SIZE(nand_save));
 	s5pc1xx_pm_do_restore(uart_save, ARRAY_SIZE(uart_save));
 
 	tmp = readl(weint_base + S5P_APM_WEINT1_PEND);

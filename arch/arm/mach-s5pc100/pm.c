@@ -89,7 +89,6 @@ static int s5pc100_pm_suspend(struct sys_device *dev, pm_message_t state)
 
 static int s5pc100_pm_resume(struct sys_device *dev)
 {
-	unsigned long tmp;
 	s5pc1xx_pm_do_restore(s5pc100_sleep, ARRAY_SIZE(s5pc100_sleep));
 	return 0;
 }

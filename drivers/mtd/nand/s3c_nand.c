@@ -893,12 +893,15 @@ static int s5pc100_nand_probe(struct platform_device *dev)
 #if defined(CONFIG_PM)
 static int s3c_nand_suspend(struct platform_device *dev, pm_message_t pm)
 {
+        struct s3c_nand *info = platform_get_drvdata(dev);
+        clk_disable(s3c_nand.clk);
 	return 0;
 }
 
 static int s3c_nand_resume(struct platform_device *dev)
 {
-
+        struct s3c_nand *info = platform_get_drvdata(dev);
+        clk_enable(s3c_nand.clk);
 	return 0;
 }
 
