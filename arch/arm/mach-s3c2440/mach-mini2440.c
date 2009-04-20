@@ -222,7 +222,7 @@ static void mini2440_backlight_blank_notify(int blank_mode)
 /*
  * This macro simplifies the table bellow
  */
-#define _LCD_DECLARE(_xres,margin_left,margin_right,hsync, \
+#define _LCD_DECLARE(_clock,_xres,margin_left,margin_right,hsync, \
 			_yres,margin_top,margin_bottom,vsync, refresh) \
 	.width = _xres, \
 	.xres = _xres, \
@@ -234,7 +234,7 @@ static void mini2440_backlight_blank_notify(int blank_mode)
 	.lower_margin	= margin_bottom,	\
 	.hsync_len	= hsync,	\
 	.vsync_len	= vsync,	\
-	.pixclock	= (1000000000000LL /	\
+	.pixclock	= ((_clock*100000000000LL) /	\
 			   ((refresh) * \
 			   (hsync + margin_left + _xres + margin_right) * \
 			   (vsync + margin_top + _yres + margin_bottom))), \
@@ -245,8 +245,9 @@ static void mini2440_backlight_blank_notify(int blank_mode)
 struct s3c2410fb_display mini2440_lcd_cfg[] __initdata = {
 	[0] = {	// mini2440 + 3.5" TFT + touchscreen
 		_LCD_DECLARE( 
+			7,			/* The 3.5 is quite fast */
 			240, 21, 38, 6, 	/* x timing */
-			320, 2, 6, 2,		/* y timing */
+			320, 4, 4, 2,		/* y timing */
 			60)			/* refresh rate */
 		.lcdcon5	= (S3C2410_LCDCON5_FRM565 |\
 				   S3C2410_LCDCON5_INVVLINE |\
@@ -256,6 +257,7 @@ struct s3c2410fb_display mini2440_lcd_cfg[] __initdata = {
 	},
 	[1] = { // mini2440 + 7" TFT + touchscreen
 		_LCD_DECLARE( 
+			10,			/* the 7" runs slower */
 			800, 40, 40, 48, 	/* x timing */
 			480, 29, 3, 3,		/* y timing */
 			50)			/* refresh rate */
@@ -271,6 +273,7 @@ struct s3c2410fb_display mini2440_lcd_cfg[] __initdata = {
 	 */
 	[2] = {
 		_LCD_DECLARE( 
+			10,
 			1024, 1, 2, 2,		/* y timing */
 			768, 200, 16, 16, 	/* x timing */
 			24)	/* refresh rate, maximum stable,
