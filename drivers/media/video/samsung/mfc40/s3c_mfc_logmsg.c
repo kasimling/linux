@@ -11,6 +11,7 @@
  * published by the Free Software Foundation.
  */
 
+/*
 #include <linux/string.h>
 #include <linux/kernel.h>
 #include <asm/param.h>
@@ -29,8 +30,8 @@ void LOG_MSG(LOG_LEVEL level, const char *func_name, const char *msg, ...)
 	char buf[256];
 	va_list argptr;
 
-	if (level < log_level)
-		return;
+	//if (level < log_level)
+	//	return;
 
 	sprintf(buf, "[%s: %s] %s: ", modulename, level_str[level], func_name);
 
@@ -39,4 +40,5 @@ void LOG_MSG(LOG_LEVEL level, const char *func_name, const char *msg, ...)
 	printk(buf);
 	va_end(argptr);
 }
+*/
 

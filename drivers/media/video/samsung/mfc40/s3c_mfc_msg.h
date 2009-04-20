@@ -1,32 +1,3 @@
-/* 
- * drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.h
- *
- * Header file for Samsung MFC (Multi Function Codec - FIMV) driver
- *
- * PyoungJae Jung, Jiun Yu, Copyright (c) 2009 Samsung Electronics
- * http://www.samsungsemi.com/
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation.
- */
-
-#ifndef _S3C_MFC_LOGMSG_H_
-#define _S3C_MFC_LOGMSG_H_
-
-
-/*
-typedef enum
-{
-	LOG_DEBUG   = 0,
-	LOG_TRACE,
-	LOG_WARNING,
-	LOG_ERROR
-} LOG_LEVEL;
-
-void LOG_MSG(LOG_LEVEL level, const char *func_name, const char *msg, ...);
-*/
-
 /* debug macros */
 #define MFC_DEBUG(fmt, ...)					\
 	do {							\
@@ -59,7 +30,7 @@ void LOG_MSG(LOG_LEVEL level, const char *func_name, const char *msg, ...);
 	} while (0)
 
 
-#ifdef CONFIG_VIDEO_MFC40_DEBUG
+#ifdef VIDEO_MFC_DEBUG
 #define mfc_debug(fmt, ...)		MFC_DEBUG(fmt, ##__VA_ARGS__)
 #else
 #define mfc_debug(fmt, ...)
@@ -69,5 +40,3 @@ void LOG_MSG(LOG_LEVEL level, const char *func_name, const char *msg, ...);
 #define mfc_notice(fmt, ...)		MFC_NOTICE(fmt, ##__VA_ARGS__)
 #define mfc_info(fmt, ...)		MFC_INFO(fmt, ##__VA_ARGS__)
 #define mfc_warn(fmt, ...)		MFC_WARN(fmt, ##__VA_ARGS__)
-
-#endif /* _S3C_MFC_LOGMSG_H_ */

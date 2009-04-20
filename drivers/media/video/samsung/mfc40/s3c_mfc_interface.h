@@ -191,6 +191,36 @@ typedef struct {
 } s3c_mfc_dec_seq_start_arg_t;
 
 typedef struct {
+	MFC_CODEC_TYPE in_codec_type; /* [IN] codec type */
+	int in_strm_buf;  /* [IN] the physical address of STRM_BUF */
+	int in_strm_size; /* [IN] Size of video stream filled in STRM_BUF */
+
+	/* [IN]  Is packed PB frame or not, 1: packedPB  0: unpacked */
+	int in_packed_PB;
+	
+	int out_img_width;	/* [OUT] width  of YUV420 frame */
+	int out_img_height;	/* [OUT] height of YUV420 frame */
+	int out_buf_width;	/* [OUT] width  of YUV420 frame */
+	int out_buf_height;	/* [OUT] height of YUV420 frame */
+
+	/* [OUT] the number of buffers which is nessary during decoding. */
+	int out_dpb_cnt; 
+
+	int in_frm_buf;   /* [IN] the address of STRM_BUF */
+	int in_frm_size;  /* [IN] Size of video stream filled in STRM_BUF */
+
+	char in_cache_flag;
+	//int in_buff_size;
+	unsigned int in_cached_mapped_addr;
+	unsigned int in_non_cached_mapped_addr;
+	unsigned int out_u_addr;
+
+	unsigned int out_p_addr;
+
+	int out_frame_buf_size;
+} s3c_mfc_dec_super_init_arg_t;
+
+typedef struct {
 	MFC_CODEC_TYPE in_codec_type;/* [IN]  codec type */
 	int in_strm_buf;  /* [IN]  the physical address of STRM_BUF */
 	int in_strm_size; /* [IN]  Size of video stream filled in STRM_BUF */
@@ -253,6 +283,7 @@ typedef union {
 	s3c_mfc_enc_exe_arg enc_exe;
 	s3c_mfc_dec_init_arg_t dec_init;
 	s3c_mfc_dec_seq_start_arg_t dec_seq_start;
+	s3c_mfc_dec_super_init_arg_t dec_super_init;
 	s3c_mfc_dec_exe_arg_t dec_exe;
 	s3c_mfc_get_config_arg_t get_config;
 	s3c_mfc_set_config_arg_t set_config;

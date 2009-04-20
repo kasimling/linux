@@ -108,7 +108,7 @@ int s3c_mfc_get_fw_buf_offset(MFC_CODEC_TYPE codecType)
 
 	default: 
 		offset = -1;
-		LOG_MSG(LOG_ERROR, "s3c_mfc_get_fw_buf_offset", "unknown codec type\n");
+		mfc_err("unknown codec type\n");
 	}
 
 	return offset;
@@ -155,7 +155,7 @@ int s3c_mfc_get_fw_buf_size(MFC_CODEC_TYPE codecType)
 		break;
 
 	default: bufSize = -1;
-		 LOG_MSG(LOG_ERROR, "s3c_mfc_get_fw_buf_size", "unknown codec type\n");
+		 mfc_err("unknown codec type\n");
 	}
 
 	return bufSize;

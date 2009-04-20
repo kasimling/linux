@@ -31,23 +31,22 @@ extern unsigned char *s3c_mfc_virt_data_buf;
 /* insert node ahead of s3c_mfc_alloc_mem_head */
 static void s3c_mfc_insert_node_to_alloc_list(s3c_mfc_alloc_mem_t *node, int inst_no)
 {
-	LOG_MSG(LOG_TRACE, "s3c_mfc_insert_node_to_alloc_list", 
-			"[%d]instance (cached_p_addr : 0x%08x uncached_p_addr : 0x%08x size:%ld cacheflag : %d)\n",
+	mfc_info("[%d]instance (cached_p_addr : 0x%08x uncached_p_addr : 0x%08x size:%d cacheflag : %d)\n",
 			inst_no, node->cached_p_addr, node->uncached_p_addr, node->size, node->cache_flag);
 	node->next = s3c_mfc_alloc_mem_head;
 	node->prev = s3c_mfc_alloc_mem_head->prev;
 	s3c_mfc_alloc_mem_head->prev->next = node;
 	s3c_mfc_alloc_mem_head->prev = node;
 	s3c_mfc_alloc_mem_head = node;
-	LOG_MSG(LOG_TRACE, "s3c_mfc_insert_node_to_alloc_list", "Finished s3c_mfc_insert_node_to_alloc_list\n");
+	mfc_info("Finished s3c_mfc_insert_node_to_alloc_list\n");
 }
 
 static void s3c_mfc_print_list(void)
 {
-	s3c_mfc_alloc_mem_t		*node1;
-	s3c_mfc_free_mem_t		*node2;
-	int 			count = 0;
-	unsigned int		p_addr;
+	s3c_mfc_alloc_mem_t *node1;
+	s3c_mfc_free_mem_t *node2;
+	int count = 0;
+	unsigned int p_addr;
 
 	for (node1 = s3c_mfc_alloc_mem_head; node1 != s3c_mfc_alloc_mem_tail; node1 = node1->next) {
 		if(node1->cache_flag)
@@ -71,7 +70,7 @@ static void s3c_mfc_print_list(void)
 /* insert node ahead of s3c_mfc_free_mem_head */
 static void s3c_mfc_insert_node_to_free_list(s3c_mfc_free_mem_t *node,  int inst_no)
 {
-	LOG_MSG(LOG_TRACE, "s3c_mfc_insert_node_to_free_list", "[%d]instance(startAddr : 0x%08x size:%ld  cached flag : %d)\n",
+	mfc_info("[%d]instance(startAddr : 0x%08x size:%d  cached flag : %d)\n",
 			inst_no, node->start_addr, node->size, node->cache_flag);
 	node->next = s3c_mfc_free_mem_head;
 	node->prev = s3c_mfc_free_mem_head->prev;
@@ -82,12 +81,11 @@ static void s3c_mfc_insert_node_to_free_list(s3c_mfc_free_mem_t *node,  int inst
 
 static void s3c_mfc_del_node_from_alloc_list(s3c_mfc_alloc_mem_t *node, int inst_no)
 {
-	LOG_MSG(LOG_TRACE, "s3c_mfc_del_node_from_alloc_list", 
-			"[%d]instance (uncached_p_addr : 0x%08x cached_p_addr : 0x%08x size:%ld cacheflag : %d)\n",
+	mfc_info("[%d]instance (uncached_p_addr : 0x%08x cached_p_addr : 0x%08x size:%d cacheflag : %d)\n",
 			inst_no, node->uncached_p_addr, node->cached_p_addr, node->size, node->cache_flag);
 
 	if(node == s3c_mfc_alloc_mem_tail){
-		LOG_MSG(LOG_TRACE, "s3c_mfc_del_node_from_alloc_list", "InValid node\n");
+		mfc_info("InValid node\n");
 		return;
 	}
 
@@ -104,10 +102,10 @@ static void s3c_mfc_del_node_from_alloc_list(s3c_mfc_alloc_mem_t *node, int inst
 
 static void s3c_mfc_del_node_from_free_list( s3c_mfc_free_mem_t *node, int inst_no)
 {
-	LOG_MSG(LOG_TRACE, "s3c_mfc_del_node_from_free_list", "[%d]s3c_mfc_del_node_from_free_list(startAddr : 0x%08x size:%ld)\n", 
-			inst_no, node->start_addr, node->size);
+	mfc_debug("[%d]s3c_mfc_del_node_from_free_list(startAddr : 0x%08x size:%ld)\n", 
+						inst_no, node->start_addr, node->size);
 	if(node == s3c_mfc_free_mem_tail){
-		LOG_MSG(LOG_ERROR, "s3c_mfc_del_node_from_free_list", "InValid node\n");
+		mfc_err("InValid node\n");
 		return;
 	}
 
@@ -132,14 +130,12 @@ void s3c_mfc_merge_frag(int inst_no)
 		while (node2 != s3c_mfc_free_mem_tail) {
 			if ((node1->start_addr + node1->size == node2->start_addr) && (node1->cache_flag == node2->cache_flag)) {
 				node1->size += node2->size;
-				LOG_MSG(LOG_TRACE, "MergeFragmentation", 
-					"find merge area !! ( node1->start_addr + node1->size == node2->start_addr)\n");
+				mfc_debug("find merge area !! ( node1->start_addr + node1->size == node2->start_addr)\n");
 				s3c_mfc_del_node_from_free_list(node2, inst_no);
 				break;
 			} else if((node1->start_addr == node2->start_addr + node2->size) && 
 						(node1->cache_flag == node2->cache_flag) ) {
-				LOG_MSG(LOG_TRACE, "MergeFragmentation", 
-					"find merge area !! ( node1->start_addr == node2->start_addr + node2->size)\n");
+				mfc_debug("find merge area !! ( node1->start_addr == node2->start_addr + node2->size)\n");
 				node1->start_addr = node2->start_addr;
 				node1->size += node2->size;
 				s3c_mfc_del_node_from_free_list(node2, inst_no);
@@ -157,10 +153,10 @@ static unsigned int s3c_mfc_get_mem_area(int allocSize, int inst_no, char cache_
 	unsigned int	allocAddr = 0;
 
 
-	LOG_MSG(LOG_TRACE, "s3c_mfc_get_mem_area", "request Size : %ld\n", allocSize);
+	mfc_debug("request Size : %ld\n", allocSize);
 
 	if (s3c_mfc_free_mem_head == s3c_mfc_free_mem_tail) {
-		LOG_MSG(LOG_ERROR, "s3c_mfc_get_mem_area", "all memory is gone\n");
+		mfc_err("all memory is gone\n");
 		return(allocAddr);
 	}
 
@@ -186,8 +182,8 @@ static unsigned int s3c_mfc_get_mem_area(int allocSize, int inst_no, char cache_
 	}
 
 	if (match_node != NULL) {
-		LOG_MSG(LOG_TRACE, "s3c_mfc_get_mem_area", "match : startAddr(0x%08x) size(%ld) cache flag(%d)\n", 
-				match_node->start_addr, match_node->size, match_node->cache_flag);
+		mfc_debug("match : startAddr(0x%08x) size(%ld) cache flag(%d)\n", 
+			match_node->start_addr, match_node->size, match_node->cache_flag);
 	}
 
 	/* rearange FreeMemArea */
@@ -256,7 +252,7 @@ MFC_ERROR_CODE s3c_mfc_release_alloc_mem(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_arg
 	}
 
 	if(node  == s3c_mfc_alloc_mem_tail){
-		printk("s3c_cmm_ioctl: invalid virtual address(0x%x)\r\n", args->mem_free.u_addr);
+		mfc_err("invalid virtual address(0x%x)\r\n", args->mem_free.u_addr);
 		ret = MFCINST_MEMORY_INVAILD_ADDR;
 		goto out_releaseallocmem;
 	}
@@ -295,7 +291,7 @@ MFC_ERROR_CODE s3c_mfc_get_phys_addr(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *arg
 	}
 
 	if(node  == s3c_mfc_alloc_mem_tail){
-		LOG_MSG(LOG_TRACE, "s3c_cmm_ioctl", "invalid virtual address(0x%x)\r\n", codec_get_phy_addr_arg->u_addr);
+		mfc_err("invalid virtual address(0x%x)\r\n", codec_get_phy_addr_arg->u_addr);
 		ret = MFCINST_MEMORY_INVAILD_ADDR;
 		goto out_getphysaddr;
 	}
@@ -325,10 +321,10 @@ MFC_ERROR_CODE s3c_mfc_get_virt_addr(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *a
 	/* if user request cachable area, allocate from reserved area */
 	/* if user request uncachable area, allocate dynamically */
 	p_startAddr = s3c_mfc_get_mem_area((int)in_param->buff_size, inst_no, in_param->cache_flag);
-	LOG_MSG(LOG_TRACE, "s3c_mfc_get_virt_addr", "p_startAddr = 0x%X\n\r", p_startAddr);
+	mfc_debug("p_startAddr = 0x%X\n\r", p_startAddr);
 
 	if (!p_startAddr) {
-		LOG_MSG(LOG_TRACE, "s3c_mfc_get_virt_addr", "There is no more memory\n\r");
+		mfc_debug("There is no more memory\n\r");
 		in_param->out_addr = -1;
 		ret = MFCINST_MEMORY_ALLOC_FAIL;
 		goto out_getcodecviraddr;
@@ -344,7 +340,7 @@ MFC_ERROR_CODE s3c_mfc_get_virt_addr(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *a
 				(p_allocMem->cached_p_addr - s3c_mfc_phys_data_buf));
 
 		if (p_allocMem->v_addr == NULL) {
-			LOG_MSG(LOG_TRACE, "s3c_mfc_get_virt_addr", "Mapping Failed [PA:0x%08x]\n\r", p_allocMem->cached_p_addr);
+			mfc_debug("Mapping Failed [PA:0x%08x]\n\r", p_allocMem->cached_p_addr);
 			ret = MFCINST_MEMORY_MAPPING_FAIL;
 			goto out_getcodecviraddr;
 		}
@@ -353,19 +349,18 @@ MFC_ERROR_CODE s3c_mfc_get_virt_addr(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *a
 		p_allocMem->v_addr = s3c_mfc_virt_data_buf + (p_allocMem->uncached_p_addr - s3c_mfc_phys_data_buf);
 		p_allocMem->u_addr = (unsigned char *)(in_param->non_cached_mapped_addr + 
 				(p_allocMem->uncached_p_addr - s3c_mfc_phys_data_buf));
-		LOG_MSG(LOG_TRACE, "s3c_mfc_get_virt_addr", 
-				"in_param->non_cached_mapped_addr = 0x%X, s3c_mfc_phys_data_buf = 0x%X, data buffer size = 0x%X\n", 
+		mfc_debug("in_param->non_cached_mapped_addr = 0x%X, s3c_mfc_phys_data_buf = 0x%X, data buffer size = 0x%X\n", 
 				in_param->non_cached_mapped_addr, s3c_mfc_phys_data_buf, s3c_get_media_memsize(S3C_MDEV_MFC));
 		if (p_allocMem->v_addr == NULL) {
-			LOG_MSG(LOG_TRACE, "s3c_mfc_get_virt_addr", "Mapping Failed [PA:0x%08x]\n\r", p_allocMem->uncached_p_addr);
+			mfc_debug("Mapping Failed [PA:0x%08x]\n\r", p_allocMem->uncached_p_addr);
 			ret = MFCINST_MEMORY_MAPPING_FAIL;
 			goto out_getcodecviraddr;
 		}
 	}
 
 	in_param->out_addr = (unsigned int)p_allocMem->u_addr;
-	LOG_MSG(LOG_TRACE, "s3c_mfc_get_virt_addr", "u_addr : 0x%x v_addr : 0x%x cached_p_addr : 0x%x, uncached_p_addr : 0x%x\n",
-			p_allocMem->u_addr, p_allocMem->v_addr, p_allocMem->cached_p_addr, p_allocMem->uncached_p_addr);
+	mfc_debug("u_addr : 0x%x v_addr : 0x%x cached_p_addr : 0x%x, uncached_p_addr : 0x%x\n",
+		p_allocMem->u_addr, p_allocMem->v_addr, p_allocMem->cached_p_addr, p_allocMem->uncached_p_addr);
 
 	p_allocMem->size = (int)in_param->buff_size;
 	p_allocMem->inst_no = inst_no;
