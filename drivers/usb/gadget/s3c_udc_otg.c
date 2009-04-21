@@ -550,23 +550,13 @@ static void set_max_pktsize(struct s3c_udc *dev, enum usb_device_speed speed)
 	dev->ep[8].ep.maxpacket = ep_fifo_size2;
 
 
-	if (speed == USB_SPEED_HIGH) {
-		/* EP0 - Control IN (64 bytes)*/
-		ep_ctrl = readl(S3C_UDC_OTG_DIEPCTL(EP0_CON));
-		writel(ep_ctrl|(0<<0), S3C_UDC_OTG_DIEPCTL(EP0_CON));
+	/* EP0 - Control IN (64 bytes)*/
+	ep_ctrl = readl(S3C_UDC_OTG_DIEPCTL(EP0_CON));
+	writel(ep_ctrl|(0<<0), S3C_UDC_OTG_DIEPCTL(EP0_CON));
 
-		/* EP0 - Control OUT (64 bytes)*/
-		ep_ctrl = readl(S3C_UDC_OTG_DOEPCTL(EP0_CON));
-		writel(ep_ctrl|(0<<0), S3C_UDC_OTG_DOEPCTL(EP0_CON));
-	} else {
-		/* EP0 - Control IN (8 bytes)*/
-		ep_ctrl = readl(S3C_UDC_OTG_DIEPCTL(EP0_CON));
-		writel(ep_ctrl|(3<<0), S3C_UDC_OTG_DIEPCTL(EP0_CON));
-
-		/* EP0 - Control OUT (8 bytes)*/
-		ep_ctrl = readl(S3C_UDC_OTG_DOEPCTL(EP0_CON));
-		writel(ep_ctrl|(3<<0), S3C_UDC_OTG_DOEPCTL(EP0_CON));
-	}
+	/* EP0 - Control OUT (64 bytes)*/
+	ep_ctrl = readl(S3C_UDC_OTG_DOEPCTL(EP0_CON));
+	writel(ep_ctrl|(0<<0), S3C_UDC_OTG_DOEPCTL(EP0_CON));
 }
 
 static int s3c_ep_enable(struct usb_ep *_ep,

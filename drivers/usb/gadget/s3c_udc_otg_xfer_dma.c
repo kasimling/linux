@@ -59,7 +59,7 @@ static inline void s3c_udc_pre_setup(void)
 	writel((1 << 19)|sizeof(struct usb_ctrlrequest), S3C_UDC_OTG_DOEPTSIZ(EP0_CON));
 	writel(virt_to_phys(&usb_ctrl), S3C_UDC_OTG_DOEPDMA(EP0_CON));
 
-	ep_ctrl = readl(S3C_UDC_OTG_DIEPCTL(EP0_CON));
+	ep_ctrl = readl(S3C_UDC_OTG_DOEPCTL(EP0_CON));
 	writel(ep_ctrl|DEPCTL_EPENA|DEPCTL_CNAK, S3C_UDC_OTG_DOEPCTL(EP0_CON));
 }
 

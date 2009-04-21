@@ -238,6 +238,17 @@ MACHINE_END
 /* Initializes OTG Phy. */
 void otg_phy_init(void) {
 
+	int err;
+
+	if (gpio_is_valid(S5P64XX_GPN(1))) {
+		err = gpio_request(S5P64XX_GPN(1), "GPN");
+
+		if(err)
+			printk(KERN_ERR "failed to request GPN1\n");
+
+		gpio_direction_output(S5P64XX_GPN(1), 1);
+	}
+
 	writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
 	writel(0x0, S3C_USBOTG_PHYPWR);		/* Power up */
         writel(OTGH_PHY_CLK_VALUE, S3C_USBOTG_PHYCLK);
@@ -257,6 +268,8 @@ EXPORT_SYMBOL(usb_ctrl);
 void otg_phy_off(void) {
 	writel(readl(S3C_USBOTG_PHYPWR)|(0x1F<<1), S3C_USBOTG_PHYPWR);
 	writel(readl(S3C_OTHERS)&~S3C_OTHERS_USB_SIG_MASK, S3C_OTHERS);
+
+	gpio_free(S5P64XX_GPN(1));
 }
 EXPORT_SYMBOL(otg_phy_off);
 

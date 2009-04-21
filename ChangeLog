@@ -2066,3 +2066,12 @@ v2.6.28.6-samsung-r2d16: Abhilash Kesavan
 		M	arch/arm/plat-s3c/include/plat/clock.h
 		M	drivers/video/samsung/s3cfb_fimd5x.c
 		M	drivers/video/backlight/Kconfig
+
+v2.6.28.6-samsung-r2d17: Kyoungil Kim
+	- Modified full speed configuration for gadget
+
+	Modified Files:
+		M       arch/arm/mach-s5p6440/mach-smdk6440.c
+		M       drivers/usb/gadget/s3c_udc_otg.c
+		M       drivers/usb/gadget/s3c_udc_otg_xfer_dma.c
+
