@@ -2075,3 +2075,6 @@ v2.6.28.6-samsung-r2d17: Kyoungil Kim
 		M       drivers/usb/gadget/s3c_udc_otg.c
 		M       drivers/usb/gadget/s3c_udc_otg_xfer_dma.c
 
+v2.6.28.6-samsung-r3: Kyoungil Kim
+	- Official Release for SMDK6410(09.04.23)
+
