@@ -41,7 +41,7 @@ static void s3c_mfc_insert_node_to_alloc_list(s3c_mfc_alloc_mem_t *node, int ins
 	mfc_info("Finished s3c_mfc_insert_node_to_alloc_list\n");
 }
 
-static void s3c_mfc_print_list(void)
+void s3c_mfc_print_list(void)
 {
 	s3c_mfc_alloc_mem_t *node1;
 	s3c_mfc_free_mem_t *node2;
@@ -66,17 +66,76 @@ static void s3c_mfc_print_list(void)
 	}
 }
 
+int list_count()
+{
+	int count = 0;
+	s3c_mfc_free_mem_t *node;
 
-/* insert node ahead of s3c_mfc_free_mem_head */
-static void s3c_mfc_insert_node_to_free_list(s3c_mfc_free_mem_t *node,  int inst_no)
+	node = s3c_mfc_free_mem_head;
+	
+	while (node != s3c_mfc_free_mem_tail) {	
+		node = node->next;
+		count++;
+	}
+
+	return count;
+}
+
+static void s3c_mfc_insert_first_node_to_free_list(s3c_mfc_free_mem_t *node,  int inst_no)
 {
 	mfc_info("[%d]instance(startAddr : 0x%08x size:%d  cached flag : %d)\n",
-			inst_no, node->start_addr, node->size, node->cache_flag);
+			inst_no, node->start_addr, node->size, node->cache_flag);	
+
 	node->next = s3c_mfc_free_mem_head;
 	node->prev = s3c_mfc_free_mem_head->prev;
 	s3c_mfc_free_mem_head->prev->next = node;
 	s3c_mfc_free_mem_head->prev = node;
 	s3c_mfc_free_mem_head = node;
+	
+}
+
+/* insert node ahead of s3c_mfc_free_mem_head */
+static void s3c_mfc_insert_node_to_free_list(s3c_mfc_free_mem_t *node,  int inst_no)
+{
+	s3c_mfc_free_mem_t *itr_node;
+	
+	mfc_info("[%d]instance(startAddr : 0x%08x size:%d  cached flag : %d)\n",
+			inst_no, node->start_addr, node->size, node->cache_flag);	
+
+	itr_node = s3c_mfc_free_mem_head;
+	
+	while (itr_node != s3c_mfc_free_mem_tail) {
+		
+		if (itr_node->start_addr >= node->start_addr) {
+			/* head */
+			if (itr_node == s3c_mfc_free_mem_head) {
+				node->next = s3c_mfc_free_mem_head;
+				node->prev = s3c_mfc_free_mem_head->prev;
+				s3c_mfc_free_mem_head->prev->next = node;
+				s3c_mfc_free_mem_head->prev = node;
+				s3c_mfc_free_mem_head = node;
+				break;
+			} else { /* mid */
+				node->next = itr_node;
+				node->prev = itr_node->prev;
+				itr_node->prev->next = node;
+				itr_node->prev = node;
+				break;
+			}
+		
+		}
+
+		itr_node = itr_node->next;
+	}
+
+	/* tail */
+	if (itr_node == s3c_mfc_free_mem_tail) {
+		node->next = s3c_mfc_free_mem_tail;
+		node->prev = s3c_mfc_free_mem_tail->prev;
+		s3c_mfc_free_mem_tail->prev->next = node;
+		s3c_mfc_free_mem_tail->prev = node;
+	}
+	
 }
 
 static void s3c_mfc_del_node_from_alloc_list(s3c_mfc_alloc_mem_t *node, int inst_no)
@@ -102,7 +161,7 @@ static void s3c_mfc_del_node_from_alloc_list(s3c_mfc_alloc_mem_t *node, int inst
 
 static void s3c_mfc_del_node_from_free_list( s3c_mfc_free_mem_t *node, int inst_no)
 {
-	mfc_debug("[%d]s3c_mfc_del_node_from_free_list(startAddr : 0x%08x size:%ld)\n", 
+	mfc_debug("[%d]s3c_mfc_del_node_from_free_list(startAddr : 0x%08x size:%d)\n", 
 						inst_no, node->start_addr, node->size);
 	if(node == s3c_mfc_free_mem_tail){
 		mfc_err("InValid node\n");
@@ -232,7 +291,7 @@ int s3c_mfc_init_buffer_manager(void)
 	free_node->start_addr = s3c_mfc_phys_data_buf;
 	free_node->cache_flag = 0;
 	free_node->size = s3c_get_media_memsize(S3C_MDEV_MFC);
-	s3c_mfc_insert_node_to_free_list(free_node, -1);
+	s3c_mfc_insert_first_node_to_free_list(free_node, -1);
 
 	return 0;
 }
@@ -251,7 +310,7 @@ MFC_ERROR_CODE s3c_mfc_release_alloc_mem(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_arg
 			break;
 	}
 
-	if(node  == s3c_mfc_alloc_mem_tail){
+	if (node == s3c_mfc_alloc_mem_tail) {
 		mfc_err("invalid virtual address(0x%x)\r\n", args->mem_free.u_addr);
 		ret = MFCINST_MEMORY_INVAILD_ADDR;
 		goto out_releaseallocmem;

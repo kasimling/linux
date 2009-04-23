@@ -29,11 +29,13 @@
 #define     INT_PULSE_BIT		(1 << 0)
 
 /* Command Types */
-#define 	CHANNEL_SET		(0)
-#define 	CHANNEL_READ		(1)
-#define 	CHANNEL_END		(2)
-#define 	INIT_CODEC		(3)
-#define 	FRAME_RUN		(4)
+#define 	MFC_CHANNEL_SET		0
+#define 	MFC_CHANNEL_READ	1
+#define 	MFC_CHANNEL_END		2
+#define 	MFC_INIT_CODEC		3
+#define 	MFC_FRAME_RUN		4
+#define 	MFC_SLEEP		6
+#define 	MFC_WAKEUP		7
 
 /* DPB Count */
 #define		NUM_MPEG4_DPB		(2)
@@ -50,6 +52,8 @@ MFC_ERROR_CODE s3c_mfc_exe_decode(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
 MFC_ERROR_CODE s3c_mfc_get_config(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
 MFC_ERROR_CODE s3c_mfc_set_config(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *args);
 MFC_ERROR_CODE s3c_mfc_deinit_hw(s3c_mfc_inst_ctx *MfcCtx);
+MFC_ERROR_CODE s3c_mfc_set_sleep(s3c_mfc_inst_ctx *MfcCtx);
+MFC_ERROR_CODE s3c_mfc_set_wakeup(s3c_mfc_inst_ctx *MfcCtx);
 
 #endif /* _S3C_MFC_OPR_H_ */
 

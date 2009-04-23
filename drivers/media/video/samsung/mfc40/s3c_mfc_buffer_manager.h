@@ -43,6 +43,8 @@ typedef struct tag_free_mem_t
 	char cache_flag;
 } s3c_mfc_free_mem_t;
 
+int list_count(void);
+void s3c_mfc_print_list(void);
 int s3c_mfc_init_buffer_manager(void);
 void s3c_mfc_merge_frag(int inst_no);
 MFC_ERROR_CODE s3c_mfc_release_alloc_mem(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args);

@@ -36,6 +36,8 @@ static void s3c_mfc_cmd_fw_start(void);
 static void s3c_mfc_cmd_dma_start(void);
 static void s3c_mfc_cmd_seq_start(void);
 static void s3c_mfc_cmd_frame_start(void);
+static void s3c_mfc_cmd_sleep(void);
+static void s3c_mfc_cmd_wakeup(void);
 static void s3c_mfc_backup_context(s3c_mfc_inst_ctx  *MfcCtx);
 static void s3c_mfc_restore_context(s3c_mfc_inst_ctx  *MfcCtx);
 static void s3c_mfc_set_codec_firmware(s3c_mfc_inst_ctx  *MfcCtx);
@@ -58,7 +60,7 @@ static void s3c_mfc_cmd_fw_start(void)
 {
 	WRITEL(1, S3C_FIMV_FW_START);
 	WRITEL(1, S3C_FIMV_CPU_RESET);
-	mdelay(1000);
+	mdelay(100);
 }
 
 static void s3c_mfc_cmd_dma_start(void)
@@ -74,6 +76,19 @@ static void s3c_mfc_cmd_seq_start(void)
 static void s3c_mfc_cmd_frame_start(void)
 {
 	WRITEL(1, S3C_FIMV_FRAME_START);
+}
+
+static void s3c_mfc_cmd_sleep()
+{
+	WRITEL(-1, S3C_FIMV_CH_ID);
+	WRITEL(MFC_SLEEP, S3C_FIMV_COMMAND_TYPE);
+}
+
+static void s3c_mfc_cmd_wakeup()
+{
+	WRITEL(-1, S3C_FIMV_CH_ID);
+	WRITEL(MFC_WAKEUP, S3C_FIMV_COMMAND_TYPE);
+	mdelay(100);
 }
 
 static void s3c_mfc_backup_context(s3c_mfc_inst_ctx  *MfcCtx)
@@ -347,7 +362,7 @@ MFC_ERROR_CODE s3c_mfc_init_encode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *arg
 	s3c_mfc_set_codec_firmware(MfcCtx);
 
 	WRITEL(s3c_mfc_get_codec_type(MfcCtx->MfcCodecType), S3C_FIMV_STANDARD_SEL);
-	WRITEL(CHANNEL_SET, S3C_FIMV_COMMAND_TYPE);
+	WRITEL(MFC_CHANNEL_SET, S3C_FIMV_COMMAND_TYPE);
 	WRITEL(MfcCtx->InstNo, S3C_FIMV_CH_ID);
 	WRITEL(0, S3C_FIMV_POST_ON);
 	WRITEL(1, S3C_FIMV_BITS_ENDIAN);
@@ -373,7 +388,7 @@ MFC_ERROR_CODE s3c_mfc_init_encode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *arg
 
 	WRITEL(s3c_mfc_get_codec_type(MfcCtx->MfcCodecType), S3C_FIMV_STANDARD_SEL);
 	WRITEL(MfcCtx->InstNo, S3C_FIMV_CH_ID);
-	WRITEL(INIT_CODEC, S3C_FIMV_COMMAND_TYPE);
+	WRITEL(MFC_INIT_CODEC, S3C_FIMV_COMMAND_TYPE);
 	WRITEL(1, S3C_FIMV_BITS_ENDIAN);
 	WRITEL(INT_LEVEL_BIT, S3C_FIMV_INT_MODE);
 	WRITEL(0, S3C_FIMV_INT_OFF);
@@ -431,7 +446,7 @@ MFC_ERROR_CODE s3c_mfc_exe_encode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args
 	WRITEL(EncExeArg->in_strm_end, S3C_FIMV_EXT_BUF_END_ADDR);
 	WRITEL(EncExeArg->in_strm_st, S3C_FIMV_HOST_PTR);
 
-	WRITEL(FRAME_RUN, S3C_FIMV_COMMAND_TYPE);
+	WRITEL(MFC_FRAME_RUN, S3C_FIMV_COMMAND_TYPE);
 	WRITEL(MfcCtx->InstNo, S3C_FIMV_CH_ID);
 	WRITEL(s3c_mfc_get_codec_type(MfcCtx->MfcCodecType), S3C_FIMV_STANDARD_SEL);
 
@@ -471,7 +486,7 @@ MFC_ERROR_CODE s3c_mfc_init_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *arg
 
 	/* Context setting from input param */
 	MfcCtx->MfcCodecType = InitArg->in_codec_type;
-	MfcCtx->packedPB = InitArg->in_packed_PB;
+	MfcCtx->IsPackedPB = InitArg->in_packed_PB;
 
 	/*
 	if(MfcCtx->MfcCodecType == H264_DEC)
@@ -497,7 +512,7 @@ MFC_ERROR_CODE s3c_mfc_init_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *arg
 	s3c_mfc_set_codec_firmware(MfcCtx);
 
 	WRITEL(s3c_mfc_get_codec_type(MfcCtx->MfcCodecType), S3C_FIMV_STANDARD_SEL);
-	WRITEL(CHANNEL_SET, S3C_FIMV_COMMAND_TYPE);
+	WRITEL(MFC_CHANNEL_SET, S3C_FIMV_COMMAND_TYPE);
 	WRITEL(MfcCtx->InstNo, S3C_FIMV_CH_ID);
 	/*
 	WRITEL(InitArg->in_post_enable, S3C_FIMV_POST_ON);
@@ -534,7 +549,7 @@ MFC_ERROR_CODE s3c_mfc_init_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *arg
 	WRITEL(1, S3C_FIMV_BITS_ENDIAN);
 	WRITEL(MfcCtx->InstNo, S3C_FIMV_CH_ID);
 	WRITEL(s3c_mfc_get_codec_type(MfcCtx->MfcCodecType), S3C_FIMV_STANDARD_SEL);
-	WRITEL(INIT_CODEC, S3C_FIMV_COMMAND_TYPE);
+	WRITEL(MFC_INIT_CODEC, S3C_FIMV_COMMAND_TYPE);
 	WRITEL((MfcCtx->displayDelay<<16)|(0xFFFF & MfcCtx->extraDPB), S3C_FIMV_NUM_EXTRA_BUF);
 	/*
 	 * WRITEL(1, S3C_FIMV_INT_OFF);
@@ -634,19 +649,25 @@ MFC_ERROR_CODE s3c_mfc_start_decode_seq(s3c_mfc_inst_ctx *MfcCtx, s3c_mfc_args *
 static MFC_ERROR_CODE s3c_mfc_decode_one_frame(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_dec_exe_arg_t *DecArg, unsigned int *consumedStrmSize)
 {
 	int ret;
+	unsigned int frame_type;
+	static int count = 0;
 
-	mfc_debug("++ IntNo%d\r\n", MfcCtx->InstNo);
+	count++;
+	
+	mfc_debug("++ IntNo%d(%d)\r\n", MfcCtx->InstNo, count);
 
 	s3c_mfc_restore_context(MfcCtx);
 
 	if(MfcCtx->endOfFrame) {
-		mfc_warn("MfcCtx->endOfFrame = 1");
 		WRITEL(1, S3C_FIMV_LAST_DEC);
 		MfcCtx->endOfFrame = 0;
 	} else {
 		WRITEL(0, S3C_FIMV_LAST_DEC);
-		s3c_mfc_set_dec_stream_buffer(DecArg->in_strm_buf, DecArg->in_strm_size);
+		//s3c_mfc_set_dec_stream_buffer(DecArg->in_strm_buf, DecArg->in_strm_size);
 	}
+
+	s3c_mfc_set_dec_stream_buffer(DecArg->in_strm_buf, DecArg->in_strm_size);
+	
 	/*
 	if(DecArg->in_endof_frame){
 		LOG_MSG(LOG_TRACE, "MFCDecodeOneFrame", "DecArg->in_endof_frame = 1");
@@ -664,7 +685,7 @@ static MFC_ERROR_CODE s3c_mfc_decode_one_frame(s3c_mfc_inst_ctx  *MfcCtx,  s3c_m
 	WRITEL( MfcCtx->InstNo, S3C_FIMV_CH_ID);
 	WRITEL(s3c_mfc_get_codec_type( MfcCtx->MfcCodecType), S3C_FIMV_STANDARD_SEL);
 	WRITEL(s3c_mfc_get_fw_buf_size(MfcCtx->MfcCodecType), S3C_FIMV_BOOTCODE_SIZE);
-	WRITEL(FRAME_RUN, S3C_FIMV_COMMAND_TYPE);
+	WRITEL(MFC_FRAME_RUN, S3C_FIMV_COMMAND_TYPE);
 	WRITEL(INT_LEVEL_BIT, S3C_FIMV_INT_MODE);
 	WRITEL(0, S3C_FIMV_INT_OFF);
 	WRITEL(1, S3C_FIMV_INT_DONE_CLEAR);
@@ -689,10 +710,12 @@ static MFC_ERROR_CODE s3c_mfc_decode_one_frame(s3c_mfc_inst_ctx  *MfcCtx,  s3c_m
 
 
 	if ((ret & MFC_INTR_FW_DONE) == MFC_INTR_FW_DONE) {
-		mfc_warn("MfcSfr->FW_DONE == 1\r\n");
 		DecArg->out_display_status = 0; /* no more frame to display */
 	} else
 		DecArg->out_display_status = 1; /* There exist frame to display */
+
+	frame_type = READL(S3C_FIMV_FRAME_TYPE);
+	MfcCtx->FrameType = (s3c_mfc_frame_type)(frame_type & 0x3);
 
 	s3c_mfc_backup_context(MfcCtx);
 
@@ -711,14 +734,15 @@ MFC_ERROR_CODE s3c_mfc_exe_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args
 	MFC_ERROR_CODE ret;
 	s3c_mfc_dec_exe_arg_t *DecArg;
 	unsigned int consumedStrmSize;
-
+	
 	/* 6. Decode Frame */
 	mfc_debug("++\n");
 
 	DecArg = (s3c_mfc_dec_exe_arg_t *)args;
 	ret = s3c_mfc_decode_one_frame(MfcCtx,  DecArg, &consumedStrmSize);
 
-	if((MfcCtx->packedPB) && (DecArg->in_strm_size - consumedStrmSize > 4)){
+	if((MfcCtx->IsPackedPB) && (MfcCtx->FrameType == MFC_RET_FRAME_P_FRAME) \
+		&& (DecArg->in_strm_size - consumedStrmSize > 4)) {
 		mfc_debug("Packed PB\n");
 		DecArg->in_strm_buf += consumedStrmSize;
 		DecArg->in_strm_size -= consumedStrmSize;

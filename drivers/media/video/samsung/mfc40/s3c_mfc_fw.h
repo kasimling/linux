@@ -21,7 +21,7 @@ extern unsigned char h264_enc_mc_fw[21180];
 extern unsigned char h263_dec_mc_fw[9672];
 extern unsigned char mp2_dec_mc_fw[14636];
 extern unsigned char vc1_dec_mc_fw[22652];
-extern unsigned char cmd_ctrl_fw[6768] ;
+extern unsigned char cmd_ctrl_fw[7432] ;
 
 #endif /* _S3C_MFC_FW_H_ */
 

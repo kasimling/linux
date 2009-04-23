@@ -64,7 +64,9 @@ typedef enum
 	MFC_DEC_SETCONF_POST_ENABLE = 1,
 	MFC_DEC_SETCONF_EXTRA_BUFFER_NUM,
 	MFC_DEC_SETCONF_DISPLAY_DELAY,
-	MFC_DEC_SETCONF_IS_LAST_FRAME
+	MFC_DEC_SETCONF_IS_LAST_FRAME,
+	MFC_DEC_GETCONF_IMG_RESOLUTION,
+	MFC_DEC_GETCONF_PHYS_ADDR
 }SSBSIP_MFC_DEC_CONF;
 
 typedef enum
@@ -311,7 +313,7 @@ typedef struct tag_mfc_args{
 #define ENC_RC_ENABLE_MACROBLOCK               1
 #define ENC_RC_ENABLE_FRAME                    2
 
-//#define ENC_RC_QBOUND(min_qp, max_qp)          ((min_qp) | ((max_qp) << 8))
+#define ENC_RC_QBOUND(min_qp, max_qp)          ((min_qp) | ((max_qp) << 8))
 #define ENC_RC_MB_CTRL_DARK_DISABLE            (1 << 3)
 #define ENC_RC_MB_CTRL_SMOOTH_DISABLE          (1 << 2)
 #define ENC_RC_MB_CTRL_STATIC_DISABLE          (1 << 1)

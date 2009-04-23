@@ -30,7 +30,6 @@
 
 #include <plat/media.h>
 
-//#include "s3c-mfc.h"
 #include "s3c_mfc_interface.h"
 #include "s3c_mfc_common.h"
 #include "s3c_mfc_logmsg.h"
@@ -38,6 +37,8 @@
 #include "s3c_mfc_intr.h"
 #include "s3c_mfc_memory.h"
 #include "s3c_mfc_buffer_manager.h"
+
+int isMFCRunning = 0;
 
 static struct resource	*s3c_mfc_mem;
 void __iomem		*s3c_mfc_sfr_virt_base;
@@ -84,6 +85,7 @@ static int s3c_mfc_open(struct inode *inode, struct file *file)
 	}
 
 	MfcCtx->extraDPB = MFC_MAX_EXTRA_DPB;
+	MfcCtx->FrameType = MFC_RET_FRAME_NOT_SET;
 
 	file->private_data = (s3c_mfc_inst_ctx *)MfcCtx;
 	ret = 0;
@@ -109,8 +111,9 @@ static int s3c_mfc_release(struct inode *inode, struct file *file)
 	}
 
 	s3c_mfc_merge_frag(MfcCtx->InstNo);
+	s3c_mfc_print_list();
 	
-	s3c_mfc_deinit_hw(MfcCtx);
+	/* s3c_mfc_deinit_hw(MfcCtx); */
 	s3c_mfc_return_inst_no(MfcCtx->InstNo);
 	kfree(MfcCtx);
 
