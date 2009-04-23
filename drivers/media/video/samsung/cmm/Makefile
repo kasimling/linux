@@ -1,10 +1,10 @@
 #################################################
-# Makefile for FIMG-3D 
+# Makefile for CMM
 # 2009 (C) Samsung Electronics 
-# Author : Jonghun Han <jonghun.han@samsung.com>
+# Author : satish <palli.satish@samsung.com>
 #################################################
 
-obj-$(CONFIG_VIDEO_CMM)	+= LogMsg.o CMMMisc.o s3c-cmm.o
+obj-$(CONFIG_VIDEO_CMM)	+= s3c_cmm.o
 
 EXTRA_CFLAGS += -Idrivers/media/video
 
