@@ -111,9 +111,7 @@ static int s3c_mfc_release(struct inode *inode, struct file *file)
 	}
 
 	s3c_mfc_merge_frag(MfcCtx->InstNo);
-	s3c_mfc_print_list();
 	
-	/* s3c_mfc_deinit_hw(MfcCtx); */
 	s3c_mfc_return_inst_no(MfcCtx->InstNo);
 	kfree(MfcCtx);
 
@@ -126,11 +124,11 @@ out_release:
 
 static int s3c_mfc_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
-	s3c_mfc_inst_ctx	*MfcCtx = NULL;
-	s3c_mfc_common_args	InParm;
-	int 		ret, ex_ret;
+	int 			ret, ex_ret;
 	int 			frameBufSize;
 	int			frame_size;
+	s3c_mfc_inst_ctx	*MfcCtx = NULL;
+	s3c_mfc_common_args	InParm;
 	s3c_mfc_args		local_param;
 	
 

@@ -82,10 +82,8 @@ typedef enum
 typedef struct tag_mfc_inst_ctx
 {
 	unsigned int MfcSfr[S3C_FIMV_REG_COUNT];
-	MFC_CODEC_TYPE MfcCodecType;
-	s3c_mfc_inst_state MfcState;
+
 	int InstNo;
-	//unsigned int packedPB;
 	unsigned int DPBCnt;
 	unsigned int totalDPBCnt;
 	unsigned int extraDPB;
@@ -93,13 +91,14 @@ typedef struct tag_mfc_inst_ctx
 	unsigned int postEnable;
 	unsigned int endOfFrame;
 	unsigned int forceSetFrameType;
-	//unsigned int phyFWBufAddr;
 	unsigned int img_width;
 	unsigned int img_height;
-
 	unsigned int dwAccess;  // for Power Management.
-	s3c_mfc_frame_type FrameType;
 	unsigned int IsPackedPB;
+	
+	s3c_mfc_frame_type FrameType;
+	MFC_CODEC_TYPE MfcCodecType;
+	s3c_mfc_inst_state MfcState;
 } s3c_mfc_inst_ctx;
 
 unsigned int s3c_mfc_get_codec_type(MFC_CODEC_TYPE    codec_type);

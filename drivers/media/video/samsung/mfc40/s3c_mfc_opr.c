@@ -487,22 +487,6 @@ MFC_ERROR_CODE s3c_mfc_init_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *arg
 	/* Context setting from input param */
 	MfcCtx->MfcCodecType = InitArg->in_codec_type;
 	MfcCtx->IsPackedPB = InitArg->in_packed_PB;
-
-	/*
-	if(MfcCtx->MfcCodecType == H264_DEC)
-		MfcCtx->displayDelay = InitArg->in_display_delay;
-	else
-		MfcCtx->displayDelay = 0;
-
-	if ((InitArg->in_extra_buffer >= 0) && (InitArg->in_extra_buffer <= MFC_MAX_EXTRA_DPB))
-		MfcCtx->extraDPB = InitArg->in_extra_buffer;
-	else {
-		LOG_MSG(LOG_ERROR, "s3c_mfc_init_decode", "in_extraBuffer is out of range(%d)... It'll be set as 5\r\n", \
-										InitArg->in_extra_buffer);
-		MfcCtx->extraDPB = MFC_MAX_EXTRA_DPB;
-	}
-	*/
-
 	
 	/* 3. CHANNEL SET
 	 * 	- set codec firmware
@@ -514,10 +498,6 @@ MFC_ERROR_CODE s3c_mfc_init_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *arg
 	WRITEL(s3c_mfc_get_codec_type(MfcCtx->MfcCodecType), S3C_FIMV_STANDARD_SEL);
 	WRITEL(MFC_CHANNEL_SET, S3C_FIMV_COMMAND_TYPE);
 	WRITEL(MfcCtx->InstNo, S3C_FIMV_CH_ID);
-	/*
-	WRITEL(InitArg->in_post_enable, S3C_FIMV_POST_ON);
-	WRITEL(1, S3C_FIMV_INT_OFF);
-	 */
 	WRITEL(MfcCtx->postEnable, S3C_FIMV_POST_ON);
 	WRITEL(INT_LEVEL_BIT, S3C_FIMV_INT_MODE);
 	WRITEL(0, S3C_FIMV_INT_OFF);
@@ -526,12 +506,7 @@ MFC_ERROR_CODE s3c_mfc_init_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *arg
 	WRITEL(1, S3C_FIMV_BITS_ENDIAN);
 
 	s3c_mfc_cmd_frame_start();
-	/*
-	if((ret = s3c_mfc_wait_for_done(MFC_POLLING_OPERATION_DONE)) == 0){
-		LOG_MSG(LOG_ERROR, "s3c_mfc_init_decode", "MFCINST_ERR_FW_LOAD_FAIL\n");
-		return MFCINST_ERR_FW_LOAD_FAIL;
-	}
-	*/
+	
 	if((ret = s3c_mfc_wait_for_done(MFC_INTR_FRAME_DONE)) == 0){
 		mfc_err("MFCINST_ERR_FW_LOAD_FAIL\n");
 		return MFCINST_ERR_FW_LOAD_FAIL;
@@ -551,10 +526,7 @@ MFC_ERROR_CODE s3c_mfc_init_decode(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *arg
 	WRITEL(s3c_mfc_get_codec_type(MfcCtx->MfcCodecType), S3C_FIMV_STANDARD_SEL);
 	WRITEL(MFC_INIT_CODEC, S3C_FIMV_COMMAND_TYPE);
 	WRITEL((MfcCtx->displayDelay<<16)|(0xFFFF & MfcCtx->extraDPB), S3C_FIMV_NUM_EXTRA_BUF);
-	/*
-	 * WRITEL(1, S3C_FIMV_INT_OFF);
-	 */
-
+	
 	s3c_mfc_cmd_frame_start();
 
 	if(s3c_mfc_wait_for_done(MFC_POLLING_HEADER_DONE) == 0){
@@ -667,15 +639,6 @@ static MFC_ERROR_CODE s3c_mfc_decode_one_frame(s3c_mfc_inst_ctx  *MfcCtx,  s3c_m
 	}
 
 	s3c_mfc_set_dec_stream_buffer(DecArg->in_strm_buf, DecArg->in_strm_size);
-	
-	/*
-	if(DecArg->in_endof_frame){
-		LOG_MSG(LOG_TRACE, "MFCDecodeOneFrame", "DecArg->in_endof_frame = 1");
-		WRITEL(1, S3C_FIMV_LAST_DEC);
-	}
-	else
-		s3c_mfc_set_dec_stream_buffer(DecArg->in_strm_buf, DecArg->in_strm_size);
-	*/
 
 	s3c_mfc_set_dec_frame_buffer(MfcCtx, DecArg->in_frm_buf, DecArg->in_frm_size);
 

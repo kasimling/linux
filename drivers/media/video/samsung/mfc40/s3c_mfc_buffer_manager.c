@@ -31,14 +31,13 @@ extern unsigned char *s3c_mfc_virt_data_buf;
 /* insert node ahead of s3c_mfc_alloc_mem_head */
 static void s3c_mfc_insert_node_to_alloc_list(s3c_mfc_alloc_mem_t *node, int inst_no)
 {
-	mfc_info("[%d]instance (cached_p_addr : 0x%08x uncached_p_addr : 0x%08x size:%d cacheflag : %d)\n",
+	mfc_debug("[%d]instance (cached_p_addr : 0x%08x uncached_p_addr : 0x%08x size:%d cacheflag : %d)\n",
 			inst_no, node->cached_p_addr, node->uncached_p_addr, node->size, node->cache_flag);
 	node->next = s3c_mfc_alloc_mem_head;
 	node->prev = s3c_mfc_alloc_mem_head->prev;
 	s3c_mfc_alloc_mem_head->prev->next = node;
 	s3c_mfc_alloc_mem_head->prev = node;
 	s3c_mfc_alloc_mem_head = node;
-	mfc_info("Finished s3c_mfc_insert_node_to_alloc_list\n");
 }
 
 void s3c_mfc_print_list(void)
@@ -83,7 +82,7 @@ int list_count()
 
 static void s3c_mfc_insert_first_node_to_free_list(s3c_mfc_free_mem_t *node,  int inst_no)
 {
-	mfc_info("[%d]instance(startAddr : 0x%08x size:%d  cached flag : %d)\n",
+	mfc_debug("[%d]instance(startAddr : 0x%08x size:%d  cached flag : %d)\n",
 			inst_no, node->start_addr, node->size, node->cache_flag);	
 
 	node->next = s3c_mfc_free_mem_head;
@@ -99,7 +98,7 @@ static void s3c_mfc_insert_node_to_free_list(s3c_mfc_free_mem_t *node,  int inst
 {
 	s3c_mfc_free_mem_t *itr_node;
 	
-	mfc_info("[%d]instance(startAddr : 0x%08x size:%d  cached flag : %d)\n",
+	mfc_debug("[%d]instance(startAddr : 0x%08x size:%d  cached flag : %d)\n",
 			inst_no, node->start_addr, node->size, node->cache_flag);	
 
 	itr_node = s3c_mfc_free_mem_head;
@@ -140,7 +139,7 @@ static void s3c_mfc_insert_node_to_free_list(s3c_mfc_free_mem_t *node,  int inst
 
 static void s3c_mfc_del_node_from_alloc_list(s3c_mfc_alloc_mem_t *node, int inst_no)
 {
-	mfc_info("[%d]instance (uncached_p_addr : 0x%08x cached_p_addr : 0x%08x size:%d cacheflag : %d)\n",
+	mfc_debug("[%d]instance (uncached_p_addr : 0x%08x cached_p_addr : 0x%08x size:%d cacheflag : %d)\n",
 			inst_no, node->uncached_p_addr, node->cached_p_addr, node->size, node->cache_flag);
 
 	if(node == s3c_mfc_alloc_mem_tail){
@@ -369,11 +368,12 @@ out_getphysaddr:
 
 MFC_ERROR_CODE s3c_mfc_get_virt_addr(s3c_mfc_inst_ctx  *MfcCtx,  s3c_mfc_args *args)
 {
-	unsigned int			p_startAddr;
-	s3c_mfc_mem_alloc_arg_t		*in_param;	
-	s3c_mfc_alloc_mem_t 			*p_allocMem;
 	int ret;
 	int inst_no = MfcCtx->InstNo;
+	unsigned int p_startAddr;
+	s3c_mfc_mem_alloc_arg_t *in_param;	
+	s3c_mfc_alloc_mem_t *p_allocMem;
+	
 
 	in_param = (s3c_mfc_mem_alloc_arg_t *)args;
 
