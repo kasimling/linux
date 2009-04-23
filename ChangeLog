@@ -1997,17 +1997,50 @@ v2.6.28.6-samsung-mfc-r0: PyoungJae Jung, Jiun Yu
 		A	drivers/media/video/samsung/mfc40/s3c_mfc_msg.h
 
 	Modified files:
-		A	drivers/media/video/samsung/Kconfig
-		A	drivers/media/video/samsung/mfc40/Kconfig
-		A	drivers/media/video/samsung/mfc40/s3c-mfc.c
-		A	drivers/media/video/samsung/mfc40/s3c_mfc_buffer_manager.c
-		A	drivers/media/video/samsung/mfc40/s3c_mfc_common.c
-		A	drivers/media/video/samsung/mfc40/s3c_mfc_interface.h
-		A	drivers/media/video/samsung/mfc40/s3c_mfc_intr.c
-		A	drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.c
-		A	drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.h
-		A	drivers/media/video/samsung/mfc40/s3c_mfc_opr.c
+		M	drivers/media/video/samsung/Kconfig
+		M	drivers/media/video/samsung/mfc40/Kconfig
+		M	drivers/media/video/samsung/mfc40/s3c-mfc.c
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_buffer_manager.c
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_common.c
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_interface.h
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_intr.c
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.c
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.h
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_opr.c
 
 	Deleted files:
 		D	drivers/media/video/samsung/mfc40/s3c-mfc.h
+
+v2.6.28.6-samsung-mfc-r0d0: PyoungJae Jung, Jiun Yu
+	- updated new MFC driver
+	- fixed bugs in memory manager unit in multi-instance
+	- deleted unused files (logmsg)
+	- pre beta level version
+
+	Modified files:
+		M	drivers/media/video/samsung/mfc40/Makefile
+		M	drivers/media/video/samsung/mfc40/command_control_fw.c
+		M	drivers/media/video/samsung/mfc40/h263_dec_fw.c
+		M	drivers/media/video/samsung/mfc40/h264_dec_fw.c
+		M	drivers/media/video/samsung/mfc40/h264_enc_fw.c
+		M	drivers/media/video/samsung/mfc40/mp2_dec_fw.c
+		M	drivers/media/video/samsung/mfc40/mp4_dec_fw.c
+		M	drivers/media/video/samsung/mfc40/mp4_enc_fw.c
+		M	drivers/media/video/samsung/mfc40/s3c-mfc.c
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_buffer_manager.c
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_buffer_manager.h
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_common.c
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_common.h
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_errorno.h
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_fw.h
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_interface.h
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.h
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_memory.h
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_opr.c
+		M	drivers/media/video/samsung/mfc40/s3c_mfc_opr.h
+		M	drivers/media/video/samsung/mfc40/vc1_dec_fw.c
+
+	Deleted files:
+		D	drivers/media/video/samsung/mfc40/s3c_mfc_msg.h
+		D	drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.c
 
