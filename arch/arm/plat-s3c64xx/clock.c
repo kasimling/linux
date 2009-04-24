@@ -380,7 +380,42 @@ static struct clk init_clocks[] = {
 		.id		= -1,
 		.parent		= &clk_h,
 		.ctrlbit	= S3C_CLKCON_HCLK_CAMIF,
-	}, {
+	}, { 
+		.name         = "hclk_mfc",
+          	.id           = -1,
+          	.parent       = &clk_h,
+          	.enable       = s3c64xx_hclk_ctrl,
+          	.ctrlbit      = S3C_CLKCON_HCLK_MFC,
+        }, { 
+		.name         = "sclk_mfc",
+          	.id           = -1,
+          	.parent       = &clk_hx2,
+          	.enable       = s3c64xx_sclk_ctrl,
+          	.ctrlbit      = S3C_CLKCON_SCLK_MFC,
+          	.usage        = 0,
+          	.rate         = 48*1000*1000,
+        }, { 
+		.name         = "pclk_mfc",
+          	.id           = -1,
+          	.parent       = &clk_p,
+          	.enable       = s3c64xx_pclk_ctrl,
+          	.ctrlbit      = S3C_CLKCON_PCLK_MFC,
+
+	}, { 
+		.name         = "hclk_jpeg",
+          	.id           = -1,
+          	.parent       = &clk_h,
+          	.enable       = s3c64xx_hclk_ctrl,
+          	.ctrlbit      = S3C_CLKCON_HCLK_JPEG,
+        }, { 
+		.name         = "sclk_jpeg",
+          	.id           = -1,
+          	.parent       = &clk_hx2,
+          	.enable       = s3c64xx_sclk_ctrl,
+          	.ctrlbit      = S3C_CLKCON_SCLK_JPEG,
+          	.usage        = 0,
+          	.rate         = 48*1000*1000,
+        }, { 
 		.name		= "sclk_cam",
 		.id		= -1,
 		.parent		= &clk_hx2,

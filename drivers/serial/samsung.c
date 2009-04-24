@@ -1187,12 +1187,10 @@ EXPORT_SYMBOL_GPL(s3c24xx_serial_remove);
 static int s3c24xx_serial_suspend(struct platform_device *dev, pm_message_t state)
 {
 	struct uart_port *port = s3c24xx_dev_to_port(&dev->dev);
-#ifndef CONFIG_CPU_S5PC100
 
 	if (port)
 		uart_suspend_port(&s3c24xx_uart_drv, port);
 
-#endif
 	return 0;
 }
 
@@ -1200,14 +1198,12 @@ static int s3c24xx_serial_resume(struct platform_device *dev)
 {
 	struct uart_port *port = s3c24xx_dev_to_port(&dev->dev);
 	struct s3c24xx_uart_port *ourport = to_ourport(port);
-#ifndef CONFIG_CPU_S5PC100
 	if (port) {
 		clk_enable(ourport->clk);
 		s3c24xx_serial_resetport(port, s3c24xx_port_to_cfg(port));
 		clk_disable(ourport->clk);
 		uart_resume_port(&s3c24xx_uart_drv, port);
 	}
-#endif
 	return 0;
 }
 #endif

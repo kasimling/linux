@@ -2080,12 +2080,18 @@ v2.6.28.6-samsung-r3: Kyoungil Kim
 
 v2.6.28.6-samsung-r3d0: Kyoungil Kim
 
-v2.6.28.6-samsung-r3d1: Jae-Cheol Lee
-	- Modified APM for SMDKC100
+v2.6.28.6-samsung-r3d1: Jaeryul Oh
+	- Clk name that MFC & JPEG (6410) uses is added
+	Modified Files :
+		M       arch/arm/plat-s3c64xx/clock.c
+		M       drivers/media/video/samsung/jpeg/s3c-jpeg.c
+		M       drivers/media/video/samsung/mfc10/s3c_mfc.c
 
+v2.6.28.6-samsung-r3d2: Jae-Cheol Lee
+	- Fixed APM bug on SMDKC100
 	Modified Files:
-		M	arch/arm/plat-s5pc1xx/sleep.S
 		M	arch/arm/plat-s5pc1xx/pm.c
+		M	arch/arm/plat-s5pc1xx/sleep.S
 		M	arch/arm/plat-s5pc1xx/s5pc1xx-time.c
 		M	arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
 		M	arch/arm/plat-s5pc1xx/include/plat/regs-gpio.h

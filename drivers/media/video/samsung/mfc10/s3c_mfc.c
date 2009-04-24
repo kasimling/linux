@@ -687,22 +687,22 @@ static int s3c_mfc_probe(struct platform_device *pdev)
 	unsigned int mfc_clk;
 
 	/* mfc clock enable  */
-	s3c_mfc_hclk = clk_get(NULL, "hclk_mfc");
-	if (!s3c_mfc_hclk) {
+	s3c_mfc_hclk = clk_get(&pdev->dev, "hclk_mfc");
+	if (!s3c_mfc_hclk || IS_ERR(s3c_mfc_hclk)) {
 		mfc_err("failed to get mfc hclk source\n");
 		return -ENOENT;
-	}
+	}	
 	clk_enable(s3c_mfc_hclk);
 
-	s3c_mfc_sclk = clk_get(NULL, "sclk_mfc");
-	if (!s3c_mfc_sclk) {
+	s3c_mfc_sclk = clk_get(&pdev->dev, "sclk_mfc");
+	if (!s3c_mfc_sclk || IS_ERR(s3c_mfc_sclk)) {
 		mfc_err("failed to get mfc sclk source\n");
 		return -ENOENT;
 	}
 	clk_enable(s3c_mfc_sclk);
 
-	s3c_mfc_pclk = clk_get(NULL, "pclk_mfc");
-	if (!s3c_mfc_pclk) {
+	s3c_mfc_pclk = clk_get(&pdev->dev, "pclk_mfc");
+	if (!s3c_mfc_pclk || IS_ERR(s3c_mfc_pclk)) {
 		mfc_err("failed to get mfc pclk source\n");
 		return -ENOENT;
 	}

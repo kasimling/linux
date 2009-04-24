@@ -179,10 +179,12 @@ static irqreturn_t s5pc1xx_timer_interrupt(int irq, void *dev_id)
 
 #endif
 
+#if 0
 	do {				
 		if(!(s5pc1xx_systimer_read(S3C_SYSTIMER_INT_CSTAT) & S3C_SYSTIMER_INT_STATS))
 			break;
 	} while(1);
+#endif
 
 #ifdef T32_DEBUG_GPD
 	tmp = __raw_readl(S5PC1XX_GPDDAT);  
