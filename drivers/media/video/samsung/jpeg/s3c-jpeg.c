@@ -343,27 +343,27 @@ static int s3c_jpeg_probe(struct platform_device *pdev)
 
 
 	// JPEG clock enable 
-	jpeg_hclk	= clk_get(NULL, "hclk_jpeg");
-	if (!jpeg_hclk) {
+	jpeg_hclk	= clk_get(&pdev->dev, "hclk_jpeg");
+	if (!jpeg_hclk || IS_ERR(jpeg_hclk)) {
 		printk(KERN_ERR "failed to get jpeg hclk source\n");
 		return -ENOENT;
 	}
 	clk_enable(jpeg_hclk);
 
-	jpeg_sclk	= clk_get(NULL, "sclk_jpeg");
-	if (!jpeg_sclk) {
+	jpeg_sclk	= clk_get(&pdev->dev, "sclk_jpeg");
+	if (!jpeg_sclk || IS_ERR(jpeg_sclk)) {
 		printk(KERN_ERR "failed to get jpeg scllk source\n");
 		return -ENOENT;
 	}
 	clk_enable(jpeg_sclk);
-
+/*
 	post	= clk_get(NULL, "post");
 	if (!post) {
 		printk(KERN_ERR "failed to get post clock source\n");
 		return -ENOENT;
 	}
 	clk_enable(post);
-
+*/
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (res == NULL) {
 		printk(KERN_INFO "failed to get memory region resouce\n");
