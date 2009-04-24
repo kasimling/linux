@@ -2096,3 +2096,8 @@ v2.6.28.6-samsung-r3d2: Jae-Cheol Lee
 		M	arch/arm/plat-s5pc1xx/include/plat/regs-clock.h
 		M	arch/arm/plat-s5pc1xx/include/plat/regs-gpio.h
 
+v2.6.28.6-samsung-r3d3: Thomas Abraham
+	- Added PM support for USB device on C100.
+	Modified Files:
+		M	drivers/usb/gadget/s3c_udc_otg.c
+		M	drivers/usb/gadget/file_storage.c
