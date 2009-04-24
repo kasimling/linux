@@ -100,7 +100,43 @@ enum PLL_TYPE
 
 #define PFX "s5pc1xx-pm: "
 static struct sleep_save core_save[] = {
+	SAVE_ITEM(S5P_CLK_SRC0),
+	SAVE_ITEM(S5P_CLK_SRC1),
+	SAVE_ITEM(S5P_CLK_SRC2),
+	SAVE_ITEM(S5P_CLK_SRC3),
+	
+	SAVE_ITEM(S5P_CLK_DIV0),
+	SAVE_ITEM(S5P_CLK_DIV1),
+	SAVE_ITEM(S5P_CLK_DIV2),
+	SAVE_ITEM(S5P_CLK_DIV3),
+	SAVE_ITEM(S5P_CLK_DIV4),
 
+	SAVE_ITEM(S5P_CLK_OUT),
+
+	SAVE_ITEM(S5P_CLKGATE_D00),
+	SAVE_ITEM(S5P_CLKGATE_D01),
+	SAVE_ITEM(S5P_CLKGATE_D02),
+
+	SAVE_ITEM(S5P_CLKGATE_D10),
+	SAVE_ITEM(S5P_CLKGATE_D11),
+	SAVE_ITEM(S5P_CLKGATE_D12),
+	SAVE_ITEM(S5P_CLKGATE_D13),
+	SAVE_ITEM(S5P_CLKGATE_D14),
+	SAVE_ITEM(S5P_CLKGATE_D15),
+
+	SAVE_ITEM(S5P_CLKGATE_D20),
+
+	SAVE_ITEM(S5P_SCLKGATE0),
+	SAVE_ITEM(S5P_SCLKGATE1),
+
+	SAVE_ITEM(S5P_MEM_SYS_CFG),
+	SAVE_ITEM(S5P_CAM_MUX_SEL),
+	SAVE_ITEM(S5P_MIXER_OUT_SEL),
+
+	SAVE_ITEM(S5P_LPMP_MODE_SEL),
+	SAVE_ITEM(S5P_MIPI_PHY_CON0),
+	SAVE_ITEM(S5P_MIPI_PHY_CON1),
+	SAVE_ITEM(S5P_HDMI_PHY_CON0),
 };
 
 static struct sleep_save gpio_save[] = {
@@ -509,34 +545,50 @@ static int s5pc1xx_pm_enter(suspend_state_t state)
 
 	/* Wake up source setting */
 	s5pc1xx_pm_configure_extint();
-#if 0
-	/* Set Power Stable Count */
-	tmp = __raw_readl(S5P_OTHERS);
-	tmp &=~(1 << S5P_OTHER_STA_TYPE);
-	tmp |= (STA_TYPE_SFR << S5P_OTHER_STA_TYPE);
-	__raw_writel(tmp , S5P_OTHERS);
-	__raw_writel(((S5P_PWR_STABLE_COUNT << S5P_PWR_STA_CNT) | (1 << S5P_PWR_STA_EXP_SCALE)) , S5P_PWR_STABLE);
 
-	/* Set Syscon Interrupt */
+	/* : USB Power Control */
+	/*   - USB PHY Disable */
+	/*   - Make USB Tranceiver PAD to Suspend */
 	tmp = __raw_readl(S5P_OTHERS);
-	tmp |= (1 << S5P_OTHER_SYS_INT);
-	__raw_writel(tmp, S5P_OTHERS);
-#endif
+   	tmp &= ~(1<<16);           	/* USB Signal Mask Clear */
+   	__raw_writel(tmp, S5P_OTHERS);
 
+	tmp = __raw_readl(S5PC1XX_UHOST);
+	tmp |= (1<<0);
+	__raw_writel(tmp, S5PC1XX_UHOST);
+
+	/* Sleep Mode Pad Configuration */
+	__raw_writel(0x2, S5PC1XX_PDNEN); /* Controlled by SLPEN Bit (You Should Clear SLPEN Bit in Wake Up Process...) */
+    
 	/* Set WFI instruction to SLEEP mode */
 	tmp = __raw_readl(S5P_PWR_CFG);
 	tmp &= S5P_CFG_WFI_CLEAN;
 	tmp |= S5P_CFG_WFI_SLEEP;
 	__raw_writel(tmp, S5P_PWR_CFG);
 
-	/* Set OSC Pad in power mode */
-	tmp = __raw_readl(S5P_SLEEP_CFG);
-	tmp |= (1 << S5P_SLEEP_CFG_OSC_EN);
-	__raw_writel(tmp, S5P_SLEEP_CFG);
-
 	/* Clear WAKEUP_STAT register for next wakeup */
 	tmp = __raw_readl(S5P_WAKEUP_STAT);
 	__raw_writel(tmp, S5P_WAKEUP_STAT);
+
+#if 1
+	/* Set Power Stable Count */
+	tmp = __raw_readl(S5P_OTHERS);
+	tmp &=~(1 << S5P_OTHER_STA_TYPE);
+	tmp |= (STA_TYPE_SFR << S5P_OTHER_STA_TYPE);
+	__raw_writel(tmp , S5P_OTHERS);
+	
+	__raw_writel(((S5P_PWR_STABLE_COUNT << S5P_PWR_STA_CNT) | (1 << S5P_PWR_STA_EXP_SCALE)), S5P_PWR_STABLE);
+
+	/* Set Syscon Interrupt */
+	tmp = __raw_readl(S5P_OTHERS);
+	tmp |= (1 << S5P_OTHER_SYS_INT);
+	__raw_writel(tmp, S5P_OTHERS);
+
+	/* Disable OSC_EN (Disable X-tal Osc Pad in Sleep mode) */
+	tmp = __raw_readl(S5P_SLEEP_CFG);
+	tmp &= ~(1 << 0);
+	__raw_writel(tmp, S5P_SLEEP_CFG);
+#endif
 
 	/* s5pc1xx_cpu_save will also act as our return point from when
 	 * we resume as it saves its own register state, so use the return
@@ -545,16 +597,35 @@ static int s5pc1xx_pm_enter(suspend_state_t state)
 	if (s5pc100_cpu_save(regs_save) == 0) {
 		flush_cache_all();
 		/* This function for Chip bug on EVT0 */
+#if 0
 		s5pc1xx_pm_clk(PM_APLL, 512 , 2 , 5);
 		s5pc1xx_pm_clk(PM_MPLL, 128 , 2 , 5);
 		s5pc1xx_pm_clk(PM_EPLL, 128 , 2 , 5);
 		s5pc1xx_pm_clk(PM_HPLL, 128 , 2 , 5);
+#endif
 		pm_cpu_sleep();
 	}
 
 	/* restore the cpu state */
 	cpu_init();
 
+	/* Sleep Mode Pad Configuration */
+    	__raw_writel(0x2, S5PC1XX_PDNEN);	/* Clear SLPEN Bit for Pad back to Normal Mode */
+
+	/* MTC IO OFF |  MTC IO SD-MMC OFF | USB Phy Enable */
+	tmp = __raw_readl(S5P_OTHERS);
+   	tmp |= (1<<31);
+	__raw_writel(tmp, S5P_OTHERS);
+
+	tmp = __raw_readl(S5P_OTHERS);
+   	tmp |= ((1<<22)|(1<<16));
+	__raw_writel(tmp, S5P_OTHERS);
+
+	tmp = __raw_readl(S5PC1XX_UHOST);
+	tmp &= ~(1<<0);
+	__raw_writel(tmp, S5PC1XX_UHOST);
+
+	
 	s5pc1xx_pm_do_restore(gpio_save, ARRAY_SIZE(gpio_save));
 	s5pc1xx_pm_do_restore(irq_save, ARRAY_SIZE(irq_save));
 	s5pc1xx_pm_do_restore(core_save, ARRAY_SIZE(core_save));

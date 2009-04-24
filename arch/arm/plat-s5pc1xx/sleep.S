@@ -60,6 +60,7 @@
 	*/
 
 ENTRY(s5pc100_cpu_save)
+#if 0
 	stmfd	sp!, { r4 - r12, lr }
 
 	@@ store co-processor registers
@@ -73,7 +74,25 @@ ENTRY(s5pc100_cpu_save)
 
 	mov	r0, #0
 	ldmfd	sp, { r4 - r12, pc }
+#else
+	stmfd	sp!, { r3 - r12, lr }
 
+	mrc	p15, 0, r4, c13, c0, 0	@ FCSE/PID
+	mrc	p15, 0, r5, c3, c0, 0	@ Domain ID
+	mrc	p15, 0, r6, c2, c0, 0	@ Translation Table BASE0
+	mrc	p15, 0, r7, c2, c0, 1	@ Translation Table BASE1
+	mrc	p15, 0, r8, c2, c0, 2	@ Translation Table Control
+	mrc	p15, 0, r9, c1, c0, 0	@ Control register
+	mrc	p15, 0, r10, c1, c0, 1	@ Auxiliary control register
+	mrc	p15, 0, r11, c1, c0, 2	@ Co-processor access controls
+	mrc	p15, 0, r12, c10, c2, 0	@ Read PRRR
+	mrc	p15, 0, r3, c10, c2, 1	@ READ NMRR	
+
+	stmia	r0, { r3 - r13 }
+
+	mov	r0, #0
+	ldmfd	sp, { r3 - r12, pc }
+#endif
 	@@ return to the caller, after having the MMU
 	@@ turned on, this restores the last bits from the
 	@@ stack
@@ -85,9 +104,11 @@ resume_with_mmu:
 	bic	r8, r8, #0xF0000000
 	orr	r8, r8, r9
 	str	r12, [r8]
-
+#if 0
 	ldmfd	sp!, { r4 - r12, pc }
-
+#else
+	ldmfd	sp!, { r3 - r12, pc }
+#endif
 	.ltorg
 
 	@@ the next bits sit in the .data segment, even though they
@@ -132,8 +153,9 @@ ENTRY(s5pc100_cpu_resume)
 	mcr	p15, 0, r1, c7, c5, 0		@@ invalidate I Cache
 
 	ldr	r0, s5pc100_sleep_save_phys	@ address of restore block
-	ldmia	r0, { r4 - r13 }
+#if 0
 
+	ldmia	r0, { r4 - r13 }
 	mcr	p15, 0, r4, c13, c0, 0		@ PID
 	mcr	p15, 0, r5, c3, c0, 0		@ Domain ID
 	mcr	p15, 0, r6, c2, c0, 0		@ translation table base
@@ -164,5 +186,60 @@ ENTRY(s5pc100_cpu_resume)
 	mcr	p15, 0, r7, c1, c0, 0		@ turn on MMU, etc
 	nop					@ second-to-last before mmu
 	mov	pc, r2				@ go back to virtual address
+#else
+	ldmia	r0, { r3 - r13 }
 
+	mcr	p15, 0, r4, c13, c0, 0	@ FCSE/PID
+	mcr	p15, 0, r5, c3, c0, 0	@ Domain ID
+	
+	mcr	p15, 0, r8, c2, c0, 2	@ Translation Table Control
+	mcr	p15, 0, r7, c2, c0, 1	@ Translation Table BASE1
+	mcr	p15, 0, r6, c2, c0, 0	@ Translation Table BASE0
+
+	mcr	p15, 0, r10, c1, c0, 1	@ Auxiliary control register
+
+	mov	r0, #0
+	mcr	p15, 0, r0, c8, c7, 0	@ Invalidate I & D TLB
+
+	mov	r0, #0			@ restore copro access controls
+	mcr	p15, 0, r11, c1, c0, 2	@ Co-processor access controls
+	mcr 	p15, 0, r0, c7, c5, 4	
+
+	mcr	p15, 0, r12, c10, c2, 0	@ write PRRR
+	mcr	p15, 0, r3, c10, c2, 1	@ write NMRR
+
+	/* calculate first section address into r8 */
+	mov	r4, r6
+	ldr	r5, =0x3fff
+	bic	r4, r4, r5
+	ldr	r11, =S5P_INFORM0
+	ldr	r10, [r11, #0]
+	mov	r10, r10 ,LSR #18
+	bic	r10, r10, #0x3
+	orr	r4, r4, r10
+
+	/* calculate mmu list value into r9 */
+	mov 	r10, r10, LSL #18
+	ldr	r5, =0x40e
+	orr	r10, r10, r5
+
+	/* back up originally data */
+
+	ldr	r12, [r4]
+
+	/* Added list about mmu */
+	str	r10, [r4]
+
+	ldr	r2, =resume_with_mmu
+	mcr	p15, 0, r9, c1, c0, 0		@ turn on MMU, etc
+
+        nop
+        nop
+        nop
+        nop
+        nop					@ second-to-last before mmu
+
+	mov	pc, r2				@ go back to virtual address
+	b	.
+#endif
 	.ltorg

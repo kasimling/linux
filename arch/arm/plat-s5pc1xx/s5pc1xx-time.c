@@ -45,6 +45,9 @@
 #include <plat/regs-gpio.h>
 #include <plat/gpio-bank-a1.h>
 
+#include <plat/gpio-bank-d.h>
+#include <plat/regs-clock.h>
+
 static unsigned long timer_startval;
 static unsigned long timer_usec_ticks;
 
@@ -52,7 +55,8 @@ static unsigned long timer_usec_ticks;
 #define TICK_MAX (0xffff)
 #endif
 
-//#define T32_DEBUG
+//#define T32_DEBUG_GPD
+//#define CLK_OUT_PROBING
 
 #define TIMER_USEC_SHIFT 16
 
@@ -163,24 +167,31 @@ static irqreturn_t s5pc1xx_timer_interrupt(int irq, void *dev_id)
 {
 	volatile unsigned int temp_cstat;
 
-#ifdef T32_DEBUG
-	__raw_writel((__raw_reald(S5PC1XX_GPA1DAT) | (1<<1)), S5PC1XX_GPA1DAT);
-#endif
-
 	temp_cstat = s5pc1xx_systimer_read(S3C_SYSTIMER_INT_CSTAT);
 	temp_cstat |= S3C_SYSTIMER_INT_STATS;
 
 	s5pc1xx_systimer_write(S3C_SYSTIMER_INT_CSTAT, temp_cstat);
+#ifdef T32_DEBUG_GPD
+	u32 tmp;  
+	tmp = __raw_readl(S5PC1XX_GPDDAT);  
+	tmp |= (0x1<<1);	
+	__raw_writel(tmp, S5PC1XX_GPDDAT);
+
+#endif
+
 	do {				
 		if(!(s5pc1xx_systimer_read(S3C_SYSTIMER_INT_CSTAT) & S3C_SYSTIMER_INT_STATS))
 			break;
 	} while(1);
 
+#ifdef T32_DEBUG_GPD
+	tmp = __raw_readl(S5PC1XX_GPDDAT);  
+	tmp &=~(0x1<<1);	
+	__raw_writel(tmp, S5PC1XX_GPDDAT);
+
+#endif
 	timer_tick();
 
-#ifdef T32_DEBUG
-	__raw_writel((__raw_reald(S5PC1XX_GPA1DAT) & ~(1<<1)), S5PC1XX_GPA1DAT);
-#endif
 	return IRQ_HANDLED;
 }
 
@@ -205,19 +216,27 @@ static void s5pc1xx_timer_setup (void)
 	unsigned long pclk;
 	struct clk *clk;
 
-#ifdef T32_DEBUG
-/*
- * GPIO setting for debugging with T32
- * connect T32's probe with number 9pin of CON7 on SMDKC100 Base Board.
- */
 	unsigned long reg;
 
-	reg = __raw_readl(S5PC1XX_GPA1CON);
-	reg &= ~(0xf << 4);
+#ifdef T32_DEBUG_GPD
+	reg = __raw_readl(S5PC1XX_GPDCON);
+	reg &=~(0xf << 4);
+	reg |= (0x1 << 4);
+	__raw_writel(reg, S5PC1XX_GPDCON);
+
+	reg = __raw_readl(S5PC1XX_GPDDAT);
+	reg &=~(0x1<<1);
+	__raw_writel(reg, S5PC1XX_GPDDAT);   
 	
-	/* GPA1CON[1] setting: output */
-	__raw_writel((reg | (0x1 << 4)), S5PC1XX_GPA1CON);
 #endif
+
+#ifdef CLK_OUT_PROBING
+	reg = __raw_readl(S5P_CLK_OUT);
+	reg &=~(0x1f<<12);
+	reg |= (0x6<<12);
+	__raw_writel(reg, S5P_CLK_OUT);
+#endif
+
 	tcnt = TICK_MAX;  /* default value for tcnt */
 
 	/* initialize system timer clock */
