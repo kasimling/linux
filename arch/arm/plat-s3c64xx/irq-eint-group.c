@@ -351,7 +351,7 @@ static inline void s3c_irq_demux_eint_group(unsigned int irq, struct irq_desc *d
 
 		for (src = 0; src < S3C64XX_EINT_MAX_SOURCES; src++) {
 			if (status & 1) {
-				newirq = group->base + (src - group->pend_ofs);
+				newirq = group->base + src;
 				generic_handle_irq(newirq);
 			}
 
