@@ -266,6 +266,12 @@ static struct clk init_clocks_disable[] = {
 		.parent  	= &clk_h,
 		.enable  	= s5p64xx_hclk_ctrl,
 		.ctrlbit 	= S3C_CLKCON_HCLK0_USB
+	}, {
+		.name    	= "post",
+		.id	   	= -1,
+		.parent  	= &clk_h,
+		.enable  	= s5p64xx_hclk_ctrl,
+		.ctrlbit 	= S3C_CLKCON_HCLK0_POST0
 	},
 
 };
