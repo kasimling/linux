@@ -127,57 +127,57 @@ int fout_set_rate(struct clk *clk, unsigned long rate)
 	switch(rate){
 	case 36000000:
 			epll_con1 |= (0 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (48 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (48 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (4 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 48000000:
 			epll_con1 |= (0 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (32 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (32 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (3 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 60000000:
 			epll_con1 |= (0 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (40 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (40 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (3 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 72000000:
 			epll_con1 |= (0 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (48 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (48 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (3 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 84000000:
 			epll_con1 |= (0 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (28 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (28 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (2 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 96000000:
 			epll_con1 |= (0 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (32 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (32 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (2 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 32768000:
 			epll_con1 |= (45264 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (43 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (43 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (4 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 45158000:
 			epll_con1 |= (6903 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (30 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (30 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (3 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 49152000:
 			epll_con1 |= (50332 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (32 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (32 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (3 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 67738000:
 			epll_con1 |= (10398 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (45 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (45 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (3 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	case 73728000:
 			epll_con1 |= (9961 << S3C_EPLL_CON_K_SHIFT);
-			epll_con0 |= (49 << S3C_EPLL_CON_M_SHIFT) | 
+			epll_con0 |= (49 << S3C_EPLL_CON_M_SHIFT) |
 					(1 << S3C_EPLL_CON_P_SHIFT) | (3 << S3C_EPLL_CON_S_SHIFT);
 			break;
 	default:
@@ -601,9 +601,9 @@ static void __init_or_cpufreq s5p6440_set_clksrc(struct clksrc_clk *clk)
 
 	clk->clk.parent = srcs->sources[clksrc];
 
-	printk(KERN_INFO "%s: source is %s (%d), rate is %ld\n",
+	printk(KERN_INFO "%s: source is %s (%d), rate is %ld.%ldMHz\n",
 	       clk->clk.name, clk->clk.parent->name, clksrc,
-	       clk_get_rate(&clk->clk));
+	       print_mhz(clk_get_rate(&clk->clk)));
 }
 
 #define GET_DIV(clk, field) ((((clk) & field##_MASK) >> field##_SHIFT) + 1)
@@ -623,6 +623,7 @@ void __init_or_cpufreq s5p6440_setup_clocks(void)
 	unsigned int ptr;
 	u32 clkdiv0;
 	u32 clkdiv3;
+	u32 clkdiv1;
 
 	printk(KERN_DEBUG "%s: registering clocks\n", __func__);
 
@@ -631,6 +632,13 @@ void __init_or_cpufreq s5p6440_setup_clocks(void)
 
 	clkdiv3 = __raw_readl(S3C_CLK_DIV3);
 	printk(KERN_DEBUG "%s: clkdiv3 = %08x\n", __func__, clkdiv3);
+
+	/* init mmc_clock divider */
+	clkdiv1 = __raw_readl(S3C_CLK_DIV1);
+	clkdiv1 &= ~0x00000fff;
+	writel(clkdiv1 | 0x777, S3C_CLK_DIV1);
+	clkdiv1 = __raw_readl(S3C_CLK_DIV1);
+	printk("%s: clkdiv1 = %08x\n", __func__, clkdiv1);
 
 	xtal_clk = clk_get(NULL, "xtal");
 	BUG_ON(IS_ERR(xtal_clk));
@@ -644,8 +652,9 @@ void __init_or_cpufreq s5p6440_setup_clocks(void)
 	mpll = s5p6440_get_pll(xtal, __raw_readl(S3C_MPLL_CON));
 	apll = s5p6440_get_pll(xtal, __raw_readl(S3C_APLL_CON));
 
-	printk(KERN_INFO "S5P64XX: PLL settings, A=%ld, M=%ld, E=%ld\n",
-	       apll, mpll, epll);
+	printk(KERN_INFO "S5P64XX: PLL settings, A=%ld.%ldMHz, M=%ld.%ldMHz," \
+							" E=%ld.%ldMHz\n",
+	       print_mhz(apll), print_mhz(mpll), print_mhz(epll));
 
 	fclk = apll / GET_DIV(clkdiv0, S3C_CLKDIV0_ARM);
 	hclk = fclk / GET_DIV(clkdiv0, S3C_CLKDIV0_HCLK);
@@ -661,8 +670,10 @@ void __init_or_cpufreq s5p6440_setup_clocks(void)
 
 	pclk_low = hclk_low / GET_DIV(clkdiv3, S3C_CLKDIV3_PCLK_LOW);
 
-	printk(KERN_INFO "S5P64XX: HCLK=%ld, HCLK_LOW=%ld, PCLK=%ld, PCLK_LOW=%ld\n",
-	       hclk, hclk_low, pclk, pclk_low);
+	printk(KERN_INFO "S5P64XX: HCLK=%ld.%ldMHz, HCLK_LOW=%ld.%ldMHz," \
+				" PCLK=%ld.%ldMHz, PCLK_LOW=%ld.%ldMHz\n",
+			       print_mhz(hclk), print_mhz(hclk_low),
+			       print_mhz(pclk), print_mhz(pclk_low));
 
 	clk_fout_mpll.rate = mpll;
 	clk_fout_epll.rate = epll;
@@ -710,6 +721,6 @@ void __init s5p6440_register_clocks(void)
 		}
 	}
 
-	clk_mpll.parent = &clk_mout_mpll.clk;
+//	clk_mpll.parent = &clk_mout_mpll.clk;
 	clk_epll.parent = &clk_mout_epll.clk;
 }
