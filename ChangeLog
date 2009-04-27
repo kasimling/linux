@@ -2044,3 +2044,22 @@ v2.6.28.6-samsung-mfc-r0d0: PyoungJae Jung, Jiun Yu
 		D	drivers/media/video/samsung/mfc40/s3c_mfc_msg.h
 		D	drivers/media/video/samsung/mfc40/s3c_mfc_logmsg.c
 
+v2.6.28.6-samsung-mfc-r0d1: PyoungJae Jung, Jiun Yu, Satish
+	- update CMM driver for hybrid Divx in 6410 support
+	- change coding style
+
+	Added files:
+		A	drivers/media/video/samsung/cmm/s3c_cmm.c
+		A	drivers/media/video/samsung/cmm/s3c_cmm.h
+
+	Modified files:
+		M	drivers/media/video/samsung/cmm/Makefile
+
+	Deleted files:
+		D	drivers/media/video/samsung/cmm/CMMMisc.c
+		D	drivers/media/video/samsung/cmm/CMMMisc.h
+		D	drivers/media/video/samsung/cmm/LogMsg.c
+		D	drivers/media/video/samsung/cmm/LogMsg.h
+		D	drivers/media/video/samsung/cmm/s3c-cmm.c
+		D	drivers/media/video/samsung/cmm/s3c-cmm.h
+
