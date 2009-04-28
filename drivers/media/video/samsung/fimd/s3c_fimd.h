@@ -16,7 +16,6 @@
 #ifdef __KERNEL__
 #include <linux/wait.h>
 #include <linux/mutex.h>
-#include <linux/i2c.h>
 #include <linux/videodev2.h>
 #include <media/v4l2-common.h>
 #include <media/v4l2-ioctl.h>
@@ -31,6 +30,7 @@
 
 #define info(args...)	do { printk(KERN_INFO S3C_FIMD_NAME ": " args); } while (0)
 #define err(args...)	do { printk(KERN_ERR  S3C_FIMD_NAME ": " args); } while (0)
+
 
 /*
  * E N U M E R A T I O N S
@@ -61,6 +61,14 @@ enum s3c_fimd_output_t {
 	OUTPUT_TV_I80LDI0,
 	OUTPUT_TV_I80LDI1,
 };
+
+enum s3c_fimd_rgb_mode_t {
+	MDOE_RGB_P = 0,
+	MODE_BGR_P = 1,
+	MODE_RGB_S = 2,
+	MODE_BGR_S = 3,
+};
+
 
 /*
  * F I M D   S T R U C T U R E S
@@ -178,7 +186,7 @@ struct s3c_fimd_lcd {
 	struct 	s3c_fimd_lcd_timing timing;
 	struct 	s3c_fimd_lcd_polarity polarity;
 
-	void (*init_ldi)(void);
+	void 	(*init_ldi)(void);
 };
 
 /*
@@ -202,7 +210,7 @@ struct s3c_fimd_window {
 	int	id;
 	int	enabled;
 	int	shadow_lock;
-	enum	s3c_fimd_data_path_t path;
+	enum 	s3c_fimd_data_path_t path;
 	int	bit_swap;
 	int	byte_swap;
 	int	halfword_swap;
@@ -245,27 +253,28 @@ struct s3c_fimd_v4l2 {
 */
 struct s3c_fimd_global {
 	/* general */
-	void __iomem		*regs;
-	struct mutex		lock;
-	struct device		*dev;
-	struct clk		*clock;
-	int			irq;
-	struct video_device	*vd;
-	struct s3c_fimd_v4l2	v4l2;
+	void __iomem			*regs;
+	struct mutex			lock;
+	struct device			*dev;
+	struct clk			*clock;
+	int				irq;
+	struct video_device		*vd;
+	struct s3c_fimd_v4l2		v4l2;
 
 	/* fimd */
-	int	enabled;
-	int	dsi;
-	int 	interlace;
-	enum	s3c_fimd_output_t output;
-	int	rgb_serial;
-	int	vclk_freerun;
-	int 	alps_enabled;
-	int	gamma_enabled;
-	int 	gain_enabled;
-	struct	s3c_fimd_window **win;
-	struct	s3c_fimd_lcd *lcd;
+	int				enabled;
+	int				dsi;
+	int				interlace;
+	enum s3c_fimd_output_t 		output;
+	enum s3c_fimd_rgb_mode_t	rgb_mode;
+	int				vclk_freerun;
+	int				alps_enabled;
+	int				gamma_enabled;
+	int				gain_enabled;
+	struct s3c_fimd_window 		**win;
+	struct s3c_fimd_lcd 		*lcd;
 };
+
 
 /*
  * E X T E R N S
