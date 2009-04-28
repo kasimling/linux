@@ -10,8 +10,8 @@
  * published by the Free Software Foundation.
 */
 
-#ifndef _S3C_CAMIF_H
-#define _S3C_CAMIF_H
+#ifndef _S3C_FIMD_H
+#define _S3C_FIMD_H
 
 #ifdef __KERNEL__
 #include <linux/wait.h>
@@ -272,4 +272,4 @@ struct s3c_fimd_global {
  *
 */
 
-#endif /* _S3C_CAMIF_H */
+#endif /* _S3C_FIMD_H */

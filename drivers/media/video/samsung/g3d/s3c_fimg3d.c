@@ -642,8 +642,8 @@ static int s3c_g3d_suspend(struct platform_device *dev, pm_message_t state)
 
 	// backup raster engine registers
 	memcpy(BACKUP_FGRA_PIXSAMP_YCLIP, (DWORD*)(s3c_g3d_base + FGRA_PIXEL_SAMPOS), sizeof(DWORD)*7);
-	BACKUP_FGRA_LODCTL = __raw_readl(FGRA_LOD_CTRL);		
-	BACKUP_FGRA_CLIPX = __raw_readl(FGRA_CLIP_XCORD);
+	BACKUP_FGRA_LODCTL = __raw_readl(s3c_g3d_base + FGRA_LOD_CTRL);		
+	BACKUP_FGRA_CLIPX = __raw_readl(s3c_g3d_base + FGRA_CLIP_XCORD);
 	memcpy(BACKUP_FGRA_PWIDTH_LWIDTH, (DWORD*)(s3c_g3d_base + FGRA_POINT_WIDTH), sizeof(DWORD)*5);
 
 	// backup pixel shader registers

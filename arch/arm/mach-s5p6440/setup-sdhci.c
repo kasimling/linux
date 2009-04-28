@@ -99,3 +99,27 @@ void s3c6410_setup_sdhci1_cfg_gpio(struct platform_device *dev, int width)
 	s3c_gpio_setpull(S5P64XX_GPG(6), S3C_GPIO_PULL_UP);
 	s3c_gpio_cfgpin(S5P64XX_GPG(6), S3C_GPIO_SFN(3));
 }
+
+void s3c6410_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
+{
+	/* XXX: should be done later. */
+#if 0
+	unsigned int gpio;
+	unsigned int end;
+
+	/* GPIO should be set on 4bit though 1-bit setting is comming. */
+	if (width == 1)
+		width = 4;
+	end = S5P64XX_GPH(2 + width);
+
+	/* Set all the necessary GPG pins to special-function 0 */
+	for (gpio = S5P64XX_GPH(0); gpio < end; gpio++) {
+		s3c_gpio_cfgpin(gpio, S3C_GPIO_SFN(2));
+		s3c_gpio_setpull(gpio, S3C_GPIO_PULL_NONE);
+	}
+
+	s3c_gpio_setpull(S5P64XX_GPG(6), S3C_GPIO_PULL_UP);
+	s3c_gpio_cfgpin(S5P64XX_GPG(6), S3C_GPIO_SFN(3));
+#endif
+}
+

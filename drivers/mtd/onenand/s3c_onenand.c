@@ -1809,7 +1809,7 @@ static int onenand_write_oob_nolock(struct mtd_info *mtd, loff_t to, struct mtd_
 		}
 
 		if (onenand_blkrw_complete(chip, ONENAND_CMD_PROG)) {
-			printk(KERN_WARNING "\onenand_write_oob_nolock: Program operation failed.\n");
+			printk(KERN_WARNING "onenand_write_oob_nolock: Program operation failed.\n");
 			chip->write(~ONENAND_TRANS_SPARE_TSRF_INC, chip->base + ONENAND_REG_TRANS_SPARE);
 			return -1;
 		}
@@ -1948,12 +1948,12 @@ static int onenand_erase(struct mtd_info *mtd, struct erase_info *instr)
 
 		/* check fail */
 		if (onenand_irq_pend(chip, ONENAND_INT_ERR_ERS_FAIL)) {
-			DEBUG(MTD_DEBUG_LEVEL3, "onenand_erase: block %d erase verify failed.\n", addr >> chip->erase_shift);
+			DEBUG(MTD_DEBUG_LEVEL3, "onenand_erase: block %d erase verify failed.\n", ((unsigned int)addr >> chip->erase_shift));
 			onenand_irq_ack(chip, ONENAND_INT_ERR_ERS_FAIL);
 
 			/* check lock */
 			if (onenand_irq_pend(chip, ONENAND_INT_ERR_LOCKED_BLK)) {
-				DEBUG(MTD_DEBUG_LEVEL3, "onenand_erase: block %d is locked.\n", addr >> chip->erase_shift);
+				DEBUG(MTD_DEBUG_LEVEL3, "onenand_erase: block %d is locked.\n", ((unsigned int)addr >> chip->erase_shift));
 				onenand_irq_ack(chip, ONENAND_INT_ERR_LOCKED_BLK);
 			}
 		}

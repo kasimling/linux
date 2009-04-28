@@ -576,6 +576,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_data *data)
 			break;
 	}
 
+#if defined(CONFIG_MMC_SDHCI_S3C) || defined(CONFIG_MMC_SDHCI_MODULE)
+	/* workaround for some MMCplus cards. */
+	if (count == 0x0)
+		count = 0x7;
+#endif
+
 	if (count >= 0xF) {
 		printk(KERN_WARNING "%s: Too large timeout requested!\n",
 			mmc_hostname(host->mmc));
