@@ -1006,24 +1006,24 @@ static int s3c_udc_remove(struct platform_device *pdev)
 #ifdef CONFIG_PM
 static int s3c_udc_suspend(struct platform_device *pdev, pm_message_t state)
 {
-        struct s3c_udc *dev = the_controller; 
+        struct s3c_udc *dev = the_controller;
         int i;
 
-        if (dev->driver->suspend) 
-                dev->driver->suspend(&dev->gadget);
-    
-        /* Terminate any outstanding requests  */
-        for (i = 0; i < S3C_MAX_ENDPOINTS; i++) {
-                struct s3c_ep *ep = &dev->ep[i];
-                if ( ep->dev != NULL )
-                        spin_lock(&ep->dev->lock);
-                ep->stopped = 1;
-                nuke(ep, -ESHUTDOWN);
-                if ( ep->dev != NULL )
-                        spin_unlock(&ep->dev->lock);
-        }
-
         if (dev->driver) {
+                if (dev->driver->suspend)
+                        dev->driver->suspend(&dev->gadget);
+
+                /* Terminate any outstanding requests  */
+                for (i = 0; i < S3C_MAX_ENDPOINTS; i++) {
+                        struct s3c_ep *ep = &dev->ep[i];
+                        if ( ep->dev != NULL )
+                                spin_lock(&ep->dev->lock);
+                        ep->stopped = 1;
+                        nuke(ep, -ESHUTDOWN);
+                        if ( ep->dev != NULL )
+                                spin_unlock(&ep->dev->lock);
+                }
+
                 disable_irq(IRQ_OTG);
                 udc_disable(dev);
                 clk_disable(otg_clock);
@@ -1041,10 +1041,10 @@ static int s3c_udc_resume(struct platform_device *pdev)
                 udc_reinit(dev);
                 enable_irq(IRQ_OTG);
                 udc_enable(dev);
-        }
 
-        if (dev->driver->resume)
-                dev->driver->resume(&dev->gadget);
+                if (dev->driver->resume)
+                        dev->driver->resume(&dev->gadget);
+        }
 
         return 0;
 }
