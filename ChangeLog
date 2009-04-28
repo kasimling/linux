@@ -2118,3 +2118,9 @@ v2.6.28.6-samsung-r3d6: Abhilash Kesavan
 	Added File:
 	A	arch/arm/configs/smdkc100pm_defconfig
 
+v2.6.28.6-samsung-r3d7: Jongpill Lee
+	- ADC bug fixed on SMDK6440
+
+	Modified Files:
+		
+		M arch/arm/plat-s5p64xx/adc.c
