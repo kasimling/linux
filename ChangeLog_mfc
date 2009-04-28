@@ -2063,3 +2063,7 @@ v2.6.28.6-samsung-mfc-r0d1: PyoungJae Jung, Jiun Yu, Satish
 		D	drivers/media/video/samsung/cmm/s3c-cmm.c
 		D	drivers/media/video/samsung/cmm/s3c-cmm.h
 
+v2.6.28.6-samsung-r3d3-mfc-r0: PyoungJae Jung, Jiun Yu
+	- merge with v2.6.28.6-samsung-r3d3 in master branch
+	- change tag name convention
+		* master branch tag + mfc tag
