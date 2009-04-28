@@ -2106,3 +2106,15 @@ v2.6.28.6-samsung-r3d5: Thomas Abraham
         - Fixed PM bug in USB gadget.
 	Modified Files:
 	        M       drivers/usb/gadget/s3c_udc_otg.c
+	
+v2.6.28.6-samsung-r3d6: Abhilash Kesavan
+	- Added PM defconfig (Base), Onenand Platform and Misc PM Fixes
+	Modified Files: 
+	M	drivers/mtd/onenand/generic.c
+	M	drivers/mtd/onenand/s3c_onenand.c
+	M	drivers/media/video/samsung/g3d/s3c_fimg3d.c
+	M	sound/soc/codecs/wm9713.c
+
+	Added File:
+	A	arch/arm/configs/smdkc100pm_defconfig
+

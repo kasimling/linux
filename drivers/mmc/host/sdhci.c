@@ -576,7 +576,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_data *data)
 			break;
 	}
 
-#ifdef CONFIG_MMC_SDHCI_S3C
+#if defined(CONFIG_MMC_SDHCI_S3C) || defined(CONFIG_MMC_SDHCI_MODULE)
 	/* workaround for some MMCplus cards. */
 	if (count == 0x0)
 		count = 0x7;
