@@ -10,8 +10,8 @@
  * published by the Free Software Foundation.
 */
 
-#ifndef _S3C_CAMIF_H
-#define _S3C_CAMIF_H
+#ifndef _S3C_FIMC_H
+#define _S3C_FIMC_H
 
 #ifdef __KERNEL__
 #include <linux/wait.h>
@@ -672,4 +672,4 @@ extern void s3c_fimc_change_rotate(struct s3c_fimc_control *ctrl);
 extern void s3cfb_enable_local(int win, int in_yuv, int sel);
 extern void s3cfb_enable_dma(int win);
 
-#endif /* _S3C_CAMIF_H */
+#endif /* _S3C_FIMC_H */
