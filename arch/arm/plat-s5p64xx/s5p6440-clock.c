@@ -643,7 +643,6 @@ void __init_or_cpufreq s5p6440_setup_clocks(void)
 	clkdiv1 &= ~0x00000fff;
 	writel(clkdiv1 | 0x777, S3C_CLK_DIV1);
 	clkdiv1 = __raw_readl(S3C_CLK_DIV1);
-	printk("%s: clkdiv1 = %08x\n", __func__, clkdiv1);
 
 	xtal_clk = clk_get(NULL, "xtal");
 	BUG_ON(IS_ERR(xtal_clk));

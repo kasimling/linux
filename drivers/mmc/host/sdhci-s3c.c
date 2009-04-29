@@ -207,11 +207,11 @@ irqreturn_t sdhci_irq_cd (int irq, void *dev_id)
 	uint detect = sc->pdata->detect_ext_cd();
 
 	if (detect) {
-		printk("sdhci: card removed.\n");
-		sc->host->flags &= ~SDHCI_DEVICE_ALIVE;
-	} else {
 		printk("sdhci: card inserted.\n");
 		sc->host->flags |= SDHCI_DEVICE_ALIVE;
+	} else {
+		printk("sdhci: card removed.\n");
+		sc->host->flags &= ~SDHCI_DEVICE_ALIVE;
 	}
 	tasklet_schedule(&sc->host->card_tasklet);
 
@@ -338,16 +338,21 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
 	else
 		host->mmc->caps = 0;
 
+	/* to add external irq as a card detect signal */
+	if (pdata->cfg_ext_cd) {
+		pdata->cfg_ext_cd();
+		if (pdata->detect_ext_cd())
+			host->flags |= SDHCI_DEVICE_ALIVE;
+	}
+
 	ret = sdhci_add_host(host);
 	if (ret) {
 		dev_err(dev, "sdhci_add_host() failed\n");
 		goto err_add_host;
 	}
 
-	/* to add external irq as a card detect signal */
+	/* register external irq here (after all init is done) */
 	if (pdata->cfg_ext_cd) {
-		host->flags |= SDHCI_DEVICE_ALIVE;
-		pdata->cfg_ext_cd();
 		ret = request_irq(pdata->ext_cd, sdhci_irq_cd,
 				IRQF_SHARED, mmc_hostname(host->mmc), sc);
 	}

@@ -141,13 +141,13 @@ static uint detect_sdhci0_irq_cd (void)
 	detect = readl(S5P64XX_GPNDAT);
 	detect &= 0x2000;	/* GPN13 */
 
-	return detect;
+	return (!detect);
 }
 
 static struct s3c_sdhci_platdata s3c_hsmmc0_platdata = {
 	.max_width	= 4,
 	.host_caps	= (MMC_CAP_4_BIT_DATA | MMC_CAP_MMC_HIGHSPEED |
-				MMC_CAP_SD_HIGHSPEED),
+				MMC_CAP_SD_HIGHSPEED | MMC_CAP_BOOT_ONTHEFLY),
 	.cfg_ext_cd	= setup_sdhci0_irq_cd,
 	.detect_ext_cd	= detect_sdhci0_irq_cd,
 	.ext_cd		= S3C_EINT(13),
