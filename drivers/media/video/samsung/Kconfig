@@ -68,13 +68,6 @@ config VIDEO_SAMSUNG_MEMSIZE_JPEG
 	default "32768"
 endif
 
-config VIDEO_MFC_MAX_INSTANCE
-	int "Maximum size of MFC instance (1-4)"
-	range 1 4
-	depends on VIDEO_MFC40 && ARCH_S5PC1XX
-	default 1
-
-
 config VIDEO_SAMSUNG_MEMSIZE_CMM
 	int "Memory size in kbytes for CMM"
 	depends on VIDEO_CMM && CPU_S3C6410

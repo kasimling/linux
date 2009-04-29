@@ -15,13 +15,13 @@
 #define _S3C_MFC_FW_H_
 
 extern unsigned char mp4_dec_mc_fw[26148];
-extern unsigned char mp4_enc_mc_fw[10324];
-extern unsigned char h264_dec_mc_fw[39260];
-extern unsigned char h264_enc_mc_fw[21044];
-extern unsigned char h263_dec_mc_fw[9728];
-extern unsigned char mp2_dec_mc_fw[14556];
+extern unsigned char mp4_enc_mc_fw[11628];
+extern unsigned char h264_dec_mc_fw[39296];
+extern unsigned char h264_enc_mc_fw[21180];
+extern unsigned char h263_dec_mc_fw[9672];
+extern unsigned char mp2_dec_mc_fw[14636];
 extern unsigned char vc1_dec_mc_fw[22652];
-extern unsigned char cmd_ctrl_fw[6744];
+extern unsigned char cmd_ctrl_fw[7432] ;
 
 #endif /* _S3C_MFC_FW_H_ */
 

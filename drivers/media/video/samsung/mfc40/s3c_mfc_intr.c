@@ -43,7 +43,7 @@ static int s3c_mfc_wait_polling(unsigned int PollingRegAddress)
 	}
 
 	if (uRegData == 0) {
-		LOG_MSG(LOG_ERROR, "s3c_mfc_wait_polling", "Polling Time Out(Reg : 0x%x)\n", PollingRegAddress);
+		mfc_err("Polling Time Out(Reg : 0x%x)\n", PollingRegAddress);
 		return 0;
 	}
 
@@ -78,7 +78,7 @@ int s3c_mfc_wait_for_done(s3c_mfc_wait_done_type command)
 	case MFC_INTR_FRAME_FW_DONE:
 		if (interruptible_sleep_on_timeout(&s3c_mfc_wait_queue, 1000) == 0) {
 			retVal = 0;
-			LOG_MSG(LOG_ERROR, "s3c_mfc_wait_for_done", "Interrupt Time Out(%d)\n", command);
+			mfc_err("Interrupt Time Out(%d)\n", command);
 			break;
 		}
 
@@ -87,7 +87,7 @@ int s3c_mfc_wait_for_done(s3c_mfc_wait_done_type command)
 		break;		
 
 	default : 
-			LOG_MSG(LOG_ERROR, "s3c_mfc_wait_for_done", "undefined command\n");
+			mfc_err("undefined command\n");
 			retVal = 0;
 	}
 

@@ -25,12 +25,22 @@ typedef enum
 {
 	MFCINST_STATE_NULL = 0,
 
-	MFCINST_STATE_OPENED = 10,    /* Instance is created but not initialized */
-	MFCINST_STATE_DEC_INITIALIZE = 20,    /* Instance is initialized for decoding */
-	MFCINST_STATE_DEC_EXE,
+	/* Instance is created */
+	MFCINST_STATE_OPENED = 10,
 
-	MFCINST_STATE_ENC_INITIALIZE = 30,    /* Instance is initialized for decoding */
-	MFCINST_STATE_ENC_EXE
+	/* channel_set and init_codec is completed */
+	MFCINST_STATE_DEC_INITIALIZE = 20,
+
+	/* seq_start is completed */
+	MFCINST_STATE_DEC_SEQ_START  = 30,
+	
+	MFCINST_STATE_DEC_EXE,
+	MFCINST_STATE_DEC_EXE_DONE,
+	
+	/* Instance is initialized for encoding */
+	MFCINST_STATE_ENC_INITIALIZE = 40, 
+	MFCINST_STATE_ENC_EXE,
+	MFCINST_STATE_ENC_EXE_DONE
 } s3c_mfc_inst_state;
 
 typedef enum
@@ -60,21 +70,35 @@ typedef enum
 	DISPLAY_ONLY = 2
 } s3c_mfc_display_status;
 
+typedef enum
+{
+	MFC_RET_FRAME_NOT_SET = -1,
+	MFC_RET_FRAME_NOT_CODED = 0,
+	MFC_RET_FRAME_I_FRAME = 1,
+	MFC_RET_FRAME_P_FRAME = 2,
+	MFC_RET_FRAME_B_FRAME = 3
+} s3c_mfc_frame_type;
+
 typedef struct tag_mfc_inst_ctx
 {
 	unsigned int MfcSfr[S3C_FIMV_REG_COUNT];
-	MFC_CODEC_TYPE MfcCodecType;
-	s3c_mfc_inst_state MfcState;
+
 	int InstNo;
-	unsigned int packedPB;
 	unsigned int DPBCnt;
 	unsigned int totalDPBCnt;
 	unsigned int extraDPB;
 	unsigned int displayDelay;
-	unsigned int phyFWBufAddr;
-	unsigned int isFirstFrame;
+	unsigned int postEnable;
+	unsigned int endOfFrame;
+	unsigned int forceSetFrameType;
 	unsigned int img_width;
 	unsigned int img_height;
+	unsigned int dwAccess;  // for Power Management.
+	unsigned int IsPackedPB;
+	
+	s3c_mfc_frame_type FrameType;
+	MFC_CODEC_TYPE MfcCodecType;
+	s3c_mfc_inst_state MfcState;
 } s3c_mfc_inst_ctx;
 
 unsigned int s3c_mfc_get_codec_type(MFC_CODEC_TYPE    codec_type);
