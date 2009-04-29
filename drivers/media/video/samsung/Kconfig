@@ -37,7 +37,7 @@ config VIDEO_SAMSUNG_MEMSIZE_FIMC
 config VIDEO_SAMSUNG_MEMSIZE_POST
 	int "Memory size in kbytes for Post Processor"
 	depends on VIDEO_POST
-	default "23552"
+	default "8192"
 
 config VIDEO_SAMSUNG_MEMSIZE_TV
 	int "Memory size in kbytes for TV"

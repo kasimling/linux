@@ -1166,6 +1166,7 @@ static int wm9713_soc_resume(struct platform_device *pdev)
 	int i, ret;
 	u16 *cache = codec->reg_cache;
 
+        wm9713_reset(codec, 0);
 	ret = wm9713_reset(codec, 1);
 	if (ret < 0) {
 		printk(KERN_ERR "could not reset AC97 codec\n");

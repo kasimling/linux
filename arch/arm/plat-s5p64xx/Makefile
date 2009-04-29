@@ -18,6 +18,7 @@ obj-y				+= irq.o
 obj-y				+= irq-eint.o
 obj-y				+= clock.o
 obj-y				+= gpiolib.o
+obj-y				+= bootmem.o
 
 # CPU support
 
@@ -31,5 +32,7 @@ obj-$(CONFIG_PM)                += sleep.o
 
 obj-$(CONFIG_S5P64XX_SETUP_I2C0) += setup-i2c0.o
 obj-$(CONFIG_S5P64XX_SETUP_I2C1) += setup-i2c1.o
-obj-$(CONFIG_S5P64XX_ADC) += adc.o
-obj-$(CONFIG_HAVE_PWM)		+= pwm.o
+obj-$(CONFIG_S5P64XX_DEV_POST)   += dev-post.o
+obj-$(CONFIG_S5P64XX_SETUP_POST) += setup-post.o
+obj-$(CONFIG_S5P64XX_ADC) 	 += adc.o
+obj-$(CONFIG_HAVE_PWM) 		 += pwm.o

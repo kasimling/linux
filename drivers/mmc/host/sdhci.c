@@ -576,6 +576,12 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_data *data)
 			break;
 	}
 
+#if defined(CONFIG_MMC_SDHCI_S3C) || defined(CONFIG_MMC_SDHCI_MODULE)
+	/* workaround for some MMCplus cards. */
+	if (count == 0x0)
+		count = 0x7;
+#endif
+
 	if (count >= 0xF) {
 		printk(KERN_WARNING "%s: Too large timeout requested!\n",
 			mmc_hostname(host->mmc));
@@ -1056,7 +1062,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
 
 	host->mrq = mrq;
 
-	if (mmc->caps & MMC_CAP_ON_BOARD)
+	if ((mmc->caps & MMC_CAP_ON_BOARD) || (host->flags & SDHCI_DEVICE_ALIVE))
 		sdhci_send_command(host, mrq->cmd);
 	else {
 		if (!(readl(host->ioaddr + SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT)

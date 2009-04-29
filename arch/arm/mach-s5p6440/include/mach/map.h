@@ -110,6 +110,10 @@
 #define S5P64XX_PA_OTGSFR	(0xED200000)
 #define S5P64XX_SZ_OTGSFR	SZ_1M
 
+/* Post Processor */
+#define S5P64XX_PA_POST		(0xEE100000)
+#define S5P64XX_SZ_POST		SZ_1M
+
 /* compatibiltiy defines. */
 #define S3C_PA_TIMER		S5P64XX_PA_TIMER
 #define S3C_PA_HSMMC0		S5P64XX_PA_HSMMC0

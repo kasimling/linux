@@ -4,8 +4,8 @@
 
 config VIDEO_POST
 	bool "Samsung Post Processor Driver" 
-	depends on VIDEO_SAMSUNG && CPU_S3C6410
+	depends on VIDEO_SAMSUNG && (ARCH_S3C64XX || ARCH_S5P64XX)
 	default n
 	---help---
-	  This is a post processor driver for Samsung S3C6410.
+	  This is a post processor driver for Samsung S3C6410 and S5P6440.
 

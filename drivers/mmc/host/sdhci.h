@@ -234,6 +234,7 @@ struct sdhci_host {
 #define SDHCI_USE_ADMA		(1<<1)		/* Host is ADMA capable */
 #define SDHCI_REQ_USE_DMA	(1<<2)		/* Use DMA for this req. */
 #define SDHCI_DEVICE_DEAD	(1<<3)		/* Device unresponsive */
+#define SDHCI_DEVICE_ALIVE	(1<<4)		/* used on ext card detect */
 
 	unsigned int		version;	/* SDHCI spec. version */
 
