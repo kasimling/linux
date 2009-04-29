@@ -120,7 +120,7 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 {
 	u32 round_tmp;
 	u32 iter;
-	u32 clk_div0_tmp, flag, tmp;
+	u32 clk_div0_tmp,tmp,flag;
 	u32 cur_clk = s3c_fclk_get_rate();
 
 	round_tmp = s3c_fclk_round_rate(clk,rate);
@@ -137,26 +137,84 @@ int s3c_fclk_set_rate(struct clk *clk, unsigned long rate)
 	if(iter >= ARRAY_SIZE(s3c_cpu_clock_table))
 		iter = ARRAY_SIZE(s3c_cpu_clock_table) - 1;
 
-	
+	tmp = 0x1000;
+#if 0	
 	if(cur_clk > round_tmp) {
-		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);		
-		clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
-		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
+		__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
+					    : : "r" (clk_div0_tmp) : "memory");
+		__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 5" \
+					    : : "r" (clk_div0_tmp) : "memory");
+		do {
+			tmp--;
+			if(tmp == 0x800) {
+				__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
+							    : : "r" (clk_div0_tmp) : "memory");
+				__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 5" \
+							    : : "r" (clk_div0_tmp) : "memory");
+				
+				clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
+				__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
 
-		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(HCLK_DIV_MASK);
-		clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
-		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+				clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(HCLK_DIV_MASK);
+				clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
+				__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+			}
+			if(tmp <= 0)
+				break;
+		} while(1);
 
 	} else {
+	
 		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(HCLK_DIV_MASK);
-		clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
-		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
-		
-		clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
-		clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
-		__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+		__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
+					    : : "r" (clk_div0_tmp) : "memory");
+		__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 5" \
+					    : : "r" (clk_div0_tmp) : "memory");
+		do {
+			tmp--;
+			if(tmp == 0x800) {
+				__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
+							    : : "r" (clk_div0_tmp) : "memory");
+				__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 5" \
+							    : : "r" (clk_div0_tmp) : "memory");		
+				clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
+				__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+				
+				clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
+				clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
+				__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+			}
+			if(tmp <= 0)
+				break;
+		} while(1);				
 	}
+#else
+	local_irq_save(flag);
+	clk_div0_tmp = __raw_readl(ARM_CLK_DIV) & ~(ARM_DIV_MASK);
+	clk_div0_tmp |= s3c_cpu_clock_table[iter][1];
+	clk_div0_tmp &= ~(HCLK_DIV_MASK);
+	clk_div0_tmp |= s3c_cpu_clock_table[iter][2];
+	__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
+				    : : "r" (clk_div0_tmp) : "memory");
+	__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 5" \
+				    : : "r" (clk_div0_tmp) : "memory");
+	do {
+		tmp--;
+		if(tmp == 0xC00) {
+			__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 4" \
+						    : : "r" (clk_div0_tmp) : "memory");
+			__asm__  __volatile__ ("mcr p15, 0, %0, c7, c10, 5" \
+						    : : "r" (clk_div0_tmp) : "memory");
 
+			__raw_writel(clk_div0_tmp, ARM_CLK_DIV);
+		}
+		if(tmp <= 0)
+			break;
+	} while(1);
+
+#endif
+	local_irq_restore(flag);
 	printk("ARM_CLK:%d, iter:%d\n",round_tmp,iter);
 
 	clk->rate = s3c_cpu_clock_table[iter][0];

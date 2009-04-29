@@ -87,6 +87,20 @@ static struct s3c2410_uartcfg smdk6440_uartcfgs[] __initdata = {
 		.ulcon	     = S3C64XX_ULCON_DEFAULT,
 		.ufcon	     = S3C64XX_UFCON_DEFAULT,
 	},
+	[2] = {
+		.hwport	     = 2,
+		.flags	     = 0,
+		.ucon	     = S3C64XX_UCON_DEFAULT,
+		.ulcon	     = S3C64XX_ULCON_DEFAULT,
+		.ufcon	     = S3C64XX_UFCON_DEFAULT,
+	},
+	[3] = {
+		.hwport	     = 3,
+		.flags	     = 0,
+		.ucon	     = S3C64XX_UCON_DEFAULT,
+		.ulcon	     = S3C64XX_ULCON_DEFAULT,
+		.ufcon	     = S3C64XX_UFCON_DEFAULT,
+	},	
 };
 
 struct map_desc smdk6440_iodesc[] = {};
