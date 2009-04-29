@@ -2156,3 +2156,5 @@ v2.6.28.6-samsung-r3d8: Jae-Cheol Lee
 	Modified Files:
 		M 	arch/arm/plat-s5p64xx/clock.c
 
+v2.6.28.6-samsung-r3d9: SungJun Bae 
+	- merged with mfc branch v2.6.28.6-samsung-mfc-r0d0 
