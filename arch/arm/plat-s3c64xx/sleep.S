@@ -57,7 +57,6 @@ ENTRY(s3c6410_cpu_save)
 	@@ return to the caller, after the MMU is turned on.
 	@@ restore the last bits of the stack and return.
 resume_with_mmu:
-	b	.
 	mov	r0, #1
 	ldmfd	sp!, { r4 - r12, pc }	@ return, from sp from s3c_cpu_save
 

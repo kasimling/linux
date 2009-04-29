@@ -2158,3 +2158,9 @@ v2.6.28.6-samsung-r3d8: Jae-Cheol Lee
 
 v2.6.28.6-samsung-r3d9: SungJun Bae 
 	- merged with mfc branch v2.6.28.6-samsung-mfc-r0d0 
+
+v2.6.28.6-samsung-r3d10: Jongpill Lee
+	- Bug fixed on APM driver for S3C6410
+
+	MOdified Files:
+		M arch/arm/plat-s3c64xx/sleep.S
