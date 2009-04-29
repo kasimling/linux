@@ -40,11 +40,16 @@ struct s3c_sdhci_platdata {
 
 	char		**clocks;	/* set of clock sources */
 
-	void	(*cfg_gpio)(struct platform_device *dev, int width);
-	void	(*cfg_card)(struct platform_device *dev,
-			    void __iomem *regbase,
-			    struct mmc_ios *ios,
-			    struct mmc_card *card);
+	void		(*cfg_gpio)(struct platform_device *dev, int width);
+	void		(*cfg_card)(struct platform_device *dev,
+				    void __iomem *regbase,
+				    struct mmc_ios *ios,
+				    struct mmc_card *card);
+	/* add to deal with EXT_IRQ as a card detect pin */
+	void		(*cfg_ext_cd) (void);
+	unsigned int	(*detect_ext_cd) (void);
+	unsigned int	ext_cd;
+
 };
 
 /**

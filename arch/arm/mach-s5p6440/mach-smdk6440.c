@@ -175,6 +175,8 @@ static void __init smdk_backlight_register(void)
 #define smdk_backlight_register()	do { } while (0)
 #endif
 
+void smdk6440_setup_sdhci0 (void);
+
 static void __init smdk6440_map_io(void)
 {
 	s3c_device_nand.name = "s5p6440-nand";
@@ -182,6 +184,8 @@ static void __init smdk6440_map_io(void)
 	s5p64xx_init_io(smdk6440_iodesc, ARRAY_SIZE(smdk6440_iodesc));
 	s3c24xx_init_clocks(12000000);
 	s3c24xx_init_uarts(smdk6440_uartcfgs, ARRAY_SIZE(smdk6440_uartcfgs));
+
+	smdk6440_setup_sdhci0();
 }
 
 static void __init smdk6440_smc911x_set(void)

@@ -201,6 +201,23 @@ static struct sdhci_ops sdhci_s3c_ops = {
 	.set_ios		= sdhci_s3c_set_ios,
 };
 
+irqreturn_t sdhci_irq_cd (int irq, void *dev_id)
+{
+	struct sdhci_s3c* sc = dev_id;
+	uint detect = sc->pdata->detect_ext_cd();
+
+	if (detect) {
+		printk("sdhci: card removed.\n");
+		sc->host->flags &= ~SDHCI_DEVICE_ALIVE;
+	} else {
+		printk("sdhci: card inserted.\n");
+		sc->host->flags |= SDHCI_DEVICE_ALIVE;
+	}
+	tasklet_schedule(&sc->host->card_tasklet);
+
+	return IRQ_HANDLED;
+}
+
 static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
 {
 	struct s3c_sdhci_platdata *pdata = pdev->dev.platform_data;
@@ -325,6 +342,14 @@ static int __devinit sdhci_s3c_probe(struct platform_device *pdev)
 	if (ret) {
 		dev_err(dev, "sdhci_add_host() failed\n");
 		goto err_add_host;
+	}
+
+	/* to add external irq as a card detect signal */
+	if (pdata->cfg_ext_cd) {
+		host->flags |= SDHCI_DEVICE_ALIVE;
+		pdata->cfg_ext_cd();
+		ret = request_irq(pdata->ext_cd, sdhci_irq_cd,
+				IRQF_SHARED, mmc_hostname(host->mmc), sc);
 	}
 
 	return 0;

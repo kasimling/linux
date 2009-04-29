@@ -17,12 +17,14 @@
 #include <linux/interrupt.h>
 #include <linux/platform_device.h>
 #include <linux/io.h>
+#include <linux/irq.h>
 
 #include <linux/mmc/card.h>
 #include <linux/mmc/host.h>
 
 #include <mach/gpio.h>
 #include <plat/gpio-cfg.h>
+#include <plat/regs-gpio.h>
 #include <plat/regs-sdhci.h>
 #include <plat/sdhci.h>
 
@@ -121,5 +123,38 @@ void s3c6410_setup_sdhci2_cfg_gpio(struct platform_device *dev, int width)
 	s3c_gpio_setpull(S5P64XX_GPG(6), S3C_GPIO_PULL_UP);
 	s3c_gpio_cfgpin(S5P64XX_GPG(6), S3C_GPIO_SFN(3));
 #endif
+}
+
+static void setup_sdhci0_irq_cd (void)
+{
+	/* init GPIO as a ext irq */
+	s3c_gpio_cfgpin(S5P64XX_GPN(13), S3C_GPIO_SFN(2));
+	s3c_gpio_setpull(S5P64XX_GPN(13), S3C_GPIO_PULL_NONE);
+
+	set_irq_type(S3C_EINT(13), IRQ_TYPE_EDGE_BOTH);
+}
+
+static uint detect_sdhci0_irq_cd (void)
+{
+	uint detect;
+
+	detect = readl(S5P64XX_GPNDAT);
+	detect &= 0x2000;	/* GPN13 */
+
+	return detect;
+}
+
+static struct s3c_sdhci_platdata s3c_hsmmc0_platdata = {
+	.max_width	= 4,
+	.host_caps	= (MMC_CAP_4_BIT_DATA | MMC_CAP_MMC_HIGHSPEED |
+				MMC_CAP_SD_HIGHSPEED),
+	.cfg_ext_cd	= setup_sdhci0_irq_cd,
+	.detect_ext_cd	= detect_sdhci0_irq_cd,
+	.ext_cd		= S3C_EINT(13),
+};
+
+void smdk6440_setup_sdhci0 (void)
+{
+	s3c_sdhci0_set_platdata(&s3c_hsmmc0_platdata);
 }
 

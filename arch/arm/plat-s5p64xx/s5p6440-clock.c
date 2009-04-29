@@ -633,6 +633,11 @@ void __init_or_cpufreq s5p6440_setup_clocks(void)
 	clkdiv3 = __raw_readl(S3C_CLK_DIV3);
 	printk(KERN_DEBUG "%s: clkdiv3 = %08x\n", __func__, clkdiv3);
 
+	/* init mmc_clock source */
+	s5p64xx_setparent_clksrc(&clk_mmc0.clk, &clk_dout_mpll);
+	s5p64xx_setparent_clksrc(&clk_mmc1.clk, &clk_dout_mpll);
+	s5p64xx_setparent_clksrc(&clk_mmc2.clk, &clk_dout_mpll);
+
 	/* init mmc_clock divider */
 	clkdiv1 = __raw_readl(S3C_CLK_DIV1);
 	clkdiv1 &= ~0x00000fff;

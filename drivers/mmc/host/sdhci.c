@@ -1062,7 +1062,7 @@ static void sdhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
 
 	host->mrq = mrq;
 
-	if (mmc->caps & MMC_CAP_ON_BOARD)
+	if ((mmc->caps & MMC_CAP_ON_BOARD) || (host->flags & SDHCI_DEVICE_ALIVE))
 		sdhci_send_command(host, mrq->cmd);
 	else {
 		if (!(readl(host->ioaddr + SDHCI_PRESENT_STATE) & SDHCI_CARD_PRESENT)
