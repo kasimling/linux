@@ -2168,11 +2168,11 @@ v2.6.28.6-samsung-r3d10: Jongpill Lee
 v2.6.28.6-samsung-r4: Kyoungil Kim
 	- Official Release for SMDK6410, 6440, C100(09.04.30)
 
-v2.6.28.6-samsung-v1: Kyoungil Kim
-	- Official Release for git.kernel.org(09.04.30)
-
 v2.6.28.6-samsung-r4d0: Kyoungil Kim
 
 v2.6.28.6-samsung-r4d1: Jassi
 	- Addded SPI driver support for S3C6410 and S5P6440 acc to latest
 	Linux-SPI architecture
+
+v2.6.28.6-samsung-r5: Kyoungil Kim
+	- Official Release for SMDK6410, 6440, C100(09.04.30)
