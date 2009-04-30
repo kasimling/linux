@@ -2164,3 +2164,7 @@ v2.6.28.6-samsung-r3d10: Jongpill Lee
 
 	MOdified Files:
 		M arch/arm/plat-s3c64xx/sleep.S
+
+v2.6.28.6-samsung-r4: Kyoungil Kim
+	- Official Release for SMDK6410, 6440, C100(09.04.30)
+
