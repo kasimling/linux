@@ -27,6 +27,7 @@
 #include <linux/module.h>
 #include <linux/clk.h>
 #include <linux/pwm_backlight.h>
+#include <linux/spi/spi.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -80,6 +81,65 @@
 
 extern struct sys_timer s3c_timer;
 extern void s3c64xx_reserve_bootmem(void);
+
+//static struct samspi_device spidev_b0_cs0;
+#if 0
+static struct samspi_device ProtocolADriver_b1_cs0;
+static struct samspi_device spidev_b0_cs1;
+static struct samspi_device ProtocolBDriver_b1_cs1;
+static struct samspi_device spidev_b1_cs2;
+#endif
+
+static struct spi_board_info __initdata sam_spi_devs[] = {
+	[0] = {
+		.modalias	 = "spidev", /* Test Interface */
+		.mode		 = SPI_MODE_2,	/* CPOL=1, CPHA=0 */
+		.max_speed_hz	 = 2468013,
+		/* Connected to SPI-0 as 1st Slave */
+		.bus_num	 = 0,
+		.irq		 = IRQ_SPI0,
+		.chip_select	 = 0,
+//		.controller_data = (void *)&spidev_b0_cs0,
+#if 0
+	}, {
+		.modalias	= "ProtocolADriver",
+		.mode		= SPI_MODE_2,
+		.max_speed_hz	= 1357923,
+		/* Connected to SPI-1 as 1st Slave */
+		.bus_num	= 1,
+		.irq		= IRQ_SPI1,
+		.chip_select	= 0,
+		.controller_data = (void *)&ProtocolADriver_b1_cs0,
+	}, {
+		.modalias	= "spidev",
+		.mode		= SPI_MODE_2,
+		.max_speed_hz	= 2357923,
+		/* Connected to SPI-0 as 2nd Slave */
+		.bus_num	= 0,
+		.irq		= IRQ_SPI0,
+		.chip_select	= 1,
+		.controller_data = (void *)&spidev_b0_cs1,
+	}, {
+		.modalias	= "ProtocolBDriver",
+		.mode		= SPI_MODE_2,
+		.max_speed_hz	= 3357923,
+		/* Connected to SPI-1 as 2ndst Slave */
+		.bus_num	= 1,
+		.irq		= IRQ_SPI1,
+		.chip_select	= 1,
+		.controller_data = (void *)&ProtocolBDriver_b1_cs1,
+	}, {
+		.modalias	= "spidev",
+		.mode		= SPI_MODE_2,
+		.max_speed_hz	= 4357923,
+		/* Connected to SPI-1 as 3rd Slave */
+		.bus_num	= 1,
+		.irq		= IRQ_SPI1,
+		.chip_select	= 2,
+		.controller_data = (void *)&spidev_b1_cs2,
+#endif
+	},
+};
 
 static struct s3c2410_uartcfg smdk6410_uartcfgs[] __initdata = {
 	[0] = {
@@ -240,6 +300,8 @@ static void __init smdk6410_machine_init(void)
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
+
+	spi_register_board_info(sam_spi_devs, ARRAY_SIZE(sam_spi_devs));
 
 	s3c_fimc0_set_platdata(NULL);
 	s3c_fimc1_set_platdata(NULL);

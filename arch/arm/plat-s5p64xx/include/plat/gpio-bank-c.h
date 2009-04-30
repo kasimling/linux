@@ -26,15 +26,15 @@
 #define S5P64XX_GPC0_ts_CLK		(0x03 << 0)
 #define S5P64XX_GPC0_EINT_G2_0		(0x07 << 0)
 
-#define S5P64XX_GPC1_SPI_CLKO		(0x02 << 4)
+#define S5P64XX_GPC1_SPI_CLK0		(0x02 << 4)
 #define S5P64XX_GPC1_ts_SYNC		(0x03 << 4)
 #define S5P64XX_GPC1_EINT_G2_1		(0x07 << 4)
 
-#define S5P64XX_GPC2_SPI_MOSIO		(0x02 << 8)
+#define S5P64XX_GPC2_SPI_MOSI0		(0x02 << 8)
 #define S5P64XX_GPC2_ts_VALID		(0x03 << 8)
 #define S5P64XX_GPC2_EINT_G2_2		(0x07 << 8)
 
-#define S5P64XX_GPC3_SPI_nCSO		(0x02 << 12)
+#define S5P64XX_GPC3_SPI_nCS0		(0x02 << 12)
 #define S5P64XX_GPC3_ts_DATA		(0x03 << 12)
 #define S5P64XX_GPC3_EINT_G2_3		(0x07 << 12)
 

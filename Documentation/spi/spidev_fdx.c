@@ -14,12 +14,14 @@
 
 static int verbose;
 
+#define MAX_LEN		4096
+
 static void do_read(int fd, int len)
 {
-	unsigned char	buf[32], *bp;
-	int		status;
+	unsigned char	buf[MAX_LEN], *bp;
+	int		status, i;
 
-	/* read at least 2 bytes, no more than 32 */
+	/* read at least 2 bytes, no more than MAX_LEN */
 	if (len < 2)
 		len = 2;
 	else if (len > sizeof(buf))
@@ -36,20 +38,22 @@ static void do_read(int fd, int len)
 		return;
 	}
 
-	printf("read(%2d, %2d): %02x %02x,", len, status,
-		buf[0], buf[1]);
-	status -= 2;
-	bp = buf + 2;
-	while (status-- > 0)
-		printf(" %02x", *bp++);
+	printf("\nread(%2d, %2d):", len, status);
+	bp = buf;
+	for(i=0; i<status; i++){
+		if(i%10 == 0)
+		   printf("\n");
+		printf(" %03d", *bp++);
+		//printf(" %02x", *bp++);
+	}
 	printf("\n");
 }
 
 static void do_msg(int fd, int len)
 {
 	struct spi_ioc_transfer	xfer[2];
-	unsigned char		buf[32], *bp;
-	int			status;
+	unsigned char		buf[MAX_LEN], *bp;
+	int			status, i;
 
 	memset(xfer, 0, sizeof xfer);
 	memset(buf, 0, sizeof buf);
@@ -59,20 +63,27 @@ static void do_msg(int fd, int len)
 
 	buf[0] = 0xaa;
 	xfer[0].tx_buf = (__u64) buf;
-	xfer[0].len = 1;
+	//xfer[0].len = 1;
+	xfer[0].len = len;
 
-	xfer[1].rx_buf = (__u64) buf;
-	xfer[1].len = len;
+	xfer[1].rx_buf = NULL;//(__u64) buf;
+	xfer[1].len = 0;//len;
 
-	status = ioctl(fd, SPI_IOC_MESSAGE(2), xfer);
+	//status = ioctl(fd, SPI_IOC_MESSAGE(2), xfer);
+	status = ioctl(fd, SPI_IOC_MESSAGE(1), xfer);
 	if (status < 0) {
 		perror("SPI_IOC_MESSAGE");
 		return;
 	}
 
-	printf("response(%2d, %2d): ", len, status);
-	for (bp = buf; len; len--)
-		printf(" %02x", *bp++);
+	printf("\nresponse(%2d, %2d):", len, status);
+	bp = buf;
+	for (i=0; i<len; i++){
+		if(i%10 == 0)
+		   printf("\n");
+		printf(" %03d", *bp++);
+		//printf(" %02x", *bp++);
+	}
 	printf("\n");
 }
 
@@ -137,7 +148,10 @@ usage:
 
 	if ((optind + 1) != argc)
 		goto usage;
-	name = argv[optind];
+	if(argv[optind] != NULL)
+		name = argv[optind];
+	else
+		name = "/dev/spi0";
 
 	fd = open(name, O_RDWR);
 	if (fd < 0) {

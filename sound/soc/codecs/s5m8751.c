@@ -231,13 +231,13 @@ static int s5m8751_hw_params(struct snd_pcm_substream *substream,
 		return -EINVAL;
 	}
 
-	in1_ctrl1 &= ~(1<<7);	/* Power down */
+//	in1_ctrl1 &= ~(1<<7);	/* Power down */
 	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
 
 	s5m8751_write(codec, S5M8751_IN1_CTRL2, in1_ctrl2);
 
-	in1_ctrl1 |= (1<<7);	/* Power up */
-	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+//	in1_ctrl1 |= (1<<7);	/* Power up */
+//	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
 
 	return 0;
 }
@@ -298,30 +298,8 @@ static int s5m8751_set_dai_fmt(struct snd_soc_dai *codec_dai, unsigned int fmt)
 		return -EINVAL;
 	}
 
-	in1_ctrl1 &= ~(1<<7);	/* Power down */
 	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
-
 	s5m8751_write(codec, S5M8751_IN1_CTRL2, in1_ctrl2);
-
-	in1_ctrl1 |= (1<<7);	/* Power up */
-	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
-	return 0;
-}
-
-static int s5m8751_digital_mute(struct snd_soc_dai *codec_dai, int mute)
-{
-	struct snd_soc_codec *codec = codec_dai->codec;
-	unsigned int da_dig2;
-
-	da_dig2 = s5m8751_read_reg_cache(codec, S5M8751_DA_DIG2);
-
-	if (mute == MUTE_OFF){
-		da_dig2 &= ~((1<<7)|(1<<6));
-	}else{
-		da_dig2 |= ((1<<7)|(1<<6));	// MUTE_DAC|DITHER_EN
-	}
-	s5m8751_write(codec, S5M8751_DA_DIG2, da_dig2);
-
 	return 0;
 }
 
@@ -347,13 +325,9 @@ static int s5m8751_set_clkdiv(struct snd_soc_dai *codec_dai,
 	}
 
 	in1_ctrl1 = s5m8751_read_reg_cache(codec, S5M8751_IN1_CTRL1);
-	in1_ctrl1 &= ~(1<<7);	/* Power down */
 	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
 
 	s5m8751_write(codec, S5M8751_IN1_CTRL2, in1_ctrl2);
-
-	in1_ctrl1 |= (1<<7);	/* Power up */
-	s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
 
 	return 0;
 }
@@ -365,31 +339,49 @@ static int s5m8751_set_bias_level(struct snd_soc_codec *codec,
 
 	in1_ctrl1 = s5m8751_read_reg_cache(codec, S5M8751_IN1_CTRL1);
 	amp_en = s5m8751_read_reg_cache(codec, S5M8751_AMP_EN);
-	amp_en &= ~(0x3<<6);	/* Clear AMP and Modltr bits for Speaker */
 	amp_mute_off = s5m8751_read_reg_cache(codec, S5M8751_AMP_MUTE);
-	amp_mute_off &= ~(0x1<<4);
+	
+	amp_en &= ~((0x7<<2)|(0x1<<6));
+	amp_mute_off &= ~((0x3<<2)|(0x1<<4));
+	
+	s5m8751_write(codec, S5M8751_AMP_MUTE, amp_mute_off);
+	mdelay(30);	
+	s5m8751_write(codec, S5M8751_AMP_EN, amp_en);
 
 	switch (level) {
 	case SND_SOC_BIAS_ON:
-		amp_mute_off |= (0x1<<4);
-		amp_en |= (0x3<<6);
+		in1_ctrl1 &= ~(0x1<<7);
+		s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
 		in1_ctrl1 |= (0x1<<7);
+		s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
+#if defined(CONFIG_SOUND_S5M8751_OUTPUT_STREAM_HP_OUT)
+		amp_mute_off |= (0x3<<2);
+		amp_en |= (0x7<<2);
+#endif
+
+#if defined(CONFIG_SOUND_S5M8751_OUTPUT_STREAM_SPK_OUT)
+		amp_mute_off |= (0x1<<4);
+		amp_en |= (0x1<<6);
+#endif
 		s5m8751_write(codec, S5M8751_AMP_EN, amp_en);
 		s5m8751_write(codec, S5M8751_AMP_MUTE, amp_mute_off);
-		s5m8751_digital_mute(codec->dai, MUTE_OFF);
-		s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
 		break;
 	case SND_SOC_BIAS_PREPARE:
 	case SND_SOC_BIAS_STANDBY:
-//		s5m8751_write(codec, S5M8751_AMP_EN, amp_en);
-//		s5m8751_write(codec, S5M8751_AMP_MUTE, amp_mute_off);
-//		s5m8751_digital_mute(codec->dai, MUTE_ON);
+		amp_en &= ~((0x7<<2)|(0x1<<6));
+		amp_mute_off &= ~((0x3<<2)|(0x1<<4));
+		s5m8751_write(codec, S5M8751_AMP_MUTE, amp_mute_off);
+		s5m8751_write(codec, S5M8751_AMP_EN, amp_en);
+		in1_ctrl1 &= ~(1<<7);
+		in1_ctrl1 &= ~(1<<7);
+		s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
 		break;
 	case SND_SOC_BIAS_OFF:
-		in1_ctrl1 &= ~(1<<7);
-		s5m8751_write(codec, S5M8751_AMP_EN, amp_en);
+		amp_en &= ~((0x7<<2)|(0x1<<6));
+		amp_mute_off &= ~((0x3<<2)|(0x1<<4));
 		s5m8751_write(codec, S5M8751_AMP_MUTE, amp_mute_off);
-		s5m8751_digital_mute(codec->dai, MUTE_ON);
+		s5m8751_write(codec, S5M8751_AMP_EN, amp_en);
+		in1_ctrl1 &= ~(1<<7);
 		s5m8751_write(codec, S5M8751_IN1_CTRL1, in1_ctrl1);
 		break;
 	}
@@ -397,7 +389,6 @@ static int s5m8751_set_bias_level(struct snd_soc_codec *codec,
 	codec->bias_level = level;
 	return 0;
 }
-
 
 /* 
  * S5M8751 can work only in Slave mode.
@@ -421,7 +412,6 @@ struct snd_soc_dai s5m8751_dai = {
 		},
 		.dai_ops = {
 			 .set_fmt = s5m8751_set_dai_fmt,
-			 .digital_mute = s5m8751_digital_mute,
 			 .set_clkdiv = s5m8751_set_clkdiv,
 		},
 };
@@ -455,28 +445,47 @@ static int s5m8751_init(struct snd_soc_device *socdev)
 	for(val=S5M8751_DA_PDB1; val<=S5M8751_LINE_CTRL; val++){ /* Don't use Power Mngmnt regs here */
 		while(s5m8751_read(codec, val) == -EIO)
 			printk(KERN_WARNING "Read failed! ");
-		//printk("Reg-0x%x = 0x%x\n", val, cache[val]);
 	}
 
-	val = (0x3f<<0); /* PowerOn all */
+#if defined(CONFIG_SOUND_S5M8751_OUTPUT_STREAM_HP_OUT)
+	val = (0x3d<<0); /* PowerOn */
+	s5m8751_write(codec, S5M8751_DA_PDB1, val);
+	
+	val = (0x21<<0); /* Enable */
+	s5m8751_write(codec, S5M8751_DA_AMIX1, val);
+	
+	val = 0; /* XXX TODO Disable all for the time being TODO XXX */
+	s5m8751_write(codec, S5M8751_DA_AMIX2, val);
+
+	val = 0x30;
+	s5m8751_write(codec, S5M8751_DA_VOLL, val);
+	s5m8751_write(codec, S5M8751_DA_VOLR, val);
+	
+	val = 0x28;
+	s5m8751_write(codec, S5M8751_AMP_CTRL, val);
+#endif
+
+#if defined(CONFIG_SOUND_S5M8751_OUTPUT_STREAM_SPK_OUT)
+	val = (0x3a<<0); /* PowerOn */
 	s5m8751_write(codec, S5M8751_DA_PDB1, val);
 
-	val = (0x3f<<0); /* Enable all */
+	val = (0x12<<0); /* Enable  */
 	s5m8751_write(codec, S5M8751_DA_AMIX1, val);
 
 	val = 0; /* XXX TODO Disable all for the time being TODO XXX */
 	s5m8751_write(codec, S5M8751_DA_AMIX2, val);
 
-	val = 60;
+	val = 0x18;
 	s5m8751_write(codec, S5M8751_DA_VOLL, val);
 	s5m8751_write(codec, S5M8751_DA_VOLR, val);
 
-	val = (15<<0) | (0<<5);	/* Gradual Slope */
+	val = 0x01;	/* Gradual Slope */
 	s5m8751_write(codec, S5M8751_SPK_SLOPE, val);
-	val = (0x1<<0);
+	val = 0x05;
 	s5m8751_write(codec, S5M8751_SPK_DT, val);
-	val = (0x1<<4);
+	val = 0x00;
 	s5m8751_write(codec, S5M8751_SPK_S2D, val);
+#endif
 	
 	/* TODO XXX What about DA_ANA, DA_DWA? TODO XXX */
 	codec->bias_level = SND_SOC_BIAS_OFF;
@@ -655,4 +664,3 @@ EXPORT_SYMBOL_GPL(soc_codec_dev_s5m8751);
 
 MODULE_DESCRIPTION("ASoC S5M8751 driver");
 MODULE_AUTHOR("Jaswinder Singh <jassi.brar@samsung.com>");
-MODULE_LICENSE("GPL");

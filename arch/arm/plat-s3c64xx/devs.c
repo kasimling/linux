@@ -478,8 +478,8 @@ EXPORT_SYMBOL(s3c_device_keypad);
 /* SPI (0) */
 static struct resource s3c_spi0_resource[] = {
 	[0] = {
-		.start = S3C_PA_SPI,
-		.end   = S3C_PA_SPI + S3C_SZ_SPI - 1,
+		.start = S3C_PA_SPI0,
+		.end   = S3C_PA_SPI0 + S3C_SZ_SPI0 - 1,
 		.flags = IORESOURCE_MEM,
 	},
 	[1] = {
@@ -493,7 +493,7 @@ static struct resource s3c_spi0_resource[] = {
 static u64 s3c_device_spi0_dmamask = 0xffffffffUL;
 
 struct platform_device s3c_device_spi0 = {
-	.name		  = "s3c2410-spi",
+	.name		  = "sam-spi",
 	.id		  = 0,
 	.num_resources	  = ARRAY_SIZE(s3c_spi0_resource),
 	.resource	  = s3c_spi0_resource,
@@ -507,8 +507,8 @@ EXPORT_SYMBOL(s3c_device_spi0);
 /* SPI (1) */
 static struct resource s3c_spi1_resource[] = {
 	[0] = {
-		.start = S3C_PA_SPI + S3C_SZ_SPI,
-		.end   = S3C_PA_SPI + S3C_SZ_SPI + 0xff,
+		.start = S3C_PA_SPI1,
+		.end   = S3C_PA_SPI1 + S3C_SZ_SPI1 - 1,
 		.flags = IORESOURCE_MEM,
 	},
 	[1] = {
@@ -522,7 +522,7 @@ static struct resource s3c_spi1_resource[] = {
 static u64 s3c_device_spi1_dmamask = 0xffffffffUL;
 
 struct platform_device s3c_device_spi1 = {
-	.name		  = "s3c2410-spi",
+	.name		  = "sam-spi",
 	.id		  = 1,
 	.num_resources	  = ARRAY_SIZE(s3c_spi1_resource),
 	.resource	  = s3c_spi1_resource,

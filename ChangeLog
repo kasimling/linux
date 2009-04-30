@@ -2173,3 +2173,6 @@ v2.6.28.6-samsung-v1: Kyoungil Kim
 
 v2.6.28.6-samsung-r4d0: Kyoungil Kim
 
+v2.6.28.6-samsung-r4d1: Jassi
+	- Addded SPI driver support for S3C6410 and S5P6440 acc to latest
+	Linux-SPI architecture

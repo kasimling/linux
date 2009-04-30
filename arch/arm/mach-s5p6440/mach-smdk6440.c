@@ -28,6 +28,7 @@
 #include <linux/module.h>
 #include <linux/clk.h>
 #include <linux/pwm_backlight.h>
+#include <linux/spi/spi.h>
 
 #include <asm/mach/arch.h>
 #include <asm/mach/map.h>
@@ -71,6 +72,65 @@
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
+
+//static struct samspi_device spidev_b0_cs0;
+#if 0
+static struct samspi_device ProtocolADriver_b1_cs0;
+static struct samspi_device spidev_b0_cs1;
+static struct samspi_device ProtocolBDriver_b1_cs1;
+static struct samspi_device spidev_b1_cs2;
+#endif
+
+static struct spi_board_info __initdata sam_spi_devs[] = {
+	[0] = {
+		.modalias	 = "spidev", /* Test Interface */
+		.mode		 = SPI_MODE_2,	/* CPOL=1, CPHA=0 */
+		.max_speed_hz	 = 2468013,
+		/* Connected to SPI-0 as 1st Slave */
+		.bus_num	 = 0,
+		.irq		 = IRQ_SPI0,
+		.chip_select	 = 0,
+//		.controller_data = (void *)&spidev_b0_cs0,
+#if 0
+	}, {
+		.modalias	= "ProtocolADriver",
+		.mode		= SPI_MODE_2,
+		.max_speed_hz	= 1357923,
+		/* Connected to SPI-1 as 1st Slave */
+		.bus_num	= 1,
+		.irq		= IRQ_SPI1,
+		.chip_select	= 0,
+		.controller_data = (void *)&ProtocolADriver_b1_cs0,
+	}, {
+		.modalias	= "spidev",
+		.mode		= SPI_MODE_2,
+		.max_speed_hz	= 2357923,
+		/* Connected to SPI-0 as 2nd Slave */
+		.bus_num	= 0,
+		.irq		= IRQ_SPI0,
+		.chip_select	= 1,
+		.controller_data = (void *)&spidev_b0_cs1,
+	}, {
+		.modalias	= "ProtocolBDriver",
+		.mode		= SPI_MODE_2,
+		.max_speed_hz	= 3357923,
+		/* Connected to SPI-1 as 2ndst Slave */
+		.bus_num	= 1,
+		.irq		= IRQ_SPI1,
+		.chip_select	= 1,
+		.controller_data = (void *)&ProtocolBDriver_b1_cs1,
+	}, {
+		.modalias	= "spidev",
+		.mode		= SPI_MODE_2,
+		.max_speed_hz	= 4357923,
+		/* Connected to SPI-1 as 3rd Slave */
+		.bus_num	= 1,
+		.irq		= IRQ_SPI1,
+		.chip_select	= 2,
+		.controller_data = (void *)&spidev_b1_cs2,
+#endif
+	},
+};
 
 static struct s3c2410_uartcfg smdk6440_uartcfgs[] __initdata = {
 	[0] = {
@@ -119,6 +179,8 @@ static struct platform_device *smdk6440_devices[] __initdata = {
 	&s3c_device_rtc,
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
+	&s3c_device_spi0,
+	&s3c_device_spi1,
 	&s3c_device_ts,
 	&s3c_device_smc911x,
 	&s3c_device_lcd,
@@ -234,6 +296,8 @@ static void __init smdk6440_machine_init(void)
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 	i2c_register_board_info(1, i2c_devs1, ARRAY_SIZE(i2c_devs1));
+
+	spi_register_board_info(sam_spi_devs, ARRAY_SIZE(sam_spi_devs));
 
 	platform_add_devices(smdk6440_devices, ARRAY_SIZE(smdk6440_devices));
 

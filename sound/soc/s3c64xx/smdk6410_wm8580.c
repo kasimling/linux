@@ -67,11 +67,11 @@ static int smdk6410_hw_params(struct snd_pcm_substream *substream,
 		bfs = 32;
 		rfs = 256;		/* Can take any RFS value for AP */
  		break;
-	case SNDRV_PCM_FORMAT_S18_3LE:
 	case SNDRV_PCM_FORMAT_S20_3LE:
  	case SNDRV_PCM_FORMAT_S24_LE:
 		bfs = 48;
-		rfs = 384;		/* Can take only 384fs or 768fs RFS value for AP */
+		rfs = 512;		/* B'coz 48-BFS needs atleast 512-RFS acc to *S5P6440* UserManual */
+					/* And S5P6440 uses the same I2S IP as S3C6410 */
  		break;
  	case SNDRV_PCM_FORMAT_S32_LE:	/* Impossible, as the AP doesn't support 64fs or more BFS */
 	default:
@@ -79,6 +79,10 @@ static int smdk6410_hw_params(struct snd_pcm_substream *substream,
  	}
  
 	/* Select the AP Sysclk */
+	ret = snd_soc_dai_set_sysclk(cpu_dai, S3C6410_CDCLKSRC_INT, params_rate(params), SND_SOC_CLOCK_OUT);
+	if (ret < 0)
+		return ret;
+
 #ifdef USE_CLKAUDIO
 	ret = snd_soc_dai_set_sysclk(cpu_dai, S3C6410_CLKSRC_CLKAUDIO, params_rate(params), SND_SOC_CLOCK_OUT);
 #else

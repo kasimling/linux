@@ -25,13 +25,13 @@
 #define S3C64XX_GPC0_SPI_MISO0		(0x02 << 0)
 #define S3C64XX_GPC0_EINT_G2_0		(0x07 << 0)
 
-#define S3C64XX_GPC1_SPI_CLKO		(0x02 << 4)
+#define S3C64XX_GPC1_SPI_CLK0		(0x02 << 4)
 #define S3C64XX_GPC1_EINT_G2_1		(0x07 << 4)
 
-#define S3C64XX_GPC2_SPI_MOSIO		(0x02 << 8)
+#define S3C64XX_GPC2_SPI_MOSI0		(0x02 << 8)
 #define S3C64XX_GPC2_EINT_G2_2		(0x07 << 8)
 
-#define S3C64XX_GPC3_SPI_nCSO		(0x02 << 12)
+#define S3C64XX_GPC3_SPI_nCS0		(0x02 << 12)
 #define S3C64XX_GPC3_EINT_G2_3		(0x07 << 12)
 
 #define S3C64XX_GPC4_SPI_MISO1		(0x02 << 16)

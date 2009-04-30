@@ -181,31 +181,6 @@ config SPI_S3C24XX_GPIO
 	  the inbuilt hardware cannot provide the transfer mode, or
 	  where the board is using non hardware connected pins.
 
-config HS_SPI_S5PC100
-        tristate "S5PC100 High Speed SPI Driver"
-        depends on SPI && MACH_SMDKC100
-        help
-          Say Y here to include support for SPI controller in the
-          Samsung S5PC100 based System-on-Chip devices.
-
-choice
-        prompt "High Speed SPI Clock Implementations"
-        depends on HS_SPI_S5PC100
-
-config HSPICLK_PCLK
-        bool "PCLK"
-        depends on HS_SPI_S5PC100
-        help
-          Say Y here to include support for pclk source.
-
-config HSPICLK_SCLK_48M
-        bool "SCLK_48M"
-        depends on  HS_SPI_S5PC100
-        help
-          Say Y here to include support for SCLK (48 MHz) source.
-
-endchoice
-
 config SPI_SH_SCI
 	tristate "SuperH SCI SPI controller"
 	depends on SUPERH
@@ -214,41 +189,67 @@ config SPI_SH_SCI
 	  SPI driver for SuperH SCI blocks.
 
 config HS_SPI_S3C6410
-	tristate "S3C6410 High Speed SPI Driver"
-	depends on SPI && (MACH_SMDK6410 || MACH_SMDK6430)
+	tristate "S3C6410 SPI Driver"
+	depends on SPI && CPU_S3C6410
 	help
 	  Say Y here to include support for SPI controller in the
 	  Samsung S3C6410 based System-on-Chip devices.
 
-choice
-        prompt "High Speed SPI Clock Implementations"
-	depends on HS_SPI_S3C2450 || HS_SPI_S3C6410 || HS_SPI_S3C2416
+config HS_SPI_S5P6440
+	tristate "S5P6440 SPI Driver"
+	depends on SPI && CPU_S5P6440
+	help
+	  Say Y here to include support for SPI controller in the
+	  Samsung S5P6440 based System-on-Chip devices.
 
-config SPICLK_PCLK
+config HS_SPI_S5PC100
+	tristate "S5PC100 SPI Driver"
+	depends on SPI && CPU_S5PC100
+	help
+	  Say Y here to include support for SPI controller in the
+	  Samsung S5PC100 based System-on-Chip devices.
+
+choice
+        prompt "SPI Source Clock"
+	depends on (HS_SPI_S3C6410 || HS_SPI_S5P6440 || HS_SPI_S5PC100)
+
+config SPICLK_SRC_PCLK
 	bool "PCLK"
-	depends on HS_SPI_S3C2450 || HS_SPI_S3C6410 || HS_SPI_S3C2416
+	depends on (HS_SPI_S3C6410 || HS_SPI_S5P6440 || HS_SPI_S5PC100)
 	help
 	  Say Y here to include support for pclk source.
 
-config SPICLK_EPLL
-	bool "EPLL"
-	depends on  HS_SPI_S3C2450 || HS_SPI_S3C6410 || HS_SPI_S3C2416
+config SPICLK_SRC_USB
+	bool "USBCLK"
+	depends on HS_SPI_S3C6410
+	help
+	  Say Y here to include support for USB clock source.
+
+config SPICLK_SRC_EPLL
+	bool "EPLL Clock"
+	depends on  HS_SPI_S3C6410
 	help
 	  Say Y here to include support for EPLL source.
 
-config SPICLK_USBCLK
-	bool "USBCLK"
-	depends on HS_SPI_S3C6400 || HS_SPI_S3C6410
+config SPICLK_SRC_SPIEXT
+	bool "SPI External Clock"
+	depends on  HS_SPI_S5P6440
+	help
+	  Say Y here to include support for EPLL source.
+
+config SPICLK_SRC_SCLK48M
+	bool "SCLK SPI 48M"
+	depends on  HS_SPI_S5PC100
+	help
+	  Say Y here to include support for EPLL source.
+
+config SPICLK_SRC_SCLKSPI
+	bool "SCLK SPI"
+	depends on HS_SPI_S5PC100
 	help
 	  Say Y here to include support for USB clock source.
 
 endchoice
-
-config WORD_TRANSIZE
-	bool "Tansfer size as Word"
-	depends on HS_SPI_S3C6400 || HS_SPI_S3C6410 || HS_SPI_S5PC100
-	help
-	  Say Y here to include support for word transfer size.
 
 config SPI_TXX9
 	tristate "Toshiba TXx9 SPI controller"

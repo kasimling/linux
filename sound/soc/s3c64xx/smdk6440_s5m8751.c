@@ -1,5 +1,5 @@
 /*
- * smdk6400_s5m8751.c
+ * smdk6440_s5m8751.c
  *
  * Copyright (C) 2009, Samsung Elect. Ltd. - Jaswinder Singh <jassisinghbrar@gmail.com>
  *
@@ -9,42 +9,34 @@
  *  option) any later version.
  */
 
-#include <linux/module.h>
-#include <linux/moduleparam.h>
-#include <linux/timer.h>
 #include <linux/interrupt.h>
 #include <linux/platform_device.h>
-#include <linux/i2c.h>
 #include <sound/core.h>
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
 #include <sound/soc.h>
 #include <sound/soc-dapm.h>
 
-#include <asm/mach-types.h>
-
-#include <plat/regs-iis.h>
-#include <plat/map-base.h>
-#include <asm/gpio.h> 
-#include <plat/gpio-cfg.h> 
-#include <plat/regs-gpio.h>
-
-#include <mach/hardware.h>
-#include <mach/audio.h>
 #include <asm/io.h>
+#include <asm/gpio.h> 
+#include <mach/map.h>
+#include <plat/regs-gpio.h> 
+#include <plat/gpio-cfg.h> 
+#include <plat/gpio-bank-r.h>
+#include <plat/map-base.h>
 #include <plat/regs-clock.h>
 
 #include "../codecs/s5m8751.h"
 #include "s3c-pcm.h"
 
-#include "s3c6410-i2s.h"
+#include "s5p6440-i2s.h"
 
-#define SRC_CLK	s3c6410_i2s_get_clockrate()
+#define SRC_CLK	s5p6440_i2s_get_clockrate()
 
 /* XXX BLC(bits-per-channel) --> BFS(bit clock shud be >= FS*(Bit-per-channel)*2) XXX */
 /* XXX BFS --> RFS(must be a multiple of BFS)                                 XXX */
 /* XXX RFS & SRC_CLK --> Prescalar Value(SRC_CLK / RFS_VAL / fs - 1)          XXX */
-static int smdk6410_hw_params(struct snd_pcm_substream *substream,
+static int smdk6440_hw_params(struct snd_pcm_substream *substream,
 	struct snd_pcm_hw_params *params)
 {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
@@ -53,10 +45,10 @@ static int smdk6410_hw_params(struct snd_pcm_substream *substream,
 	int bfs, rfs, psr, ret;
 
 	/* Choose BFS and RFS values combination that is supported by
-	 * both the S5M8751 codec as well as the S5P6410 AP
+	 * both the S5M8751 codec as well as the S5P6440 AP
 	 *
 	 * S5M8751 codec supports only S16_LE, S18_3LE, S20_3LE & S24_LE.
-	 * S5P6410 AP supports only S8, S16_LE & S24_LE.
+	 * S5P6440 AP supports only S8, S16_LE & S24_LE.
 	 * We implement all for completeness but only S16_LE & S24_LE bit-lengths 
 	 * are possible for this AP-Codec combination.
 	 */
@@ -73,22 +65,21 @@ static int smdk6410_hw_params(struct snd_pcm_substream *substream,
 	case SNDRV_PCM_FORMAT_S20_3LE:
  	case SNDRV_PCM_FORMAT_S24_LE:
 		bfs = 48;
-		rfs = 512;		/* B'coz 48-BFS needs atleast 512-RFS acc to *S5P6440* UserManual */
-					/* And S5P6440 uses the same I2S IP as S3C6410 */
+		rfs = 512;		/* See Table 41-1,2 of S5P6440 UserManual */
  		break;
 	default:
 		return -EINVAL;
  	}
  
 	/* Select the AP Sysclk */
-	ret = snd_soc_dai_set_sysclk(cpu_dai, S3C6410_CDCLKSRC_INT, params_rate(params), SND_SOC_CLOCK_OUT);
+	ret = snd_soc_dai_set_sysclk(cpu_dai, S5P6440_CDCLKSRC_INT, params_rate(params), SND_SOC_CLOCK_OUT);
 	if (ret < 0)
 		return ret;
 
 #ifdef USE_CLKAUDIO
-	ret = snd_soc_dai_set_sysclk(cpu_dai, S3C6410_CLKSRC_CLKAUDIO, params_rate(params), SND_SOC_CLOCK_OUT);
+	ret = snd_soc_dai_set_sysclk(cpu_dai, S5P6440_CLKSRC_CLKAUDIO, params_rate(params), SND_SOC_CLOCK_OUT);
 #else
-	ret = snd_soc_dai_set_sysclk(cpu_dai, S3C6410_CLKSRC_PCLK, 0, SND_SOC_CLOCK_OUT);
+	ret = snd_soc_dai_set_sysclk(cpu_dai, S5P6440_CLKSRC_PCLK, 0, SND_SOC_CLOCK_OUT);
 #endif
 	if (ret < 0)
 		return ret;
@@ -99,12 +90,12 @@ static int smdk6410_hw_params(struct snd_pcm_substream *substream,
 		return ret;
 
 	/* Set the AP RFS */
-	ret = snd_soc_dai_set_clkdiv(cpu_dai, S3C64XX_DIV_MCLK, rfs);
+	ret = snd_soc_dai_set_clkdiv(cpu_dai, S5P64XX_DIV_MCLK, rfs);
 	if (ret < 0)
 		return ret;
 
 	/* Set the AP BFS */
-	ret = snd_soc_dai_set_clkdiv(cpu_dai, S3C64XX_DIV_BCLK, bfs);
+	ret = snd_soc_dai_set_clkdiv(cpu_dai, S5P64XX_DIV_BCLK, bfs);
 	if (ret < 0)
 		return ret;
 
@@ -132,7 +123,7 @@ static int smdk6410_hw_params(struct snd_pcm_substream *substream,
 	//printk("SRC_CLK=%d PSR=%d RFS=%d BFS=%d\n", SRC_CLK, psr, rfs, bfs);
 
 	/* Set the AP Prescalar */
-	ret = snd_soc_dai_set_clkdiv(cpu_dai, S3C64XX_DIV_PRESCALER, psr);
+	ret = snd_soc_dai_set_clkdiv(cpu_dai, S5P64XX_DIV_PRESCALER, psr);
 	if (ret < 0)
 		return ret;
 
@@ -152,8 +143,8 @@ static int smdk6410_hw_params(struct snd_pcm_substream *substream,
 /*
  * S5M8751 DAI operations.
  */
-static struct snd_soc_ops smdk6410_ops = {
-	.hw_params = smdk6410_hw_params,
+static struct snd_soc_ops smdk6440_ops = {
+	.hw_params = smdk6440_hw_params,
 };
 
 static const struct snd_soc_dapm_widget s5m8751_dapm_widgets[] = {
@@ -180,14 +171,14 @@ static const struct snd_soc_dapm_route audio_map[] = {
 		
 };
 
-static int smdk6410_s5m8751_init(struct snd_soc_codec *codec)
+static int smdk6440_s5m8751_init(struct snd_soc_codec *codec)
 {
 	int i;
 
-	/* Add smdk6410 specific widgets */
+	/* Add smdk6440 specific widgets */
 	snd_soc_dapm_new_controls(codec, s5m8751_dapm_widgets,ARRAY_SIZE(s5m8751_dapm_widgets));
 
-	/* set up smdk6410 specific audio paths */
+	/* set up smdk6440 specific audio paths */
 	snd_soc_dapm_add_routes(codec, audio_map,ARRAY_SIZE(audio_map));
 
 	/* No jack detect - mark all jacks as enabled */
@@ -200,74 +191,79 @@ static int smdk6410_s5m8751_init(struct snd_soc_codec *codec)
 	return 0;
 }
 
-static struct snd_soc_dai_link smdk6410_dai[] = {
+static struct snd_soc_dai_link smdk6440_dai[] = {
 {
 	.name = "S5M8751",
 	.stream_name = "S5M8751 Playback",
-	.cpu_dai = &s3c6410_i2s_v32_dai,
+	.cpu_dai = &s5p6440_i2s_v40_dai,
 	.codec_dai = &s5m8751_dai,
-	.init = smdk6410_s5m8751_init,
-	.ops = &smdk6410_ops,
+	.init = smdk6440_s5m8751_init,
+	.ops = &smdk6440_ops,
 },
 };
 
-static struct snd_soc_machine smdk6410 = {
-	.name = "smdk6410",
-	.dai_link = smdk6410_dai,
-	.num_links = ARRAY_SIZE(smdk6410_dai),
+static struct snd_soc_machine smdk6440 = {
+	.name = "smdk6440",
+	.dai_link = smdk6440_dai,
+	.num_links = ARRAY_SIZE(smdk6440_dai),
 };
 
-static struct s5m8751_setup_data smdk6410_s5m8751_setup = {
+static struct s5m8751_setup_data smdk6440_s5m8751_setup = {
 	.i2c_address = 0x68,
 };
 
-static struct snd_soc_device smdk6410_snd_devdata = {
-	.machine = &smdk6410,
+static struct snd_soc_device smdk6440_snd_devdata = {
+	.machine = &smdk6440,
 	.platform = &s3c24xx_soc_platform,
 	.codec_dev = &soc_codec_dev_s5m8751,
-	.codec_data = &smdk6410_s5m8751_setup,
+	.codec_data = &smdk6440_s5m8751_setup,
 };
 
-static struct platform_device *smdk6410_snd_device;
+static struct platform_device *smdk6440_snd_device;
 
-static int __init smdk6410_audio_init(void)
+static int __init vega_audio_init(void)
 {
 	int ret;
 	u32 val;
+	/* configure the GPR pins is I2C mode */
+	/* Configure the GPR pins in I2S mode */
+	val = __raw_readl(S5P64XX_GPRPUD);
+	val &= ~((3<<8) | (3<<10) | (3<<14) | (3<<16) | (3<<18) | (3<<20) | (3<<28) | (3<<30));
+	val |= ((0<<8) | (0<<10) | (0<<14) | (0<<16) | (0<<18) | (1<<19) | (1<<21) | (0<<28) | (1<<30));
+	__raw_writel(val, S5P64XX_GPRPUD);
 
-	/* Configure the GPD pins in I2S and Pull-Up mode */
-	val = __raw_readl(S3C64XX_GPDPUD);
-	val &= ~((3<<0) | (3<<2) | (3<<4) | (3<<6) | (3<<8));
-	val |= (2<<0) | (2<<2) | (2<<4) | (2<<6) | (2<<8);
-	__raw_writel(val, S3C64XX_GPDPUD);
+	val = __raw_readl(S5P64XX_GPRCON0);
+	val &= ~((0xf<<16) | (0xf<<20) | (0xf<<28));
+	val |= (5<<16) | (5<<20) | (5<<28);
+	__raw_writel(val, S5P64XX_GPRCON0);
 
-	val = __raw_readl(S3C64XX_GPDCON);
-	val &= ~((0xf<<0) | (0xf<<4) | (0xf<<8) | (0xf<<12) | (0xf<<16));
-	val |= (3<<0) | (3<<4) | (3<<8) | (3<<12) | (3<<16);
-	__raw_writel(val, S3C64XX_GPDCON);
+	val = __raw_readl(S5P64XX_GPRCON1);
+	val &= ~((0xf<<0) | (0xf<<4) | (0xf<<8) | (0xf<<12) | (0xf<<24) | (0xf<<28));
+	val |= (5<<0) | (5<<4) | (3<<9) | (3<<13) | (5<<24) | (5<<28);
+	__raw_writel(val, S5P64XX_GPRCON1);
 
-	smdk6410_snd_device = platform_device_alloc("soc-audio", 0);
-	if (!smdk6410_snd_device)
+	smdk6440_snd_device = platform_device_alloc("soc-audio", 0);
+	if (!smdk6440_snd_device)
 		return -ENOMEM;
 
-	platform_set_drvdata(smdk6410_snd_device, &smdk6410_snd_devdata);
-	smdk6410_snd_devdata.dev = &smdk6410_snd_device->dev;
-	ret = platform_device_add(smdk6410_snd_device);
+	platform_set_drvdata(smdk6440_snd_device, &smdk6440_snd_devdata);
+	smdk6440_snd_devdata.dev = &smdk6440_snd_device->dev;
+	ret = platform_device_add(smdk6440_snd_device);
 
 	if (ret)
-		platform_device_put(smdk6410_snd_device);
+		platform_device_put(smdk6440_snd_device);
 	
 	return ret;
 }
 
-static void __exit smdk6410_audio_exit(void)
+static void __exit vega_audio_exit(void)
 {
-	platform_device_unregister(smdk6410_snd_device);
+	platform_device_unregister(smdk6440_snd_device);
 }
 
-module_init(smdk6410_audio_init);
-module_exit(smdk6410_audio_exit);
+module_init(vega_audio_init);
+module_exit(vega_audio_exit);
 
 /* Module information */
-MODULE_DESCRIPTION("ALSA SoC SMDK6410 S5M8751");
+MODULE_DESCRIPTION("ALSA SoC SMDK6440 S5M8751");
 MODULE_LICENSE("GPL");

@@ -9,8 +9,6 @@
  *  option) any later version.
  */
 
-//#define USE_GPR
-
 #include <linux/interrupt.h>
 #include <linux/platform_device.h>
 #include <sound/core.h>
@@ -24,6 +22,8 @@
 #include <mach/map.h>
 #include <plat/regs-gpio.h> 
 #include <plat/gpio-cfg.h> 
+
+//#define USE_GPR
 
 #ifdef USE_GPR
 #include <plat/gpio-bank-r.h>
@@ -70,11 +70,7 @@ static int smdk6440_hw_params(struct snd_pcm_substream *substream,
 		bfs = 32;
 		rfs = 256;		/* Can take any RFS value for AP */
  		break;
-	case SNDRV_PCM_FORMAT_S18_3LE:
 	case SNDRV_PCM_FORMAT_S20_3LE:
-		bfs = 48;
-		rfs = 384;		/* Can take only 384fs or 768fs RFS value for AP */
- 		break;
  	case SNDRV_PCM_FORMAT_S24_LE:
 		bfs = 48;
 		rfs = 512;		/* See Table 41-1,2 of S5P6440 UserManual */
@@ -85,6 +81,10 @@ static int smdk6440_hw_params(struct snd_pcm_substream *substream,
  	}
  
 	/* Select the AP Sysclk */
+	ret = snd_soc_dai_set_sysclk(cpu_dai, S5P6440_CDCLKSRC_INT, params_rate(params), SND_SOC_CLOCK_OUT);
+	if (ret < 0)
+		return ret;
+
 #ifdef USE_CLKAUDIO
 	ret = snd_soc_dai_set_sysclk(cpu_dai, S5P6440_CLKSRC_CLKAUDIO, params_rate(params), SND_SOC_CLOCK_OUT);
 #else

@@ -83,6 +83,16 @@ static struct s3c_dma_map __initdata s5p6440_dma_mappings[] = {
 		.channels	= MAP0(S3C_DMA0_SPI0_TX),
 		.hw_addr.to	= S3C_DMA0_SPI0_TX,
 	},
+	[DMACH_SPI1_IN] = {
+		.name		= "spi1-in",
+		.channels	= MAP0(S3C_DMA0_SPI1_RX),
+		.hw_addr.from	= S3C_DMA0_SPI1_RX,
+	},
+	[DMACH_SPI1_OUT] = {
+		.name		= "spi1-out",
+		.channels	= MAP0(S3C_DMA0_SPI1_TX),
+		.hw_addr.to	= S3C_DMA0_SPI1_TX,
+	},
 	[DMACH_AC97_PCM_OUT] = {
 		.name		= "ac97-pcm-out",
 		.channels	= MAP0(S3C_DMA0_PCM0_TX),
