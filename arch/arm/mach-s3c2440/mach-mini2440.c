@@ -224,7 +224,7 @@ static struct s3c2410_ts_mach_info mini2440_ts_cfg = {
 	.type		= (S3C2410_LCDCON1_TFT16BPP |\
 			   S3C2410_LCDCON1_TFT)
 
-static struct s3c2410fb_display mini2440_lcd_cfg[] __initdata = {
+static struct s3c2410fb_display mini2440_lcd_cfg[] = {
 	[0] = {	/* mini2440 + 3.5" TFT + touchscreen - old model "N35" */
 		_LCD_DECLARE(
 			7,			/* The 3.5 is quite fast */
