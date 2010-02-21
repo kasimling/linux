@@ -48,6 +48,16 @@
 #include <plat/mci.h>
 #include <plat/udc.h>
 
+/*
+ * This is compiled conditionaly, as:
+ * 1) not everyone needs the touchscreen
+ * 2) that s3c_ts code might not have been added
+ * 	to the kernel with this file
+ */
+#ifdef CONFIG_TOUCHSCREEN_S3C2410
+#include <mach/ts.h>
+#endif
+
 #include <linux/mtd/mtd.h>
 #include <linux/mtd/nand.h>
 #include <linux/mtd/nand_ecc.h>
@@ -59,9 +69,16 @@
 
 #include <sound/s3c24xx_uda134x.h>
 
+#ifdef CONFIG_TOUCHSCREEN_FILTER
+#include <../drivers/input/touchscreen/ts_filter_linear.h>
+#include <../drivers/input/touchscreen/ts_filter_mean.h>
+#include <../drivers/input/touchscreen/ts_filter_median.h>
+#include <../drivers/input/touchscreen/ts_filter_group.h>
+#endif
+
 #define MACH_MINI2440_DM9K_BASE (S3C2410_CS4 + 0x300)
 
-static struct map_desc mini2440_iodesc[] __initdata = {
+static struct map_desc mini2440_iodesc[] = {
 	/* nothing to declare, move along */
 };
 
@@ -70,7 +87,7 @@ static struct map_desc mini2440_iodesc[] __initdata = {
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
 
 
-static struct s3c2410_uartcfg mini2440_uartcfgs[] __initdata = {
+static struct s3c2410_uartcfg mini2440_uartcfgs[] = {
 	[0] = {
 		.hwport	     = 0,
 		.flags	     = 0,
@@ -114,10 +131,73 @@ static void mini2440_udc_pullup(enum s3c2410_udc_cmd_e cmd)
 	}
 }
 
-static struct s3c2410_udc_mach_info mini2440_udc_cfg __initdata = {
+static struct s3c2410_udc_mach_info mini2440_udc_cfg = {
 	.udc_command		= mini2440_udc_pullup,
 };
 
+/* touchscreen configuration */
+
+#ifdef CONFIG_TOUCHSCREEN_FILTER
+static struct ts_filter_linear_configuration mini2440_ts_linear_config = {
+	.constants = {
+		0, /* x factor */
+		1, /* y proportion */
+		0, /* x offset */
+
+		1, /* x factor */
+		0, /* y factor */
+		0, /* y offset */
+
+		1  /* common divisor */
+	},
+	.coord0 = 0,
+	.coord1 = 1,
+};
+
+static struct ts_filter_group_configuration mini2440_ts_group_config = {
+	.extent = 12,
+	.close_enough = 10,
+	.threshold = 6,		/* at least half of the points in a group */
+	.attempts = 10,
+};
+
+static struct ts_filter_median_configuration mini2440_ts_median_config = {
+	.extent = 20,
+	.decimation_below = 3,
+	.decimation_threshold = 8 * 3,
+	.decimation_above = 4,
+};
+
+static struct ts_filter_mean_configuration mini2440_ts_mean_config = {
+	.bits_filter_length = 2, /* 4 points */
+};
+
+static struct s3c2410_ts_mach_info mini2440_ts_cfg = {
+	.delay = 10000,
+	.presc = 0xff, /* slow as we can go */
+	.filter_sequence = {
+		[0] = &ts_filter_group_api,
+		[1] = &ts_filter_median_api,
+		[2] = &ts_filter_mean_api,
+		[3] = &ts_filter_linear_api,
+	},
+	.filter_config = {
+		[0] = &mini2440_ts_group_config,
+		[1] = &mini2440_ts_median_config,
+		[2] = &mini2440_ts_mean_config,
+		[3] = &mini2440_ts_linear_config,
+	},
+};
+#else /* !CONFIG_TOUCHSCREEN_FILTER */
+#ifdef CONFIG_TOUCHSCREEN_S3C2410
+static struct s3c2410_ts_mach_info mini2440_ts_cfg = {
+	.delay = 10000,
+	.presc = 0xff, /* slow as we can go */
+};
+#endif /* CONFIG_TOUCHSCREEN_S3C2410 */
+#endif
+
+/* LCD driver info */
 
 /* LCD timing and setup */
 
@@ -145,7 +225,7 @@ static struct s3c2410_udc_mach_info mini2440_udc_cfg __initdata = {
 			   S3C2410_LCDCON1_TFT)
 
 static struct s3c2410fb_display mini2440_lcd_cfg[] __initdata = {
-	[0] = {	/* mini2440 + 3.5" TFT + touchscreen */
+	[0] = {	/* mini2440 + 3.5" TFT + touchscreen - old model "N35" */
 		_LCD_DECLARE(
 			7,			/* The 3.5 is quite fast */
 			240, 21, 38, 6, 	/* x timing */
@@ -183,6 +263,31 @@ static struct s3c2410fb_display mini2440_lcd_cfg[] __initdata = {
 				 tested with the FPGA shield */
 		.lcdcon5	= (S3C2410_LCDCON5_FRM565 |
 				   S3C2410_LCDCON5_HWSWP),
+	},
+	
+	[3] = {	/* mini2440 + 3.5" TFT + TS -- New model as Nov 2009 "T35" */
+		_LCD_DECLARE(
+			7,			/* The 3.5 is quite fast */
+			240, 21, 25, 6, 	/* x timing */
+			320, 2, 4, 2,		/* y timing */
+			40),			/* refresh rate */
+		.lcdcon5	= (S3C2410_LCDCON5_FRM565 |
+				   S3C2410_LCDCON5_INVVLINE |
+				   S3C2410_LCDCON5_INVVFRAME |
+				   S3C2410_LCDCON5_INVVDEN |
+				   S3C2410_LCDCON5_PWREN),
+	},
+	[4] = { /* mini2440 + 5.6" TFT + touchscreen -- Innolux AT056TN52 */
+		/* be sure the "power" jumper is set accordingly ! */
+		_LCD_DECLARE(
+			10,			/* the 5.3" runs slower */
+			640, 41, 68, 22, 	/* x timing */
+			480, 26, 6, 2,		/* y timing */
+			40),			/* refresh rate */
+		.lcdcon5	= (S3C2410_LCDCON5_FRM565 |
+				   S3C2410_LCDCON5_INVVLINE |
+				   S3C2410_LCDCON5_INVVFRAME |
+				   S3C2410_LCDCON5_PWREN),
 	},
 };
 
@@ -233,7 +338,7 @@ static struct s3c2410fb_mach_info mini2440_fb_info __initdata = {
 
 /* MMC/SD  */
 
-static struct s3c24xx_mci_pdata mini2440_mmc_cfg __initdata = {
+static struct s3c24xx_mci_pdata mini2440_mmc_cfg = {
    .gpio_detect   = S3C2410_GPG(8),
    .gpio_wprotect = S3C2410_GPH(8),
    .set_power     = NULL,
@@ -242,7 +347,7 @@ static struct s3c24xx_mci_pdata mini2440_mmc_cfg __initdata = {
 
 /* NAND Flash on MINI2440 board */
 
-static struct mtd_partition mini2440_default_nand_part[] __initdata = {
+static struct mtd_partition mini2440_default_nand_part[] = {
 	[0] = {
 		.name	= "u-boot",
 		.size	= SZ_256K,
@@ -267,7 +372,7 @@ static struct mtd_partition mini2440_default_nand_part[] __initdata = {
 	},
 };
 
-static struct s3c2410_nand_set mini2440_nand_sets[] __initdata = {
+static struct s3c2410_nand_set mini2440_nand_sets[] = {
 	[0] = {
 		.name		= "nand",
 		.nr_chips	= 1,
@@ -277,7 +382,7 @@ static struct s3c2410_nand_set mini2440_nand_sets[] __initdata = {
 	},
 };
 
-static struct s3c2410_platform_nand mini2440_nand_info __initdata = {
+static struct s3c2410_platform_nand mini2440_nand_info = {
 	.tacls		= 0,
 	.twrph0		= 25,
 	.twrph1		= 15,
@@ -430,6 +535,7 @@ static struct s3c24xx_led_platdata mini2440_led4_pdata = {
 static struct s3c24xx_led_platdata mini2440_led_backlight_pdata = {
 	.name		= "backlight",
 	.gpio		= S3C2410_GPG(4),
+	.flags		= S3C24XX_LEDF_STARTON,
 	.def_trigger	= "backlight",
 };
 
@@ -498,14 +604,14 @@ static struct at24_platform_data at24c08 = {
 	.page_size	= 16,
 };
 
-static struct i2c_board_info mini2440_i2c_devs[] __initdata = {
+static struct i2c_board_info mini2440_i2c_devs[] = {
 	{
 		I2C_BOARD_INFO("24c08", 0x50),
 		.platform_data = &at24c08,
 	},
 };
 
-static struct platform_device *mini2440_devices[] __initdata = {
+static struct platform_device *mini2440_devices[] = {
 	&s3c_device_usb,
 	&s3c_device_wdt,
 /*	&s3c_device_adc,*/ /* ADC doesn't like living with touchscreen ! */
@@ -609,8 +715,18 @@ static void mini2440_parse_features(
 			features->done |= FEATURE_BACKLIGHT;
 			break;
 		case 't':
-			printk(KERN_INFO "MINI2440: '%c' ignored, "
-				"touchscreen not compiled in\n", f);
+#ifdef CONFIG_TOUCHSCREEN_S3C2410
+			if (features->done & FEATURE_TOUCH)
+				printk(KERN_INFO "MINI2440: '%c' ignored, "
+					"touchscreen already set\n", f);
+			else
+				features->optional[features->count++] =
+						&s3c_device_ts;
+			features->done |= FEATURE_TOUCH;
+#else
+				printk(KERN_INFO "MINI2440: '%c' ignored, "
+					"touchscreen not compiled in\n", f);
+#endif
 			break;
 		case 'c':
 			if (features->done & FEATURE_CAMERA)
@@ -683,6 +799,11 @@ static void __init mini2440_init(void)
 
 	i2c_register_board_info(0, mini2440_i2c_devs,
 				ARRAY_SIZE(mini2440_i2c_devs));
+
+#ifdef CONFIG_TOUCHSCREEN_S3C2410
+	if (features.done & FEATURE_TOUCH)
+		set_s3c2410ts_info(&mini2440_ts_cfg);
+#endif
 
 	platform_add_devices(mini2440_devices, ARRAY_SIZE(mini2440_devices));
 

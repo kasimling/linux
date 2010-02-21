@@ -11,6 +11,54 @@ menuconfig INPUT_TOUCHSCREEN
 
 if INPUT_TOUCHSCREEN
 
+menuconfig TOUCHSCREEN_FILTER
+	boolean "Touchscreen Filtering"
+	depends on INPUT_TOUCHSCREEN
+	select TOUCHSCREEN_FILTER_GROUP
+	select TOUCHSCREEN_FILTER_MEDIAN
+	select TOUCHSCREEN_FILTER_MEAN
+	select TOUCHSCREEN_FILTER_LINEAR
+	help
+	  Select this to include kernel touchscreen filter support.  The filters
+	  can be combined in any order in your machine init and the parameters
+	  for them can also be set there.
+
+if TOUCHSCREEN_FILTER
+
+config TOUCHSCREEN_FILTER_GROUP
+	bool "Group Touchscreen Filter"
+	depends on INPUT_TOUCHSCREEN && TOUCHSCREEN_FILTER
+	default Y
+	help
+	  Say Y here if you want to use the Group touchscreen filter, it
+	  avoids using atypical samples.
+
+config TOUCHSCREEN_FILTER_MEDIAN
+	bool "Median Average Touchscreen Filter"
+	depends on INPUT_TOUCHSCREEN && TOUCHSCREEN_FILTER
+	default Y
+	help
+	  Say Y here if you want to use the Median touchscreen filter, it's
+	  highly effective if you data is noisy with occasional excursions.
+
+config TOUCHSCREEN_FILTER_MEAN
+	bool "Mean Average Touchscreen Filter"
+	depends on INPUT_TOUCHSCREEN && TOUCHSCREEN_FILTER
+	default Y
+	help
+	  Say Y here if you want to use the Mean touchscreen filter, it
+	  can further improve decent quality data by removing jitter
+
+config TOUCHSCREEN_FILTER_LINEAR
+	bool "Linear Touchscreen Filter"
+	depends on INPUT_TOUCHSCREEN && TOUCHSCREEN_FILTER
+	default Y
+	help
+	  Say Y here if you want to use the Linear touchscreen filter, it
+	  enables the use of calibration data for the touchscreen.
+
+endif
+
 config TOUCHSCREEN_ADS7846
 	tristate "ADS7846/TSC2046 and ADS7843 based touchscreens"
 	depends on SPI_MASTER
@@ -111,18 +159,6 @@ config TOUCHSCREEN_DA9034
 	  Say Y here to enable the support for the touchscreen found
 	  on Dialog Semiconductor DA9034 PMIC.
 
-config TOUCHSCREEN_DYNAPRO
-	tristate "Dynapro serial touchscreen"
-	select SERIO
-	help
-	  Say Y here if you have a Dynapro serial touchscreen connected to
-	  your system.
-
-	  If unsure, say N.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called dynapro.
-
 config TOUCHSCREEN_EETI
 	tristate "EETI touchscreen panel support"
 	depends on I2C
@@ -147,8 +183,8 @@ config TOUCHSCREEN_FUJITSU
 
 config TOUCHSCREEN_S3C2410
 	tristate "Samsung S3C2410 touchscreen input driver"
-	depends on ARCH_S3C2410
-	select S3C24XX_ADC
+	depends on ARCH_S3C2410 && INPUT && INPUT_TOUCHSCREEN
+	select SERIO
 	help
 	  Say Y here if you have the s3c2410 touchscreen.
 
@@ -156,6 +192,12 @@ config TOUCHSCREEN_S3C2410
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called s3c2410_ts.
+
+config TOUCHSCREEN_S3C2410_DEBUG
+	boolean "Samsung S3C2410 touchscreen debug messages"
+	depends on TOUCHSCREEN_S3C2410
+	help
+	  Select this if you want debug messages
 
 config TOUCHSCREEN_GUNZE
 	tristate "Gunze AHL-51S touchscreen"
@@ -321,7 +363,7 @@ config TOUCHSCREEN_TOUCHWIN
 
 config TOUCHSCREEN_ATMEL_TSADCC
 	tristate "Atmel Touchscreen Interface"
-	depends on ARCH_AT91SAM9RL || ARCH_AT91SAM9G45
+	depends on ARCH_AT91SAM9RL
 	help
 	  Say Y here if you have a 4-wire touchscreen connected to the
           ADC Controller on your Atmel SoC (such as the AT91SAM9RL).
@@ -442,25 +484,12 @@ config TOUCHSCREEN_USB_COMPOSITE
 	  - IdealTEK URTC1000
 	  - GoTop Super_Q2/GogoPen/PenPower tablets
 	  - JASTEC USB Touch Controller/DigiTech DTR-02U
-	  - Zytronic controllers
 
 	  Have a look at <http://linux.chapter7.ch/touchkit/> for
 	  a usage description and the required user-space stuff.
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called usbtouchscreen.
-
-config TOUCHSCREEN_MC13783
-	tristate "Freescale MC13783 touchscreen input driver"
-	depends on MFD_MC13783
-	help
-	  Say Y here if you have an Freescale MC13783 PMIC on your
-	  board and want to use its touchscreen
-
-	  If unsure, say N.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called mc13783_ts.
 
 config TOUCHSCREEN_USB_EGALAX
 	default y
@@ -525,16 +554,6 @@ config TOUCHSCREEN_USB_JASTEC
 config TOUCHSCREEN_USB_E2I
 	default y
 	bool "e2i Touchscreen controller (e.g. from Mimo 740)"
-	depends on TOUCHSCREEN_USB_COMPOSITE
-
-config TOUCHSCREEN_USB_ZYTRONIC
-	default y
-	bool "Zytronic controller" if EMBEDDED
-	depends on TOUCHSCREEN_USB_COMPOSITE
-
-config TOUCHSCREEN_USB_ETT_TC5UH
-	default y
-	bool "ET&T TC5UH touchscreen controler support" if EMBEDDED
 	depends on TOUCHSCREEN_USB_COMPOSITE
 
 config TOUCHSCREEN_TOUCHIT213

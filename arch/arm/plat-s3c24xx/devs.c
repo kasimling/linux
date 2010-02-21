@@ -28,6 +28,8 @@
 #include <mach/hardware.h>
 #include <mach/dma.h>
 #include <mach/irqs.h>
+#include <mach/ts.h>
+#include <asm/io.h>
 #include <asm/irq.h>
 
 #include <plat/regs-serial.h>
@@ -36,8 +38,6 @@
 #include <plat/devs.h>
 #include <plat/cpu.h>
 #include <plat/regs-spi.h>
-
-#include <mach/ts.h>
 
 /* Serial port registrations */
 
@@ -185,20 +185,22 @@ void __init s3c24xx_fb_set_platdata(struct s3c2410fb_mach_info *pd)
 }
 
 /* Touchscreen */
+
 struct platform_device s3c_device_ts = {
 	.name		  = "s3c2410-ts",
 	.id		  = -1,
 };
+
 EXPORT_SYMBOL(s3c_device_ts);
 
 static struct s3c2410_ts_mach_info s3c2410ts_info;
 
-void __init s3c24xx_ts_set_platdata(struct s3c2410_ts_mach_info *hard_s3c2410ts_info)
+void set_s3c2410ts_info(struct s3c2410_ts_mach_info *hard_s3c2410ts_info)
 {
-	memcpy(&s3c2410ts_info, hard_s3c2410ts_info, sizeof(struct s3c2410_ts_mach_info));
+	memcpy(&s3c2410ts_info,hard_s3c2410ts_info,sizeof(struct s3c2410_ts_mach_info));
 	s3c_device_ts.dev.platform_data = &s3c2410ts_info;
 }
-EXPORT_SYMBOL(s3c24xx_ts_set_platdata);
+EXPORT_SYMBOL(set_s3c2410ts_info);
 
 /* USB Device (Gadget)*/
 
