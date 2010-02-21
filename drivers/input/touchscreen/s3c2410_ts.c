@@ -108,7 +108,7 @@ static char *s3c2410ts_name = "s3c2410 TouchScreen";
 /*
  * Per-touchscreen data.
  */
-
+static struct kfifo event_fifo_s;
 struct s3c2410ts {
 	struct input_dev *dev;
 	struct ts_filter *tsf[MAX_TS_FILTER_CHAIN];
@@ -194,7 +194,7 @@ static void event_send_timer_f(unsigned long data)
 	static int noop_counter;
 	int event_type;
 
-	while (__kfifo_get(ts.event_fifo, (unsigned char *)&event_type,
+	while (kfifo_out(ts.event_fifo, (unsigned char *)&event_type,
 			   sizeof(int))) {
 		int buf[2];
 
@@ -213,7 +213,7 @@ static void event_send_timer_f(unsigned long data)
 			if (ts.is_down) /* stylus_action needs a conversion */
 				s3c2410_ts_start_adc_conversion();
 
-			if (unlikely(__kfifo_get(ts.event_fifo,
+			if (unlikely(kfifo_out(ts.event_fifo,
 						 (unsigned char *)buf,
 						 sizeof(int) * 2)
 				     != sizeof(int) * 2))
@@ -271,7 +271,7 @@ static irqreturn_t stylus_updown(int irq, void *dev_id)
 
 	event_type = ts.is_down ? 'D' : 'U';
 
-	if (unlikely(__kfifo_put(ts.event_fifo, (unsigned char *)&event_type,
+	if (unlikely(kfifo_in(ts.event_fifo, (unsigned char *)&event_type,
 		     sizeof(int)) != sizeof(int))) /* should not happen */
 		printk(KERN_ERR __FILE__": stylus_updown lost event!\n");
 
@@ -321,7 +321,7 @@ static irqreturn_t stylus_action(int irq, void *dev_id)
 	buf[1] = ts.coords[0];
 	buf[2] = ts.coords[1];
 
-	if (unlikely(__kfifo_put(ts.event_fifo, (unsigned char *)buf,
+	if (unlikely(kfifo_in(ts.event_fifo, (unsigned char *)buf,
 		     sizeof(int) * 3) != sizeof(int) * 3))
 		/* should not happen */
 			printk(KERN_ERR":stylus_action error\n");
@@ -419,11 +419,14 @@ static int __init s3c2410ts_probe(struct platform_device *pdev)
 	ts.dev->id.product = 0xBEEF;
 	ts.dev->id.version = S3C2410TSVERSION;
 	ts.state = TS_STATE_STANDBY;
-	ts.event_fifo = kfifo_alloc(TS_EVENT_FIFO_SIZE, GFP_KERNEL, NULL);
-	if (IS_ERR(ts.event_fifo)) {
+
+	memset(&event_fifo_s, 0, sizeof(event_fifo_s));
+	if (kfifo_alloc(&event_fifo_s,TS_EVENT_FIFO_SIZE, GFP_KERNEL)){
 		ret = -EIO;
 		goto bail2;
 	}
+
+	ts.event_fifo = &event_fifo_s;
 
 	/* create the filter chain set up for the 2 coordinates we produce */
 	ret = ts_filter_create_chain(

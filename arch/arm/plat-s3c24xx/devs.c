@@ -39,6 +39,8 @@
 #include <plat/cpu.h>
 #include <plat/regs-spi.h>
 
+#include <mach/ts.h>
+
 /* Serial port registrations */
 
 static struct resource s3c2410_uart0_resource[] = {
