@@ -24,3 +24,4 @@ obj-$(CONFIG_MACH_ANW6410)	+= mach-anw6410.o
 obj-$(CONFIG_MACH_SMDK6410)	+= mach-smdk6410.o
 obj-$(CONFIG_MACH_NCP)		+= mach-ncp.o
 obj-$(CONFIG_MACH_HMT)		+= mach-hmt.o
+obj-$(CONFIG_MACH_MINI6410)	+= mach-mini6410.o
