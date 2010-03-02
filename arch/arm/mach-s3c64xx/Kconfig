@@ -219,3 +219,19 @@ config MACH_SMARTQ7
 	select MACH_SMARTQ
 	help
 	    Machine support for the SmartQ 7
+
+config MACH_MINI6410
+        bool "FriendlyARM MINI6410 Board"
+        select CPU_S3C6410
+        select S3C_DEV_HSMMC
+        select S3C_DEV_HSMMC1
+        select S3C_DEV_I2C1
+        select S3C_DEV_FB
+        select S3C_DEV_USB_HOST
+        select S3C_DEV_USB_HSOTG
+        select S3C64XX_SETUP_SDHCI
+        select S3C64XX_SETUP_I2C1
+        select S3C64XX_SETUP_FB_24BPP
+        select SAMSUNG_DEV_ADC
+        help
+          Machine support for the FriendlyARM MINI6410 board
