@@ -86,12 +86,36 @@ static struct s3c2410_uartcfg mini6410_uartcfgs[] __initdata = {
 };
 
 /* framebuffer and LCD setup. */
+static struct s3c_fb_pd_win mini6410_fb_win0 = {
+        /* this is to ensure we use win0 */
+        .win_mode       = {
+                .pixclock       = 121359,
+                .left_margin    = 4,
+                .right_margin   = 2,
+                .upper_margin   = 7,
+                .lower_margin   = 5,
+                .hsync_len      = 1,
+                .vsync_len      = 1,
+                .xres           = 480,
+                .yres           = 272,
+        },
+        .max_bpp        = 32,
+        .default_bpp    = 18,
+};
+
+static struct s3c_fb_platdata mini6410_lcd_pdata __initdata = {
+        .setup_gpio     = s3c64xx_fb_gpio_setup_24bpp,
+        .win[0]         = &mini6410_fb_win0,
+        .vidcon0        = VIDCON0_VIDOUT_RGB | VIDCON0_PNRMODE_RGB,
+        .vidcon1        = VIDCON1_INV_VCLK /*| VIDCON1_INV_HSYNC | VIDCON1_INV_VSYNC*/,
+};
 
 static struct map_desc mini6410_iodesc[] = {};
 
 static struct platform_device *mini6410_devices[] __initdata = {
 	&s3c_device_hsmmc0,
 /*	&s3c_device_hsmmc1,	*/
+	&s3c_device_fb,
 	&s3c_device_i2c0,
 	&s3c_device_usb,
 	&s3c_device_usb_hsotg,
@@ -112,6 +136,8 @@ static void __init mini6410_machine_init(void)
 	s3c_i2c0_set_platdata(NULL);
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
+
+	s3c_fb_set_platdata(&mini6410_lcd_pdata);
 
 	platform_add_devices(mini6410_devices, ARRAY_SIZE(mini6410_devices));
 }
