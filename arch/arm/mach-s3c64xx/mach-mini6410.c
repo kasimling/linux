@@ -44,6 +44,7 @@
 #include <plat/regs-sys.h>
 #include <plat/iic.h>
 #include <plat/fb.h>
+#include <plat/gpio-bank-n.h>
 #include <plat/gpio-cfg.h>
 
 #include <plat/s3c6410.h>
@@ -129,7 +130,7 @@ static struct resource mini6410_dm9k_resource[] = {
         [2] = {
                 .start = S3C_EINT(7),
                 .end   = S3C_EINT(7),
-                .flags = IORESOURCE_IRQ | IORESOURCE_IRQ_HIGHEDGE,
+                .flags = IORESOURCE_IRQ | IORESOURCE_IRQ_HIGHLEVEL,
         }
 };
 
@@ -181,6 +182,10 @@ static void __init mini6410_machine_init(void)
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 
 	s3c_fb_set_platdata(&mini6410_lcd_pdata);
+
+	/* DM9000A EINT7 */
+	s3c_gpio_cfgpin(S3C64XX_GPN(7), S3C64XX_GPN7_EINT7);
+	s3c_gpio_setpull(S3C64XX_GPN(7), S3C_GPIO_PULL_NONE);
 
 	platform_add_devices(mini6410_devices, ARRAY_SIZE(mini6410_devices));
 }
