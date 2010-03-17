@@ -642,6 +642,34 @@ static int s3c_fb_blank(int blank_mode, struct fb_info *info)
 	return 0;
 }
 
+/* Pan the display if device supports it. */
+static int s3c_fb_pan_display(struct fb_var_screeninfo *var, struct fb_info *info)
+{
+        struct s3c_fb_win *win = info->par;
+        struct s3c_fb *sfb = win->parent;
+        void __iomem *regs = sfb->regs;
+        int win_no = win->index;
+        unsigned long smem_start;
+        u32 data;
+
+        if ((var->xoffset + var->xres > info->var.xres_virtual) ||
+            (var->yoffset + var->yres > info->var.yres_virtual)) {
+                dev_err(sfb->dev, "invalid xoffset/yoffset value\n");
+                return -EINVAL;
+        }
+
+        smem_start = info->fix.smem_start + var->xres_virtual * (var->bits_per_pixel / 8) * var->yoffset;
+
+        /* write the buffer address */
+
+        writel(smem_start, regs + VIDW_BUF_START(win_no));
+
+        data = smem_start + var->xres_virtual * (var->bits_per_pixel / 8) * var->yres;
+        writel(data, regs + VIDW_BUF_END(win_no));
+
+	return 0;
+}
+
 static struct fb_ops s3c_fb_ops = {
 	.owner		= THIS_MODULE,
 	.fb_check_var	= s3c_fb_check_var,
@@ -651,6 +679,7 @@ static struct fb_ops s3c_fb_ops = {
 	.fb_fillrect	= cfb_fillrect,
 	.fb_copyarea	= cfb_copyarea,
 	.fb_imageblit	= cfb_imageblit,
+	.fb_pan_display = s3c_fb_pan_display,
 };
 
 /**
@@ -805,6 +834,18 @@ static int __devinit s3c_fb_probe_win(struct s3c_fb *sfb, unsigned int win_no,
 		dev_err(sfb->dev, "check_var failed on initial video params\n");
 		return ret;
 	}
+
+        if(windata->win_mode.xres < windata->virtual_x)
+        {
+            dev_dbg(sfb->dev, "set xpanstep to 1\n");
+            fbinfo->fix.xpanstep = 1;
+        }
+
+        if(windata->win_mode.yres < windata->virtual_y)
+        {
+            dev_dbg(sfb->dev, "set ypanstep to 1\n");
+            fbinfo->fix.ypanstep = 1;
+        }
 
 	/* create initial colour map */
 
