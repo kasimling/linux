@@ -108,6 +108,8 @@ static struct s3c_fb_pd_win mini6410_fb_win0 = {
         },
         .max_bpp        = 32,
         .default_bpp    = 18,
+        .virtual_x      = 480,
+        .virtual_y      = 544, /* 2*272 */
 };
 
 static struct s3c_fb_platdata mini6410_lcd_pdata __initdata = {
