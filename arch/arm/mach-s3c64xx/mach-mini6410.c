@@ -39,15 +39,14 @@
 #include <asm/mach-types.h>
 
 #include <plat/regs-serial.h>
-#include <plat/regs-modem.h>
-#include <plat/regs-gpio.h>
-#include <plat/regs-sys.h>
+#include <mach/regs-modem.h>
+#include <mach/regs-gpio.h>
+#include <mach/regs-sys.h>
 #include <plat/iic.h>
 #include <plat/fb.h>
-#include <plat/gpio-bank-n.h>
 #include <plat/gpio-cfg.h>
 
-#include <plat/s3c6410.h>
+#include <mach/s3c6410.h>
 #include <plat/clock.h>
 #include <plat/devs.h>
 #include <plat/cpu.h>
@@ -162,7 +161,7 @@ static struct platform_device *mini6410_devices[] __initdata = {
 /*	&s3c_device_hsmmc1,	*/
 	&s3c_device_fb,
 	&s3c_device_i2c0,
-	&s3c_device_usb,
+	&s3c_device_ohci,
 	&s3c_device_usb_hsotg,
 	&mini6410_device_eth,
 };
@@ -199,10 +198,6 @@ static void __init mini6410_machine_init(void)
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 
 	s3c_fb_set_platdata(&mini6410_lcd_pdata);
-
-	/* DM9000A EINT7 */
-	s3c_gpio_cfgpin(S3C64XX_GPN(7), S3C64XX_GPN7_EINT7);
-	s3c_gpio_setpull(S3C64XX_GPN(7), S3C_GPIO_PULL_NONE);
 
 	platform_add_devices(mini6410_devices, ARRAY_SIZE(mini6410_devices));
 }
