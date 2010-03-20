@@ -51,6 +51,7 @@
 #include <plat/clock.h>
 #include <plat/devs.h>
 #include <plat/cpu.h>
+#include <plat/ts.h>
 
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
@@ -154,6 +155,11 @@ static struct platform_device mini6410_device_eth = {
         },
 };
 
+static struct s3c2410_ts_mach_info mini6410_touchscreen_pdata __initdata = {
+       .delay                  = 65535,
+       .presc                  = 99,
+       .oversampling_shift     = 4,
+};
 
 static struct map_desc mini6410_iodesc[] = {};
 
@@ -164,6 +170,8 @@ static struct platform_device *mini6410_devices[] __initdata = {
 	&s3c_device_i2c0,
 	&s3c_device_usb,
 	&s3c_device_usb_hsotg,
+	&s3c_device_adc,
+	&s3c_device_ts,
 	&mini6410_device_eth,
 };
 
@@ -199,6 +207,7 @@ static void __init mini6410_machine_init(void)
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 
 	s3c_fb_set_platdata(&mini6410_lcd_pdata);
+	s3c24xx_ts_set_platdata(&mini6410_touchscreen_pdata);
 
 	/* DM9000A EINT7 */
 	s3c_gpio_cfgpin(S3C64XX_GPN(7), S3C64XX_GPN7_EINT7);
