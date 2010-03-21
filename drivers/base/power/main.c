@@ -946,7 +946,7 @@ static int dpm_suspend(pm_message_t state)
 		mutex_unlock(&dpm_list_mtx);
 
 		dpm_drv_wdset(dev);
-		error = device_suspend(dev, state);
+		error = device_suspend(dev);
 		dpm_drv_wdclr(dev);
 
 		mutex_lock(&dpm_list_mtx);
