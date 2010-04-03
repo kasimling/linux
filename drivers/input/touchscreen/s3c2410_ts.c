@@ -343,8 +343,8 @@ static int __devinit s3c2410ts_probe(struct platform_device *pdev)
 	ts.input = input_dev;
 	ts.input->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
 	ts.input->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
-	input_set_abs_params(ts.input, ABS_X, 0, 0x3FF, 0, 0);
-	input_set_abs_params(ts.input, ABS_Y, 0, 0x3FF, 0, 0);
+	input_set_abs_params(ts.input, ABS_X, 0, (platform_get_device_id(pdev)->driver_data == TYPE_S3C64XX) ? 0xFFF : 0x3FF, 0, 0);
+	input_set_abs_params(ts.input, ABS_Y, 0, (platform_get_device_id(pdev)->driver_data == TYPE_S3C64XX) ? 0xFFF : 0x3FF, 0, 0);
 	input_set_abs_params(ts.input, ABS_PRESSURE, 0, 1, 0, 0);
 
 	ts.input->name = "S3C24XX TouchScreen";
