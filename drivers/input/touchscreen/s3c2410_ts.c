@@ -56,6 +56,7 @@
 			 S3C2410_ADCTSC_XY_PST(0))
 
 #define FEAT_PEN_IRQ	(1 << 0)	/* HAS ADCCLRINTPNDNUP */
+#define FEAT_12BIT_ADC  (1 << 1)        /* 12bit ADC resolution */
 
 /* Per-touchscreen data. */
 
@@ -126,6 +127,7 @@ static void touch_timer_fire(unsigned long data)
 			input_report_abs(ts.input, ABS_Y, ts.yp);
 
 			input_report_key(ts.input, BTN_TOUCH, 1);
+			input_report_abs(ts.input, ABS_PRESSURE, 1);
 			input_sync(ts.input);
 
 			ts.xp = 0;
@@ -140,6 +142,7 @@ static void touch_timer_fire(unsigned long data)
 		ts.count = 0;
 
 		input_report_key(ts.input, BTN_TOUCH, 0);
+		input_report_abs(ts.input, ABS_PRESSURE, 0);
 		input_sync(ts.input);
 
 		writel(WAIT4INT | INT_DOWN, ts.io + S3C2410_ADCTSC);
@@ -316,8 +319,9 @@ static int __devinit s3c2410ts_probe(struct platform_device *pdev)
 	ts.input = input_dev;
 	ts.input->evbit[0] = BIT_MASK(EV_KEY) | BIT_MASK(EV_ABS);
 	ts.input->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
-	input_set_abs_params(ts.input, ABS_X, 0, 0x3FF, 0, 0);
-	input_set_abs_params(ts.input, ABS_Y, 0, 0x3FF, 0, 0);
+	input_set_abs_params(ts.input, ABS_X, 0, (platform_get_device_id(pdev)->driver_data & FEAT_12BIT_ADC) ? 0xFFF : 0x3FF, 0, 0);
+	input_set_abs_params(ts.input, ABS_Y, 0, (platform_get_device_id(pdev)->driver_data & FEAT_12BIT_ADC) ? 0xFFF : 0x3FF, 0, 0);
+	input_set_abs_params(ts.input, ABS_PRESSURE, 0, 1, 0, 0);
 
 	ts.input->name = "S3C24XX TouchScreen";
 	ts.input->id.bustype = BUS_HOST;
@@ -415,7 +419,7 @@ static struct dev_pm_ops s3c_ts_pmops = {
 static struct platform_device_id s3cts_driver_ids[] = {
 	{ "s3c2410-ts", 0 },
 	{ "s3c2440-ts", 0 },
-	{ "s3c64xx-ts", FEAT_PEN_IRQ },
+	{ "s3c64xx-ts", FEAT_PEN_IRQ | FEAT_12BIT_ADC },
 	{ }
 };
 MODULE_DEVICE_TABLE(platform, s3cts_driver_ids);
