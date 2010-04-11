@@ -54,6 +54,7 @@
 #include <plat/devs.h>
 #include <plat/cpu.h>
 #include <plat/ts.h>
+#include <plat/pm.h>
 
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
@@ -333,6 +334,8 @@ static void __init mini6410_machine_init(void)
         }
 
 	platform_add_devices(mini6410_devices, ARRAY_SIZE(mini6410_devices));
+
+	s3c_pm_init();
 }
 
 MACHINE_START(MINI6410, "MINI6410")
