@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.34-rc1
-# Sun Apr 11 15:20:42 2010
+# Sun Apr 11 16:20:48 2010
 #
 CONFIG_ARM=y
 CONFIG_SYS_SUPPORTS_APM_EMULATION=y
@@ -835,7 +835,7 @@ CONFIG_INPUT_MOUSEDEV_SCREEN_X=1024
 CONFIG_INPUT_MOUSEDEV_SCREEN_Y=768
 # CONFIG_INPUT_JOYDEV is not set
 CONFIG_INPUT_EVDEV=y
-CONFIG_INPUT_EVBUG=y
+# CONFIG_INPUT_EVBUG is not set
 # CONFIG_INPUT_KEYRESET is not set
 
 #
