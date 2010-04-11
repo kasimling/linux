@@ -192,5 +192,6 @@ config MACH_MINI6410
         select S3C64XX_SETUP_I2C1
         select S3C64XX_SETUP_FB_24BPP
         select S3C64XX_DEV_TS
+        select HAVE_PWM
         help
           Machine support for the FriendlyARM MINI6410 board
