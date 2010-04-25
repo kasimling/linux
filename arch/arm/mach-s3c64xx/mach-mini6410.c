@@ -188,6 +188,7 @@ static struct gpio_keys_button mini6410_buttons[] = {
                 .code           = KEY_ENTER,
                 .desc           = "Button K4(ENTER)",
                 .active_low     = 1,
+                .wakeup         = 1,
         },
         {
                 .gpio           = S3C64XX_GPN(4),               /* K5 */
