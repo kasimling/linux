@@ -422,12 +422,17 @@ static int s3c_adc_suspend(struct platform_device *pdev, pm_message_t state)
 static int s3c_adc_resume(struct platform_device *pdev)
 {
 	struct adc_device *adc = platform_get_drvdata(pdev);
+	unsigned tmp;
 
 	clk_enable(adc->clk);
 	enable_irq(adc->irq);
 
-	writel(adc->prescale | S3C2410_ADCCON_PRSCEN,
-	       adc->regs + S3C2410_ADCCON);
+	tmp = adc->prescale | S3C2410_ADCCON_PRSCEN;
+	if (platform_get_device_id(pdev)->driver_data == TYPE_S3C64XX) {
+                /* Enable 12-bit ADC resolution */
+                tmp |= S3C64XX_ADCCON_RESSEL;
+        }
+        writel(tmp, adc->regs + S3C2410_ADCCON);
 
 	return 0;
 }
