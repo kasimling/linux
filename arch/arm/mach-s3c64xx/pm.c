@@ -29,6 +29,7 @@
 #include <mach/regs-syscon-power.h>
 #include <mach/regs-gpio-memport.h>
 #include <mach/regs-modem.h>
+#include <mach/regs-srom.h>
 
 #ifdef CONFIG_S3C_PM_DEBUG_LED_SMDK
 #include <mach/gpio-bank-n.h>
@@ -75,6 +76,13 @@ static struct sleep_save core_save[] = {
 	SAVE_ITEM(S3C64XX_MEM0DRVCON),
 	SAVE_ITEM(S3C64XX_MEM1DRVCON),
 
+	SAVE_ITEM(S3C64XX_SROM_BW),
+	SAVE_ITEM(S3C64XX_SROM_BC0),
+	SAVE_ITEM(S3C64XX_SROM_BC1),
+	SAVE_ITEM(S3C64XX_SROM_BC2),
+	SAVE_ITEM(S3C64XX_SROM_BC3),
+	SAVE_ITEM(S3C64XX_SROM_BC4),
+	SAVE_ITEM(S3C64XX_SROM_BC5),
 #ifndef CONFIG_CPU_FREQ
 	SAVE_ITEM(S3C_APLL_CON),
 	SAVE_ITEM(S3C_MPLL_CON),
