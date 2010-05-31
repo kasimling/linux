@@ -80,6 +80,10 @@ void __init s5pv210_map_io(void)
 	s3c_device_adc.name	= "s3c64xx-adc";
 #endif
 
+#ifdef CONFIG_S3C_DEV_FB
+	s3c_device_fb.name	= "s5p-fb";
+#endif
+
 	iotable_init(s5pv210_iodesc, ARRAY_SIZE(s5pv210_iodesc));
 
 	/* initialise device information early */
