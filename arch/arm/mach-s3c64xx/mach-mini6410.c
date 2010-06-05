@@ -23,6 +23,8 @@
 #include <linux/i2c.h>
 #include <linux/fb.h>
 #include <linux/gpio.h>
+#include <linux/input.h>
+#include <linux/gpio_keys.h>
 #include <linux/delay.h>
 
 #include <video/platform_lcd.h>
@@ -158,6 +160,59 @@ static struct s3c2410_ts_mach_info mini6410_touchscreen_pdata __initdata = {
        .oversampling_shift     = 4,
 };
 
+static struct gpio_keys_button mini6410_buttons[] = {
+        {
+                .gpio           = S3C64XX_GPN(0),               /* K1 */
+                .code           = KEY_F1,
+                .desc           = "Button K1(MENU)",
+                .active_low     = 1,
+        },
+        {
+                .gpio           = S3C64XX_GPN(1),               /* K2 */
+                .code           = KEY_HOME,
+                .desc           = "Button K2(HOME)",
+                .active_low     = 1,
+        },
+        {
+                .gpio           = S3C64XX_GPN(2),               /* K3 */
+                .code           = KEY_BACK,
+                .desc           = "Button K3(BACK)",
+                .active_low     = 1,
+        },
+        {
+                .gpio           = S3C64XX_GPN(3),               /* K4 */
+                .code           = KEY_ENTER,
+                .desc           = "Button K4(ENTER)",
+                .active_low     = 1,
+        },
+        {
+                .gpio           = S3C64XX_GPN(4),               /* K5 */
+                .code           = KEY_DOWN,
+                .desc           = "Button K5(DOWN)",
+                .active_low     = 1,
+        },
+
+        {
+                .gpio           = S3C64XX_GPN(5),               /* K6 */
+                .code           = KEY_UP,
+                .desc           = "Button K6(UP)",
+                .active_low     = 1,
+        },
+};
+
+static struct gpio_keys_platform_data mini6410_button_data = {
+        .buttons        = mini6410_buttons,
+        .nbuttons       = ARRAY_SIZE(mini6410_buttons),
+};
+
+static struct platform_device mini6410_button_device = {
+        .name           = "gpio-keys",
+        .id             = -1,
+        .dev            = {
+                .platform_data  = &mini6410_button_data,
+        }
+};
+
 static struct map_desc mini6410_iodesc[] = {};
 
 static struct platform_device *mini6410_devices[] __initdata = {
@@ -170,6 +225,7 @@ static struct platform_device *mini6410_devices[] __initdata = {
 	&s3c_device_adc,
 	&s3c_device_ts,
 	&mini6410_device_eth,
+	&mini6410_button_device,
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
@@ -199,12 +255,21 @@ static void __init mini6410_map_io(void)
 
 static void __init mini6410_machine_init(void)
 {
+	int i;
+
 	s3c_i2c0_set_platdata(NULL);
 
 	i2c_register_board_info(0, i2c_devs0, ARRAY_SIZE(i2c_devs0));
 
 	s3c_fb_set_platdata(&mini6410_lcd_pdata);
 	s3c24xx_ts_set_platdata(&mini6410_touchscreen_pdata);
+
+        /* mark the key as input, without pullups (there is one on the board) */
+        for (i = 0; i < ARRAY_SIZE(mini6410_buttons); i++) {
+                s3c_gpio_setpull(mini6410_buttons[i].gpio, S3C_GPIO_PULL_NONE);
+                s3c_gpio_cfgpin(mini6410_buttons[i].gpio,
+                                        S3C_GPIO_SFN(0));
+        }
 
 	platform_add_devices(mini6410_devices, ARRAY_SIZE(mini6410_devices));
 }
