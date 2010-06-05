@@ -26,6 +26,7 @@
 #include <linux/input.h>
 #include <linux/gpio_keys.h>
 #include <linux/delay.h>
+#include <linux/pwm_backlight.h>
 
 #include <video/platform_lcd.h>
 
@@ -213,6 +214,62 @@ static struct platform_device mini6410_button_device = {
         }
 };
 
+static int mini6410_bl_init(struct device *dev)
+{
+        int ret;
+
+        ret = gpio_request(S3C64XX_GPE(0), "lcd backlight enable");
+        if (!ret)
+                ret = gpio_direction_output(S3C64XX_GPE(0), 0);
+
+        return ret;
+}
+
+static int mini6410_bl_notify(struct device *dev, int brightness)
+{
+        /*
+         * translate from CIELUV/CIELAB L*->brightness, E.G. from
+         * perceived luminance to light output. Assumes range 0..25600
+         */
+        if (brightness < 0x800) {
+                /* Y = Yn * L / 903.3 */
+                brightness = (100*256 * brightness + 231245/2) / 231245;
+        } else {
+                /* Y = Yn * ((L + 16) / 116 )^3 */
+                int t = (brightness*4 + 16*1024 + 58)/116;
+                brightness = 25 * ((t * t * t + 0x100000/2) / 0x100000);
+        }
+        gpio_set_value(S3C64XX_GPE(0), brightness);
+
+
+        return brightness;
+}
+
+static void mini6410_bl_exit(struct device *dev)
+{
+        gpio_free(S3C64XX_GPE(0));
+}
+
+static struct platform_pwm_backlight_data mini6410_backlight_data = {
+        .pwm_id         = 1,
+        .max_brightness = 100 * 256,
+        .dft_brightness = 40 * 256,
+        .pwm_period_ns  = 1000000000 / (100 * 256 * 20),
+        .init           = mini6410_bl_init,
+        .notify         = mini6410_bl_notify,
+        .exit           = mini6410_bl_exit,
+
+};
+
+
+static struct platform_device mini6410_backlight_device = {
+        .name           = "pwm-backlight",
+        .dev            = {
+                .parent = &s3c_device_timer[1].dev,
+                .platform_data = &mini6410_backlight_data,
+        },
+};
+
 static struct map_desc mini6410_iodesc[] = {};
 
 static struct platform_device *mini6410_devices[] __initdata = {
@@ -226,6 +283,8 @@ static struct platform_device *mini6410_devices[] __initdata = {
 	&s3c_device_ts,
 	&mini6410_device_eth,
 	&mini6410_button_device,
+	&s3c_device_timer[1],
+	&mini6410_backlight_device,
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
