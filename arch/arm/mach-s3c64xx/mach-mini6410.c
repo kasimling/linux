@@ -17,6 +17,7 @@
 #include <linux/timer.h>
 #include <linux/init.h>
 #include <linux/serial_core.h>
+#include <linux/dm9000.h>
 #include <linux/platform_device.h>
 #include <linux/io.h>
 #include <linux/i2c.h>
@@ -53,6 +54,8 @@
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
+
+#define MACH_MINI6410_DM9K_BASE (0x18000000 + 0x300)
 
 static struct s3c2410_uartcfg mini6410_uartcfgs[] __initdata = {
 	[0] = {
@@ -110,6 +113,44 @@ static struct s3c_fb_platdata mini6410_lcd_pdata __initdata = {
         .vidcon1        = VIDCON1_INV_HSYNC | VIDCON1_INV_VSYNC,
 };
 
+/* DM9000AEP 10/100 ethernet controller */
+
+static struct resource mini6410_dm9k_resource[] = {
+        [0] = {
+                .start = MACH_MINI6410_DM9K_BASE,
+                .end   = MACH_MINI6410_DM9K_BASE + 3,
+                .flags = IORESOURCE_MEM
+        },
+        [1] = {
+                .start = MACH_MINI6410_DM9K_BASE + 4,
+                .end   = MACH_MINI6410_DM9K_BASE + 7,
+                .flags = IORESOURCE_MEM
+        },
+        [2] = {
+                .start = S3C_EINT(7),
+                .end   = S3C_EINT(7),
+                .flags = IORESOURCE_IRQ | IORESOURCE_IRQ_HIGHLEVEL,
+        }
+};
+
+/*
+ * The DM9000 has no eeprom, and it's MAC address is set by
+ * the bootloader before starting the kernel.
+ */
+static struct dm9000_plat_data mini6410_dm9k_pdata = {
+        .flags          = (DM9000_PLATF_16BITONLY | DM9000_PLATF_NO_EEPROM),
+};
+
+static struct platform_device mini6410_device_eth = {
+        .name           = "dm9000",
+        .id             = -1,
+        .num_resources  = ARRAY_SIZE(mini6410_dm9k_resource),
+        .resource       = mini6410_dm9k_resource,
+        .dev            = {
+                .platform_data  = &mini6410_dm9k_pdata,
+        },
+};
+
 static struct map_desc mini6410_iodesc[] = {};
 
 static struct platform_device *mini6410_devices[] __initdata = {
@@ -119,6 +160,7 @@ static struct platform_device *mini6410_devices[] __initdata = {
 	&s3c_device_i2c0,
 	&s3c_device_ohci,
 	&s3c_device_usb_hsotg,
+	&mini6410_device_eth,
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
