@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Linux kernel version: 2.6.35-rc1
-# Sun Jun  6 21:40:30 2010
+# Wed Jun 16 12:31:19 2010
 #
 CONFIG_ARM=y
 CONFIG_HAVE_PWM=y
@@ -266,6 +266,7 @@ CONFIG_S3C_DEV_FB=y
 CONFIG_S3C_DEV_USB_HOST=y
 CONFIG_S3C_DEV_USB_HSOTG=y
 CONFIG_S3C_DEV_NAND=y
+CONFIG_S3C_DEV_RTC=y
 CONFIG_SAMSUNG_DEV_ADC=y
 CONFIG_SAMSUNG_DEV_TS=y
 
@@ -1370,7 +1371,7 @@ CONFIG_RTC_INTF_DEV=y
 #
 # on-CPU RTC drivers
 #
-# CONFIG_RTC_DRV_S3C is not set
+CONFIG_RTC_DRV_S3C=y
 # CONFIG_DMADEVICES is not set
 # CONFIG_AUXDISPLAY is not set
 # CONFIG_UIO is not set
