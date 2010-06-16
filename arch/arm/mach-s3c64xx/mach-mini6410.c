@@ -288,6 +288,7 @@ static struct platform_device *mini6410_devices[] __initdata = {
 	&mini6410_device_eth,
 	&mini6410_button_device,
 	&s3c_device_timer[1],
+	&s3c_device_rtc,
 	&mini6410_backlight_device,
 };
 
