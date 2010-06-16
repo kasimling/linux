@@ -79,6 +79,7 @@ struct s3c_fb;
  * @osd: The base for the OSD registers.
  * @palette: Address of palette memory, or 0 if none.
  * @has_prtcon: Set if has PRTCON register.
+ * @has_shadowcon: Set if has SHADOWCON register.
  */
 struct s3c_fb_variant {
 	unsigned int	is_2443:1;
@@ -95,6 +96,7 @@ struct s3c_fb_variant {
 	unsigned short	palette[S3C_FB_MAX_WIN];
 
 	unsigned int	has_prtcon:1;
+	unsigned int	has_shadowcon:1;
 };
 
 /**
@@ -620,6 +622,43 @@ static inline unsigned int chan_to_field(unsigned int chan,
 }
 
 /**
+ * shadow_protect() - disable updating values from shadow registers at vsync
+ *
+ * @sfb: The hardware information
+ * @win_no: Window number to protect registers for
+ */
+static void shadow_protect(struct s3c_fb_win *win)
+{
+	struct s3c_fb *sfb = win->parent;
+
+	if (sfb->variant.has_prtcon)
+		writel(PRTCON_PROTECT, sfb->regs + PRTCON);
+	else if (sfb->variant.has_shadowcon)
+		writel(SHADOWCON_WINx_PROTECT(win->index),
+			sfb->regs + SHADOWCON);
+}
+
+/**
+ * shadow_noprotect() - re-enable updating values from shadow registers at vsync
+ *
+ * @sfb: The hardware information
+ * @win_no: Window number to re-enable updates from shadow registers
+ */
+static void shadow_noprotect(struct s3c_fb_win *win)
+{
+	struct s3c_fb *sfb = win->parent;
+	u32 reg;
+
+	if (sfb->variant.has_prtcon) {
+		writel(0, sfb->regs + PRTCON);
+	} else if (sfb->variant.has_shadowcon) {
+		reg = readl(sfb->regs + SHADOWCON);
+		writel(reg & ~SHADOWCON_WINx_PROTECT(win->index),
+			sfb->regs + SHADOWCON);
+	}
+}
+
+/**
  * s3c_fb_setcolreg() - framebuffer layer request to change palette.
  * @regno: The palette index to change.
  * @red: The red field for the palette data.
@@ -811,16 +850,14 @@ static int s3c_fb_pan_display(struct fb_var_screeninfo *var,
 
 	/* Temporarily turn off per-vsync update from shadow registers until
 	 * both start and end addresses are updated to prevent corruption */
-	if (sfb->variant.has_prtcon)
-		writel(PRTCON_PROTECT, sfb->regs + PRTCON);
+	shadow_protect(win);
 
 	writel(info->fix.smem_start + start_byte_offset,
 		buf + sfb->variant.buf_start);
 	writel(info->fix.smem_start + end_byte_offset,
 		buf + sfb->variant.buf_end);
 
-	if (sfb->variant.has_prtcon)
-		writel(0, sfb->regs + PRTCON);
+	shadow_noprotect(win);
 
 	return 0;
 }
@@ -1534,6 +1571,7 @@ static struct s3c_fb_driverdata s3c_fb_data_s5pv210 __devinitdata = {
 			[4] = 0x3400,
 		},
 
+		.has_shadowcon	= 1,
 	},
 	.win[0]	= &s3c_fb_data_64xx_wins[0],
 	.win[1]	= &s3c_fb_data_64xx_wins[1],
