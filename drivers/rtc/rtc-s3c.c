@@ -46,6 +46,9 @@ static enum s3c_cpu_type s3c_rtc_cpu_type;
 
 static DEFINE_SPINLOCK(s3c_rtc_pie_lock);
 
+static int alarm_int_requested = 0;
+static int tick_int_requested = 0;
+
 /* IRQ Handlers */
 
 static irqreturn_t s3c_rtc_alarmirq(int irq, void *id)
@@ -273,6 +276,21 @@ static int s3c_rtc_setalarm(struct device *dev, struct rtc_wkalrm *alrm)
 		 tm->tm_mday & 0xff, tm->tm_mon & 0xff, tm->tm_year & 0xff,
 		 tm->tm_hour & 0xff, tm->tm_min & 0xff, tm->tm_sec);
 
+	if(!alarm_int_requested)
+	{
+		struct platform_device *pdev = to_platform_device(dev);
+		struct rtc_device *rtc_dev = platform_get_drvdata(pdev);
+		int ret = 0;
+
+		ret = request_irq(s3c_rtc_alarmno, s3c_rtc_alarmirq,
+				IRQF_DISABLED,  "s3c2410-rtc alarm", rtc_dev);
+		if (ret) {
+			dev_err(dev, "IRQ%d error %d\n", s3c_rtc_alarmno, ret);
+				return ret;
+		}
+
+		alarm_int_requested = 1;
+	}
 
 	alrm_en = readb(base + S3C2410_RTCALM) & S3C2410_RTCALM_ALMEN;
 	writeb(0x00, base + S3C2410_RTCALM);
@@ -326,7 +344,10 @@ static int s3c_rtc_open(struct device *dev)
 {
 	struct platform_device *pdev = to_platform_device(dev);
 	struct rtc_device *rtc_dev = platform_get_drvdata(pdev);
-	int ret;
+	int ret = 0;
+
+	if(alarm_int_requested)
+		goto request_tick_irq;
 
 	ret = request_irq(s3c_rtc_alarmno, s3c_rtc_alarmirq,
 			  IRQF_DISABLED,  "s3c2410-rtc alarm", rtc_dev);
@@ -336,6 +357,12 @@ static int s3c_rtc_open(struct device *dev)
 		return ret;
 	}
 
+	alarm_int_requested = 1;
+
+request_tick_irq:
+	if(tick_int_requested)
+		return ret;
+
 	ret = request_irq(s3c_rtc_tickno, s3c_rtc_tickirq,
 			  IRQF_DISABLED,  "s3c2410-rtc tick", rtc_dev);
 
@@ -343,6 +370,8 @@ static int s3c_rtc_open(struct device *dev)
 		dev_err(dev, "IRQ%d error %d\n", s3c_rtc_tickno, ret);
 		goto tick_err;
 	}
+
+	tick_int_requested = 1;
 
 	return ret;
 
