@@ -40,6 +40,7 @@
 #include <plat/iic-core.h>
 #include <plat/adc.h>
 #include <plat/onenand-core.h>
+#include <plat/fb-core.h>
 #include <mach/s3c6400.h>
 #include <mach/s3c6410.h>
 
@@ -58,6 +59,8 @@ void __init s3c6410_map_io(void)
 	s3c_device_nand.name = "s3c6400-nand";
 	s3c_onenand_setname("s3c6410-onenand");
 	s3c64xx_onenand1_setname("s3c6410-onenand");
+
+	s3c_fb_setname("s3c-fb");
 }
 
 void __init s3c6410_init_clocks(int xtal)

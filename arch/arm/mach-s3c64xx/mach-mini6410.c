@@ -108,7 +108,7 @@ static struct s3c_fb_pd_win mini6410_fb_win0 = {
                 .yres           = 272,
         },
         .max_bpp        = 32,
-        .default_bpp    = 18,
+        .default_bpp    = 16,
         .virtual_x      = 480,
         .virtual_y      = 544, /* 2*272 */
 };
