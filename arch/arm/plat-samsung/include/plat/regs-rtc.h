@@ -61,5 +61,8 @@
 #define S3C2410_RTCMON	      S3C2410_RTCREG(0x84)
 #define S3C2410_RTCYEAR	      S3C2410_RTCREG(0x88)
 
+#define S3C_INTP              S3C2410_RTCREG(0x30)
+#define S3C_INTP_ALM          (1<<1)
+#define S3C_INTP_TIC          (1<<0)
 
 #endif /* __ASM_ARCH_REGS_RTC_H */

@@ -56,6 +56,10 @@ static irqreturn_t s3c_rtc_alarmirq(int irq, void *id)
 	struct rtc_device *rdev = id;
 
 	rtc_update_irq(rdev, 1, RTC_AF | RTC_IRQF);
+
+	if(s3c_rtc_cpu_type == TYPE_S3C64XX)
+		writeb(S3C_INTP_ALM, s3c_rtc_base + S3C_INTP);
+
 	return IRQ_HANDLED;
 }
 
@@ -64,6 +68,10 @@ static irqreturn_t s3c_rtc_tickirq(int irq, void *id)
 	struct rtc_device *rdev = id;
 
 	rtc_update_irq(rdev, 1, RTC_PF | RTC_IRQF);
+
+	if(s3c_rtc_cpu_type == TYPE_S3C64XX)
+		writeb(S3C_INTP_TIC, s3c_rtc_base + S3C_INTP);
+
 	return IRQ_HANDLED;
 }
 
