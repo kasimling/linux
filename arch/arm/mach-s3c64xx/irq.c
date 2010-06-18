@@ -55,7 +55,7 @@ void __init s3c64xx_init_irq(u32 vic0_valid, u32 vic1_valid)
 
 	/* initialise the pair of VICs */
 	vic_init(VA_VIC0, IRQ_VIC0_BASE, vic0_valid, 0);
-	vic_init(VA_VIC1, IRQ_VIC1_BASE, vic1_valid, 0);
+	vic_init(VA_VIC1, IRQ_VIC1_BASE, vic1_valid, (1 << 28)); /* allow RTC alarm to be wakeup source */
 
 	/* add the timer sub-irqs */
 
