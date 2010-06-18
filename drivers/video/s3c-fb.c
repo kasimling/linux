@@ -741,7 +741,6 @@ static int s3c_fb_pan_display(struct fb_var_screeninfo *var, struct fb_info *inf
         struct s3c_fb_win *win = info->par;
         struct s3c_fb *sfb = win->parent;
         void __iomem *regs = sfb->regs;
-	void __iomem *buf = regs;
         int win_no = win->index;
         unsigned long smem_start;
         u32 data;
@@ -755,12 +754,11 @@ static int s3c_fb_pan_display(struct fb_var_screeninfo *var, struct fb_info *inf
         smem_start = info->fix.smem_start + var->xres_virtual * (var->bits_per_pixel / 8) * var->yoffset;
 
         /* write the buffer address */
-        buf = regs + win_no * 8;
 
-        writel(info->fix.smem_start, buf + sfb->variant.buf_start);
+        writel(smem_start, regs + VIDW_BUF_START(win_no));
 
-        data = info->fix.smem_start + info->fix.line_length * var->yres;
-        writel(data, buf + sfb->variant.buf_end);
+        data = smem_start + var->xres_virtual * (var->bits_per_pixel / 8) * var->yres;
+        writel(data, regs + VIDW_BUF_END(win_no));
 
 	return 0;
 }
