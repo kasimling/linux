@@ -97,6 +97,9 @@
 #define S3C64XX_PA_USB_HSPHY	(0x7C100000)
 #define S3C64XX_VA_USB_HSPHY	S3C_ADDR_CPU(0x00200000)
 
+#define S3C64XX_PA_G2D          (0x76100000)
+#define S3C64XX_SZ_G2D          SZ_1M
+
 /* place VICs close together */
 #define VA_VIC0			(S3C_VA_IRQ + 0x00)
 #define VA_VIC1			(S3C_VA_IRQ + 0x10000)

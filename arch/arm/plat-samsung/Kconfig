@@ -222,6 +222,12 @@ config S3C64XX_DEV_SPI
 	  Compile in platform device definitions for S3C64XX's type
 	  SPI controllers.
 
+config S3C64XX_DEV_G2D
+	bool
+	help
+	  Compile in platform device definitions for S3C64XX's type
+	  Graphics 2D accelerator
+
 config SAMSUNG_DEV_TS
 	bool
 	help
