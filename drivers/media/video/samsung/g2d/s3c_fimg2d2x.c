@@ -13,6 +13,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/errno.h>
+#include <linux/slab.h>
 #include <linux/clk.h>
 #include <linux/poll.h>
 #include <linux/fs.h>
