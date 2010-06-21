@@ -236,5 +236,6 @@ config MACH_MINI6410
         select SAMSUNG_DEV_TS
         select HAVE_PWM
 	select S3C_DEV_RTC
+	select S3C64XX_DEV_G2D
         help
           Machine support for the FriendlyARM MINI6410 board
