@@ -48,35 +48,47 @@ void s3c_g2d_check_fifo(int empty_fifo)
 	while( S3C_G2D_FIFO_USED(val) > (FIFO_NUM - empty_fifo));
 }
 
+static u32 get_format(G2D_COLOR_SPACE color_mode)
+{
+	u32 bpp_mode;
+
+        switch(color_mode) {
+        case ARGB8:
+                bpp_mode = S3C_G2D_COLOR_MODE_REG_C0_15BPP;
+                break;
+
+        case RGB16:
+                bpp_mode = S3C_G2D_COLOR_RGB_565;
+                break;
+
+        case RGB18:
+                bpp_mode = S3C_G2D_COLOR_MODE_REG_C2_18BPP;
+                break;
+
+        case RGB24:
+                bpp_mode = S3C_G2D_COLOR_XRGB_8888;
+                break;
+
+        case RGBA24:
+                bpp_mode = S3C_G2D_COLOR_RGBA_8888;
+                break;
+
+        default:
+                bpp_mode = S3C_G2D_COLOR_MODE_REG_C3_24BPP;
+                break;
+        }
+
+	return bpp_mode;
+}
 
 static int s3c_g2d_init_regs(s3c_g2d_params *params)
 {
-	u32 bpp_mode;
+	u32 src_bpp_mode, dst_bpp_mode;
 	u32 tmp_reg;
 	s3c_g2d_check_fifo(25);
 
-
-	switch(params->bpp) {
-	case ARGB8:
-		bpp_mode = S3C_G2D_COLOR_MODE_REG_C0_15BPP;
-		break;
-		
-	case RGB16:
-		bpp_mode = S3C_G2D_COLOR_RGB_565;
-		break;
-
-	case RGB18:
-		bpp_mode = S3C_G2D_COLOR_MODE_REG_C2_18BPP;
-		break;
-
-	case RGB24:
-		bpp_mode = S3C_G2D_COLOR_XRGB_8888;
-		break;
-
-	default:
-		bpp_mode = S3C_G2D_COLOR_MODE_REG_C3_24BPP;
-		break;
-	}
+	src_bpp_mode = get_format(params->src_bpp);
+	dst_bpp_mode = get_format(params->dst_bpp);
 
 	/*set register for soruce image ===============================*/
 	__raw_writel(params->src_base_addr, s3c_g2d_base + S3C_G2D_SRC_BASE_ADDR);
@@ -85,7 +97,7 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 	__raw_writel((S3C_G2D_FULL_V(params->src_full_height) | 
 			S3C_G2D_FULL_H(params->src_full_width)), 
 			s3c_g2d_base+S3C_G2D_SRC_RES_REG);
-	__raw_writel(bpp_mode, s3c_g2d_base + S3C_G2D_SRC_COLOR_MODE);
+	__raw_writel(src_bpp_mode, s3c_g2d_base + S3C_G2D_SRC_COLOR_MODE);
 	
 	/*set register for destination image =============================*/
 	__raw_writel(params->dst_base_addr, s3c_g2d_base + S3C_G2D_DST_BASE_ADDR);
@@ -94,7 +106,7 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 	__raw_writel((S3C_G2D_FULL_V(params->dst_full_height) | 
 			S3C_G2D_FULL_H(params->dst_full_width)), 
 			s3c_g2d_base+S3C_G2D_SC_RES_REG);
-	__raw_writel(bpp_mode, s3c_g2d_base + S3C_G2D_DST_COLOR_MODE);
+	__raw_writel(dst_bpp_mode, s3c_g2d_base + S3C_G2D_DST_COLOR_MODE);
 
 	/*set register for clipping window===============================*/
 	__raw_writel(params->cw_x1, s3c_g2d_base + S3C_G2D_CW_LT_X_REG);
@@ -115,7 +127,7 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 		}
 
 		__raw_writel(S3C_G2D_ROP_REG_OS_FG_COLOR | 
-				S3C_G2D_ROP_REG_ABM_REGISTER | 
+				S3C_G2D_ROP_REG_ABM_SRC_BITMAP |
 				S3C_G2D_ROP_REG_T_OPAQUE_MODE | 
 				G2D_ROP_SRC_ONLY, 
 				s3c_g2d_base + S3C_G2D_ROP_REG);
@@ -145,6 +157,41 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 	return 0;
 }
 
+static u32 s3c_g2d_calculate_XY_incr_format(u32 uDividend, u32 uDivisor)
+{
+    int i;
+    u32 uQuotient;
+    u32 uUnderPoint=0;
+
+//  printk("\nuDivend:%x(%d), uDivisor:%x(%d), uUnderPoint:%x(%d)", uDividend, uDividend, uDivisor, uDivisor,uUnderPoint, uUnderPoint);
+
+    if(uDivisor == 0)
+    {
+        uDivisor = 1;    //< this will prevent data abort. but result is incorrect.
+    }
+
+    uQuotient = (u32)(uDividend/uDivisor);
+
+    uDividend -= (uQuotient * uDivisor);
+
+    /// Now under point is calculated.
+    for (i=0; i<12; i++)
+    {
+        uDividend <<= 1;
+        uUnderPoint <<= 1;
+
+        if (uDividend >= uDivisor)
+        {
+            uUnderPoint = uUnderPoint | 1;
+            uDividend -= uDivisor;
+        }
+//      printk("\nuDivend:%x(%d), uDivisor:%x(%d), uUnderPoint:%x(%d)", uDividend, uDividend, uDivisor, uDivisor,uUnderPoint, uUnderPoint);
+    }
+
+    uUnderPoint = (uUnderPoint + 1) >> 1;
+
+    return ( uUnderPoint | (uQuotient<<11) );
+}
 
 void s3c_g2d_bitblt(u16 src_x1, u16 src_y1, u16 src_x2, u16 src_y2,
  	 u16 dst_x1, u16 dst_y1, u16 dst_x2, u16 dst_y2)
@@ -163,9 +210,12 @@ void s3c_g2d_bitblt(u16 src_x1, u16 src_y1, u16 src_x2, u16 src_y2,
  	__raw_writel(dst_x2, s3c_g2d_base + S3C_G2D_COORD3_X_REG);
  	__raw_writel(dst_y2, s3c_g2d_base + S3C_G2D_COORD3_Y_REG);
 
+        __raw_writel(s3c_g2d_calculate_XY_incr_format(src_x2 - src_x1, dst_x2 - dst_x1), s3c_g2d_base + S3C_G2D_X_INCR_REG);
+	__raw_writel(s3c_g2d_calculate_XY_incr_format(src_y2 - src_y1, dst_y2 - dst_y1), s3c_g2d_base + S3C_G2D_Y_INCR_REG);
+
 	cmd_reg_val = readl(s3c_g2d_base + S3C_G2D_CMD1_REG);
 	cmd_reg_val = ~(S3C_G2D_CMD1_REG_S|S3C_G2D_CMD1_REG_N);
-	cmd_reg_val |= S3C_G2D_CMD1_REG_N;
+	cmd_reg_val |= S3C_G2D_CMD1_REG_S;
 	__raw_writel(cmd_reg_val, s3c_g2d_base + S3C_G2D_CMD1_REG);
 }
 

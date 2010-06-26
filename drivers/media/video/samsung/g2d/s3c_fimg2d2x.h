@@ -115,7 +115,8 @@ typedef struct
 	u32 cw_x2, cw_y2;
 
 	u32 color_val[8];
-	G2D_COLOR_SPACE bpp;
+	G2D_COLOR_SPACE src_bpp;
+	G2D_COLOR_SPACE dst_bpp;
 
 	u32	alpha_mode;			//true : enable, false : disable
 	u32	alpha_val;
