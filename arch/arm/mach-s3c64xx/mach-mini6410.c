@@ -55,6 +55,7 @@
 #include <plat/cpu.h>
 #include <plat/ts.h>
 #include <plat/pm.h>
+#include <plat/udc-hs.h>
 
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
@@ -274,6 +275,10 @@ static struct platform_device mini6410_backlight_device = {
         },
 };
 
+static struct s3c_hsotg_plat mini6410_otg_data = {
+        .is_osc         = 0,
+};
+
 static struct map_desc mini6410_iodesc[] = {};
 
 static struct platform_device *mini6410_devices[] __initdata = {
@@ -335,6 +340,7 @@ static void __init mini6410_machine_init(void)
                                         S3C_GPIO_SFN(0));
         }
 
+	s3c_device_usb_hsotg.dev.platform_data = &mini6410_otg_data;
 	platform_add_devices(mini6410_devices, ARRAY_SIZE(mini6410_devices));
 
 	s3c_pm_init();
