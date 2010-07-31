@@ -1098,7 +1098,7 @@ static int fsync_sub(struct lun *curlun)
 	inode = filp->f_path.dentry->d_inode;
 	mutex_lock(&inode->i_mutex);
 	rc = filemap_fdatawrite(inode->i_mapping);
-	err = filp->f_op->fsync(filp, filp->f_path.dentry, 1);
+	err = filp->f_op->fsync(filp, 1);
 	if (!rc)
 		rc = err;
 	err = filemap_fdatawait(inode->i_mapping);
@@ -2576,7 +2576,7 @@ static void close_backing_file(struct fsg_dev *fsg, struct lun *curlun)
 		 * our pages get synced to disk.
 		 * Also drop caches here just to be extra-safe
 		 */
-		rc = vfs_fsync(curlun->filp, curlun->filp->f_path.dentry, 1);
+		rc = vfs_fsync(curlun->filp, 1);
 		if (rc < 0)
 			printk(KERN_ERR "ums: Error syncing data (%d)\n", rc);
 		/* drop_pagecache and drop_slab are no longer available */
