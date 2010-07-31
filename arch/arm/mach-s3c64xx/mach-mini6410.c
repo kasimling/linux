@@ -56,6 +56,7 @@
 #include <plat/ts.h>
 #include <plat/pm.h>
 #include <plat/udc-hs.h>
+#include <linux/usb/android_composite.h>
 
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
@@ -279,6 +280,58 @@ static struct s3c_hsotg_plat mini6410_otg_data = {
         .is_osc         = 0,
 };
 
+static struct usb_mass_storage_platform_data mass_storage_pdata = {
+        .nluns = 1,
+        .vendor = "FriendlyARM",
+        .product = "MINI6410",
+        .release = 0x0100,
+};
+
+static struct platform_device usb_mass_storage_device = {
+        .name = "usb_mass_storage",
+        .id = -1,
+        .dev = {
+                .platform_data = &mass_storage_pdata,
+        },
+};
+
+static char *usb_functions[] = { "usb_mass_storage" };
+static char *usb_functions_adb[] = { "usb_mass_storage", "adb" };
+
+static struct android_usb_product usb_products[] = {
+        {
+                .product_id     = 0x6401,
+                .num_functions  = ARRAY_SIZE(usb_functions),
+                .functions      = usb_functions,
+        },
+        {
+                .product_id     = 0x6402,
+                .num_functions  = ARRAY_SIZE(usb_functions_adb),
+                .functions      = usb_functions_adb,
+        },
+};
+
+static struct android_usb_platform_data android_usb_pdata = {
+        .vendor_id = 0x18d1,
+        .product_id = 0x6402,
+        .version = 0x0100,
+        .serial_number = "42",
+        .product_name = "MINI6410",
+        .manufacturer_name = "FriendlyARM",
+        .num_products = ARRAY_SIZE(usb_products),
+        .products = usb_products,
+        .num_functions = ARRAY_SIZE(usb_functions_adb),
+        .functions = usb_functions_adb,
+};
+
+static struct platform_device android_usb_device = {
+        .name = "android_usb",
+        .id = -1,
+        .dev = {
+                .platform_data = &android_usb_pdata,
+        },
+};
+
 static struct map_desc mini6410_iodesc[] = {};
 
 static struct platform_device *mini6410_devices[] __initdata = {
@@ -288,6 +341,8 @@ static struct platform_device *mini6410_devices[] __initdata = {
 	&s3c_device_i2c0,
 	&s3c_device_ohci,
 	&s3c_device_usb_hsotg,
+	&usb_mass_storage_device,
+	&android_usb_device,
 	&s3c_device_adc,
 	&s3c_device_ts,
 	&mini6410_device_eth,
