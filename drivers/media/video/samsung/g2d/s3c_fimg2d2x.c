@@ -18,6 +18,7 @@
 #include <linux/fs.h>
 #include <linux/irq.h>
 #include <linux/mm.h>
+#include <linux/slab.h>
 #include <linux/interrupt.h>
 #include <linux/platform_device.h>
 #include <linux/miscdevice.h>

@@ -1151,3 +1151,4 @@ config VIDEO_MEM2MEM_TESTDEV
 	  framework.
 
 endif # V4L_MEM2MEM_DRIVERS
+source "drivers/media/video/samsung/Kconfig"
