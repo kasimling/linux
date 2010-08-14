@@ -58,11 +58,24 @@
 #include <plat/udc-hs.h>
 #include <linux/usb/android_composite.h>
 
+#ifdef CONFIG_ANDROID_PMEM
+#include <linux/android_pmem.h>
+#endif
+
 #define UCON S3C2410_UCON_DEFAULT | S3C2410_UCON_UCLK
 #define ULCON S3C2410_LCON_CS8 | S3C2410_LCON_PNONE | S3C2410_LCON_STOPB
 #define UFCON S3C2410_UFCON_RXTRIG8 | S3C2410_UFCON_FIFOMODE
 
 #define MACH_MINI6410_DM9K_BASE (0x18000000 + 0x300)
+
+#ifdef CONFIG_ANDROID_PMEM
+#define MEM_BASE 0x50000000
+#define MEM_SIZE 0x08000000    /* 128M */
+#define PMEM_BASE_SIZE                 (SZ_1M*4)
+#define PMEM_ADSP_BASE_SIZE    (SZ_1M*4)
+#define PMEM_ADSP_BASE         (MEM_BASE + MEM_SIZE - PMEM_ADSP_BASE_SIZE)
+#define PMEM_BASE      (MEM_BASE + MEM_SIZE - PMEM_ADSP_BASE_SIZE - PMEM_BASE_SIZE)
+#endif
 
 static struct s3c2410_uartcfg mini6410_uartcfgs[] __initdata = {
 	[0] = {
@@ -332,6 +345,40 @@ static struct platform_device android_usb_device = {
         },
 };
 
+#ifdef CONFIG_ANDROID_PMEM
+static struct android_pmem_platform_data android_pmem_pdata = {
+       .name = "pmem",
+       .start = PMEM_BASE,
+       .size = PMEM_BASE_SIZE,
+       .no_allocator = 1,
+       .cached = 1,
+};
+
+static struct android_pmem_platform_data android_pmem_adsp_pdata = {
+       .name = "pmem_adsp",
+       .start = PMEM_ADSP_BASE,
+       .size = PMEM_ADSP_BASE_SIZE,
+       .no_allocator = 0,
+       .cached = 0,
+};
+
+struct platform_device android_pmem_device = {
+       .name = "android_pmem",
+       .id = 0,
+       .dev = {
+               .platform_data = &android_pmem_pdata,
+       },
+};
+
+struct platform_device android_pmem_adsp_device = {
+       .name = "android_pmem",
+       .id = 1,
+       .dev = {
+               .platform_data = &android_pmem_adsp_pdata
+       },
+};
+#endif
+
 static struct map_desc mini6410_iodesc[] = {};
 
 static struct platform_device *mini6410_devices[] __initdata = {
@@ -350,6 +397,10 @@ static struct platform_device *mini6410_devices[] __initdata = {
 	&s3c_device_timer[1],
 	&s3c_device_rtc,
 	&mini6410_backlight_device,
+#ifdef CONFIG_ANDROID_PMEM
+	&android_pmem_device,
+	&android_pmem_adsp_device,
+#endif
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
