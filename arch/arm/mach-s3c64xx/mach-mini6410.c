@@ -381,6 +381,7 @@ struct platform_device android_pmem_adsp_device = {
 
 static struct map_desc mini6410_iodesc[] = {};
 
+extern struct platform_device s3c_device_g2d;
 static struct platform_device *mini6410_devices[] __initdata = {
 	&s3c_device_hsmmc0,
 /*	&s3c_device_hsmmc1,	*/
@@ -401,6 +402,7 @@ static struct platform_device *mini6410_devices[] __initdata = {
 	&android_pmem_device,
 	&android_pmem_adsp_device,
 #endif
+	&s3c_device_g2d,
 };
 
 static struct i2c_board_info i2c_devs0[] __initdata = {
