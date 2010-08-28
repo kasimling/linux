@@ -70,6 +70,7 @@ static u32 get_format(G2D_COLOR_SPACE color_mode)
                 break;
 
         case RGBA24:
+	case BGRA24:
                 bpp_mode = S3C_G2D_COLOR_RGBA_8888;
                 break;
 
@@ -89,6 +90,10 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 
 	src_bpp_mode = get_format(params->src_bpp);
 	dst_bpp_mode = get_format(params->dst_bpp);
+	if(params->src_bpp == BGRA24)
+		__raw_writel(1, s3c_g2d_base + 0x350);
+	else
+		__raw_writel(0, s3c_g2d_base + 0x350);
 
 	/*set register for soruce image ===============================*/
 	__raw_writel(params->src_base_addr, s3c_g2d_base + S3C_G2D_SRC_BASE_ADDR);
