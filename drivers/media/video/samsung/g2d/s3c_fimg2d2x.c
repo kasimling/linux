@@ -156,7 +156,7 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 	
 	return 0;
 }
-
+#if 0
 static u32 s3c_g2d_calculate_XY_incr_format(u32 uDividend, u32 uDivisor)
 {
     int i;
@@ -192,7 +192,7 @@ static u32 s3c_g2d_calculate_XY_incr_format(u32 uDividend, u32 uDivisor)
 
     return ( uUnderPoint | (uQuotient<<11) );
 }
-
+#endif
 void s3c_g2d_bitblt(u16 src_x1, u16 src_y1, u16 src_x2, u16 src_y2,
  	 u16 dst_x1, u16 dst_y1, u16 dst_x2, u16 dst_y2)
 {
@@ -209,13 +209,14 @@ void s3c_g2d_bitblt(u16 src_x1, u16 src_y1, u16 src_x2, u16 src_y2,
  	__raw_writel(dst_y1, s3c_g2d_base + S3C_G2D_COORD2_Y_REG);
  	__raw_writel(dst_x2, s3c_g2d_base + S3C_G2D_COORD3_X_REG);
  	__raw_writel(dst_y2, s3c_g2d_base + S3C_G2D_COORD3_Y_REG);
-
+#if 0
         __raw_writel(s3c_g2d_calculate_XY_incr_format(src_x2 - src_x1, dst_x2 - dst_x1), s3c_g2d_base + S3C_G2D_X_INCR_REG);
 	__raw_writel(s3c_g2d_calculate_XY_incr_format(src_y2 - src_y1, dst_y2 - dst_y1), s3c_g2d_base + S3C_G2D_Y_INCR_REG);
+#endif
 
 	cmd_reg_val = readl(s3c_g2d_base + S3C_G2D_CMD1_REG);
 	cmd_reg_val = ~(S3C_G2D_CMD1_REG_S|S3C_G2D_CMD1_REG_N);
-	cmd_reg_val |= S3C_G2D_CMD1_REG_S;
+	cmd_reg_val |= S3C_G2D_CMD1_REG_N;
 	__raw_writel(cmd_reg_val, s3c_g2d_base + S3C_G2D_CMD1_REG);
 }
 
