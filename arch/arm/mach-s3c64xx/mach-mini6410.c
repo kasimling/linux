@@ -71,10 +71,8 @@
 #ifdef CONFIG_ANDROID_PMEM
 #define MEM_BASE 0x50000000
 #define MEM_SIZE 0x08000000    /* 128M */
-#define PMEM_BASE_SIZE                 (SZ_1M*4)
-#define PMEM_ADSP_BASE_SIZE    (SZ_1M*4)
-#define PMEM_ADSP_BASE         (MEM_BASE + MEM_SIZE - PMEM_ADSP_BASE_SIZE)
-#define PMEM_BASE      (MEM_BASE + MEM_SIZE - PMEM_ADSP_BASE_SIZE - PMEM_BASE_SIZE)
+#define PMEM_BASE_SIZE                 (SZ_1M*8)
+#define PMEM_BASE      (MEM_BASE + MEM_SIZE  - PMEM_BASE_SIZE)
 #endif
 
 static struct s3c2410_uartcfg mini6410_uartcfgs[] __initdata = {
@@ -354,27 +352,11 @@ static struct android_pmem_platform_data android_pmem_pdata = {
        .cached = 1,
 };
 
-static struct android_pmem_platform_data android_pmem_adsp_pdata = {
-       .name = "pmem_adsp",
-       .start = PMEM_ADSP_BASE,
-       .size = PMEM_ADSP_BASE_SIZE,
-       .no_allocator = 0,
-       .cached = 0,
-};
-
 struct platform_device android_pmem_device = {
        .name = "android_pmem",
        .id = 0,
        .dev = {
                .platform_data = &android_pmem_pdata,
-       },
-};
-
-struct platform_device android_pmem_adsp_device = {
-       .name = "android_pmem",
-       .id = 1,
-       .dev = {
-               .platform_data = &android_pmem_adsp_pdata
        },
 };
 #endif
@@ -400,7 +382,6 @@ static struct platform_device *mini6410_devices[] __initdata = {
 	&mini6410_backlight_device,
 #ifdef CONFIG_ANDROID_PMEM
 	&android_pmem_device,
-	&android_pmem_adsp_device,
 #endif
 	&s3c_device_g2d,
 };
