@@ -25,8 +25,11 @@
 #include <asm/io.h>
 #include <mach/map.h>
 #include <plat/regs-g2d.h>
+#include <linux/dma-mapping.h>
+#include <linux/file.h>
 
 #include "s3c_fimg2d2x.h"
+#include <asm/cacheflush.h>
 
 static struct clk *s3c_g2d_clock;
 static struct clk *h_clk;
@@ -82,6 +85,7 @@ static u32 get_format(G2D_COLOR_SPACE color_mode)
 	return bpp_mode;
 }
 
+#define G2D_RGBA32 BGRA24
 static int s3c_g2d_init_regs(s3c_g2d_params *params)
 {
 	u32 src_bpp_mode, dst_bpp_mode;
@@ -132,11 +136,20 @@ static int s3c_g2d_init_regs(s3c_g2d_params *params)
 		}
 
 		__raw_writel(S3C_G2D_ROP_REG_OS_FG_COLOR | 
+				S3C_G2D_ROP_REG_ABM_REGISTER |
+				S3C_G2D_ROP_REG_T_OPAQUE_MODE |
+				G2D_ROP_SRC_ONLY,
+				s3c_g2d_base + S3C_G2D_ROP_REG);
+		__raw_writel(S3C_G2D_ALPHA(params->alpha_val), s3c_g2d_base + S3C_G2D_ALPHA_REG);
+	}
+	else if(params->src_bpp == G2D_RGBA32)
+	{
+		__raw_writel(S3C_G2D_ROP_REG_OS_FG_COLOR |
 				S3C_G2D_ROP_REG_ABM_SRC_BITMAP |
 				S3C_G2D_ROP_REG_T_OPAQUE_MODE | 
 				G2D_ROP_SRC_ONLY, 
 				s3c_g2d_base + S3C_G2D_ROP_REG);
-		__raw_writel(S3C_G2D_ALPHA(params->alpha_val), s3c_g2d_base + S3C_G2D_ALPHA_REG);
+		__raw_writel(S3C_G2D_ALPHA(0x00), s3c_g2d_base + S3C_G2D_ALPHA_REG);
 	} else {
 		__raw_writel(S3C_G2D_ROP_REG_OS_FG_COLOR | 
 				S3C_G2D_ROP_REG_ABM_NO_BLENDING | 
@@ -203,7 +216,8 @@ void s3c_g2d_bitblt(u16 src_x1, u16 src_y1, u16 src_x2, u16 src_y2,
 {
 	u32 cmd_reg_val;
 
-	s3c_g2d_check_fifo(25);
+	flush_cache_all();//add by kyon
+	s3c_g2d_check_fifo(12);
 
  	__raw_writel(src_x1, s3c_g2d_base + S3C_G2D_COORD0_X_REG);
 	__raw_writel(src_y1, s3c_g2d_base + S3C_G2D_COORD0_Y_REG);
@@ -241,7 +255,7 @@ static void s3c_g2d_rotate_with_bitblt(s3c_g2d_params *params, ROT_DEG rot_degre
 	dst_x2 = params->dst_start_x + params->dst_work_width;
 	dst_y2 = params->dst_start_y + params->dst_work_height;
 	
-	s3c_g2d_check_fifo(25);
+	s3c_g2d_check_fifo(8);
 	__raw_writel(S3C_G2D_INTEN_REG_CCF, s3c_g2d_base + S3C_G2D_INTEN_REG);	
 
 	s3c_g2d_get_rotation_origin(src_x1, src_y1, src_x2, src_y2, 
@@ -319,7 +333,7 @@ static void s3c_g2d_get_rotation_origin(u16 src_x1, u16 src_y1,
 					ROT_DEG rot_degree, 
 					u16* org_x, u16* org_y)
 {
-	s3c_g2d_check_fifo(25);
+	//s3c_g2d_check_fifo(25);
 
 	switch(rot_degree) {
 	case ROT_90:
