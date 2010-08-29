@@ -121,4 +121,7 @@
 
 #define SAMSUNG_PA_ADC		S3C64XX_PA_ADC
 
+#define S3C64XX_PA_G2D		(0x76100000)
+#define S3C64XX_SZ_G2D		SZ_1M
+
 #endif /* __ASM_ARCH_6400_MAP_H */
