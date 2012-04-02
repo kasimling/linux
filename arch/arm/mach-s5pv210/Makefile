@@ -35,6 +35,7 @@ obj-$(CONFIG_MACH_HERRING)	+= herring-panel.o
 obj-$(CONFIG_MACH_HERRING)	+= herring-touchkey-led.o
 
 obj-$(CONFIG_MACH_HERRING)	+= dev-herring-phone.o
+obj-$(CONFIG_MACH_MINI210)	+= mach-mini210.o
 
 # device support
 
