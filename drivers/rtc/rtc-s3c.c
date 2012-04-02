@@ -226,8 +226,9 @@ static int s3c_rtc_settime(struct device *dev, struct rtc_time *tm)
 	writeb(bin2bcd(year), base + S3C2410_RTCYEAR);
 #endif
 	s3c_rtc_enable(dev, 0);
-
+#ifdef CONFIG_RTC_DRV_MAX8998
 	max8998_rtc_set_time_hack(tm);
+#endif
 
 	return 0;
 }
@@ -599,8 +600,9 @@ static int __devinit s3c_rtc_probe(struct platform_device *pdev)
 
 
 	s3c_rtc_cpu_type = platform_get_device_id(pdev)->driver_data;
-
+#ifdef CONFIG_RTC_DRV_MAX8998
 	max8998_rtc_read_time_hack(&tm);
+#endif
 
 	/* update time from pmic */
 

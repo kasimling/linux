@@ -142,10 +142,14 @@ struct clk_should_be_running s5pv210_pd_cam_clk[] = {
 	}, {
 		.clk_name	= "fimc",
 		.dev		= &s3c_device_fimc2.dev,
-	}, {
+	},
+#ifdef CONFIG_S5P_DEV_CSIS0
+	{
 		.clk_name	= "sclk_csis",
 		.dev		= &s5p_device_mipi_csis0.dev,
-	}, {
+	},
+#endif
+	{
 		.clk_name	= "jpeg",
 		.dev		= &s3c_device_jpeg.dev,
 	}, {
@@ -175,6 +179,7 @@ struct clk_should_be_running s5pv210_pd_tv_clk[] = {
 };
 
 struct clk_should_be_running s5pv210_pd_lcd_clk[] = {
+#ifdef CONFIG_S5P_DEV_FB
 	{
 		.clk_name	= "lcd",
 		.dev		= &s3c_device_fb.dev,
@@ -184,7 +189,9 @@ struct clk_should_be_running s5pv210_pd_lcd_clk[] = {
 	}, {
 		.clk_name	= "sclk_fimg2d",
 		.dev		= &s3c_device_fb.dev,
-	}, {
+	},
+#endif
+	{
 		/* end of the clock array */
 	},
 };
@@ -197,7 +204,7 @@ struct clk_should_be_running s5pv210_pd_g3d_clk[] = {
 		/* end of the clock array */
 	},
 };
-
+#ifdef CONFIG_S5P_DEV_MFC
 struct clk_should_be_running s5pv210_pd_mfc_clk[] = {
 	{
 		.clk_name	= "mfc",
@@ -206,7 +213,7 @@ struct clk_should_be_running s5pv210_pd_mfc_clk[] = {
 		/* end of the clock array */
 	},
 };
-
+#endif
 static struct s5pv210_pd_config s5pv210_pd_audio_pdata = {
 	.supply_name = "pd_audio_supply",
 	.microvolts = 5000000,
@@ -246,7 +253,7 @@ static struct s5pv210_pd_config s5pv210_pd_g3d_pdata = {
 	.clk_run = s5pv210_pd_g3d_clk,
 	.ctrlbit = S5PV210_PD_G3D,
 };
-
+#ifdef CONFIG_S5P_DEV_MFC
 static struct s5pv210_pd_config s5pv210_pd_mfc_pdata = {
 	.supply_name = "pd_mfc_supply",
 	.microvolts = 5000000,
@@ -254,7 +261,7 @@ static struct s5pv210_pd_config s5pv210_pd_mfc_pdata = {
 	.clk_run = s5pv210_pd_mfc_clk,
 	.ctrlbit = S5PV210_PD_MFC,
 };
-
+#endif
 struct platform_device s5pv210_pd_audio = {
 	.name          = "reg-s5pv210-pd",
 	.id            = 0,
