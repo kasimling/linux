@@ -355,10 +355,14 @@ static void s3c24xx_serial_set_mctrl(struct uart_port *port, unsigned int mctrl)
 	/* todo - possibly remove AFC and do manual CTS */
 	unsigned int umcon = 0;
 	umcon = rd_regl(port, S3C2410_UMCON);
+
+	if(umcon & S3C2410_UMCOM_AFC)
+		return; /* Do nothing when AFC */
+
 	if (mctrl & TIOCM_RTS)
-		umcon |= S3C2410_UMCOM_AFC;
+		umcon &= ~S3C2410_UMCOM_RTS_LOW;
 	else
-		umcon &= ~S3C2410_UMCOM_AFC;
+		umcon |= S3C2410_UMCOM_RTS_LOW;
 
 	wr_regl(port, S3C2410_UMCON, umcon);
 }
