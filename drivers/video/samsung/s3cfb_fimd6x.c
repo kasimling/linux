@@ -208,7 +208,7 @@ int s3cfb_set_polarity(struct s3cfb_global *ctrl)
 	u32 cfg;
 
 	pol = &ctrl->lcd->polarity;
-	cfg = 0;
+	cfg = (ctrl->lcd->args & 0xf0);
 
 	if (pol->rise_vclk)
 		cfg |= S3C_VIDCON1_IVCLK_RISING_EDGE;
@@ -570,8 +570,8 @@ int s3cfb_set_buffer_address(struct s3cfb_global *ctrl, int id)
 	u32 shw;
 
 	if (fix->smem_start) {
-		start_addr = fix->smem_start + (var->xres_virtual *
-				(var->bits_per_pixel / 8) * var->yoffset);
+		start_addr = fix->smem_start + ALIGN(var->xres_virtual *
+				(var->bits_per_pixel / 8) * var->yoffset, PAGE_SIZE);
 
 		end_addr = start_addr + fix->line_length * var->yres;
 	}

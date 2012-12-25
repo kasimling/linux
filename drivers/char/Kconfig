@@ -124,6 +124,13 @@ config MINI210_HELLO_MODULE
 	help
 	  Mini210 module sample.
 
+config MINI210_BUTTONS
+	tristate "Buttons driver for FriendlyARM Mini210 development boards"
+	depends on CPU_S5PV210 && !KEYBOARD_GPIO
+	default y if !KEYBOARD_GPIO
+	help
+	  this is buttons driver for FriendlyARM Mini210 development boards
+
 config MINI210_BUZZER
 	tristate "Buzzer driver for FriendlyARM Mini210 development boards"
 	depends on MACH_MINI210

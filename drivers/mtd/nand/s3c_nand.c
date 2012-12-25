@@ -248,6 +248,7 @@ static void s3c_nand_init_later(struct mtd_info *mtd)
 			nfconf &= ~S3C_NFCONF_PAGESIZE;
 		}
 	} else {
+		nfconf |= (3 << 23) | (1 << 3);
 		if (mtd->writesize == 2048) {
 			nfconf |= S3C_NFCONF_PAGESIZE;
 		} else {
@@ -417,7 +418,7 @@ static void s3c_nand_enable_hwecc(struct mtd_info *mtd, int mode)
  * This function returns encoded ecc codes.
  */
 static int s3c_nand_calculate_ecc(struct mtd_info *mtd,
-			const u_char *dat, u_char *ecc_code)
+		const u_char *dat, u_char *ecc_code)
 {
 	u_long nfcont, nfmecc0, nfmecc1;
 	void __iomem *regs = s3c_nand.regs;
@@ -466,7 +467,7 @@ static int s3c_nand_calculate_ecc(struct mtd_info *mtd,
  * If uncorrectable errors occured, return -1.
  */
 static int s3c_nand_correct_data(struct mtd_info *mtd, u_char *dat,
-			u_char *read_ecc, u_char *calc_ecc)
+		u_char *read_ecc, u_char *calc_ecc)
 {
 	int ret = -1;
 	u_long nfestat0, nfestat1, nfmeccdata0, nfmeccdata1, nfmlcbitpt;
@@ -562,7 +563,7 @@ static int s3c_nand_correct_data(struct mtd_info *mtd, u_char *dat,
 }
 
 static int s3c_nand_write_oob_1bit(struct mtd_info *mtd, struct nand_chip *chip,
-			      int page)
+		int page)
 {
 	uint8_t *ecc_calc = chip->buffers->ecccalc;
 	int status = 0;
@@ -591,7 +592,7 @@ static int s3c_nand_write_oob_1bit(struct mtd_info *mtd, struct nand_chip *chip,
 }
 
 static int s3c_nand_read_oob_1bit(struct mtd_info *mtd, struct nand_chip *chip,
-			     int page, int sndcmd)
+		int page, int sndcmd)
 {
 	uint8_t *ecc_calc = chip->buffers->ecccalc;
 	int eccbytes = chip->ecc.bytes;
@@ -611,7 +612,7 @@ static int s3c_nand_read_oob_1bit(struct mtd_info *mtd, struct nand_chip *chip,
 }
 
 static void s3c_nand_write_page_1bit(struct mtd_info *mtd, struct nand_chip *chip,
-				  const uint8_t *buf)
+		const uint8_t *buf)
 {
 	int i, eccsize = chip->ecc.size;
 	int eccbytes = chip->ecc.bytes;
@@ -644,7 +645,7 @@ static void s3c_nand_write_page_1bit(struct mtd_info *mtd, struct nand_chip *chi
 }
 
 static int s3c_nand_read_page_1bit(struct mtd_info *mtd, struct nand_chip *chip,
-				uint8_t *buf)
+		uint8_t *buf, int page)
 {
 	int i, stat, eccsize = chip->ecc.size;
 	int eccbytes = chip->ecc.bytes;
@@ -688,7 +689,7 @@ static int s3c_nand_read_page_1bit(struct mtd_info *mtd, struct nand_chip *chip,
  * Hardware specific page read function for MLC.
  */
 static int s3c_nand_read_page_4bit(struct mtd_info *mtd, struct nand_chip *chip,
-				uint8_t *buf)
+		uint8_t *buf, int page)
 {
 	int i, stat, eccsize = chip->ecc.size;
 	int eccbytes = chip->ecc.bytes;
@@ -725,7 +726,7 @@ static int s3c_nand_read_page_4bit(struct mtd_info *mtd, struct nand_chip *chip,
  * Hardware specific page write function for MLC.
  */
 static void s3c_nand_write_page_4bit(struct mtd_info *mtd, struct nand_chip *chip,
-				  const uint8_t *buf)
+		const uint8_t *buf)
 {
 	int i, eccsize = chip->ecc.size;
 	int eccbytes = chip->ecc.bytes;
@@ -795,7 +796,8 @@ void s3c_nand_enable_hwecc_8bit(struct mtd_info *mtd, int mode)
 	writel(nfcont, (regs + S3C_NFCONT));
 }
 
-int s3c_nand_calculate_ecc_8bit(struct mtd_info *mtd, const u_char *dat, u_char *ecc_code)
+int s3c_nand_calculate_ecc_8bit(struct mtd_info *mtd,
+		const u_char *dat, u_char *ecc_code)
 {
 	u_long nfcont, nfm8ecc0, nfm8ecc1, nfm8ecc2, nfm8ecc3;
 	void __iomem *regs = s3c_nand.regs;
@@ -833,7 +835,8 @@ int s3c_nand_calculate_ecc_8bit(struct mtd_info *mtd, const u_char *dat, u_char 
 	return 0;
 }
 
-int s3c_nand_correct_data_8bit(struct mtd_info *mtd, u_char *dat, u_char *read_ecc, u_char *calc_ecc)
+int s3c_nand_correct_data_8bit(struct mtd_info *mtd, u_char *dat,
+		u_char *read_ecc, u_char *calc_ecc)
 {
 	int ret = -1;
 	u_long nf8eccerr0, nf8eccerr1, nf8eccerr2, nfmlc8bitpt0, nfmlc8bitpt1;
@@ -897,7 +900,7 @@ int s3c_nand_correct_data_8bit(struct mtd_info *mtd, u_char *dat, u_char *read_e
 }
 
 void s3c_nand_write_page_8bit(struct mtd_info *mtd, struct nand_chip *chip,
-				  const uint8_t *buf)
+		const uint8_t *buf)
 {
 	int i, eccsize = chip->ecc.size;
 	int eccbytes = chip->ecc.bytes;
@@ -921,7 +924,7 @@ void s3c_nand_write_page_8bit(struct mtd_info *mtd, struct nand_chip *chip,
 }
 
 int s3c_nand_read_page_8bit(struct mtd_info *mtd, struct nand_chip *chip,
-				uint8_t *buf)
+		uint8_t *buf, int page)
 {
 	int i, stat, eccsize = chip->ecc.size;
 	int eccbytes = chip->ecc.bytes;
@@ -954,7 +957,7 @@ int s3c_nand_read_page_8bit(struct mtd_info *mtd, struct nand_chip *chip,
 }
 
 int s3c_nand_read_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip,
-			int page, int sndcmd)
+		int page, int sndcmd)
 {
 	int eccbytes = chip->ecc.bytes;
 	int secc_start = mtd->oobsize - eccbytes;
@@ -984,6 +987,12 @@ int s3c_nand_write_oob_8bit(struct mtd_info *mtd, struct nand_chip *chip, int pa
 }
 #endif
 
+#ifdef CONFIG_MACH_MINI210
+/* S5P MLC support */
+extern int s5p_nand_ext_finit(struct nand_chip *nand, void __iomem *nandregs);
+extern int s5p_nand_mlc_probe(struct nand_chip *nand, void __iomem *nandregs, u_char *ids);
+#endif
+
 /* s3c_nand_probe
  *
  * called by device layer when it finds a device matching
@@ -1004,13 +1013,12 @@ static int s3c_nand_probe(struct platform_device *pdev, enum s3c_cpu_type cpu_ty
 	int err = 0;
 	int ret = 0;
 	int i, size;
-#ifdef CONFIG_MTD_PARTITIONS
 	struct mtd_partition *partitions = NULL;
 	int num_partitions = 0;
-#endif
 
 #if defined(CONFIG_MTD_NAND_S3C_HWECC)
 	struct nand_flash_dev *type = NULL;
+	u_char id_data[8];
 	u_char tmp;
 	int j;
 #endif
@@ -1074,6 +1082,11 @@ static int s3c_nand_probe(struct platform_device *pdev, enum s3c_cpu_type cpu_ty
 		nand->dev_ready		= s3c_nand_device_ready;
 		nand->scan_bbt		= s3c_nand_scan_bbt;
 		nand->options		= 0;
+		nand->badblockbits	= 8;
+
+#ifdef CONFIG_MACH_MINI210
+		s5p_nand_ext_finit(nand, s3c_nand.regs);
+#endif
 
 #if defined(CONFIG_MTD_NAND_S3C_HWECC)
 		nand->ecc.mode		= NAND_ECC_HW;
@@ -1087,9 +1100,11 @@ static int s3c_nand_probe(struct platform_device *pdev, enum s3c_cpu_type cpu_ty
 		s3c_nand_hwcontrol(0, NAND_CMD_NONE, NAND_NCE | NAND_CTRL_CHANGE);
 		s3c_nand_device_ready(0);
 
-		tmp = readb(nand->IO_ADDR_R); /* Maf. ID */
-		tmp = readb(nand->IO_ADDR_R); /* Device ID */
+		for (j = 0; j < 8; j++) {
+			id_data[j] = readb(nand->IO_ADDR_R);
+		}
 
+		tmp = id_data[1];				/* Device ID */
 		for (j = 0; nand_flash_ids[j].name != NULL; j++) {
 			if (tmp == nand_flash_ids[j].id) {
 				type = &nand_flash_ids[j];
@@ -1102,8 +1117,9 @@ static int s3c_nand_probe(struct platform_device *pdev, enum s3c_cpu_type cpu_ty
 			goto exit_error;
 		}
 
-		nand->cellinfo = readb(nand->IO_ADDR_R);	/* the 3rd byte */
-		tmp = readb(nand->IO_ADDR_R);			/* the 4th byte */
+		nand->cellinfo = id_data[2];	/* the 3rd byte */
+		tmp = id_data[3];				/* the 4th byte */
+
 		if (!type->pagesize) {
 			if (((nand->cellinfo >> 2) & 0x3) == 0) {
 				nand_type = S3C_NAND_TYPE_SLC;
@@ -1139,6 +1155,10 @@ static int s3c_nand_probe(struct platform_device *pdev, enum s3c_cpu_type cpu_ty
 				nand_type = S3C_NAND_TYPE_MLC;
 				nand->options |= NAND_NO_SUBPAGE_WRITE;	/* NOP = 1 if MLC */
 
+#ifdef CONFIG_MACH_MINI210
+				nand->badblockbits = 4;
+				s5p_nand_mlc_probe(nand, s3c_nand.regs, id_data);
+#else
 				if ((1024 << (tmp & 3)) == 4096) {
 					/* Page size is 4Kbytes */
 					nand->ecc.read_page = s3c_nand_read_page_8bit;
@@ -1159,6 +1179,7 @@ static int s3c_nand_probe(struct platform_device *pdev, enum s3c_cpu_type cpu_ty
 					nand->ecc.bytes = 8;    /* really 7 bytes */
 					nand->ecc.layout = &s3c_nand_oob_mlc_64;
 				}
+#endif
 			}
 		} else {
 			nand_type = S3C_NAND_TYPE_SLC;
@@ -1194,7 +1215,11 @@ static int s3c_nand_probe(struct platform_device *pdev, enum s3c_cpu_type cpu_ty
 			partitions = partition_info;
 		}
 
+#ifdef CONFIG_MTD_PARTITIONS
 		add_mtd_partitions(s3c_mtd, partitions, num_partitions);
+#else
+		mtd_device_register(s3c_mtd, partitions, num_partitions);
+#endif
 	}
 
 	pr_debug("initialized ok\n");

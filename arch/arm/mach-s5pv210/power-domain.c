@@ -159,16 +159,24 @@ struct clk_should_be_running s5pv210_pd_audio_clk[] = {
 struct clk_should_be_running s5pv210_pd_cam_clk[] = {
 	{
 		.clk_name	= "sclk_fimc_lclk",
+#ifdef CONFIG_VIDEO_FIMC
 		.dev		= &s3c_device_fimc0.dev,
+#endif
 	}, {
 		.clk_name	= "sclk_fimc_lclk",
+#ifdef CONFIG_VIDEO_FIMC
 		.dev		= &s3c_device_fimc1.dev,
+#endif
 	}, {
 		.clk_name	= "sclk_fimc_lclk",
+#ifdef CONFIG_VIDEO_FIMC
 		.dev		= &s3c_device_fimc2.dev,
+#endif
 	}, {
 		.clk_name	= "sclk_csis",
+#ifdef CONFIG_VIDEO_FIMC
 		.dev		= &s3c_device_csis.dev,
+#endif
 	}, {
 		.clk_name	= "jpeg",
 		.dev		= &s3c_device_jpeg.dev,
@@ -225,7 +233,9 @@ struct clk_should_be_running s5pv210_pd_g3d_clk[] = {
 struct clk_should_be_running s5pv210_pd_mfc_clk[] = {
 	{
 		.clk_name	= "mfc",
+#if defined(CONFIG_VIDEO_MFC51) || defined(CONFIG_VIDEO_MFC50)
 		.dev		= &s3c_device_mfc.dev,
+#endif
 	}, {
 		/* end of the clock array */
 	},

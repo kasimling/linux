@@ -157,9 +157,9 @@ static struct s3c2410_uartcfg mini210_uartcfgs[] __initdata = {
 #define PXL2FIMD(pixels)	\
 		((pixels) * BYTES_PER_PIXEL * CONFIG_FB_S3C_NR_BUFFERS)
 
-#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC0		(24576 * SZ_1K)
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC0		( 6144 * SZ_1K)
 #define S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC1		( 9900 * SZ_1K)
-#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC2		(24576 * SZ_1K)
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC2		( 6144 * SZ_1K)
 #define S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC0		(36864 * SZ_1K)
 #define S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC1		(36864 * SZ_1K)
 #define S5PV210_VIDEO_SAMSUNG_MEMSIZE_JPEG		( 8192 * SZ_1K)
@@ -171,80 +171,106 @@ static struct s3c2410_uartcfg mini210_uartcfgs[] __initdata = {
  * - framesize <  1080p : 1080 *  720 * 4(32bpp) * 2(double buffer) = under 8MB
  **/
 #define S5PV210_VIDEO_SAMSUNG_MEMSIZE_G2D		( 8192 * SZ_1K)
-#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_TEXSTREAM	( 3000 * SZ_1K)
+#define S5PV210_VIDEO_SAMSUNG_MEMSIZE_TEXSTREAM	( 4096 * SZ_1K)
+#define S5PV210_ANDROID_PMEM_MEMSIZE_PMEM		( 5550 * SZ_1K)
 #define S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_GPU1	( 3300 * SZ_1K)
+#define S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_ADSP	( 1500 * SZ_1K)
 
 static struct s5p_media_device mini210_media_devs[] = {
-	[0] = {
+#if defined(CONFIG_VIDEO_MFC50)
+	{
 		.id = S5P_MDEV_MFC,
 		.name = "mfc",
 		.bank = 0,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC0,
 		.paddr = 0,
 	},
-	[1] = {
+	{
 		.id = S5P_MDEV_MFC,
 		.name = "mfc",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC1,
 		.paddr = 0,
 	},
-	[2] = {
+#endif
+#if defined(CONFIG_VIDEO_FIMC)
+	{
 		.id = S5P_MDEV_FIMC0,
 		.name = "fimc0",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC0,
 		.paddr = 0,
 	},
-	[3] = {
+	{
 		.id = S5P_MDEV_FIMC1,
 		.name = "fimc1",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC1,
 		.paddr = 0,
 	},
-	[4] = {
+	{
 		.id = S5P_MDEV_FIMC2,
 		.name = "fimc2",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC2,
 		.paddr = 0,
 	},
-	[5] = {
+#endif
+#if defined(CONFIG_VIDEO_JPEG_V2)
+	{
 		.id = S5P_MDEV_JPEG,
 		.name = "jpeg",
 		.bank = 0,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_JPEG,
 		.paddr = 0,
 	},
-	[6] = {
+#endif
+	{
 		.id = S5P_MDEV_FIMD,
 		.name = "fimd",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMD,
 		.paddr = 0,
 	},
-	[7] = {
+	{
 		.id = S5P_MDEV_TEXSTREAM,
 		.name = "texstream",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_TEXSTREAM,
 		.paddr = 0,
 	},
-	[8] = {
+#if defined(CONFIG_ANDROID_PMEM)
+	{
+		.id = S5P_MDEV_PMEM,
+		.name = "pmem",
+		.bank = 0,
+		.memsize = S5PV210_ANDROID_PMEM_MEMSIZE_PMEM,
+		.paddr = 0,
+	},
+	{
 		.id = S5P_MDEV_PMEM_GPU1,
 		.name = "pmem_gpu1",
 		.bank = 0, /* OneDRAM */
 		.memsize = S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_GPU1,
 		.paddr = 0,
 	},
-	[9] = {
+	{
+		.id = S5P_MDEV_PMEM_ADSP,
+		.name = "pmem_adsp",
+		.bank = 0,
+		.memsize = S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_ADSP,
+		.paddr = 0,
+	},
+#endif
+#if defined(CONFIG_VIDEO_G2D)
+	{
 		.id = S5P_MDEV_G2D,
 		.name = "g2d",
 		.bank = 0,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_G2D,
 		.paddr = 0,
 	},
+#endif
 };
 
 static void mini210_fixup_bootmem(int id, unsigned int size) {
@@ -588,13 +614,13 @@ static struct gpio_keys_button gpio_buttons[] = {
 	{
 		.gpio		= S5PV210_GPH2(0),
 		.code		= 158,
-		.desc		= "HOME",
+		.desc		= "BACK",
 		.active_low	= 1,
 		.wakeup		= 0,
 	}, {
 		.gpio		= S5PV210_GPH2(1),
 		.code		= 102,
-		.desc		= "BACK",
+		.desc		= "HOME",
 		.active_low	= 1,
 		.wakeup		= 1,
 	}, {
@@ -633,6 +659,12 @@ static struct gpio_keys_button gpio_buttons[] = {
 		.desc		= "DPAD_RIGHT",
 		.active_low	= 1,
 		.wakeup		= 0,
+	}, {
+		.gpio		= S5PV210_GPH1(7),
+		.code		= 102,
+		.desc		= "HOME",
+		.active_low	= 1,
+		.wakeup		= 1,
 	}
 };
 
@@ -736,10 +768,12 @@ static void __init mini210_wifi_init(void)
 	gpio_request(S5PV210_GPJ4(1), "GPJ4_1");
 	gpio_direction_output(S5PV210_GPJ4(1), 1);
 	udelay(50);
-	gpio_free(S5PV210_GPJ4(4));
+	gpio_free(S5PV210_GPJ4(1));
 
 	gpio_request(S5PV210_GPJ4(3), "GPJ4_3");
-	gpio_direction_output(S5PV210_GPJ4(3), 1);
+	gpio_direction_output(S5PV210_GPJ4(3), 0);
+	udelay(100);
+	gpio_set_value(S5PV210_GPJ4(3), 1);
 	gpio_free(S5PV210_GPJ4(3));
 }
 
@@ -1313,6 +1347,12 @@ static struct s3c_platform_camera s5k4ea = {
 #ifdef CONFIG_VIDEO_OV9650
 static int ov9650_power_en(int onoff)
 {
+#define CAMA_PWR_EN		S5PV210_GPJ2(4)
+
+	gpio_request(CAMA_PWR_EN, "GPJ2_4");
+	gpio_direction_output(CAMA_PWR_EN, onoff);
+	gpio_free(CAMA_PWR_EN);
+
 	printk("ov9650: power %s\n", onoff ? "ON" : "Off");
 	return 0;
 }
@@ -1367,6 +1407,54 @@ static struct s3c_platform_camera ov9650 = {
 };
 #endif
 
+#ifdef CONFIG_VIDEO_TVP5150
+static int tvp5150_power_en(int onoff)
+{
+	printk("tvp5150: power %s\n", onoff ? "ON" : "Off");
+	return 0;
+}
+
+static struct i2c_board_info tvp5150_i2c_info = {
+	I2C_BOARD_INFO("tvp5150", (0xb8 >> 1)),
+};
+
+static struct s3c_platform_camera tvp5150 = {
+	#ifdef CAM_ITU_CH_A
+	.id		= CAMERA_PAR_A,
+	#else
+	.id		= CAMERA_PAR_B,
+	#endif
+	.type		= CAM_TYPE_ITU,
+	.fmt		= ITU_656_YCBCR422_8BIT,
+	.order422	= CAM_ORDER422_8BIT_CBYCRY,
+	.i2c_busnum	= 0,
+	.info		= &tvp5150_i2c_info,
+	.pixelformat	= V4L2_PIX_FMT_YUYV,
+	.srclk_name	= "mout_mpll",
+	/* .srclk_name	= "xusbxti", */
+	.clk_name	= "sclk_cam1",
+	.clk_rate	= 40000000,
+	.line_length	= 1920,
+	.width		= 1280,
+	.height		= 1024,
+	.window		= {
+		.left	= 0,
+		.top	= 0,
+		.width	= 1280,
+		.height	= 1024,
+	},
+
+	/* Polarity */
+	.inv_pclk	= 0,
+	.inv_vsync	= 0,
+	.inv_href	= 0,
+	.inv_hsync	= 0,
+
+	.initialized	= 0,
+	.cam_power	= tvp5150_power_en,
+};
+#endif
+
 /* Interface setting */
 static struct s3c_platform_fimc fimc_plat_lsi = {
 	.srclk_name	= "mout_mpll",
@@ -1395,6 +1483,9 @@ static struct s3c_platform_fimc fimc_plat_lsi = {
 #ifdef CONFIG_VIDEO_S5K4EA
 			&s5k4ea,
 #endif
+#ifdef CONFIG_VIDEO_TVP5150
+			&tvp5150,
+#endif
 #ifdef CONFIG_VIDEO_OV9650
 			&ov9650,
 #endif
@@ -1419,12 +1510,22 @@ static struct wm8960_data wm8960_pdata = {
 };
 #endif
 
+#ifdef CONFIG_SENSORS_MMA7660
+#include <linux/mma7660.h>
+static struct mma7660_platform_data mma7660_pdata = {
+	.irq			= IRQ_EINT9,
+	.poll_interval	= 100,
+	.input_fuzz		= 4,
+	.input_flat		= 4,
+};
+#endif
+
 /* I2C0 */
 static struct i2c_board_info i2c_devs0[] __initdata = {
 #ifdef CONFIG_SND_SOC_WM8960_MINI210
 	{
 		I2C_BOARD_INFO("wm8960", 0x1a),
-				.platform_data  = &wm8960_pdata,
+		.platform_data = &wm8960_pdata,
 	},
 #endif
 #ifdef CONFIG_SND_SOC_WM8580
@@ -1438,6 +1539,12 @@ static struct i2c_board_info i2c_devs0[] __initdata = {
 		.platform_data = &ov9650_plat,
 	},
 #endif
+#ifdef CONFIG_SENSORS_MMA7660
+	{
+		I2C_BOARD_INFO("mma7660", 0x4c),
+		.platform_data = &mma7660_pdata,
+	},
+#endif
 };
 
 /* I2C1 */
@@ -1449,6 +1556,38 @@ static struct i2c_board_info i2c_devs1[] __initdata = {
 #endif
 };
 
+#ifdef CONFIG_TOUCHSCREEN_GOODIX
+#include <plat/goodix_touch.h>
+static struct goodix_i2c_platform_data goodix_pdata = {
+	.gpio_irq		= S5PV210_GPH1(6),
+	.irq_cfg		= S3C_GPIO_SFN(0xf),
+	.gpio_shutdown	= 0,
+	.shutdown_cfg	= S3C_GPIO_OUTPUT,
+	.screen_width	= 800,
+	.screen_height	= 480,
+};
+
+#include <plat/regs-iic.h>
+static struct s3c2410_platform_i2c goodix_i2c_data __initdata = {
+	.flags		= 0,
+	.bus_num	= 2,
+	.slave_addr	= 0x10,
+	.frequency	= 250*1000,
+	.sda_delay	= S3C2410_IICLC_SDA_DELAY5 | S3C2410_IICLC_FILTER_ON,
+};
+#endif
+
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
+#include <plat/ft5x0x_touch.h>
+static struct ft5x0x_i2c_platform_data ft5x0x_pdata = {
+	.gpio_irq		= S5PV210_GPH1(6),
+	.irq_cfg		= S3C_GPIO_SFN(0xf),
+	.screen_max_x	= 480,
+	.screen_max_y	= 272,
+	.pressure_max	= 255,
+};
+#endif
+
 /* I2C2 */
 static struct i2c_board_info i2c_devs2[] __initdata = {
 #ifdef CONFIG_REGULATOR_MAX8698
@@ -1456,6 +1595,18 @@ static struct i2c_board_info i2c_devs2[] __initdata = {
 		/* The address is 0xCC used since SRAD = 0 */
 		I2C_BOARD_INFO("max8698", (0xCC >> 1)),
 		.platform_data = &max8698_pdata,
+	},
+#endif
+#ifdef CONFIG_TOUCHSCREEN_GOODIX
+	{
+		I2C_BOARD_INFO("gt80x-ts", 0x55),
+		.platform_data = &goodix_pdata,
+	},
+#endif
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
+	{
+		I2C_BOARD_INFO("ft5x0x_ts", (0x70 >> 1)),
+		.platform_data = &ft5x0x_pdata,
 	},
 #endif
 };
@@ -1478,6 +1629,14 @@ struct platform_device sec_device_battery = {
 #endif
 
 #ifdef CONFIG_ANDROID_PMEM
+static struct android_pmem_platform_data pmem_pdata = {
+	.name = "pmem",
+	.no_allocator = 1,
+	.cached = 1,
+	.start = 0,
+	.size = 0,
+};
+
 static struct android_pmem_platform_data pmem_gpu1_pdata = {
 	.name = "pmem_gpu1",
 	.no_allocator = 1,
@@ -1487,18 +1646,47 @@ static struct android_pmem_platform_data pmem_gpu1_pdata = {
 	.size = 0,
 };
 
+static struct android_pmem_platform_data pmem_adsp_pdata = {
+	.name = "pmem_adsp",
+	.no_allocator = 1,
+	.cached = 1,
+	.buffered = 1,
+	.start = 0,
+	.size = 0,
+};
+
+static struct platform_device pmem_device = {
+	.name = "android_pmem",
+	.id = 0,
+	.dev = { .platform_data = &pmem_pdata },
+};
+
 static struct platform_device pmem_gpu1_device = {
 	.name = "android_pmem",
 	.id = 1,
 	.dev = { .platform_data = &pmem_gpu1_pdata },
 };
 
+static struct platform_device pmem_adsp_device = {
+	.name = "android_pmem",
+	.id = 2,
+	.dev = { .platform_data = &pmem_adsp_pdata },
+};
+
 static void __init android_pmem_set_platdata(void)
 {
+	pmem_pdata.start = (u32)s5p_get_media_memory_bank(S5P_MDEV_PMEM, 0);
+	pmem_pdata.size = (u32)s5p_get_media_memsize_bank(S5P_MDEV_PMEM, 0);
+
 	pmem_gpu1_pdata.start =
 		(u32)s5p_get_media_memory_bank(S5P_MDEV_PMEM_GPU1, 0);
 	pmem_gpu1_pdata.size =
 		(u32)s5p_get_media_memsize_bank(S5P_MDEV_PMEM_GPU1, 0);
+
+	pmem_adsp_pdata.start =
+		(u32)s5p_get_media_memory_bank(S5P_MDEV_PMEM_ADSP, 0);
+	pmem_adsp_pdata.size =
+		(u32)s5p_get_media_memsize_bank(S5P_MDEV_PMEM_ADSP, 0);
 }
 #endif
 
@@ -1577,7 +1765,7 @@ static struct platform_device *mini210_devices[] __initdata = {
 	&s3c_device_i2c1,
 #endif
 #ifdef CONFIG_S3C_DEV_I2C2
-	//&s3c_device_i2c2,
+	&s3c_device_i2c2,
 #endif
 
 #ifdef CONFIG_USB_OHCI_HCD
@@ -1643,18 +1831,28 @@ static struct platform_device *mini210_devices[] __initdata = {
 static void __init mini210_map_io(void)
 {
 	struct s3cfb_lcd *lcd = mini210_get_lcd();
-	int fimd_size;
+	int frame_size, fimd_size;
 
 	s5p_init_io(NULL, 0, S5P_VA_CHIPID);
 	s3c24xx_init_clocks(24000000);
 	s5pv210_gpiolib_init();
 	s3c24xx_init_uarts(mini210_uartcfgs, ARRAY_SIZE(mini210_uartcfgs));
 
-	fimd_size = PXL2FIMD(lcd->width * lcd->height);
+	frame_size = lcd->width * lcd->height * BYTES_PER_PIXEL;
+	fimd_size = ALIGN(frame_size, PAGE_SIZE) * CONFIG_FB_S3C_NR_BUFFERS;
 	if (fimd_size != S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMD) {
 		mini210_fixup_bootmem(S5P_MDEV_FIMD, fimd_size);
 	}
 	s5p_reserve_bootmem(mini210_media_devs, ARRAY_SIZE(mini210_media_devs));
+
+#ifdef CONFIG_TOUCHSCREEN_GOODIX
+	goodix_pdata.screen_width = lcd->width;
+	goodix_pdata.screen_height = lcd->height;
+#endif
+#ifdef CONFIG_TOUCHSCREEN_FT5X0X
+	ft5x0x_pdata.screen_max_x = lcd->width;
+	ft5x0x_pdata.screen_max_y = lcd->height;
+#endif
 
 #ifdef CONFIG_MTD_ONENAND
 	s5pc110_device_onenand.name = "s5pc110-onenand";
@@ -1669,15 +1867,17 @@ static void __init mini210_fixup(struct machine_desc *desc,
 		struct tag *tags, char **cmdline,
 		struct meminfo *mi)
 {
-	mi->bank[0].start = 0x20000000;
-	mi->bank[0].size = 256 * SZ_1M;
-	mi->bank[0].node = 0;
-
-	mi->bank[1].start = 0x40000000;
-	mi->bank[1].size = 256 * SZ_1M;
-	mi->bank[1].node = 2;
-
-	mi->nr_banks = 2;
+#ifdef CONFIG_ARCH_DISCONTIGMEM_ENABLE
+	/*-------------------------------------------------------------
+	 * fixup memory info here, for example:
+	 +   mi->bank[0].start = 0x20000000;
+	 +   mi->bank[0].size = 256 * SZ_1M;
+	 +   mi->bank[0].node = 0;
+	 +   mi->nr_banks = 1;
+	 -------------------------------------------------------------*/
+#else
+#warning "DRAM #1 may be inaccesaable, pls *CHECK* kernel config!"
+#endif
 }
 
 unsigned int pm_debug_scratchpad;
@@ -1769,7 +1969,9 @@ static void __init mini210_machine_init(void)
 	s3c_usb_set_serial();
 	platform_add_devices(mini210_devices, ARRAY_SIZE(mini210_devices));
 #ifdef CONFIG_ANDROID_PMEM
+	platform_device_register(&pmem_device);
 	platform_device_register(&pmem_gpu1_device);
+	platform_device_register(&pmem_adsp_device);
 #endif
 	pm_power_off = smdkc110_power_off ;
 
@@ -1779,7 +1981,11 @@ static void __init mini210_machine_init(void)
 	/* i2c */
 	s3c_i2c0_set_platdata(NULL);
 	s3c_i2c1_set_platdata(NULL);
+#ifdef CONFIG_TOUCHSCREEN_GOODIX
+	s3c_i2c2_set_platdata(&goodix_i2c_data);
+#else
 	s3c_i2c2_set_platdata(NULL);
+#endif
 
 	sound_init();
 
@@ -1795,8 +2001,15 @@ static void __init mini210_machine_init(void)
 #endif
 
 #ifdef CONFIG_FB_S3C_MINI210
-	mini210_fb_data.lcd = mini210_get_lcd();
-	s3cfb_set_platdata(&mini210_fb_data);
+	{
+		struct s3cfb_lcd *mlcd = mini210_get_lcd();
+		if (!(mlcd->args & 0x0f)) {
+			if (readl(S5PV210_GPF0_BASE + 0x184) & 0x10)
+				mlcd->args |= (1 << 7);
+		}
+		mini210_fb_data.lcd = mlcd;
+		s3cfb_set_platdata(&mini210_fb_data);
+	}
 #endif
 
 	/* spi */

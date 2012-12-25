@@ -49,3 +49,13 @@ obj-$(CONFIG_MTD_NAND_MPC5121_NFC)	+= mpc5121_nfc.o
 obj-$(CONFIG_MTD_NAND_RICOH)		+= r852.o
 
 nand-objs := nand_base.o nand_bbt.o
+
+ifeq ($(CONFIG_MACH_MINI210),y)
+S5P_NAND_MLC_SRC = $(shell ls drivers/mtd/nand/s5p_nand_mlc.c 2>/dev/null)
+ifeq ($(S5P_NAND_MLC_SRC),)
+obj-$(CONFIG_MTD_NAND_S3C)          += s5p_nand_mlc.fo
+else
+obj-$(CONFIG_MTD_NAND_S3C)          += s5p_nand_mlc.o
+endif
+endif
+

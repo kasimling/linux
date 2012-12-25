@@ -32,7 +32,9 @@
 
 #include "s3c-dma.h"
 
+#if defined(CONFIG_SND_S3C_NEW_DMA)
 #define NEW_DMA
+#endif
 
 static const struct snd_pcm_hardware s3c_dma_hardware = {
 	.info			= SNDRV_PCM_INFO_INTERLEAVED |

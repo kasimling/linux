@@ -351,6 +351,8 @@ static int nand_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip)
 
 	page = (int)(ofs >> chip->page_shift) & chip->pagemask;
 
+#if	0
+	/* Moved to nand_block_checkbad() for chip specify support */
 	if (getchip) {
 		chipnr = (int)(ofs >> chip->chip_shift);
 
@@ -359,6 +361,7 @@ static int nand_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip)
 		/* Select the NAND device */
 		chip->select_chip(mtd, chipnr);
 	}
+#endif
 
 	if (chip->options & NAND_BUSWIDTH_16) {
 		chip->cmdfunc(mtd, NAND_CMD_READOOB, chip->badblockpos & 0xFE,
@@ -378,8 +381,10 @@ static int nand_block_bad(struct mtd_info *mtd, loff_t ofs, int getchip)
 	else
 		res = hweight8(bad) < chip->badblockbits;
 
+#if	0
 	if (getchip)
 		nand_release_device(mtd);
+#endif
 
 	return res;
 }
@@ -463,9 +468,26 @@ static int nand_block_checkbad(struct mtd_info *mtd, loff_t ofs, int getchip,
 			       int allowbbt)
 {
 	struct nand_chip *chip = mtd->priv;
+	int chipnr, res = 0;
 
-	if (!chip->bbt)
-		return chip->block_bad(mtd, ofs, getchip);
+	/* Chip specify block_bad() support */
+	if (!chip->bbt) {
+		if (getchip) {
+			chipnr = (int)(ofs >> chip->chip_shift);
+
+			nand_get_device(chip, mtd, FL_READING);
+
+			/* Select the NAND device */
+			chip->select_chip(mtd, chipnr);
+		}
+
+		res = chip->block_bad(mtd, ofs, getchip);
+
+		if (getchip)
+			nand_release_device(mtd);
+
+		return res;
+	}
 
 	/* Return info from the table */
 	return nand_isbad_bbt(mtd, ofs, allowbbt);
@@ -2853,11 +2875,16 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 				id_data[0] == NAND_MFR_SAMSUNG &&
 				(chip->cellinfo & NAND_CI_CELLTYPE_MSK) &&
 				id_data[5] != 0x00) {
+			int __oobsz[] = { 0, 128, 218, 400, 436, 512, 640, 0 };
 			/* Calc pagesize */
 			mtd->writesize = 2048 << (extid & 0x03);
 			extid >>= 2;
 			/* Calc oobsize */
-			mtd->oobsize = (extid & 0x03) == 0x01 ? 128 : 218;
+			if (extid & 0x10) {
+				mtd->oobsize = __oobsz[4 + (extid & 0x3)];
+			} else {
+				mtd->oobsize = __oobsz[(extid & 0x3)];
+			}
 			extid >>= 2;
 			/* Calc blocksize */
 			mtd->erasesize = (128 * 1024) <<
@@ -2922,7 +2949,9 @@ static struct nand_flash_dev *nand_get_flash_type(struct mtd_info *mtd,
 	/* Set the bad block position */
 	chip->badblockpos = mtd->writesize > 512 ?
 		NAND_LARGE_BADBLOCK_POS : NAND_SMALL_BADBLOCK_POS;
-	chip->badblockbits = 8;
+
+	if (!chip->badblockbits)
+		chip->badblockbits = 8;
 
 	/* Get chip options, preserve non chip based options */
 	chip->options &= ~NAND_CHIPOPTIONS_MSK;

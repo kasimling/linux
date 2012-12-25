@@ -52,3 +52,20 @@ obj-$(CONFIG_TOUCHSCREEN_TPS6507X)	+= tps6507x-ts.o
 obj-$(CONFIG_TOUCHSCREEN_S3C)           += ts-s3c.o
 obj-$(CONFIG_TOUCHSCREEN_1WIRE)		+= mini210_1wire_host.o
 obj-$(CONFIG_TOUCHSCREEN_IF)		+= ts-if.o
+
+ifneq ($(wildcard drivers/input/touchscreen/goodix_touch.c),)
+ifeq ($(FA),1)
+obj-$(CONFIG_TOUCHSCREEN_GOODIX)	+= goodix_touch.o
+else
+obj-m += goodix_touch.o
+endif  #FA
+endif
+
+ifneq ($(wildcard drivers/input/touchscreen/ft5x06_ts.c),)
+ifeq ($(FA),1)
+obj-$(CONFIG_TOUCHSCREEN_FT5X0X)	+= ft5x06_ts.o
+else
+obj-m += ft5x06_ts.o
+endif  #FA
+endif
+

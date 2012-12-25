@@ -1113,10 +1113,18 @@ config SENSORS_APPLESMC
 	  the awesome power of applesmc.
 
 config SENSORS_MC13783_ADC
-        tristate "Freescale MC13783 ADC"
-        depends on MFD_MC13783
-        help
-          Support for the A/D converter on MC13783 PMIC.
+	tristate "Freescale MC13783 ADC"
+	depends on MFD_MC13783
+	help
+	  Support for the A/D converter on MC13783 PMIC.
+
+config SENSORS_MMA7660
+	tristate "Freescale MMA7660 Accelerometer"
+	depends on I2C && MACH_MINI210
+	default n
+	help
+	  This driver provides Support for the 3-Axis Orientation/Motion
+	  Detection Sensor - MMA7660 of Freescale Semiconductor.
 
 if ACPI
 

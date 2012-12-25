@@ -176,6 +176,7 @@ struct s3cfb_lcd {
 
 	void	(*init_ldi)(void);
 	void	(*deinit_ldi)(void);
+	unsigned long args;
 };
 
 /*

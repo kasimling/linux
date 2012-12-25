@@ -32,8 +32,6 @@
 
 #define DEVICE_NAME	"mini210-adc"
 
-static void __iomem *base_addr;
-
 typedef struct {
 	wait_queue_head_t wait;
 	int channel;
@@ -58,6 +56,7 @@ static ADC_DEV adcdev;
 static volatile int ev_adc = 0;
 static int adc_data;
 
+static void __iomem *base_addr;
 static struct clk	*adc_clock;
 
 #define __ADCREG(name)	(*(volatile unsigned long *)(base_addr + name))
@@ -132,12 +131,34 @@ static ssize_t s3c2410_adc_read(struct file *filp, char *buffer, size_t count, l
 	}
 }
 
+static int s3c2410_adc_ioctl(struct inode *inode, struct file *file,
+		unsigned int cmd, unsigned long arg)
+{
+#define ADC_SET_CHANNEL		0xc000fa01
+#define ADC_SET_ADCTSC		0xc000fa02
+
+	switch (cmd) {
+		case ADC_SET_CHANNEL:
+			adcdev.channel = arg;
+			break;
+		case ADC_SET_ADCTSC:
+			ADCTSC = arg;
+		default:
+			return -EINVAL;
+	}
+
+	return 0;
+}
+
 static int s3c2410_adc_open(struct inode *inode, struct file *filp)
 {
 	init_waitqueue_head(&(adcdev.wait));
 
 	adcdev.channel=0;
 	adcdev.prescale=0xff;
+
+	/* Bit 6 must be 1 for YP, bit 7 must be 0 for YM */
+	ADCTSC = 0x40;
 
 	DPRINTK("adc opened\n");
 	return 0;
@@ -154,6 +175,7 @@ static struct file_operations dev_fops = {
 	owner:	THIS_MODULE,
 	open:	s3c2410_adc_open,
 	read:	s3c2410_adc_read,	
+	ioctl:	s3c2410_adc_ioctl,
 	release:	s3c2410_adc_release,
 };
 

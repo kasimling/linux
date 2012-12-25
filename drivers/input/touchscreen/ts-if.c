@@ -90,7 +90,7 @@ static int __init dev_init(void)
 	input_set_abs_params(input_dev, ABS_Y, 0, height, 0, 0);
 	input_set_abs_params(input_dev, ABS_PRESSURE, 0, 1, 0, 0);
 
-	input_dev->name = "TouchScreen Pipe";
+	input_dev->name = "fa_ts_input";
 	input_dev->phys = phys;
 	input_dev->id.bustype = BUS_RS232;
 	input_dev->id.vendor = 0xDEAD;

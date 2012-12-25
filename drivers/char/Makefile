@@ -118,8 +118,10 @@ obj-$(CONFIG_S3C_MEM)		+= s3c_mem.o
 
 obj-$(CONFIG_MINI210_LEDS)	+= mini210_leds.o
 obj-$(CONFIG_MINI210_HELLO_MODULE)	+= mini210_hello_module.o
+obj-$(CONFIG_MINI210_BUTTONS)	+= mini210_buttons.o
 obj-$(CONFIG_MINI210_BUZZER)	+= mini210_pwm.o
 obj-$(CONFIG_MINI210_ADC)		+= mini210_adc.o
+obj-y							+= mini210_backlight.o
 
 # Files generated that shall be removed upon make clean
 clean-files := consolemap_deftbl.c defkeymap.c

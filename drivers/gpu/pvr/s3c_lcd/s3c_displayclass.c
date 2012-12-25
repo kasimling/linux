@@ -959,7 +959,7 @@ int s3c_displayclass_init(void)
 		for (i=0 ; i < num_of_backbuffer; i++)
 		{
 			g_psLCDInfo->asBackBuffers[i].byteSize = g_psLCDInfo->sSysBuffer.byteSize;
-			g_psLCDInfo->asBackBuffers[i].bufferPAddr.uiAddr = pa_fb + byteSize * (i+1);
+			g_psLCDInfo->asBackBuffers[i].bufferPAddr.uiAddr = pa_fb + ALIGN(byteSize * (i+1), PAGE_SIZE);
 			g_psLCDInfo->asBackBuffers[i].bufferVAddr = (IMG_CPU_VIRTADDR)phys_to_virt(g_psLCDInfo->asBackBuffers[i].bufferPAddr.uiAddr);
 			g_psLCDInfo->asBackBuffers[i].yoffset = screen_h * (i + 1);
 		

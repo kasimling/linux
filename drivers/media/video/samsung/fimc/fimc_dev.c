@@ -400,7 +400,7 @@ static inline void fimc_irq_cap(struct fimc_control *ctrl)
 		cfg = readl(ctrl->regs + S3C_CIGCTRL);
 		cfg |= (S3C_CIGCTRL_SWRST);
 		writel(cfg, ctrl->regs + S3C_CIGCTRL);
-		msleep(1);
+		udelay(10);
 
 		cfg = readl(ctrl->regs + S3C_CIGCTRL);
 		cfg &= ~S3C_CIGCTRL_SWRST;

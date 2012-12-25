@@ -55,7 +55,19 @@ obj-$(CONFIG_VIDEO_BT866) += bt866.o
 obj-$(CONFIG_VIDEO_KS0127) += ks0127.o
 obj-$(CONFIG_VIDEO_THS7303) += ths7303.o
 obj-$(CONFIG_VIDEO_VINO) += indycam.o
+
+ifeq ($(CONFIG_MACH_MINI210),y)
+ifneq ($(wildcard drivers/media/video/tvp5150_tiny210.c),)
+ifeq ($(FA),1)
+obj-$(CONFIG_VIDEO_TVP5150) += tvp5150_tiny210.o
+else
+obj-m += tvp5150_tiny210.o
+endif  #FA
+endif
+else
 obj-$(CONFIG_VIDEO_TVP5150) += tvp5150.o
+endif
+
 obj-$(CONFIG_VIDEO_TVP514X) += tvp514x.o
 obj-$(CONFIG_VIDEO_TVP7002) += tvp7002.o
 obj-$(CONFIG_VIDEO_MSP3400) += msp3400.o

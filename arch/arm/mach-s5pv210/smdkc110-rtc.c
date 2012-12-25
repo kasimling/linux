@@ -375,8 +375,8 @@ static int __devinit smdkc110_rtc_probe(struct platform_device *pdev)
 	smdkc110_rtc_gettime(&pdev->dev, &tm);
 	if (tm.tm_mon > 12 || tm.tm_mday > 31 || tm.tm_year > 3840) {
 #endif
-		/* Set the default time. 2011:1:1:12:0:0 */
-		tm.tm_year = 111;
+		/* Set the default time. 2012:1:1:12:0:0 */
+		tm.tm_year = 112;
 		tm.tm_mon = 0;
 		tm.tm_mday = 1;
 		tm.tm_hour = 12;
