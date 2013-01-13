@@ -146,6 +146,7 @@ config MACH_MINI210
 	select CPU_S5PV210
 	select S3C_DEV_RTC
 	select S3C_DEV_WDT
+	select S3C_DEV_HSMMC
 	select SAMSUNG_DEV_PWM
 	help
 	  Machine support for FriendlyARM MINI210

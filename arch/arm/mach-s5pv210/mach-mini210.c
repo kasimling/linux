@@ -79,6 +79,7 @@ static struct s3c2410_uartcfg mini210_uartcfgs[] __initdata = {
 static struct platform_device *mini210_devices[] __initdata = {
 	&s3c_device_rtc,
 	&s3c_device_wdt,
+	&s3c_device_hsmmc0,
 };
 
 static void __init mini210_map_io(void)
