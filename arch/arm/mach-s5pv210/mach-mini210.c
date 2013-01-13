@@ -80,6 +80,9 @@ static struct platform_device *mini210_devices[] __initdata = {
 	&s3c_device_rtc,
 	&s3c_device_wdt,
 	&s3c_device_hsmmc0,
+	&s3c_device_hsmmc1,
+	&s3c_device_hsmmc2,
+	&s3c_device_hsmmc3,
 };
 
 static void __init mini210_map_io(void)
