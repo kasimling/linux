@@ -141,6 +141,15 @@ endmenu
 
 menu "S5PV210 Machines"
 
+config MACH_MINI210
+	bool "MINI210"
+	select CPU_S5PV210
+	select S3C_DEV_RTC
+	select S3C_DEV_WDT
+	select SAMSUNG_DEV_PWM
+	help
+	  Machine support for FriendlyARM MINI210
+
 config MACH_SMDKV210
 	bool "SMDKV210"
 	select CPU_S5PV210
