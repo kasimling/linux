@@ -427,6 +427,20 @@ static inline void stop_timer_for_1wire(void)
 	writel(tcon, S3C2410_TCON);
 }
 
+/* enable TINT */
+static inline void enable_timer_int(void) {
+	unsigned int tint;
+	unsigned long flags;
+
+	local_irq_save(flags);
+	tint = __raw_readl(S3C64XX_TINT_CSTAT);
+	tint &= 0x1f;
+	tint |= 0x108;
+	__raw_writel(tint, S3C64XX_TINT_CSTAT);
+	local_irq_restore(flags);
+}
+
+
 enum {
 	IDLE,
 	START,
@@ -439,10 +453,12 @@ enum {
 static volatile unsigned int io_bit_count;
 static volatile unsigned int io_data;
 static volatile unsigned char one_wire_request;
+
 static irqreturn_t timer_for_1wire_interrupt(int irq, void *dev_id)
 {
 	unsigned int tint;
-	tint = __raw_readl(S3C64XX_TINT_CSTAT);
+
+	tint = __raw_readl(S3C64XX_TINT_CSTAT) & 0x1f;
 	tint |= 0x100;
 	__raw_writel(tint, S3C64XX_TINT_CSTAT);
 
@@ -636,13 +652,7 @@ static int ts_1wire_probe(struct platform_device *pdev)
 		one_wire_timer_proc(0);
 	}
 
-	/* enable TINT */
-	{
-		unsigned int tint;
-		tint = __raw_readl(S3C64XX_TINT_CSTAT);
-		tint |= 0x108;
-		__raw_writel(tint, S3C64XX_TINT_CSTAT);
-	}
+	enable_timer_int();
 
 	return ret;
 }
@@ -704,14 +714,7 @@ static int ts_1wire_resume(struct device *dev)
 	one_wire_timer_proc(0);
 
 	enable_irq(IRQ_TIMER3);
-
-	/* enable TINT */
-	{
-		unsigned int tint;
-		tint = __raw_readl(S3C64XX_TINT_CSTAT);
-		tint |= 0x108;
-		__raw_writel(tint, S3C64XX_TINT_CSTAT);
-	}
+	enable_timer_int();
 
 	return 0;
 }

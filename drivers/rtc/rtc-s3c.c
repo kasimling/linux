@@ -427,14 +427,12 @@ static void s3c_rtc_release(struct device *dev)
 	struct platform_device *pdev = to_platform_device(dev);
 	struct rtc_device *rtc_dev = platform_get_drvdata(pdev);
 
-#ifndef CONFIG_HRT_RTC
 	/* do not clear AIE here, it may be needed for wake */
 
 	free_irq(s3c_rtc_alarmno, rtc_dev);
+#ifndef CONFIG_HRT_RTC
 	free_irq(s3c_rtc_tickno, rtc_dev);
 #endif
-	free_irq(s3c_rtc_alarmno, rtc_dev);
-
 }
 
 static const struct rtc_class_ops s3c_rtcops = {
