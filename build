@@ -1,0 +1,11 @@
+#!/bin/bash
+
+DESTDIR=/tmp/FriendlyARM/mini6410/kernel
+mkdir -p ${DESTDIR}
+
+for suffix in ezvga vga1024x768 vga640x480 vga800x600 g10 l80 a70 s70 t35 w35 w50 x35 n43 h43; do
+	cp config_mini6410_${suffix} .config && \
+		make &&
+		cp -vf arch/arm/boot/zImage ${DESTDIR}/zImage_${suffix} || exit 1
+done
+
