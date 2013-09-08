@@ -873,11 +873,11 @@ void fimc_adjust_mplane_format(struct fimc_fmt *fmt, u32 width, u32 height,
 			bytesperline = bpl;
 
 		plane_fmt->bytesperline = bytesperline;
-		if(V4L2_PIX_FMT_JPEG==pix->pixelformat)
-			plane_fmt->sizeimage =0x46b400;
+		if (V4L2_PIX_FMT_JPEG == pix->pixelformat)
+			plane_fmt->sizeimage = 0x46b400;
 		else
-		plane_fmt->sizeimage = max((pix->width * pix->height *
-				   fmt->depth[i]) / 8, plane_fmt->sizeimage);
+			plane_fmt->sizeimage = max((pix->width * pix->height *
+						fmt->depth[i]) / 8, plane_fmt->sizeimage);
 	}
 }
 

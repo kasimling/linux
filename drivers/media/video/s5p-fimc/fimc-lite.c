@@ -462,8 +462,8 @@ static int fimc_lite_open(struct file *file)
 	if (ret < 0)
 		goto done;
 	ret = platform_sysmmu_on(&fimc->pdev->dev);
-        if (ret < 0)
-                goto err_pm;
+	if (ret < 0)
+		goto err_pm;
 
 	ret = v4l2_fh_open(file);
 	if (ret < 0)
@@ -481,6 +481,7 @@ static int fimc_lite_open(struct file *file)
 
 		fimc_lite_clear_event_counters(fimc);
 	}
+
 err_pm:
 	pm_runtime_put(&fimc->pdev->dev);	
 done:

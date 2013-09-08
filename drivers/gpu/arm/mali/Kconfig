@@ -39,7 +39,7 @@ config MALI400_UMP
 
 config MALI_DVFS
 	bool "MALI DVFS"
-	depends on MALI400 && REGULATOR
+	depends on MALI400
 	default y
 	help
 	  This enables Mali driver DVFS.

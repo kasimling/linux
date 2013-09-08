@@ -151,8 +151,10 @@ static int ft5x0x_read_fw_ver(unsigned char *val)
 	*val = 0xff;
 	ret = ft5x0x_read_reg(FT5X0X_REG_FIRMID, val);
 	if (*val == 0x06) {
+#if 0
 		swap_xy = 1;
 		scal_xy = 1;
+#endif
 	} else {
 		/* TODO: Add support for other version */
 	}

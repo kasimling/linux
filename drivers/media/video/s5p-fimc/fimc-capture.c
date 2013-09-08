@@ -518,15 +518,14 @@ static int fimc_capture_open(struct file *file)
 
 	fimc->pipeline_initialized = false;
 	dbg("pid: %d, state: 0x%lx", task_pid_nr(current), fimc->state);
-	if(fimc->id==0)
-	{
-	 exynos_cpufreq_lock_freq(1, MAX_CPU_FREQ);
+	if (fimc->id == 0) {
+		exynos_cpufreq_lock_freq(1, MAX_CPU_FREQ);
 #ifdef CONFIG_ARM_EXYNOS4_BUS_DEVFREQ
-        ret = exynos4_busfreq_lock(0);
-        if(ret){
-                printk("cannot acquire freq lock\n");
-                return ret;
-        }
+		ret = exynos4_busfreq_lock(0);
+		if (ret) {
+			printk("cannot acquire freq lock\n");
+			return ret;
+		}
 #endif
 	}
 
@@ -537,17 +536,49 @@ static int fimc_capture_open(struct file *file)
 	ret = pm_runtime_get_sync(&fimc->pdev->dev);
 	if (ret < 0)
 		return ret;
+
 	ret = platform_sysmmu_on(&fimc->pdev->dev);
 	if (ret < 0) {
 		pm_runtime_put_sync(&fimc->pdev->dev);
 		return ret;
 	}
-	ret = v4l2_fh_open(file);
-	if (ret)
-		return ret;
 
+	ret = v4l2_fh_open(file);
+	if (ret) {
+		platform_sysmmu_off(&fimc->pdev->dev);
+		pm_runtime_put_sync(&fimc->pdev->dev);
+		return ret;
+	}
+
+#ifdef CONFIG_MACH_TINY4412
 	fimc->vid_cap.refcnt++;
 	return 0;
+#else
+	if (++fimc->vid_cap.refcnt != 1)
+		return 0;
+
+	ret = fimc_pipeline_initialize(&fimc->pipeline,
+				       &fimc->vid_cap.vfd->entity, true);
+	if (ret < 0) {
+		clear_bit(ST_CAPT_BUSY, &fimc->state);
+		platform_sysmmu_off(&fimc->pdev->dev);
+		pm_runtime_put_sync(&fimc->pdev->dev);
+		fimc->vid_cap.refcnt--;
+		v4l2_fh_release(file);
+		return ret;
+	}
+	ret = fimc_capture_ctrls_create(fimc);
+
+	if (!ret && !fimc->vid_cap.user_subdev_api)
+		ret = fimc_capture_set_default_format(fimc);
+
+	if (ret) {
+		platform_sysmmu_off(&fimc->pdev->dev);
+		pm_runtime_put_sync(&fimc->pdev->dev);
+	}
+
+	return ret;
+#endif
 }
 
 static int fimc_capture_close(struct file *file)
@@ -555,15 +586,14 @@ static int fimc_capture_close(struct file *file)
 	struct fimc_dev *fimc = video_drvdata(file);
 	int ret;
 	dbg("pid: %d, state: 0x%lx", task_pid_nr(current), fimc->state);
-	if(fimc->id==0)
-	{
-	exynos_cpufreq_lock_freq(0, MAX_CPU_FREQ);
+	if (fimc->id == 0) {
+		exynos_cpufreq_lock_freq(0, MAX_CPU_FREQ);
 #ifdef CONFIG_ARM_EXYNOS4_BUS_DEVFREQ
-        ret = exynos4_busfreq_lock(1);
-        if(ret){
-                printk("cannot acquire freq lock\n");
-                return ret;
-        }
+		ret = exynos4_busfreq_lock(1);
+		if(ret){
+			printk("cannot acquire freq lock\n");
+			return ret;
+		}
 #endif
 	}
 
@@ -1137,10 +1167,11 @@ static int fimc_cap_streamon(struct file *file, void *priv,
 	struct fimc_pipeline *p = &fimc->pipeline;
 	struct v4l2_subdev *sd = p->subdevs[IDX_SENSOR];
 	int ret;
+
 	if (fimc_capture_active(fimc))
 		return -EBUSY;
-	if(!fimc->vid_cap.use_isp)
-	{
+
+	if (!fimc->vid_cap.use_isp) {
 		ret = media_entity_pipeline_start(&sd->entity, p->m_pipeline);
 		if (ret < 0)
 			return ret;
@@ -1151,7 +1182,7 @@ static int fimc_cap_streamon(struct file *file, void *priv,
 				media_entity_pipeline_stop(&sd->entity);
 				return ret;
 			}
-	}
+		}
 	}
 	return vb2_streamon(&fimc->vid_cap.vbq, type);
 }
