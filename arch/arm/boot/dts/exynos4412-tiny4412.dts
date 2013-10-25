@@ -19,7 +19,7 @@
 	compatible = "friendlyarm,tiny4412", "samsung,exynos4412";
 
 	chosen {
-		bootargs = "console=ttySAC0,115200n8 androidboot.console=ttySAC0 lcd=HD700 earlyprintk";
+		bootargs = "root=/dev/mmcblk0p2 rootwait console=ttySAC0,115200n8 androidboot.console=ttySAC0 lcd=HD700 earlyprintk";
 	};
 
 	memory {
