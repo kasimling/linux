@@ -72,4 +72,8 @@
 			clock-frequency = <24000000>;
 		};
 	};
+
+	ehci@12580000 {
+		status = "okay";
+	};
 };
