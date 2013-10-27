@@ -72,4 +72,8 @@
 	ehci@12580000 {
 		status = "okay";
 	};
+
+	usbphy@125B0000 {
+		status = "okay";
+	};
 };
