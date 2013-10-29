@@ -73,6 +73,11 @@
 		};
 	};
 
+	usb4640 {
+		compatible = "smsc,usb4640";
+		reset-gpios = <&gpm2 4 1>;
+	};
+
 	ehci@12580000 {
 		status = "okay";
 	};
