@@ -1,0 +1,13 @@
+SMSC USB4640 High-Speed Hub Controller
+
+Required properties:
+- compatible: Should be "smsc,usb4640" or "smsc,usb4640i".
+
+Optional properties:
+- reset-gpios: Should specify GPIO for reset.
+
+Examples:
+	usb4640 {
+		compatible = "smsc,usb4640";
+		reset-gpios = <&gpx3 5 1>;
+	};
