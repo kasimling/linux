@@ -22,6 +22,32 @@
 		reg = <0x40000000 0x40000000>;
 	};
 
+	leds {
+		compatible = "gpio-leds";
+		led1 {
+			label = "led1:heart";
+			gpios = <&gpm4 0 1>;
+			default-state = "off";
+			linux,default-trigger = "heartbeat";
+		};
+		led2 {
+			label = "led2";
+			gpios = <&gpm4 1 1>;
+			default-state = "off";
+		};
+		led3 {
+			label = "led3";
+			gpios = <&gpm4 2 1>;
+			default-state = "off";
+		};
+		led4 {
+			label = "led4:mmc1";
+			gpios = <&gpm4 3 1>;
+			default-state = "off";
+			linux,default-trigger = "mmc1";
+		};
+	};
+
 	rtc@10070000 {
 		status = "okay";
 	};
