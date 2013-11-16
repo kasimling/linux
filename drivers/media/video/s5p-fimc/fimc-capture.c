@@ -33,7 +33,7 @@
 #include "fimc-core.h"
 #include "fimc-reg.h"
 #include <mach/cpufreq.h>
-#define MAX_CPU_FREQ 1400000
+
 extern int exynos4_busfreq_lock(bool);
 struct fimc_dev *gfimc;
 
@@ -517,6 +517,7 @@ static int fimc_capture_open(struct file *file)
 	int ret;
 
 	fimc->pipeline_initialized = false;
+	fimc->vid_cap.is.powered_on= false;
 	dbg("pid: %d, state: 0x%lx", task_pid_nr(current), fimc->state);
 	if (fimc->id == 0) {
 		exynos_cpufreq_lock_freq(1, MAX_CPU_FREQ);
@@ -558,7 +559,7 @@ static int fimc_capture_open(struct file *file)
 		return 0;
 
 	ret = fimc_pipeline_initialize(&fimc->pipeline,
-				       &fimc->vid_cap.vfd->entity, true);
+			&fimc->vid_cap.vfd->entity, true);
 	if (ret < 0) {
 		clear_bit(ST_CAPT_BUSY, &fimc->state);
 		platform_sysmmu_off(&fimc->pdev->dev);
@@ -590,7 +591,7 @@ static int fimc_capture_close(struct file *file)
 		exynos_cpufreq_lock_freq(0, MAX_CPU_FREQ);
 #ifdef CONFIG_ARM_EXYNOS4_BUS_DEVFREQ
 		ret = exynos4_busfreq_lock(1);
-		if(ret){
+		if (ret) { 
 			printk("cannot acquire freq lock\n");
 			return ret;
 		}
@@ -601,6 +602,10 @@ static int fimc_capture_close(struct file *file)
 		clear_bit(ST_CAPT_BUSY, &fimc->state);
 		fimc_stop_capture(fimc, false);
 		fimc_pipeline_shutdown(&fimc->pipeline);
+		if (fimc->vid_cap.is.powered_on && fimc->id == 0) {
+			v4l2_subdev_call(fimc->vid_cap.is.sd, core, s_power, 0);
+			fimc->vid_cap.is.powered_on = false;
+		}
 		fimc->pipeline_initialized = false;
 		fimc_ctrls_delete(fimc->vid_cap.ctx);
 		clear_bit(ST_CAPT_SUSPENDED, &fimc->state);
@@ -845,7 +850,10 @@ static int fimc_pipeline_try_format(struct fimc_ctx *ctx,
 
 	memset(&sfmt, 0, sizeof(sfmt));
 	sfmt.format = *tfmt;
-
+	if (sfmt.format.width == 1920)
+		sfmt.format.reserved[0] = 1920;
+	else
+		sfmt.format.reserved[0] = 0;
 	sfmt.which = set ? V4L2_SUBDEV_FORMAT_ACTIVE : V4L2_SUBDEV_FORMAT_TRY;
 	while (1) {
 		ffmt = fimc_find_format(NULL, mf->code != 0 ? &mf->code : NULL,
@@ -1170,7 +1178,6 @@ static int fimc_cap_streamon(struct file *file, void *priv,
 
 	if (fimc_capture_active(fimc))
 		return -EBUSY;
-
 	if (!fimc->vid_cap.use_isp) {
 		ret = media_entity_pipeline_start(&sd->entity, p->m_pipeline);
 		if (ret < 0)

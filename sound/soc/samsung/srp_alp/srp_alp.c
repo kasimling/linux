@@ -54,6 +54,13 @@ static DEFINE_MUTEX(srp_mutex);
 static DECLARE_WAIT_QUEUE_HEAD(read_wq);
 static DECLARE_WAIT_QUEUE_HEAD(decinfo_wq);
 
+static struct timer_list srp_state_timer;
+bool srp_run_state;
+
+void srp_state_update(unsigned long data){
+	srp_run_state = 0;
+}
+ 
 int srp_get_status(int cmd)
 {
 	return (cmd == IS_RUNNING) ? srp.is_running : srp.is_opened;
@@ -612,7 +619,13 @@ static int srp_mmap(struct file *filep, struct vm_area_struct *vma)
 	unsigned long size = vma->vm_end - vma->vm_start;
 	unsigned int pfn;
 	unsigned int mmap_addr;
+	unsigned long size_max;
 
+	size_max = (srp.obuf_info.mmapped_size +PAGE_SIZE -1) &
+				~(PAGE_SIZE -1);
+	if(size > size_max)
+		return -EINVAL;
+	srp.obuf_info.mmapped_size = size_max; 
 	vma->vm_flags |= VM_IO;
 	vma->vm_flags |= VM_RESERVED;
 	vma->vm_page_prot = pgprot_writecombine(vma->vm_page_prot);
@@ -661,7 +674,8 @@ static irqreturn_t srp_irq(int irqno, void *dev_id)
 	srp_debug("IRQ: Code [0x%x], Pending [%s], CFGR [0x%x]", irq_code,
 			readl(srp.commbox + SRP_PENDING) ? "STALL" : "RUN",
 			readl(srp.commbox + SRP_CFGR));
-
+	srp_run_state  = 1;
+	mod_timer(&srp_state_timer,jiffies + 200);
 	irq_code &= SRP_INTR_CODE_MASK;
 	if (irq_code & SRP_INTR_CODE_REQUEST) {
 		irq_code_req = irq_code & SRP_INTR_CODE_REQUEST_MASK;
@@ -1107,6 +1121,11 @@ static __devinit int srp_probe(struct platform_device *pdev)
 	}
 
 	srp.audss_clk_enable = audss_clk_enable;
+	init_timer(&srp_state_timer);
+	srp_state_timer.function = srp_state_update;
+	srp_state_timer.data = 0;
+	srp_state_timer.expires = jiffies + 400;
+	add_timer(&srp_state_timer);
 
 	return 0;
 
@@ -1134,6 +1153,7 @@ static __devexit int srp_remove(struct platform_device *pdev)
 	srp_remove_fw_buff(&pdev->dev);
 
 	misc_deregister(&srp_miscdev);
+	del_timer(&srp_state_timer);
 
 	iounmap(srp.commbox);
 	iounmap(srp.icache);

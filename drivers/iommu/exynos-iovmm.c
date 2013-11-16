@@ -17,11 +17,11 @@
 #include <linux/slab.h>
 #include <linux/scatterlist.h>
 #include <linux/err.h>
+#include <linux/exynos-iommu.h>
 
 #include <plat/iovmm.h>
 #include <plat/sysmmu.h>
 
-#include "exynos-iommu.h"
 
 static struct exynos_vm_region *find_region(
 		struct exynos_iovmm *vmm, dma_addr_t iova)

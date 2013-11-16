@@ -63,8 +63,8 @@ static struct clk  *mali_clock = 0;
 
 static unsigned int GPU_MHZ	= 1000000;
 
-int mali_gpu_clk = 440;//266;
-int mali_gpu_vol = 1025000;//900000
+int mali_gpu_clk = 440;     // 266;
+int mali_gpu_vol = 1025000; // 900000
 
 #ifdef CONFIG_MALI_DVFS
 #define MALI_DVFS_DEFAULT_STEP 0
@@ -385,8 +385,8 @@ static mali_bool init_mali_clock(void)
 		goto err_clock_get;
 	}
 
-	MALI_PRINT(("init_mali_clock mali_clock %p \n", mali_clock));
-
+	MALI_PRINT(("init_mali_clock mali_clock %p at %d MHz\n",
+			mali_clock, mali_gpu_clk));
 
 #ifdef CONFIG_REGULATOR
 #ifdef USING_MALI_PMM
@@ -450,7 +450,7 @@ static mali_bool deinit_mali_clock(void)
 _mali_osk_errcode_t mali_platform_init()
 {
 	MALI_CHECK(init_mali_clock(), _MALI_OSK_ERR_FAULT);
-#if CONFIG_MALI_DVFS
+#ifdef CONFIG_MALI_DVFS
 	if (!clk_register_map) clk_register_map = _mali_osk_mem_mapioregion( CLK_DIV_STAT_G3D, 0x20, CLK_DESC );
 	if(!init_mali_dvfs_status(MALI_DVFS_DEFAULT_STEP))
 		MALI_DEBUG_PRINT(1, ("mali_platform_init failed\n"));

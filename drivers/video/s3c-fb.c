@@ -27,14 +27,16 @@
 
 #include <mach/map.h>
 #include <mach/sysmmu.h>
+#include <mach/s3c-fb.h>
 #include <plat/regs-fb-v4.h>
 #include <plat/fb.h>
 
+#ifdef CONFIG_ION_EXYNOS
 #define CONFIG_FB_ION_EXYNOS
+#endif
 
 #if defined(CONFIG_FB_ION_EXYNOS)
 #include <linux/dma-buf.h>
-#include <mach/s3c-fb.h>
 #include <plat/iovmm.h>
 #include <linux/sw_sync.h>
 #include <plat/devs.h>
@@ -68,8 +70,9 @@
 /* irq_flags bits */
 #define S3C_FB_VSYNC_IRQ_EN	0
 
-#define VSYNC_TIMEOUT_MSEC	50
+#define VSYNC_TIMEOUT_MSEC	60
 
+#undef  CHECK_BANDWIDTH
 #define MAX_BW_PER_WINDOW	(800 * 1280 * 4 * 60)
 
 struct s3c_fb;
@@ -245,9 +248,8 @@ struct s3c_fb_vsync {
 	int					irq_refcount;
 	struct mutex		irq_lock;
 	struct task_struct	*thread;
-#else
-	unsigned int		count;
 #endif
+	unsigned int		count;
 };
 
 /**
@@ -582,7 +584,6 @@ static void shadow_protect_win(struct s3c_fb_win *win, bool protect)
 	}
 }
 
-#if defined(CONFIG_FB_ION_EXYNOS)
 static inline u32 fb_visual(u32 bits_per_pixel, unsigned short palette_sz)
 {
 	switch (bits_per_pixel) {
@@ -754,7 +755,6 @@ static inline u32 blendeq(enum s3c_fb_blending blending, u8 transp_length)
 			BLENDEQ_P_FUNC(BLENDEQ_COEF_ZERO) |
 			BLENDEQ_Q_FUNC(BLENDEQ_COEF_ZERO));
 }
-#endif
 
 static void s3c_fb_clear_win(struct s3c_fb *sfb, int win);
 static void s3c_fb_set_rgb_timing(struct s3c_fb *sfb);
@@ -796,11 +796,15 @@ static void s3c_fb_enable(struct s3c_fb *sfb, int enable)
 			s3c_fb_clear_win(sfb, win_no);
 
 		s3c_fb_set_rgb_timing(sfb);
+#if defined(CONFIG_FB_ION_EXYNOS)
 		iovmm_activate(&s5p_device_fimd0.dev);
+#endif
 		ret = platform_sysmmu_on(sfb->dev);
 		if (ret < 0) {
 			pr_err("FIMD SYSMMU ON FAILED \n");
+#if defined(CONFIG_FB_ION_EXYNOS)
 			iovmm_deactivate(&s5p_device_fimd0.dev);
+#endif
 			pm_runtime_put_sync(sfb->dev);
 			return;
 		}
@@ -827,7 +831,9 @@ static void s3c_fb_enable(struct s3c_fb *sfb, int enable)
 			clk_disable(sfb->lcd_clk);
 
 		clk_disable(sfb->bus_clk);
+#if defined(CONFIG_FB_ION_EXYNOS)
 		iovmm_deactivate(&s5p_device_fimd0.dev);
+#endif
 		pm_runtime_put_sync(sfb->dev);
 		ret = platform_sysmmu_off(sfb->dev);
 		if (ret < 0)
@@ -837,6 +843,7 @@ static void s3c_fb_enable(struct s3c_fb *sfb, int enable)
 	sfb->output_on = enable;
 }
 
+#if defined(CHECK_BANDWIDTH)
 static unsigned int s3c_fb_calc_bandwidth(u32 w, u32 h, u32 bits_per_pixel, int fps)
 {
 	unsigned int bw = w * h;
@@ -846,6 +853,7 @@ static unsigned int s3c_fb_calc_bandwidth(u32 w, u32 h, u32 bits_per_pixel, int 
 
 	return bw;
 }
+#endif
 
 /**
  * s3c_fb_set_par() - framebuffer request to set new framebuffer state.
@@ -1259,9 +1267,8 @@ static irqreturn_t s3c_fb_irq(int irq, void *dev_id)
 
 #if defined(CONFIG_FB_ION_EXYNOS)
 		sfb->vsync_info.timestamp = timestamp;
-#else
-		sfb->vsync_info.count++;
 #endif
+		sfb->vsync_info.count++;
 		wake_up_interruptible(&sfb->vsync_info.wait);
 	}
 
@@ -1280,32 +1287,24 @@ static irqreturn_t s3c_fb_irq(int irq, void *dev_id)
  */
 static int s3c_fb_wait_for_vsync(struct s3c_fb *sfb, u32 crtc)
 {
-#if defined(CONFIG_FB_ION_EXYNOS)
-	ktime_t timestamp;
-#else
 	unsigned long count;
-#endif
 	int ret;
 
 	if (crtc != 0) {
 		return -ENODEV;
 	}
 
-#if defined(CONFIG_FB_ION_EXYNOS)
-	timestamp = sfb->vsync_info.timestamp;
-#else
 	count = sfb->vsync_info.count;
-#endif
-	s3c_fb_activate_vsync(sfb);
-	ret = wait_event_interruptible_timeout(sfb->vsync_info.wait,
 #if defined(CONFIG_FB_ION_EXYNOS)
-			!ktime_equal(timestamp, sfb->vsync_info.timestamp),
-#else
-			count != sfb->vsync_info.count,
+	s3c_fb_activate_vsync(sfb);
 #endif
+	ret = wait_event_interruptible_timeout(sfb->vsync_info.wait,
+			count != sfb->vsync_info.count,
 			msecs_to_jiffies(VSYNC_TIMEOUT_MSEC));
 
+#if defined(CONFIG_FB_ION_EXYNOS)
 	s3c_fb_deactivate_vsync(sfb);
+#endif
 
 	if (ret == 0) {
 		dev_err(sfb->dev, "wait for vsync failed\n");
@@ -1389,14 +1388,17 @@ int s3c_fb_set_chroma_key(struct fb_info *info,
 	return 0;
 }
 
+#if defined(CONFIG_FB_ION_EXYNOS)
 static int s3c_fb_wait_for_vsync_thread(void *data)
 {
 	struct s3c_fb *sfb = data;
+	unsigned long count;
+	int ret;
+
 	while (!kthread_should_stop()) {
-		ktime_t timestamp = sfb->vsync_info.timestamp;
-		int ret = wait_event_interruptible(sfb->vsync_info.wait,
-				!ktime_equal(timestamp, sfb->vsync_info.timestamp) &&
-				sfb->vsync_info.active);
+		count = sfb->vsync_info.count;
+		ret = wait_event_interruptible(sfb->vsync_info.wait,
+				(count != sfb->vsync_info.count) && sfb->vsync_info.active);
 
 		if (!ret) {
 			sysfs_notify(&sfb->dev->kobj, NULL, "vsync");
@@ -1405,6 +1407,7 @@ static int s3c_fb_wait_for_vsync_thread(void *data)
 
 	return 0;
 }
+#endif
 
 /*------------------------------------------------------------------ */
 
@@ -1412,8 +1415,12 @@ static ssize_t s3c_fb_vsync_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	struct s3c_fb *sfb = dev_get_drvdata(dev);
+#if defined(CONFIG_FB_ION_EXYNOS)
 	return scnprintf(buf, PAGE_SIZE, "%llu\n",
 			ktime_to_ns(sfb->vsync_info.timestamp));
+#else
+	return scnprintf(buf, PAGE_SIZE, "%u\n", sfb->vsync_info.count);
+#endif
 }
 
 static DEVICE_ATTR(vsync, S_IRUGO, s3c_fb_vsync_show, NULL);
@@ -1936,15 +1943,19 @@ static int s3c_fb_set_win_config(struct s3c_fb *sfb,
 			regs->wincon[i] &= ~WINCONx_ENWIN;
 		regs->winmap[i] = color_map;
 
+#if defined(CHECK_BANDWIDTH)
 		if (enabled && config->state == S3C_FB_WIN_STATE_BUFFER) {
 			bw += s3c_fb_calc_bandwidth(config->w, config->h,
 					win->fbinfo->var.bits_per_pixel,
 					win->fps);
 		}
+#endif
 	}
 
+#if defined(CHECK_BANDWIDTH)
 	dev_dbg(sfb->dev, "Total BW = %d Mbits, Max BW per window = %d Mbits\n",
 			bw / (1024 * 1024), MAX_BW_PER_WINDOW / (1024 * 1024));
+#endif
 	if (ret) {
 		for (i = 0; i < sfb->variant.nr_windows; i++) {
 			sfb->windows[i]->fbinfo->fix =
@@ -2046,7 +2057,7 @@ static void s3c_fb_update_regs(struct s3c_fb *sfb, struct s3c_reg_data *regs)
 
 	do {
 		__s3c_fb_update_regs(sfb, regs);
-		s3c_fb_wait_for_vsync(sfb,0);
+		s3c_fb_wait_for_vsync(sfb, 0);
 		wait_for_vsync = false;
 
 		for (i = 0; i < sfb->variant.nr_windows; i++) {
@@ -2233,6 +2244,7 @@ static int s3c_fb_ioctl(struct fb_info *info, unsigned int cmd,
 	return ret;
 }
 
+#if defined(CONFIG_FB_ION_EXYNOS)
 static int s3c_fb_mmap(struct fb_info *info, struct vm_area_struct *vma)
 {
 	struct s3c_fb_win *win = info->par;
@@ -2240,6 +2252,7 @@ static int s3c_fb_mmap(struct fb_info *info, struct vm_area_struct *vma)
 
 	return dma_buf_mmap(win->dma_buf_data.dma_buf, vma, 0);
 }
+#endif
 
 static struct fb_ops s3c_fb_ops = {
 	.owner			= THIS_MODULE,
@@ -2252,7 +2265,9 @@ static struct fb_ops s3c_fb_ops = {
 	.fb_imageblit	= cfb_imageblit,
 	.fb_pan_display	= s3c_fb_pan_display,
 	.fb_ioctl		= s3c_fb_ioctl,
+#if defined(CONFIG_FB_ION_EXYNOS)
 	.fb_mmap		= s3c_fb_mmap,
+#endif
 };
 
 /**
@@ -2290,11 +2305,13 @@ static int __devinit s3c_fb_alloc_memory(struct s3c_fb *sfb,
 	struct s3c_fb_pd_win *windata = win->windata;
 	unsigned int real_size, virt_size, size;
 	struct fb_info *fbi = win->fbinfo;
-	struct ion_handle *handle;
 	dma_addr_t map_dma;
+#if defined(CONFIG_FB_ION_EXYNOS)
+	struct ion_handle *handle;
 	int fd;
 	int ret;
 	struct file *file;
+#endif
 
 	dev_dbg(sfb->dev, "allocating memory for display\n");
 
@@ -2482,13 +2499,13 @@ static int __devinit s3c_fb_probe_win(struct s3c_fb *sfb, unsigned int win_no,
 	initmode.yres = windata->yres;
 	fb_videomode_to_var(&fbinfo->var, &initmode);
 
+	fbinfo->var.width	= windata->width;
+	fbinfo->var.height	= windata->height;
 	fbinfo->fix.type	= FB_TYPE_PACKED_PIXELS;
 	fbinfo->fix.accel	= FB_ACCEL_NONE;
 	fbinfo->var.activate	= FB_ACTIVATE_NOW;
 	fbinfo->var.vmode	= FB_VMODE_NONINTERLACED;
 	fbinfo->var.bits_per_pixel = windata->default_bpp;
-	fbinfo->var.width	= windata->width;
-	fbinfo->var.height	= windata->height;
 	fbinfo->fbops		= &s3c_fb_ops;
 	fbinfo->flags		= FBINFO_FLAG_DEFAULT;
 	fbinfo->pseudo_palette = &win->pseudo_palette;
@@ -2797,7 +2814,7 @@ static int __devinit s3c_fb_probe(struct platform_device *pdev)
 		}
 	}
 
-#ifdef CONFIG_FB_ION_EXYNOS
+#if defined(CONFIG_FB_ION_EXYNOS)
 	sfb->vsync_info.thread = kthread_run(s3c_fb_wait_for_vsync_thread,
 					sfb, "s3c-fb-vsync");
 	if (sfb->vsync_info.thread == ERR_PTR(-ENOMEM)) {

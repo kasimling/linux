@@ -15,6 +15,8 @@
 #include <linux/list.h>
 #include <linux/atomic.h>
 #include <linux/spinlock.h>
+#include <mach/sysmmu.h>
+#include <asm/dma-iommu.h>
 
 enum exynos_sysmmu_inttype {
 	SYSMMU_PAGEFAULT,
@@ -52,7 +54,8 @@ typedef int (*sysmmu_fault_handler_t)(struct device *dev,
  * from virtual address to physical address.
  * Return non-zero if it fails to enable System MMU.
  */
-int exynos_sysmmu_enable(struct device *owner, unsigned long pgd);
+int exynos_sysmmu_enable(struct sysmmu_drvdata *data, unsigned long pgtable,
+						struct iommu_domain *domain);
 
 /**
  * exynos_sysmmu_disable() - disable sysmmu mmu of ip

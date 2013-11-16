@@ -662,7 +662,7 @@ static int __fimc_md_create_flite_source_links(struct fimc_md *fmd)
 {
 	struct media_entity *source, *sink;
 	unsigned int flags = MEDIA_LNK_FL_ENABLED;
-	int i, ret;
+	int i, ret = 0;
 
 	for (i = 0; i < FIMC_LITE_MAX_DEVS; i++) {
 		struct fimc_lite *fimc = fmd->fimc_lite[i];
@@ -695,7 +695,7 @@ static int __fimc_md_create_flite_source_links(struct fimc_md *fmd)
  */
 static int fimc_md_create_links(struct fimc_md *fmd)
 {
-	struct v4l2_subdev *sensor, *csis;
+	struct v4l2_subdev *sensor = NULL, *csis;
 	struct s5p_fimc_isp_info *pdata;
 	struct fimc_sensor_info *s_info;
 	struct media_entity *source, *sink;
@@ -937,7 +937,7 @@ static int fimc_md_link_notify(struct media_pad *source,
 			ret = fimc_capture_ctrls_create(fimc);
 		}
 		mutex_unlock(&fimc->lock);
-	} else {
+	} else if (fimc_lite) {
 		mutex_lock(&fimc_lite->lock);
 		if (fimc_lite->ref_count > 0) {
 			ret = __fimc_pipeline_initialize(pipeline,

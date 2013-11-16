@@ -58,6 +58,7 @@ static int audss_clk_div_init(struct clk *src_clk)
 	u32 src_clk_rate = 0;
 	u32 bus_div = 0;
 	u32 i2s_div = 0;
+	u32 srp_div = 0;
 	u32 ret = -1;
 
 	src_clk_rate = clk_get_rate(src_clk);
@@ -80,7 +81,11 @@ static int audss_clk_div_init(struct clk *src_clk)
 		bus_div = 2;
 		i2s_div = !strcmp(audss.rclksrc, "i2sclk") ? 2 : 16;
 		break;
-
+	case 400000000:
+		srp_div = 4;
+		bus_div = 2;
+		i2s_div = !strcmp(audss.rclksrc, "i2sclk") ? 5 : 16;
+		break;
 	default:
 		pr_err("%s: Not supported src clk rate\n", __func__);
 	}
@@ -99,9 +104,13 @@ static int audss_clk_div_init(struct clk *src_clk)
 	if (i2s_div)
 		clk_div |= (i2s_div - 1) << S5P_AUDSS_CLKDIV_I2SCLK_SHIFT;
 
+	if (srp_div)
+		clk_div |= (srp_div - 1) << S5P_AUDSS_CLKDIV_RP_SHIFT;
+
 	writel(clk_div, S5P_CLKDIV_AUDSS);
 
-	pr_debug("%s: BUSCLK[%ld], I2SCLK[%ld]\n", __func__,
+	pr_debug("%s: RPCLK[%ld], BUSCLK[%ld], I2SCLK[%ld]\n", __func__,
+						clk_get_rate(audss.srp_clk),
 						clk_get_rate(audss.bus_clk),
 						clk_get_rate(audss.i2s_clk));
 	pr_debug("%s: CLKDIV[0x%x]\n", __func__, readl(S5P_CLKDIV_AUDSS));

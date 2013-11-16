@@ -92,3 +92,4 @@ obj-$(CONFIG_EXYNOS4_SETUP_HDMI)	+= setup-hdmi.o
 obj-$(CONFIG_EXYNOS_ASV)		+= asv.o asv-4x12.o
 obj-$(CONFIG_EXYNOS_DVFS_NR_POLICY_OLD) += dynamic-dvfs-nr_running-hotplug.o
 obj-$(CONFIG_EXYNOS_DVFS_NR_RUNNING_POLICY) += dynamic-dvfs-nr-bassed-hotplug.o
+obj-$(CONFIG_EXYNOS_DVFS_NR_RUNNING_QUICK_POLICY) += dynamic-dvfs-nr-bassed-hotplug.o

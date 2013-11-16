@@ -92,8 +92,9 @@ static const struct m5mols_resolution m5mols_reg_res[] = {
 	{ 0x25, M5MOLS_RESTYPE_MONITOR, 1920, 1080 },	/* 1080p */
 	{ 0x29, M5MOLS_RESTYPE_MONITOR, 3264, 2448 },	/* 2.63fps 8M */
 	{ 0x39, M5MOLS_RESTYPE_MONITOR, 800, 602 },	/* AHS_MON debug */
-#endif
 	{ 0x21, M5MOLS_RESTYPE_MONITOR, 1280, 720 },	/* HD */
+#endif
+	{ 0x25, M5MOLS_RESTYPE_MONITOR, 1920, 1080 },	/* 1080p */
 
 	{ 0x02, M5MOLS_RESTYPE_CAPTURE, 320, 240 },	/* QVGA */
 	{ 0x04, M5MOLS_RESTYPE_CAPTURE, 400, 240 },	/* WQVGA */
@@ -614,6 +615,10 @@ static int m5mols_set_fmt(struct v4l2_subdev *sd, struct v4l2_subdev_fh *fh,
 	enum m5mols_restype type;
 	u32 resolution = 0;
 	int ret;
+	if(format->reserved[0] == 1920)
+		info->is1080p = true;
+	else
+		info->is1080p = false;
 
 	ret = __find_resolution(sd, format, &type, &resolution);
 	if (ret < 0)
@@ -693,8 +698,12 @@ static int m5mols_start_monitor(struct m5mols_info *info)
 	ret = m5mols_set_mode(info, REG_PARAMETER);
 	if (!ret)
 		ret = m5mols_write(sd, PARM_MON_SIZE, info->resolution);
-	if (!ret)
-		ret = m5mols_write(sd, PARM_MON_FPS, REG_FPS_30);
+	if (!ret) {
+		if(info->is1080p)
+			ret = m5mols_write(sd, PARM_MON_FPS, REG_FPS_15);
+		else
+			ret = m5mols_write(sd, PARM_MON_FPS, REG_FPS_30);
+	}
 	if (!ret)
 		ret = m5mols_set_mode(info, REG_MONITOR);
 	if (!ret)

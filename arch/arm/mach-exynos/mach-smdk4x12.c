@@ -55,6 +55,7 @@
 #include <plat/ehci.h>
 #include <plat/camport.h>
 #include <plat/s3c64xx-spi.h>
+#include <plat/fimg2d.h>
 
 #ifdef CONFIG_EXYNOS4_DEV_DWMCI
 #include <mach/dwmci.h>
@@ -763,13 +764,13 @@ struct s5m_opmode_data s5m8767_opmode_data[S5M8767_REG_MAX] = {
 	[S5M8767_BUCK2] = {S5M8767_BUCK2, S5M_OPMODE_SUSPEND},
 	[S5M8767_BUCK3] = {S5M8767_BUCK3, S5M_OPMODE_SUSPEND},
 	[S5M8767_BUCK4] = {S5M8767_BUCK4, S5M_OPMODE_SUSPEND},
-	[S5M8767_LDO8]  = {S5M8767_LDO8,  S5M_OPMODE_ON},
-	[S5M8767_LDO10] = {S5M8767_LDO10, S5M_OPMODE_ON},
-	[S5M8767_LDO11] = {S5M8767_LDO11, S5M_OPMODE_ON},
-	[S5M8767_LDO12] = {S5M8767_LDO12, S5M_OPMODE_ON},
-	[S5M8767_LDO14] = {S5M8767_LDO14, S5M_OPMODE_ON},
-	[S5M8767_LDO15] = {S5M8767_LDO15, S5M_OPMODE_ON},
-	[S5M8767_LDO16] = {S5M8767_LDO16, S5M_OPMODE_ON},
+	[S5M8767_LDO8]  = {S5M8767_LDO8,  S5M_OPMODE_SUSPEND},
+	[S5M8767_LDO10] = {S5M8767_LDO10, S5M_OPMODE_SUSPEND},
+	[S5M8767_LDO11] = {S5M8767_LDO11, S5M_OPMODE_SUSPEND},
+	[S5M8767_LDO12] = {S5M8767_LDO12, S5M_OPMODE_SUSPEND},
+	[S5M8767_LDO14] = {S5M8767_LDO14, S5M_OPMODE_SUSPEND},
+	[S5M8767_LDO15] = {S5M8767_LDO15, S5M_OPMODE_SUSPEND},
+	[S5M8767_LDO16] = {S5M8767_LDO16, S5M_OPMODE_SUSPEND},
 };
 
 static struct s5m_platform_data exynos4_s5m8767_pdata = {
@@ -1194,6 +1195,8 @@ static struct s3c_fb_pd_win smdk4x12_fb_win0 = {
         .virtual_y              = 800 * CONFIG_FB_S3C_NR_BUFFERS,
         .max_bpp                = 32,
         .default_bpp            = 24,
+	.width			= 66,
+	.height 		= 109,
 };
 
 static struct s3c_fb_pd_win smdk4x12_fb_win1 = {
@@ -1203,6 +1206,8 @@ static struct s3c_fb_pd_win smdk4x12_fb_win1 = {
         .virtual_y              = 800 * CONFIG_FB_S3C_NR_BUFFERS,
         .max_bpp                = 32,
         .default_bpp            = 24,
+	.width			= 66,
+	.height 		= 109,
 };
 
 static struct s3c_fb_pd_win smdk4x12_fb_win2 = {
@@ -1212,6 +1217,8 @@ static struct s3c_fb_pd_win smdk4x12_fb_win2 = {
         .virtual_y              = 800 * CONFIG_FB_S3C_NR_BUFFERS,
         .max_bpp                = 32,
         .default_bpp            = 24,
+	.width			= 66,
+	.height 		= 109,
 };
 
 static struct s3c_fb_pd_win smdk4x12_fb_win3 = {
@@ -1221,6 +1228,8 @@ static struct s3c_fb_pd_win smdk4x12_fb_win3 = {
         .virtual_y              = 800 * CONFIG_FB_S3C_NR_BUFFERS,
         .max_bpp                = 32,
         .default_bpp            = 24,
+	.width			= 66,
+	.height 		= 109,
 };
 
 static struct s3c_fb_pd_win smdk4x12_fb_win4 = {
@@ -1230,6 +1239,8 @@ static struct s3c_fb_pd_win smdk4x12_fb_win4 = {
         .virtual_y              = 800 * CONFIG_FB_S3C_NR_BUFFERS,
         .max_bpp                = 32,
         .default_bpp            = 24,
+	.width			= 66,
+	.height 		= 109,
 };
 
 static struct fb_videomode smdk4x12_lcd_timing = {
@@ -1527,6 +1538,13 @@ static struct platform_device exynos4_busfreq = {
 	.name = "exynos-busfreq",
 };
 
+#ifdef CONFIG_BATTERY_SAMSUNG
+static struct platform_device samsung_device_battery = {
+	.name	= "samsung-fake-battery",
+	.id	= -1,
+};
+#endif
+
 static struct platform_device *smdk4x12_devices[] __initdata = {
 #ifdef CONFIG_EXYNOS4_DEV_DWMCI
 	&exynos_device_dwmci,
@@ -1547,8 +1565,8 @@ static struct platform_device *smdk4x12_devices[] __initdata = {
 	&s3c_device_rtc,
 	&s3c_device_usb_hsotg,
 	&s3c_device_wdt,
-	&exynos4_device_ohci,
 	&s5p_device_ehci,
+	&exynos4_device_ohci,
 #ifdef CONFIG_VIDEO_EXYNOS_FIMC_LITE
 	&exynos_device_flite0,
 	&exynos_device_flite1,
@@ -1602,7 +1620,9 @@ static struct platform_device *smdk4x12_devices[] __initdata = {
         &exynos4_device_spdif,
 #endif
 	&samsung_audio,
-	&s5p_device_g2d,
+#ifdef CONFIG_VIDEO_EXYNOS_FIMG2D
+	&s5p_device_fimg2d,
+#endif
 #ifdef CONFIG_EXYNOS_THERMAL
 	&exynos_device_tmu,
 #endif
@@ -1612,6 +1632,9 @@ static struct platform_device *smdk4x12_devices[] __initdata = {
 #endif
 #ifdef CONFIG_BUSFREQ_OPP
 	&exynos4_busfreq,
+#endif
+#ifdef CONFIG_BATTERY_SAMSUNG
+	&samsung_device_battery,
 #endif
 };
 
@@ -1727,6 +1750,17 @@ static void __init smdk4x12_usbswitch_init(void)
 }
 #endif
 
+#ifdef CONFIG_VIDEO_EXYNOS_FIMG2D
+static struct fimg2d_platdata fimg2d_data __initdata = {
+	.ip_ver         = IP_VER_G2D_4P,
+	.hw_ver         = 0x41,
+	.parent_clkname = "mout_g2d0",
+	.clkname        = "sclk_fimg2d",
+	.gate_clkname   = "fimg2d",
+	.clkrate        = 200 * MHZ,
+};
+#endif
+
 static int __init exynos4_setup_clock(struct device *dev,
 						const char *clock,
 						const char *parent,
@@ -1801,8 +1835,13 @@ static void initialize_prime_clocks(void)
 	exynos4_setup_clock(&s3c_device_hsmmc2.dev, "dout_mmc2",
 					"mout_mpll_user", 100 * MHZ);
 #ifdef CONFIG_EXYNOS4_DEV_DWMCI
+#ifdef CONFIG_SND_SAMSUNG_I2S_MASTER
+	exynos4_setup_clock(&exynos_device_dwmci.dev, "dout_mmc4",
+					"mout_epll", 400 * MHZ);
+#else
 	exynos4_setup_clock(&exynos_device_dwmci.dev, "dout_mmc4",
 					"mout_mpll_user", 440 * MHZ);
+#endif
 #endif
 }
 
@@ -1912,6 +1951,10 @@ static void __init smdk4x12_machine_init(void)
 	s5p_tv_setup();
 	s5p_i2c_hdmiphy_set_platdata(NULL);
 	s5p_hdmi_set_platdata(smdk4x12_i2c_hdmiphy, NULL, 0);
+
+#ifdef CONFIG_VIDEO_EXYNOS_FIMG2D
+	s5p_fimg2d_set_platdata(&fimg2d_data);
+#endif
 #if defined(CONFIG_VIDEO_M5MOLS) || defined(CONFIG_VIDEO_S5K6A3)
 	smdk4x12_camera_init();
 #endif

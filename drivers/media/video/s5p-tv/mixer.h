@@ -24,7 +24,6 @@
 #include <linux/wait.h>
 #include <media/v4l2-device.h>
 #include <media/videobuf2-core.h>
-#include <mach/dev.h>
 
 #include "regs-mixer.h"
 
@@ -50,7 +49,6 @@
 #define BF_SET(y, x, start, len)    \
     ( y= ((y) &~ BF_MASK(start, len)) | BF_PREP(x, start, len) )
 
-#define BUSFREQ_400MHZ	400000
 
 /** description of a macroblock for packed formats */
 struct mxr_block {
@@ -290,7 +288,6 @@ struct mxr_device {
 	int current_output;
 	/** auxiliary resources used my mixer */
 	struct mxr_resources res;
-	struct device *bus_dev;
 };
 
 /** transform device structure into mixer device */

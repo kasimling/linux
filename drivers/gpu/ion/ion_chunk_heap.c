@@ -74,6 +74,7 @@ static int ion_chunk_heap_allocate(struct ion_heap *heap,
 		if (!paddr)
 			goto err;
 		sg_set_page(sg, phys_to_page(paddr), chunk_heap->chunk_size, 0);
+		sg_dma_len(sg) = chunk_heap->chunk_size;
 		sg = sg_next(sg);
 	}
 

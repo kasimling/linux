@@ -49,16 +49,14 @@ struct sysmmu_drvdata {
 	char *dbgname;
 	int nsfrs;
 	void __iomem **sfrbases;
-	struct clk *clk[3];
+	struct clk *clk[2];
 	int activations;
 	rwlock_t lock;
 	struct iommu_domain *domain; /* domain given to iommu_attach_device() */
-	sysmmu_fault_handler_t fault_handler;
 	unsigned long pgtable;
 #ifdef CONFIG_EXYNOS_IOVMM
 	struct exynos_iovmm vmm;
 #endif
-	unsigned int qos;
 };
 
 #ifdef CONFIG_EXYNOS_IOVMM

@@ -37,7 +37,6 @@
 
 #include <mach/cpufreq.h>
 extern int exynos4_busfreq_lock(bool);
-#define MAX_CPU_FREQ 1400000
 
 int debug;
 module_param(debug, int, S_IRUGO | S_IWUSR);

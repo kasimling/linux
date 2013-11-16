@@ -232,7 +232,10 @@ int pwm_config(struct pwm_device *pwm, int duty_ns, int period_ns)
 
 	tcon = __raw_readl(S3C2410_TCON);
 	tcon |= pwm_tcon_manulupdate(pwm);
-	tcon |= pwm_tcon_autoreload(pwm);
+	if (duty_ns)
+		tcon |= pwm_tcon_autoreload(pwm);
+	else
+		tcon &= ~pwm_tcon_autoreload(pwm);
 	__raw_writel(tcon, S3C2410_TCON);
 
 	tcon &= ~pwm_tcon_manulupdate(pwm);

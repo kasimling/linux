@@ -65,3 +65,4 @@ AFLAGS_s5p-sleep.o :=-Wa,-march=armv7-a$(plus_sec)
 # PWM support
 
 obj-$(CONFIG_HAVE_PWM)		+= pwm.o
+obj-$(CONFIG_S5P_DEV_FIMG2D)		+= dev-fimg2d.o

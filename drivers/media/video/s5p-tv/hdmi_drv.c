@@ -35,6 +35,7 @@
 
 
 #include <mach/gpio.h>
+#include <mach/cpufreq.h>
 #include "regs-hdmi.h"
 #include "hdmi.h"
 
@@ -43,8 +44,10 @@ MODULE_DESCRIPTION("Samsung HDMI");
 MODULE_LICENSE("GPL");
 
 /* default preset configured on probe */
-#define HDMI_DEFAULT_PRESET V4L2_DV_1080P30
+#define HDMI_DEFAULT_PRESET V4L2_DV_1080P60
+#define BUSFREQ_400MHZ        400000
 
+extern int exynos4_busfreq_lock(bool);
 
 static const struct hdmi_preset_conf hdmi_conf_480p60 = {
 	.core = {
@@ -1421,11 +1424,22 @@ static int hdmi_s_stream(struct v4l2_subdev *sd, int enable)
 {
 	struct hdmi_device *hdev = sd_to_hdmi_dev(sd);
 	struct device *dev = hdev->dev;
-
+        int ret = 0;
 	dev_dbg(dev, "%s(%d)\n", __func__, enable);
-	if (enable)
-		return hdmi_streamon(hdev);
-	return hdmi_streamoff(hdev);
+	if (enable) {
+        exynos_cpufreq_lock_freq(enable, MAX_CPU_FREQ);
+#ifdef CONFIG_BUSFREQ_OPP
+        dev_lock(hdev->bus_dev, dev, BUSFREQ_400MHZ);
+#endif
+    	ret = hdmi_streamon(hdev);
+        } else {
+	ret = hdmi_streamoff(hdev);
+#ifdef CONFIG_BUSFREQ_OPP
+        dev_unlock(hdev->bus_dev, dev);
+#endif
+        exynos_cpufreq_lock_freq(enable, MAX_CPU_FREQ);
+        }
+    return ret;
 }
 
 static void hdmi_resource_poweron(struct hdmi_resources *res)
@@ -1598,32 +1612,7 @@ static int hdmi_runtime_resume(struct device *dev)
 
 }
 
-static int hdmi_resume(struct device *dev) 
-{
-	struct v4l2_subdev *sd = dev_get_drvdata(dev);
-        struct hdmi_device *hdev = sd_to_hdmi_dev(sd);
-	struct s5p_hdmi_platform_data *pdata = dev->platform_data;
-	bool now_connected = pdata->read_gpio();
-	pr_info("hdmi_resume: HDMI status (prev: %d, now: %d)\n", hdev->connected, now_connected);
-	/* flag that device context is lost */
-	hdev->cur_conf_dirty = 1;
-	if (now_connected) {
-		if (hdev->connected) {
-			hdev->connected = false;
-			schedule_work(&hdev->work);
-		}
-		hdev->connected = true;
-		schedule_work(&hdev->work);
-	} else {
-		if (!hdev->connected) {
-			schedule_work(&hdev->work);
-		}
-	} 
-	return 0;
-}
-
 static const struct dev_pm_ops hdmi_pm_ops = {
-	.resume		 = hdmi_resume,
 	.runtime_suspend = hdmi_runtime_suspend,
 	.runtime_resume	 = hdmi_runtime_resume,
 };
@@ -1845,6 +1834,11 @@ static int __devinit hdmi_probe(struct platform_device *pdev)
 #ifdef CONFIG_VIDEO_SAMSUNG_S5P_HDMI_HDCP
 	s5p_hdcp_init();
 #endif
+#ifdef CONFIG_BUSFREQ_OPP
+        /* To lock bus frequency in OPP mode */
+        hdmi_dev->bus_dev = dev_get("exynos-busfreq");
+#endif
+
 	pm_runtime_enable(dev);
 
 	sd = &hdmi_dev->sd;

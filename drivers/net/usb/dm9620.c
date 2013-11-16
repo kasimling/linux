@@ -94,7 +94,7 @@
 
 struct dm96xx_priv {
 	int	flag_fail_count;
-	u8	mode_9620;	
+	u8	mode_9620;
 };
 
 #if defined(DEBUG)

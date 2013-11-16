@@ -99,6 +99,7 @@ extern struct platform_device s5p_device_mipi_csis1;
 extern struct platform_device s5p_device_mixer;
 extern struct platform_device s5p_device_onenand;
 extern struct platform_device s5p_device_sdo;
+extern struct platform_device s5p_device_fimg2d;
 
 extern struct platform_device s5p6440_device_iis;
 extern struct platform_device s5p6440_device_pcm;

@@ -209,6 +209,9 @@ static int jpeg_dec_vidioc_s_fmt_cap(struct file *file, void *priv,
 	pix = &f->fmt.pix_mp;
 	fmt = find_format(f);
 
+	if (!fmt)
+		return -EINVAL;
+
 	for (i = 0; i < fmt->memplanes; i++) {
 		ctx->payload[i] =
 			pix->plane_fmt[i].bytesperline * pix->height;
@@ -248,6 +251,9 @@ static int jpeg_dec_vidioc_s_fmt_out(struct file *file, void *priv,
 	/* TODO: width & height has to be multiple of two */
 	pix = &f->fmt.pix_mp;
 	fmt = find_format(f);
+
+	if (!fmt)
+		return -EINVAL;
 
 	for (i = 0; i < fmt->memplanes; i++)
 		ctx->payload[i] =

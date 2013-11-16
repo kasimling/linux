@@ -161,6 +161,7 @@ inline struct flite_fmt const *find_flite_format(struct
 /* fimc-reg.c */
 void flite_hw_set_cam_source_size(struct flite_dev *dev);
 void flite_hw_set_cam_channel(struct flite_dev *dev);
+void flite_hw_reset(struct flite_dev *dev);
 void flite_hw_set_camera_type(struct flite_dev *dev, struct s3c_platform_camera_2 *cam);
 int flite_hw_set_source_format(struct flite_dev *dev);
 void flite_hw_set_output_dma(struct flite_dev *dev, bool enable);

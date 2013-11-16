@@ -157,8 +157,8 @@ out:
 
 void mxr_power_put(struct mxr_device *mdev)
 {
-	pm_runtime_put_sync(mdev->dev);
 	platform_sysmmu_off(mdev->dev);
+	pm_runtime_put_sync(mdev->dev);
 }
 
 /* --------- RESOURCE MANAGEMENT -------------*/
@@ -424,10 +424,6 @@ static int __devinit mxr_probe(struct platform_device *pdev)
 	if (ret)
 		goto fail_video;
 
-#ifdef CONFIG_BUSFREQ_OPP
-	/* To lock bus frequency in OPP mode */
-	mdev->bus_dev = dev_get("exynos-busfreq");
-#endif
 	pm_runtime_enable(dev);
 
 	mxr_info(mdev, "probe successful\n");

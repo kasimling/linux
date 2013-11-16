@@ -271,11 +271,11 @@ static int s5m8767_reg_disable(struct regulator_dev *rdev)
 	return s5m_reg_update(s5m8767->iodev, reg, ~mask, mask);
 }
 
-static int s5m8767_get_voltage_register(struct regulator_dev *rdev, int *_reg)
+static int s5m8767_get_voltage_register(struct regulator_dev *rdev, u8 *_reg)
 {
 	struct s5m8767_info *s5m8767 = rdev_get_drvdata(rdev);
 	int reg_id = rdev_get_id(rdev);
-	int reg;
+	u8 reg;
 
 	switch (reg_id) {
 	case S5M8767_LDO1 ... S5M8767_LDO2:
@@ -320,7 +320,8 @@ static int s5m8767_get_voltage_register(struct regulator_dev *rdev, int *_reg)
 static int s5m8767_get_voltage_sel(struct regulator_dev *rdev)
 {
 	struct s5m8767_info *s5m8767 = rdev_get_drvdata(rdev);
-	int reg, mask, ret;
+	int mask, ret;
+	u8 reg;
 	int reg_id = rdev_get_id(rdev);
 	u8 val;
 
@@ -386,7 +387,8 @@ static int s5m8767_set_voltage(struct regulator_dev *rdev,
 	struct s5m8767_info *s5m8767 = rdev_get_drvdata(rdev);
 	const struct s5m_voltage_desc *desc;
 	int reg_id = rdev_get_id(rdev);
-	int sel, reg, mask, ret = 0, old_index, index = 0;
+	int sel, mask, ret = 0, old_index, index = 0;
+	u8 reg;
 	u8 val;
 	u8 *buck234_vol = NULL;
 

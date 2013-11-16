@@ -322,7 +322,7 @@ void mxr_reg_vp_format(struct mxr_device *mdev,
 
 void mxr_reg_graph_buffer(struct mxr_device *mdev, int idx, dma_addr_t addr)
 {
-	u32 val = addr ? ~0 : 0;
+	u32 val = ~0;
 	unsigned long flags;
 
 	spin_lock_irqsave(&mdev->reg_slock, flags);
@@ -358,7 +358,7 @@ void mxr_reg_vp_buffer(struct mxr_device *mdev,
 	mxr_vsync_set_update(mdev, MXR_ENABLE);
 	spin_unlock_irqrestore(&mdev->reg_slock, flags);
 }
-
+ 
 static void mxr_irq_layer_handle(struct mxr_layer *layer)
 {
 	struct list_head *head = &layer->enq_list;
@@ -383,9 +383,10 @@ static void mxr_irq_layer_handle(struct mxr_layer *layer)
 		next = list_first_entry(head, struct mxr_buffer, list);
 		list_del(&next->list);
 		layer->update_buf = next;
-	}
 
-	layer->ops.buffer_set(layer, layer->update_buf);
+		/* load buffer to mixer */
+		layer->ops.buffer_set(layer, layer->update_buf);
+	}
 
 	if (done && done != layer->shadow_buf)
 		vb2_buffer_done(&done->vb, VB2_BUF_STATE_DONE);
@@ -401,9 +402,11 @@ irqreturn_t mxr_irq_handler(int irq, void *dev_data)
 
 	spin_lock(&mdev->reg_slock);
 	val = mxr_read(mdev, MXR_INT_STATUS);
-
 	/* wake up process waiting for VSYNC */
-	if (val & MXR_INT_STATUS_VSYNC) {
+	if ((val & MXR_INT_STATUS_VSYNC) &&
+		!(val & MXR_INT_STATUS_MX0_VIDEO) &&
+		!(val & MXR_INT_STATUS_MX0_GRP0) &&
+		!(val & MXR_INT_STATUS_MX0_GRP1)) {
 		set_bit(MXR_EVENT_VSYNC, &mdev->event_flags);
 		/* toggle TOP field event if working in interlaced mode */
 		if (~mxr_read(mdev, MXR_CFG) & MXR_CFG_SCAN_PROGRASSIVE)
@@ -412,7 +415,9 @@ irqreturn_t mxr_irq_handler(int irq, void *dev_data)
 		/* vsync interrupt use different bit for read and clear */
 		val &= ~MXR_INT_STATUS_VSYNC;
 		val |= MXR_INT_CLEAR_VSYNC;
-	}
+	} else
+		mxr_dbg(mdev, "mxr underrun occured 0x%x\n",val);
+
 
 	/* clear interrupts */
 	mxr_write(mdev, MXR_INT_STATUS, val);

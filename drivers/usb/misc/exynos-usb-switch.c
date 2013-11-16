@@ -110,12 +110,18 @@ static int exynos_change_usb_mode(struct exynos_usb_switch *usb_switch,
 		atomic_set(&usb_switch->connect, 0);
 		atomic_set(&usb_switch->usb_status, USB_DEVICE_DETACHED);
 		udc->connect = false;
+#if defined(CONFIG_BATTERY_SAMSUNG)
+		exynos_usb_cable_disconnect();
+#endif
 		break;
 	case USB_DEVICE_ATTACHED:
 		udc->gadget.ops->pullup(&udc->gadget, 1);
 		atomic_set(&usb_switch->connect, 1);
 		atomic_set(&usb_switch->usb_status, USB_DEVICE_ATTACHED);
 		udc->connect = true;
+#if defined(CONFIG_BATTERY_SAMSUNG)
+		exynos_usb_cable_connect();
+#endif
 		break;
 	case USB_HOST_DETACHED:
 		if (atomic_read(&usb_switch->usb_status)

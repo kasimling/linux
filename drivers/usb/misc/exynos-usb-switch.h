@@ -44,4 +44,7 @@ extern int s5p_ehci_port_power_on(struct platform_device *pdev);
 extern int s5p_ohci_port_power_off(struct platform_device *pdev);
 extern int s5p_ohci_port_power_on(struct platform_device *pdev);
 
+#if defined(CONFIG_BATTERY_SAMSUNG)
+extern void samsung_cable_check_status(int on);
+#endif
 #endif /* __EXYNOS_USB_SWITCH__ */

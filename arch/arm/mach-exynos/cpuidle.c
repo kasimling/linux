@@ -67,8 +67,11 @@
 #define GPIO_PUD_OFFSET         0x08
 #define GPIO_CON_PDN_OFFSET     0x10
 #define GPIO_PUD_PDN_OFFSET     0x14
-#define GPIO_END_OFFSET         0x40
+#define GPIO_END_OFFSET         0x200
 
+#ifdef	CONFIG_SND_SAMSUNG_ALP
+extern bool srp_run_state;
+#endif
 enum hc_type {
 	HC_SDHC,
 	HC_MSHC,
@@ -77,6 +80,7 @@ enum hc_type {
 void __iomem *reg_directgo_addr, *reg_directgo_flag;
 static unsigned lpa_enable;
 
+extern int exynos4_check_usb_op(void);
 static int exynos4_enter_lowpower(struct cpuidle_device *dev,
 				struct cpuidle_driver *drv,
 				int index);
@@ -165,25 +169,30 @@ static struct sleep_save exynos4_set_clksrc[] = {
 
 static void exynos4_gpio_conpdn_reg(void)
 {
-	void __iomem *gpio_base = ioremap((EXYNOS4_PA_GPIO2 + 0x40), SZ_4K);
-	void __iomem *gpio_end = gpio_base + GPIO_END_OFFSET;
+	void __iomem *gpio_base = S5P_VA_GPIO;
 	unsigned int val;
 
 	do {
-		/* Keep the previous state in LPA mode */
-		writel(0xffff, gpio_base + GPIO_CON_PDN_OFFSET);
+		/* Keep the previous state in didle mode */
+		__raw_writel(0xffff, gpio_base + GPIO_CON_PDN_OFFSET);
 
-		/* Pull up-down state in LPA is same as normal */
-		val = readl(gpio_base + GPIO_PUD_OFFSET);
-		writel(val, gpio_base + GPIO_PUD_PDN_OFFSET);
+		/* Pull up-down state in didle is same as normal */
+		val = __raw_readl(gpio_base + GPIO_PUD_OFFSET);
+		__raw_writel(val, gpio_base + GPIO_PUD_PDN_OFFSET);
 
 		gpio_base += GPIO_OFFSET;
 
 		if (gpio_base == S5P_VA_GPIO + GPIO_END_OFFSET)
 			gpio_base = S5P_VA_GPIO2;
-	} while (gpio_base < gpio_end);
 
-	iounmap(gpio_base);
+	} while (gpio_base <= S5P_VA_GPIO2 + GPIO_END_OFFSET);
+
+	/* set the GPZ */
+	gpio_base = S5P_VA_GPIO3;
+	__raw_writel(0xffff, gpio_base + GPIO_CON_PDN_OFFSET);
+
+	val = __raw_readl(gpio_base + GPIO_PUD_OFFSET);
+	__raw_writel(val, gpio_base + GPIO_PUD_PDN_OFFSET);
 
 	return;
 }
@@ -301,12 +310,9 @@ static int check_power_domain(void)
 	return 0;
 }
 
-extern int exynos4_usb_host_phy1_is_suspend(void);
-
 static int check_usb_op(void)
 {
-	int ret = exynos4_usb_host_phy1_is_suspend();
-	return ret;
+	return exynos4_check_usb_op();
 }
 
 static int exynos_check_operation(void)
@@ -314,11 +320,11 @@ static int exynos_check_operation(void)
 	int ret;
 	if (!lpa_enable)
 		return 1;
-
-	ret  = __raw_readl(S5P_CLKGATE_AUDSS);
-	if (!(ret & S5P_AUDSS_CLKGATE_RP)) {
+#ifdef	CONFIG_SND_SAMSUNG_ALP
+	if(!srp_run_state){
 		return 1;
 	}
+#endif
 	ret = check_power_domain();
 	if (ret) {
 		return 1;
@@ -412,7 +418,6 @@ static int exynos4_enter_core0_lpa(struct cpuidle_device *dev,
 				int index)
 {
 	unsigned long tmp, abb_val;
-
 	/* Set wakeup sources */
 	__raw_writel(0x3ff0000, S5P_WAKEUP_MASK);
 
@@ -543,8 +548,13 @@ static int __init exynos4_init_cpuidle(void)
 	}
 
 	if (soc_is_exynos4412()) {
+#ifdef CONFIG_ARM_TRUSTZONE
 		reg_directgo_addr = S5P_VA_SYSRAM_NS + 0x24;
 		reg_directgo_flag = S5P_VA_SYSRAM_NS + 0x20;
+#else
+		reg_directgo_addr = S5P_INFORM0;
+		reg_directgo_flag = S5P_INFORM1;
+#endif
 	} else {
 		reg_directgo_addr = REG_DIRECTGO_ADDR;
 		reg_directgo_flag = REG_DIRECTGO_FLAG;

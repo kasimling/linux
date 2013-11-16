@@ -110,7 +110,7 @@ enum jpeg_interface {
 enum jpeg_node_type {
 	JPEG_NODE_INVALID = -1,
 	JPEG_NODE_DECODER = 15,
-	JPEG_NODE_ENCODER = 14,
+	JPEG_NODE_ENCODER = 13,
 };
 
 struct jpeg_fmt {

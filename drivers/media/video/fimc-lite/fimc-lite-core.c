@@ -192,6 +192,8 @@ static int flite_s_stream(struct v4l2_subdev *sd, int enable)
 	u32 int_src = FLITE_REG_CIGCTRL_IRQ_LASTEN0_ENABLE;
 	unsigned long flags;
 	int ret = 0;
+	if (enable) 
+		 flite_hw_reset(flite);
 	spin_lock_irqsave(&flite->slock, flags);
 
 	if (test_bit(FLITE_ST_SUSPENDED, &flite->state))

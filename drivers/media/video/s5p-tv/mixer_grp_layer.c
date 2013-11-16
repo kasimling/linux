@@ -14,9 +14,6 @@
 #include "mixer.h"
 
 #include <media/videobuf2-dma-contig.h>
-#include <mach/cpufreq.h>
-extern int exynos4_busfreq_lock(bool);
-#define MAX_CPU_FREQ 1400000
 
 /* FORMAT DEFINITIONS */
 
@@ -95,20 +92,6 @@ static void mxr_graph_buffer_set(struct mxr_layer *layer,
 
 static void mxr_graph_stream_set(struct mxr_layer *layer, int en)
 {
-	struct mxr_device *mdev = layer->mdev;
-
-	exynos_cpufreq_lock_freq(en, MAX_CPU_FREQ);
-
-#ifdef CONFIG_BUSFREQ_OPP
-	if (en)
-		dev_lock(mdev->bus_dev, mdev->dev, BUSFREQ_400MHZ);
-	else
-		dev_unlock(mdev->bus_dev, mdev->dev);
-#endif
-
-#ifdef CONFIG_ARM_EXYNOS4_BUS_DEVFREQ
-	exynos4_busfreq_lock(!en);
-#endif
 	mxr_reg_graph_layer_stream(layer->mdev, layer->idx, en);
 }
 

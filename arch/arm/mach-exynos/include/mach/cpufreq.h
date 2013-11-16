@@ -33,6 +33,7 @@ struct exynos_dvfs_info {
 	bool (*need_apll_change)(unsigned int, unsigned int);
 };
 
+#define MAX_CPU_FREQ 1600000
 #ifdef CONFIG_ARM_EXYNOS_CPUFREQ
 void exynos_cpufreq_lock_freq(bool lock_en, unsigned int freq);
 #else

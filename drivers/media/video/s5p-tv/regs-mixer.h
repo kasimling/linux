@@ -113,6 +113,9 @@
 #define MXR_INT_EN_ALL			(0x0f << 8)
 
 /* bit for MXR_INT_STATUS */
+#define MXR_INT_STATUS_MX0_GRP1		(1 << 9)
+#define MXR_INT_STATUS_MX0_GRP0		(1 << 8)
+#define MXR_INT_STATUS_MX0_VIDEO	(1 << 10)
 #define MXR_INT_CLEAR_VSYNC		(1 << 11)
 #define MXR_INT_STATUS_VSYNC		(1 << 0)
 

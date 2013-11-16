@@ -8,6 +8,7 @@
 #include <media/v4l2-device.h>
 #include <linux/switch.h>
 #include <mach/videodev2_samsung.h>
+#include <mach/dev.h>
 
 struct hdmi_tg_regs {
 	u8 cmd;
@@ -133,6 +134,7 @@ struct hdmi_device {
 	struct work_struct work;
 	struct i2c_client *hdmiphy_port;
 	int hdcp_enabled;
+        struct device *bus_dev;
 };
 
 extern bool on_stop_process;

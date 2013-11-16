@@ -310,7 +310,9 @@ static int __init s5p_sysmmu_late_init(void)
 	platform_set_sysmmu(&SYSMMU_PLATDEV(mfc_l).dev, &s5p_device_mfc_l.dev);
 	platform_set_sysmmu(&SYSMMU_PLATDEV(mfc_r).dev, &s5p_device_mfc_r.dev);
 	platform_set_sysmmu(&SYSMMU_PLATDEV(tv).dev, 	&s5p_device_mixer.dev);
-	platform_set_sysmmu(&SYSMMU_PLATDEV(2d).dev, &s5p_device_g2d.dev);
+#ifdef CONFIG_VIDEO_EXYNOS_FIMG2D
+	platform_set_sysmmu(&SYSMMU_PLATDEV(2d).dev, &s5p_device_fimg2d.dev);
+#endif
 #ifdef CONFIG_VIDEO_EXYNOS_FIMC_LITE
 	platform_set_sysmmu(&SYSMMU_PLATDEV(flite0).dev, &exynos_device_flite0.dev);
 	platform_set_sysmmu(&SYSMMU_PLATDEV(flite1).dev, &exynos_device_flite1.dev);
@@ -324,8 +326,10 @@ static int __init s5p_sysmmu_late_init(void)
 	s5p_create_iommu_mapping(&s5p_device_fimc3.dev, 0x20000000, SZ_128M, 4);
 	s5p_create_iommu_mapping(&s5p_device_mfc_l.dev, 0x20000000, SZ_128M, 4);
 	s5p_create_iommu_mapping(&s5p_device_mfc_r.dev, 0x40000000, SZ_128M, 4);
-	s5p_create_iommu_mapping(&s5p_device_mixer.dev, 0x20000000, SZ_128M, 4);
-	s5p_create_iommu_mapping(&s5p_device_g2d.dev, 0x20000000, SZ_128M, 4);
+	s5p_create_iommu_mapping(&s5p_device_mixer.dev, 0x00000000, SZ_128M, 4);
+#ifdef CONFIG_VIDEO_EXYNOS_FIMG2D
+	s5p_create_iommu_mapping(&s5p_device_fimg2d.dev, 0x20000000, SZ_128M, 4);
+#endif
 	s5p_create_iommu_mapping(&s5p_device_jpeg.dev, 	0x20000000, SZ_64M, 4);
 #ifdef CONFIG_VIDEO_EXYNOS_FIMC_LITE
 	s5p_create_iommu_mapping(&exynos_device_flite0.dev, 0x20000000, SZ_128M, 4);

@@ -55,6 +55,7 @@ config SOC_EXYNOS4412
 	depends on ARCH_EXYNOS4
 	select SAMSUNG_DMADEV
 	select S5P_DEV_USB_SWITCH
+	select S5P_DEV_FIMG2D
 	help
 	  Enable EXYNOS4412 SoC support
 
@@ -201,12 +202,29 @@ config EXYNOS_ASV
 	help
 	  Common ASV support for Exynos4x12 SoCs.
 
+config EXYNOS4412_REV_BIN_1GHz
+	bool "Upto 1GHz support for Exynos4x12"
+	help
+	  Enables CPU-FREQ support upto 1GHz only for Exynos4412.
+
+choice
+	prompt "Support DVFS based CPU Hotplug"
+	optional
+
 config EXYNOS_DVFS_NR_RUNNING_POLICY
-	tristate "Support DVFS CPU Hotplug"
+	bool "DVFS-NR CPU Hotplug"
 	depends on HOTPLUG_CPU && SMP && ARM_EXYNOS4X12_CPUFREQ
 	help
-	  New Dynamic CPU HOTLUG for EXYNOS-4412 based on cpu-freq and no. of
+	  Dynamic CPU HOTLUG for EXYNOS-4412 based on cpu-freq and no. of
 	  running threads. 
+
+config EXYNOS_DVFS_NR_RUNNING_QUICK_POLICY
+	bool "QUICK DVFS_NR CPU Hotplug"
+	depends on HOTPLUG_CPU && SMP && ARM_EXYNOS4X12_CPUFREQ
+	help
+	  Dynamic CPU HOTLUG for EXYNOS-4412 based on cpu-freq and no. of
+	  running threads. It can bring all the cpus up quickly in single run.
+endchoice
 
 config CONFIG_EXYNOS_DVFS_NR_POLICY_OLD
 	tristate "Support DVFS CPU Hotplug OLD"

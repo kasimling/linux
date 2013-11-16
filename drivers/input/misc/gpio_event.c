@@ -226,8 +226,10 @@ static int gpio_event_resume(struct device *dev)
 	struct gpio_event *ip = dev_get_drvdata(dev);
 	int val;
 	val = __raw_readl(S5P_WAKEUP_STAT);
-	if(val & S5P_WAKEUP_EINT) {
-		/* report a fake wake_up event for wake_up key */ 
+	/* In case of RTC wake-up, fake event reporting is not required. */
+	val &= 0x6;
+	if(!val) {
+		/* report a fake wake_up event for wake_up key */
 		input_event(ip->input_devs->dev[0], 1, 0x74, 1);
 		input_sync(ip->input_devs->dev[0]);
 	}

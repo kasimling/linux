@@ -481,7 +481,6 @@ static int fimc_lite_open(struct file *file)
 
 		fimc_lite_clear_event_counters(fimc);
 	}
-
 err_pm:
 	pm_runtime_put(&fimc->pdev->dev);	
 done:
@@ -1467,8 +1466,8 @@ static int __devinit fimc_lite_probe(struct platform_device *pdev)
 	if (ret < 0)
 		goto err_sd;
 	ret = platform_sysmmu_on(&pdev->dev);
-        if (ret < 0)
-                goto err_pm;
+	if (ret < 0)
+		goto err_pm;
 	fimc->alloc_ctx = vb2_dma_contig_init_ctx(&pdev->dev);
 	if (IS_ERR(fimc->alloc_ctx)) {
 		ret = PTR_ERR(fimc->alloc_ctx);

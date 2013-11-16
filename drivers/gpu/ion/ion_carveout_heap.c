@@ -100,6 +100,7 @@ struct sg_table *ion_carveout_heap_map_dma(struct ion_heap *heap,
 	}
 	sg_set_page(table->sgl, phys_to_page(buffer->priv_phys), buffer->size,
 		    0);
+	sg_dma_len(table->sgl) = buffer->size;
 	return table;
 }
 

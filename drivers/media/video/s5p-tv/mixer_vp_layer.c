@@ -16,9 +16,6 @@
 #include "regs-vp.h"
 
 #include <media/videobuf2-dma-contig.h>
-#include <mach/cpufreq.h>
-extern int exynos4_busfreq_lock(bool);
-#define MAX_CPU_FREQ 1400000
 
 /* FORMAT DEFINITIONS */
 static const struct mxr_format mxr_fmt_nv12 = {
@@ -122,10 +119,6 @@ static void mxr_vp_buffer_set(struct mxr_layer *layer,
 
 static void mxr_vp_stream_set(struct mxr_layer *layer, int en)
 {
-	exynos_cpufreq_lock_freq(en, MAX_CPU_FREQ);
-#ifdef CONFIG_ARM_EXYNOS4_BUS_DEVFREQ
-   	exynos4_busfreq_lock(!en);	
-#endif
 	mxr_reg_vp_layer_stream(layer->mdev, en);
 }
 

@@ -197,6 +197,7 @@ obj-$(CONFIG_VIDEO_EXYNOS_FIMC_LITE)    += fimc-lite/
 
 obj-$(CONFIG_VIDEO_SAMSUNG_S5P_G2D)	+= s5p-g2d/
 obj-$(CONFIG_VIDEO_SAMSUNG_S5P_JPEG_V2X)	+= s5p-jpeg_v2x/
+obj-$(CONFIG_VIDEO_EXYNOS_FIMG2D)	+= fimg2d/
 
 obj-$(CONFIG_BLACKFIN)                  += blackfin/
 

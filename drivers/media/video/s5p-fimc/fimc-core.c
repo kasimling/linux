@@ -267,7 +267,7 @@ int fimc_set_scaler_info(struct fimc_ctx *ctx)
 	if (ret)
 		return ret;
 
-	ret = fimc_get_scaler_factor(sy, ty,  &sc->pre_vratio, &sc->vfactor);
+	ret = fimc_get_scaler_factor(sy, ty, &sc->pre_vratio, &sc->vfactor);
 	if (ret)
 		return ret;
 
@@ -521,8 +521,9 @@ static int __fimc_s_ctrl(struct fimc_ctx *ctx, struct v4l2_ctrl *ctrl)
 	unsigned int flags = FIMC_DST_FMT | FIMC_SRC_FMT;
 	int ret = 0;
 	struct v4l2_control ctrl2;
-         ctrl2.id=ctrl->id;
-	 ctrl2.value=ctrl->val;
+
+	ctrl2.id = ctrl->id;
+	ctrl2.value = ctrl->val;
 
 	if (ctrl->flags & V4L2_CTRL_FLAG_INACTIVE)
 		return 0;
@@ -562,10 +563,10 @@ static int __fimc_s_ctrl(struct fimc_ctx *ctx, struct v4l2_ctrl *ctrl)
 			return ret;
 		break;
 	default: 
-	 if (fimc->vid_cap.use_isp)
-	{
-                ret = v4l2_subdev_call(fimc->vid_cap.is.sd,core, s_ctrl, &ctrl2);
-	}
+		if (fimc->vid_cap.use_isp)
+		{
+			ret = v4l2_subdev_call(fimc->vid_cap.is.sd,core, s_ctrl, &ctrl2);
+		}
 		break;
 	}
 
@@ -577,11 +578,12 @@ static int __fimc_s_ctrl(struct fimc_ctx *ctx, struct v4l2_ctrl *ctrl)
 static int fimc_g_volatile_ctrl(struct v4l2_ctrl *ctrl)
 {	
 	struct fimc_ctx *ctx = ctrl_to_ctx(ctrl);
-        struct fimc_dev *fimc = ctx->fimc_dev;
+	struct fimc_dev *fimc = ctx->fimc_dev;
 	struct v4l2_control ctrl2;
-        ctrl2.id=ctrl->id;
+
+	ctrl2.id = ctrl->id;
 	v4l2_subdev_call(fimc->vid_cap.is.sd,core, g_ctrl, &ctrl2);
-	ctrl->val=ctrl2.value;
+	ctrl->val = ctrl2.value;
 	return 0;
 }
 static int fimc_s_ctrl(struct v4l2_ctrl *ctrl)
@@ -626,10 +628,10 @@ int fimc_ctrls_create(struct fimc_ctx *ctx)
 	 v4l2_ctrl_new_custom(handler, &is_pos_x, NULL);
 	 v4l2_ctrl_new_custom(handler, &pos_y, NULL);
 	 v4l2_ctrl_new_custom(handler, &is_pos_y, NULL);
-         v4l2_ctrl_new_custom(handler, &win_pos_x, NULL);
-         v4l2_ctrl_new_custom(handler, &win_pos_y, NULL);
-         v4l2_ctrl_new_custom(handler, &win_width, NULL);
-         v4l2_ctrl_new_custom(handler, &win_height, NULL);
+	 v4l2_ctrl_new_custom(handler, &win_pos_x, NULL);
+	 v4l2_ctrl_new_custom(handler, &win_pos_y, NULL);
+	 v4l2_ctrl_new_custom(handler, &win_width, NULL);
+	 v4l2_ctrl_new_custom(handler, &win_height, NULL);
 	 v4l2_ctrl_new_custom(handler, &focus_mode, NULL);
 	 v4l2_ctrl_new_custom(handler, &s_focus_mode, NULL);
 	 v4l2_ctrl_new_custom(handler, &af_start_stop, NULL);
@@ -669,7 +671,7 @@ int fimc_ctrls_create(struct fimc_ctx *ctx)
 	 v4l2_ctrl_new_custom(handler, &is_zoom, NULL);
 	 ctrls->ctrl_is_ext_fcount = v4l2_ctrl_new_custom(handler, &is_ext_fcount, NULL);
 	 ctrls->ctrl_is_ext_fcount->flags |= V4L2_CTRL_FLAG_VOLATILE;
-   	 ctrls->ctrl_is_ext_fcount = v4l2_ctrl_new_custom(handler, &is_ext_fnum, NULL);
+	 ctrls->ctrl_is_ext_fcount = v4l2_ctrl_new_custom(handler, &is_ext_fnum, NULL);
 	 ctrls->ctrl_is_ext_fcount->flags |= V4L2_CTRL_FLAG_VOLATILE;
 	 ctrls->ctrl_is_ext_fcount = v4l2_ctrl_new_custom(handler, &is_ext_fconfidence, NULL);
 	 ctrls->ctrl_is_ext_fcount->flags |= V4L2_CTRL_FLAG_VOLATILE;
@@ -1036,11 +1038,11 @@ static int fimc_probe(struct platform_device *pdev)
 	clk_enable(fimc->clock[CLK_BUS]);
 
 	sprintf(workqueue_name, "fimc%d_irq_wq_name", fimc->id);
-        fimc->irq_workqueue = create_singlethread_workqueue(workqueue_name);
-        if (fimc->irq_workqueue == NULL) {
-                dev_err(&pdev->dev, "failed to create workqueue for fimc\n");
-                return -ENOMEM ;
-        }
+	fimc->irq_workqueue = create_singlethread_workqueue(workqueue_name);
+	if (fimc->irq_workqueue == NULL) {
+		dev_err(&pdev->dev, "failed to create workqueue for fimc\n");
+		return -ENOMEM ;
+	}
 
 	ret = devm_request_irq(&pdev->dev, res->start, fimc_irq_handler,
 			       0, dev_name(&pdev->dev), fimc);
@@ -1059,8 +1061,8 @@ static int fimc_probe(struct platform_device *pdev)
 	if (ret < 0)
 		goto err_sd;
 	ret = platform_sysmmu_on(&pdev->dev);
-        if (ret < 0)
-  		goto err_pm;
+	if (ret < 0)
+		goto err_pm;
 	/* Initialize contiguous memory allocator */
 	fimc->alloc_ctx = vb2_dma_contig_init_ctx(&pdev->dev);
 	if (IS_ERR(fimc->alloc_ctx)) {

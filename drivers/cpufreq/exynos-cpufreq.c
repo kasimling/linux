@@ -215,7 +215,7 @@ void exynos_cpufreq_lock_freq(bool lock_en, unsigned int freq)
 {
 	struct cpufreq_policy *policy = cpufreq_cpu_get(0); /* boot CPU */
 	static unsigned int saved_freq;
-	unsigned int temp;
+	static unsigned int temp;
 	mutex_lock(&cpufreq_lock);
 	if(lock_en) {
 		lock_count++;
@@ -234,13 +234,11 @@ void exynos_cpufreq_lock_freq(bool lock_en, unsigned int freq)
                         exynos_target(policy, freq,
                                       CPUFREQ_RELATION_H);
                         mutex_lock(&cpufreq_lock);
-			locking_frequency = temp;
                 }
 	} else {
 		lock_count--;
 		if(lock_count>0)
 			goto out;
-		temp = locking_frequency;
 		locking_frequency = saved_freq;
 		mutex_unlock(&cpufreq_lock);
 		exynos_target(policy, saved_freq,

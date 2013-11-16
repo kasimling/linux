@@ -180,7 +180,9 @@ struct sysmmu_drvdata {
 	rwlock_t lock;
 	struct iommu_domain *domain;
 	unsigned long pgtable;
+#ifdef CONFIG_EXYNOS_IOVMM
 	struct exynos_iovmm vmm;
+#endif
 };
 
 static bool set_sysmmu_active(struct sysmmu_drvdata *data)
@@ -475,7 +477,6 @@ bool exynos_sysmmu_disable(struct device *dev)
 	bool disabled;
 
 	disabled = __exynos_sysmmu_disable(data);
-	pm_runtime_put(data->sysmmu);
 
 	return disabled;
 }
@@ -654,7 +655,7 @@ static int exynos_runtime_suspend(struct device *dev)
 {
 	struct sysmmu_drvdata *data;
 	data = dev_get_drvdata(dev);
-	printk("exynos_runtime_suspend: %pF\n",dev);
+	dev_dbg(dev, "exynos_runtime_suspend: %pF\n", dev);
 	if (!is_sysmmu_active(data))
 		return 0;
 
@@ -669,10 +670,10 @@ static int exynos_runtime_resume(struct device *dev)
 {
 	struct sysmmu_drvdata *data;
 	data = dev_get_drvdata(dev);
-	printk("exynos_runtime_resume: %pF\n",dev);
+	dev_dbg(dev, "exynos_runtime_resume: %pF\n", dev);
 
 	if (is_sysmmu_active(data))
-		__exynos_sysmmu_enable(data, data->pgtable, NULL);
+		__exynos_sysmmu_enable(data, data->pgtable, data->domain);
 	return 0;
 }
 

@@ -36,7 +36,7 @@
  * @virtual_x: The virtual X size.
  * @virtual_y: The virtual Y size.
  * @width    : The width of display in mm.
- * @height   : The height of display in mm.
+ * @height   : The height of display in mm
  */
 struct s3c_fb_pd_win {
 	unsigned short		default_bpp;
